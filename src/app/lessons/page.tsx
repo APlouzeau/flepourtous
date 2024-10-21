@@ -16,7 +16,7 @@ export default function Lessons() {
 
   const getLessons = async () => {
     try {
-      const response = await fetch("../api/readlessons", {
+      const response = await fetch("/api/readlessons", {
         method: "GET",
       });
 
