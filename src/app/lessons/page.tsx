@@ -45,11 +45,12 @@ export default function Lessons() {
               key={lesson.id.toString()}
               className="card card-compact bg-base-100 w-96 shadow-xl m-4"
             >
-              <figure>
-                <img
+              <figure className="relative w-full h-60">
+                <Image
                   src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
                   alt="Shoes"
-                  className="w-full h-auto" // Vous pouvez ajouter des classes pour gérer la taille
+                  fill
+                  className="object-cover" // Vous pouvez ajouter des classes pour gérer la taille
                 />
               </figure>
               <div className="card-body">

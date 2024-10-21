@@ -1,1 +1,5 @@
-{}
+{
+  "/lessons/page": "app/lessons/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/present/page": "app/present/page.js"
+}

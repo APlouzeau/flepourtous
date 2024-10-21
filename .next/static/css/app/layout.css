@@ -1353,6 +1353,9 @@ html {
   margin-inline-start: calc(var(--border-btn) * -1);
   margin-top: 0px;
 }
+.relative {
+  position: relative;
+}
 .m-2 {
   margin: 0.5rem;
 }
@@ -1380,6 +1383,9 @@ html {
 }
 .flex {
   display: flex;
+}
+.h-60 {
+  height: 15rem;
 }
 .min-h-24 {
   min-height: 6rem;
@@ -1457,6 +1463,9 @@ html {
 }
 .to-cyan-500 {
   --tw-gradient-to: #06b6d4 var(--tw-gradient-to-position);
+}
+.object-cover {
+  object-fit: cover;
 }
 .p-2\.5 {
   padding: 0.625rem;
