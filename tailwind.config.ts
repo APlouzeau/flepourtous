@@ -14,6 +14,10 @@ export default {
                 foreground: "var(--foreground)",
             },
         },
+        fontFamily: {
+            sans: ["Roboto", "system-ui", "sans-serif"],
+            title: ["Montserrat", "serif"],
+        },
     },
     plugins: [daisyui],
 } satisfies Config;

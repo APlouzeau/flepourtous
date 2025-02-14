@@ -1,7 +1,7 @@
 export default function Home() {
     return (
         <>
-            <h1>FLE pour tous</h1>
+            <h1 className="text-center text-6xl mt-12 font-bold">FLE pour tous</h1>
         </>
     );
 }
