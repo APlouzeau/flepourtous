@@ -1,0 +1,12 @@
+[
+    {
+        "title": "Cours de français pour débutants",
+        "description": "Cours de français pour débutants",
+        "imageUrl": "/images/enfant.jpg"
+    },
+    {
+        "title": "Cours de français pour niveau intermédiaire",
+        "description": "Apprenez les bases de la langue française avec ce cours pour niveau intermédiaire",
+        "imageUrl": "/images/ados.jpg"
+    }
+]
