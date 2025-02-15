@@ -1,4 +1,4 @@
-import CardLesson from "../components/card-lesson/page";
+import CardLesson from "../components/card-lesson/CardLesson";
 import type { Lessons } from "../types/lessons";
 import lessonsData from "../../../public/datas/lessons.json";
 
