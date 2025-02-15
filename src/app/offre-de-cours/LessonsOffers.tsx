@@ -7,42 +7,17 @@ export default function OfferPage() {
     return (
         <>
             <h2 className="mt-12 text-5xl font-bold text-center">Offre de cours</h2>
-            <div className="flex flex-wrap justify-center">
-                <CardLesson
-                    title={lessons[0].title}
-                    description={lessons[0].description}
-                    imageUrl={lessons[0].imageUrl}
-                />
-                <CardLesson
-                    title={lessons[1].title}
-                    description={lessons[1].description}
-                    imageUrl={lessons[1].imageUrl}
-                />
-                <CardLesson
-                    title={lessons[0].title}
-                    description={lessons[0].description}
-                    imageUrl={lessons[0].imageUrl}
-                />
-                <CardLesson
-                    title={lessons[1].title}
-                    description={lessons[1].description}
-                    imageUrl={lessons[1].imageUrl}
-                />
-                <CardLesson
-                    title={lessons[0].title}
-                    description={lessons[0].description}
-                    imageUrl={lessons[0].imageUrl}
-                />
-                <CardLesson
-                    title={lessons[1].title}
-                    description={lessons[1].description}
-                    imageUrl={lessons[1].imageUrl}
-                />
-                <CardLesson
-                    title={lessons[0].title}
-                    description={lessons[0].description}
-                    imageUrl={lessons[0].imageUrl}
-                />
+            <div className="flex flex-wrap justify-center gap-8">
+                {Array(7)
+                    .fill(null)
+                    .map((_, index) => (
+                        <CardLesson
+                            key={index}
+                            title={lessons[index % 2].title}
+                            description={lessons[index % 2].description}
+                            imageUrl={lessons[index % 2].imageUrl}
+                        />
+                    ))}
             </div>
         </>
     );
