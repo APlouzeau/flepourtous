@@ -13,10 +13,10 @@ export default {
                 background: "var(--background)",
                 foreground: "var(--foreground)",
             },
-        },
-        fontFamily: {
-            sans: ["Roboto", "system-ui", "sans-serif"],
-            title: ["Montserrat", "serif"],
+            fontFamily: {
+                sans: ["var(--font-roboto)", "system-ui", "sans-serif"],
+                title: ["var(--font-montserrat)", "serif"],
+            },
         },
     },
     plugins: [daisyui],
