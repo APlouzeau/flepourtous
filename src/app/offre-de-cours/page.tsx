@@ -13,6 +13,11 @@ export default function OfferPage() {
                     description={lessons[0].description}
                     imageUrl={lessons[0].imageUrl}
                 />
+                <CardLesson
+                    title={lessons[1].title}
+                    description={lessons[1].description}
+                    imageUrl={lessons[1].imageUrl}
+                />
             </div>
         </>
     );
