@@ -8,7 +8,7 @@ interface CardLessonProps {
 
 export default function CardLesson(props: CardLessonProps) {
     return (
-        <div className="mt-16 mx-8 flex justify-center">
+        <div className="w-5/6 mt-16 mx-8 flex justify-center">
             <div className="card card-compact bg-base-100 w-96 shadow-[5px_5px_15px_8px_rgba(0,0,0,0.78)]">
                 <figure className="relative h-64">
                     <Image

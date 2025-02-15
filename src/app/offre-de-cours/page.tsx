@@ -7,7 +7,7 @@ export default function OfferPage() {
     return (
         <>
             <h2 className="mt-12 text-5xl font-bold text-center">Offre de cours</h2>
-            <div className="flex flex-wrap justify-center gap-8">
+            <div className="flex flex-wrap lg:flex-nowrap justify-center gap-8">
                 <CardLesson
                     title={lessons[0].title}
                     description={lessons[0].description}
