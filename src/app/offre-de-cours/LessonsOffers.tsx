@@ -1,6 +1,6 @@
-import CardLesson from "../components/card-lesson/CardLesson";
-import type { Lessons } from "../types/lessons";
-import lessonsData from "../../../public/datas/lessons.json";
+import CardLesson from "@/app/components/card-lesson/CardLesson";
+import type { Lessons } from "@/app/types/lessons";
+import lessonsData from "@/public/static/lessons.json";
 
 export default function OfferPage() {
     const lessons = lessonsData as Lessons;
