@@ -4,7 +4,7 @@ import React from "react";
 export default function Header() {
     return (
         <>
-            <header className="h-96 bg-gradient-to-r from-purple-400 from-10% to-purple-800 m-2 flex flex-col rounded-box">
+            <header className="h-96 bg-purple-800 m-2 flex flex-col rounded-box">
                 <div className="flex-1 flex items-center justify-center">
                     <Link href="/" className="font-bold text-white text-8xl">
                         FLE pour tous

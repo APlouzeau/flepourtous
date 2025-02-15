@@ -1,44 +1,47 @@
 import CardLesson from "../components/card-lesson/page";
+import type { Lessons } from "../types/lessons";
+import lessonsData from "../../../public/datas/lessons.json";
 
 export default function OfferPage() {
+    const lessons = lessonsData as Lessons;
     return (
         <>
             <h2 className="mt-12 text-5xl font-bold text-center">Offre de cours</h2>
             <div className="flex flex-wrap justify-center">
                 <CardLesson
-                    title="Cours de français pour débutants"
-                    description="Apprenez les bases de la langue française avec ce cours pour débutant"
-                    imageUrl="/images/enfant.jpg"
+                    title={lessons[0].title}
+                    description={lessons[0].description}
+                    imageUrl={lessons[0].imageUrl}
                 />
                 <CardLesson
-                    title="Cours de français pour niveau intermédiaire"
-                    description="Apprenez les bases de la langue française avec ce cours pour niveau intermédiaire"
-                    imageUrl="/images/ados.jpg"
+                    title={lessons[1].title}
+                    description={lessons[1].description}
+                    imageUrl={lessons[1].imageUrl}
                 />
                 <CardLesson
-                    title="Cours de français pour débutants"
-                    description="Apprenez les bases de la langue française avec ce cours pour débutant"
-                    imageUrl="/images/enfant.jpg"
+                    title={lessons[0].title}
+                    description={lessons[0].description}
+                    imageUrl={lessons[0].imageUrl}
                 />
                 <CardLesson
-                    title="Cours de français pour niveau intermédiaire"
-                    description="Apprenez les bases de la langue française avec ce cours pour niveau intermédiaire"
-                    imageUrl="/images/ados.jpg"
+                    title={lessons[1].title}
+                    description={lessons[1].description}
+                    imageUrl={lessons[1].imageUrl}
                 />
                 <CardLesson
-                    title="Cours de français pour débutants"
-                    description="Apprenez les bases de la langue française avec ce cours pour débutant"
-                    imageUrl="/images/enfant.jpg"
+                    title={lessons[0].title}
+                    description={lessons[0].description}
+                    imageUrl={lessons[0].imageUrl}
                 />
                 <CardLesson
-                    title="Cours de français pour niveau intermédiaire"
-                    description="Apprenez les bases de la langue française avec ce cours pour niveau intermédiaire"
-                    imageUrl="/images/ados.jpg"
+                    title={lessons[1].title}
+                    description={lessons[1].description}
+                    imageUrl={lessons[1].imageUrl}
                 />
                 <CardLesson
-                    title="Cours de français pour débutants"
-                    description="Apprenez les bases de la langue française avec ce cours pour débutant"
-                    imageUrl="/images/enfant.jpg"
+                    title={lessons[0].title}
+                    description={lessons[0].description}
+                    imageUrl={lessons[0].imageUrl}
                 />
             </div>
         </>
