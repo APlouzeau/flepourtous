@@ -3,7 +3,7 @@
 # dependencies
 /node_modules
 **/node_modules/
-/.pnp
+**/.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -12,14 +12,14 @@
 !.yarn/versions
 
 # testing
-/coverage
+**/coverage
 
 # next.js
-/.next/
+**/.next/
 /out/
 
 # production
-/build
+**/build
 
 # misc
 .DS_Store
@@ -43,3 +43,6 @@ next-env.d.ts
 
 # env
 config.php
+
+#livrables
+/livrables

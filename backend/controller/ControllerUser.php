@@ -100,13 +100,26 @@ class ControllerUser
 
     public function listUsers()
     {
+        // Ajouter les headers CORS pour permettre la communication entre domaines
+        header("Access-Control-Allow-Origin: http://localhost:3000"); // Adaptez à votre URL frontend
+        header("Access-Control-Allow-Methods: GET");
+        header("Access-Control-Allow-Headers: Content-Type");
+        header("Content-Type: application/json");
+        header("Access-Control-Allow-Origin: *");
+        header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
+        header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+        $result = array("message" => "Hello from PHP!");
+
         $modelUser = new ModelUser();
         $users = $modelUser->getAllUsers();
-
-        require_once APP_PATH . "/views/head.php";
-        require_once APP_PATH . "/views/header.php";
-        require_once APP_PATH . "/views/listUsers.php";
-        require_once APP_PATH . "/views/footer.php";
+        $result = [];
+        foreach ($users as $user) {
+            $result[] = [
+                'mail' => $user->getMail(),
+            ];
+        }
+        echo json_encode($result);
     }
 
     public function deleteUser()
