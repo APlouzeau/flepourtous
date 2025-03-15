@@ -10,3 +10,6 @@ $router->addRoute('POST', BASE_URL . 'register', 'ControllerUser', 'register');
 
 // Navigation
 $router->addRoute('GET', BASE_URL . "home", 'ControllerUser', 'homePage');
+
+//Users
+$router->addRoute('GET', BASE_URL . "users", 'ControllerUser', 'listUsers');

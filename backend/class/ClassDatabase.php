@@ -1,5 +1,7 @@
 <?php
 
+require_once APP_PATH . "config/config.php";
+
 class ClassDatabase
 {
     public PDO $conn;

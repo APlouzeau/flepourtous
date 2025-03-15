@@ -4,8 +4,7 @@ class ControllerUser
 {
     public function homePage()
     {
-        $titlePage = "Ecoquiz : Accueil";
-        var_dump($_SESSION);
+        $titlePage = " : Accueil";
         require_once APP_PATH . "/views/head.php";
         require_once APP_PATH . "/views/header.php";
         require_once APP_PATH . "/views/home.php";
@@ -13,7 +12,7 @@ class ControllerUser
     }
     public function loginPage()
     {
-        $titlePage = "Ecoquiz : Connexion";
+        $titlePage = " : Connexion";
         require_once APP_PATH . "/views/head.php";
         require_once APP_PATH . "/views/header.php";
         require_once APP_PATH . "/views/login.php";
@@ -92,7 +91,6 @@ class ControllerUser
                 "pseudo" => $pseudo,
                 "password" => $mdp
             ]);
-            var_dump($user);
             $userModel = new ModelUser();
             $userModel->register($user);
             header("Location: " . BASE_URL . "login");

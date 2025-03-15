@@ -22,7 +22,7 @@ extends ClassDatabase
 
     public function getAllUsers()
     {
-        $req = $this->conn->query('SELECT id_user, pseudo, pseudo, firstname, mail FROM users ORDER BY pseudo');
+        $req = $this->conn->query('SELECT id, nickName, firstname, mail FROM users ORDER BY nickName');
         $datas = $req->fetchAll();
         $users = [];
         foreach ($datas as $data) {
