@@ -3,21 +3,23 @@ import type { Lessons } from "@/app/types/lessons";
 import lessonsData from "../data/lessons.json";
 
 export default async function OfferPage() {
-    const lessons = lessonsData as Lessons;
+    console.log("fonction");
+    const response = await fetch("http://flepourtous.localhost/api/lessons");
+    console.log(response);
+    const lessons: Lessons = await response.json();
+    console.log("lesons", lessons);
     return (
         <>
             <h2 className="mt-12 text-5xl font-bold text-center">Offre de cours</h2>
             <div className="flex flex-wrap lg:flex-nowrap justify-center gap-8">
-                <CardLesson
-                    title={lessons[0].title}
-                    description={lessons[0].description}
-                    imageUrl={lessons[0].imageUrl}
-                />
-                <CardLesson
-                    title={lessons[1].title}
-                    description={lessons[1].description}
-                    imageUrl={lessons[1].imageUrl}
-                />
+                {lessons.map((lesson, index) => (
+                    <CardLesson
+                        key={index}
+                        title={lesson.title}
+                        shortDescription={lesson.shortDescription}
+                        imagePath={lesson.imagePath}
+                    />
+                ))}
             </div>
         </>
     );

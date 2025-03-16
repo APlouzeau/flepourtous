@@ -13,3 +13,6 @@ $router->addRoute('GET', BASE_URL . "home", 'ControllerUser', 'homePage');
 
 //Users
 $router->addRoute('GET', BASE_URL . "api/users", 'ControllerUser', 'listUsers');
+
+//Lessons
+$router->addRoute('GET', BASE_URL . "api/lessons", 'ControllerLesson', 'getAllLessons');

@@ -1,6 +1,6 @@
 export interface Lesson {
     title: string;
-    description: string;
-    imageUrl: string;
+    shortDescription: string;
+    imagePath: string;
 }
 export type Lessons = Lesson[];
