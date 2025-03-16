@@ -46,3 +46,6 @@ config.php
 
 #livrables
 /livrables
+
+#build
+/frontend/out

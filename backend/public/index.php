@@ -1,6 +1,11 @@
 <?php
 #if (session_status() === PHP_SESSION_NONE) {
 session_start();
+
+header("Access-Control-Allow-Origin: *"); // Adaptez à votre URL frontend
+//header("Access-Control-Allow-Origin: " . $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME']); // Adaptez à votre URL frontend
+//header("Content-Type: application/json"); méthode
+//header("Access-Control-Allow-Headers: Content-Type, Authorization");
 #}
 define("APP_PATH", __DIR__ . "/../");
 define("BASE_URL", "/");

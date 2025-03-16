@@ -12,4 +12,4 @@ $router->addRoute('POST', BASE_URL . 'register', 'ControllerUser', 'register');
 $router->addRoute('GET', BASE_URL . "home", 'ControllerUser', 'homePage');
 
 //Users
-$router->addRoute('GET', BASE_URL . "users", 'ControllerUser', 'listUsers');
+$router->addRoute('GET', BASE_URL . "api/users", 'ControllerUser', 'listUsers');

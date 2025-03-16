@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
             },
         ],
     },
+    output: process.env.OUTPUT ? "export" : undefined,
 };
 
 export default nextConfig;
