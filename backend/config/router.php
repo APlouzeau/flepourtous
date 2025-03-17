@@ -16,3 +16,4 @@ $router->addRoute('GET', BASE_URL . "api/users", 'ControllerUser', 'listUsers');
 
 //Lessons
 $router->addRoute('GET', BASE_URL . "api/lessons", 'ControllerLesson', 'getAllLessons');
+$router->addRoute('GET', BASE_URL . "api/offre-de-cours/(?<slug>[a-zA-Z0-9\-]+)", 'ControllerLesson', 'getLessonByName');

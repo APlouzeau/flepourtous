@@ -49,6 +49,6 @@ if (!class_exists($handler['controller']) || $handler['controller'] == 'Controll
         $controller = new ControllerError();
         $controller->index($handler, $method, $uri);
     } else {
-        $controller->{$handler['action']}();
+        $controller->{$handler['action']}($handler['params']['slug'] ?? null, $handler['params']['id'] ?? null);
     }
 }

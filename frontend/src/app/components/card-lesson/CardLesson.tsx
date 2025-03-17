@@ -1,9 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 
 interface CardLessonProps {
     title: string;
     shortDescription: string;
     imagePath: string;
+    slug: string;
 }
 
 export default function CardLesson(props: CardLessonProps) {
@@ -24,7 +26,9 @@ export default function CardLesson(props: CardLessonProps) {
                     <h2 className="card-title">{props.title}</h2>
                     <p>{props.shortDescription}</p>
                     <div className="card-actions justify-end">
-                        <button className="btn btn-primary">Découvrir</button>
+                        <Link href={`/offre-de-cours/${props.slug}`} className="btn btn-primary">
+                            Découvrir
+                        </Link>
                     </div>
                 </div>
             </div>

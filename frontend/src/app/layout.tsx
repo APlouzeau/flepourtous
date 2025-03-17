@@ -28,9 +28,12 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="fr">
-            <body className={`${montserrat.variable} ${roboto.variable} font-sans antialiased`}>
+            <body
+                data-theme="synthwave"
+                className={`${montserrat.variable} ${roboto.variable} font-sans antialiased min-h-screen flex flex-col justify-between`}
+            >
                 <Header />
-                <main>{children}</main>
+                <main className="min-">{children}</main>
                 <Footer />
             </body>
         </html>

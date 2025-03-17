@@ -15,11 +15,26 @@ class ModelLesson extends  ClassDatabase
                     'id' => $data['id'],
                     'title' => $data['title'],
                     'shortDescription' => $data['shortDescription'],
-                    'fullDescription' => $data['fullDescription'],
-                    'imagePath' => $data['imagePath']
+                    'imagePath' => $data['imagePath'],
+                    'slug' => $data['slug']
                 ];
             $lessons[] = $lesson;
         }
         return $lessons;
+    }
+
+    public function getLessonByName($slug)
+    {
+        $req = $this->conn->prepare('SELECT * FROM lesson WHERE slug = :slug');
+        $req->execute(['slug' => $slug]);
+        $data = $req->fetch();
+        $lesson =
+            [
+                'id' => $data['id'],
+                'title' => $data['title'],
+                'fullDescription' => $data['fullDescription'],
+                'imagePath' => $data['imagePath'],
+            ];
+        return $lesson;
     }
 }
