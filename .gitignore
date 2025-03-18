@@ -49,3 +49,6 @@ config.php
 
 #build
 /frontend/out
+
+#githubaction
+githubaction.yml

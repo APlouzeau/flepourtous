@@ -5,10 +5,3 @@ export interface cardLesson {
     slug: string;
 }
 export type lessons = cardLesson[];
-
-export interface Lesson {
-    title: string;
-    fullDescription: string;
-    imagePath: string;
-    slug: string;
-}

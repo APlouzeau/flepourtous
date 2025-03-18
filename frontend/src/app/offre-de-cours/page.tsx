@@ -1,4 +1,4 @@
-import CardLesson from "@/app/components/card-lesson/CardLesson";
+import CardLesson from "@/app/components/cardLesson/cardLesson";
 import type { lessons } from "@/app/types/lessons";
 
 export default async function OfferPage() {

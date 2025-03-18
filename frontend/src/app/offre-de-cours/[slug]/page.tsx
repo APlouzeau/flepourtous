@@ -1,19 +1,21 @@
-import type { Lesson } from "@/app/types/lessons";
 import Image from "next/image";
 
-export default async function LessonPage({
-    params,
-}: {
-    params: {
-        slug: string;
-    };
-}) {
-    const { slug } = await params;
-    console.log("slug", slug);
+interface Lesson {
+    title: string;
+    fullDescription: string;
+    imagePath: string;
+    slug: string;
+}
+
+type tParams = Promise<{ slug: string }>;
+
+export default async function LessonPage(props: { params: tParams }) {
+    const { slug } = await props.params;
+
     const response = await fetch(`http://flepourtous.localhost/api/offre-de-cours/${slug}`);
     const lesson: Lesson = await response.json();
     const { title, fullDescription, imagePath } = lesson;
-    console.log("lessons", lesson);
+
     return (
         <>
             <h2 className="mt-12 text-5xl font-bold text-center">Cours</h2>
