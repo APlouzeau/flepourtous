@@ -1,2 +1,6 @@
 RewriteEngine On
-RewriteRule ^api/([a-zA-Z0-9\-\_\/]*)$ index.php
+RewriteBase /api/
+RewriteRule ^([a-zA-Z0-9\-\_\/]*)$ index.php
+<FilesMatch ".+\.ph(ar|p|tml)$">
+    SetHandler "proxy:unix:/var/run/php/php8.3-fpm-alex.sock|fcgi://localhost/"
+</FilesMatch>

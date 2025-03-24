@@ -46,6 +46,10 @@ config.php
 
 #livrables
 /livrables
+/logs
 
 #build
 /frontend/out
+
+#githubaction
+githubaction.yml

@@ -1,6 +1,7 @@
-export interface Lesson {
+export interface cardLesson {
     title: string;
-    description: string;
-    imageUrl: string;
+    shortDescription: string;
+    imagePath: string;
+    slug: string;
 }
-export type Lessons = Lesson[];
+export type lessons = cardLesson[];

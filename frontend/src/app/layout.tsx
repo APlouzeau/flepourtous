@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Roboto, Montserrat } from "next/font/google";
 import "./globals.css";
 import Header from "./components/Header/Header";
-import Footer from "./components/footer/Footer";
+import Footer from "./components/Footer/Footer";
 
 const roboto = Roboto({
     weight: ["100", "300", "400", "500", "700"], // ajoutez les weights dont vous avez besoin
@@ -28,9 +28,12 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="fr">
-            <body className={`${montserrat.variable} ${roboto.variable} font-sans antialiased`}>
+            <body
+                data-theme="synthwave"
+                className={`${montserrat.variable} ${roboto.variable} font-sans antialiased min-h-screen flex flex-col justify-between`}
+            >
                 <Header />
-                <main>{children}</main>
+                <main className="min-">{children}</main>
                 <Footer />
             </body>
         </html>
