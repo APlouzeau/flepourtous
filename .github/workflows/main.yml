@@ -20,6 +20,7 @@ jobs:
                   cd ~/projects/flepourtous
                   git checkout dev
                   git pull origin dev
+                  cd frontend
                   pnpm i
                   pnpm build
                   pm2 restart flepourtous
