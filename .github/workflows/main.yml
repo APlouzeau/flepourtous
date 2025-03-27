@@ -17,7 +17,7 @@ jobs:
               uses: actions/checkout@v2
             - name: deploy
               run: |
-                  cd ~/projects/prod/flepourtous-prod
+                  cd ~/projects/prod/flepourtous
                   git checkout main
                   git pull origin main
                   cd frontend
