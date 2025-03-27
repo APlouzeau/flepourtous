@@ -12,7 +12,7 @@ type tParams = Promise<{ slug: string }>;
 export default async function LessonPage(props: { params: tParams }) {
     const { slug } = await props.params;
 
-    const response = await fetch(`http://flepourtous.plouzor.fr/api/offre-de-cours/${slug}`);
+    const response = await fetch(`${process.env.API_URL}/offre-de-cours/${slug}`);
     const lesson: Lesson = await response.json();
     const { title, fullDescription, imagePath } = lesson;
 
