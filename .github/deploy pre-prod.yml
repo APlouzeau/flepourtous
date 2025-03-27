@@ -1,0 +1,25 @@
+name: Deploy Next on pre-prod
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - dev
+    workflow_dispatch:
+
+jobs:
+    deploy:
+        runs-on: [self-hosted, linux, ARM64]
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+            - name: deploy
+              run: |
+                  cd ~/home/alex/projects/flepourtous
+                  git checkout dev
+                  git pull origin dev
+                  pnpm i
+                  pnpm build
+                  pm2 restart flepourtous
