@@ -14,7 +14,7 @@ export default function Header() {
         const checkLoginStatus = async () => {
             try {
                 await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`).then((response) => {
-                    if (response.data.errmsg == "Utilisateur connecté") {
+                    if (response.data.message == "Utilisateur connecté") {
                         setIsLoggedIn(true);
                     } else {
                         setIsLoggedIn(false);
@@ -30,7 +30,7 @@ export default function Header() {
     const handleLogout = async () => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`);
-            if (response.data.errmsg == "Deconnexion réussie.") {
+            if (response.data.message == "Deconnexion réussie.") {
                 setIsLoggedIn(false);
                 router.push("/");
             } else {

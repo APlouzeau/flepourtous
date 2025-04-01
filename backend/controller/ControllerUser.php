@@ -10,13 +10,13 @@ class ControllerUser
     {
         if (isset($_SESSION['id_user']) && !empty($_SESSION['id_user'])) {
             $response = [
-                'errno' => 0,
-                'errmsg' => 'Utilisateur connecté',
+                'code' => 1,
+                'message' => 'Utilisateur connecté',
             ];
         } else {
             $response = [
-                'errno' => 1,
-                'errmsg' => 'Utilisateur non connecté'
+                'code' => 0,
+                'message' => 'Utilisateur non connecté'
             ];
         }
         echo json_encode($response);
@@ -48,11 +48,15 @@ class ControllerUser
                     'firstName' => $userVerify['firstName'],
                     'lastName' => $userVerify['lastName'],
                 ];
-                $response =
-                    "Connexion réussie.";
-                /*                         "SESSION" => $_SESSION, */
+                $response = [
+                    'code' => 1,
+                    'message' => 'Connexion réussie.'
+                ];
             } else {
-                $response = "Nom ou mot de passe incorrect.";
+                $response = [
+                    'code' => 0,
+                    'message' => 'Nom ou mot de passe incorrect.'
+                ];
             }
             echo json_encode($response);
         }
@@ -63,8 +67,8 @@ class ControllerUser
         session_destroy();
         $_SESSION = [];
         echo json_encode([
-            'errno' => 0,
-            'errmsg' => 'Deconnexion réussie.'
+            'code' => 1,
+            'message' => 'Deconnexion réussie.'
         ]);
     }
 
@@ -73,14 +77,15 @@ class ControllerUser
     public function getUserInformations()
     {
         if (!isset($_SESSION['id_user']) || empty($_SESSION['id_user'])) {
-            $response['errmsg'] = 'error';
+            $response['message'] = 'error';
         } else {
             $modelUser = new ModelUser();
             $user = new EntitieUser([
                 'id_user' => $_SESSION['id_user']
             ]);
             $response = [
-                'errmsg' => 'Utilisateur trouvé',
+                'code' => 1,
+                'message' => 'Utilisateur trouvé',
                 'data' =>
                 $modelUser->getUser($user)
 
@@ -88,28 +93,49 @@ class ControllerUser
         }
         echo json_encode($response);
     }
-    public function registerPage()
-    {
-        $titlePage = "Ecoloquiz : Inscription";
-        require_once APP_PATH . "/views/head.php";
-        require_once APP_PATH . "/views/header.php";
-        require_once APP_PATH . "/views/register.php";
-        require_once APP_PATH . "/views/footer.php";
-    }
 
     public function register()
     {
-        if (isset($_POST['nickName']) and !empty($_POST['password'])) {
-            $nickName = htmlspecialchars($_POST['nickName']);
-            $mdp = sha1($_POST['password']);
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+        if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur de méthode',
+            ];
+        } else if (
+            !isset($data['nickName']) ||
+            !isset($data['firstName']) ||
+            !isset($data['lastName']) ||
+            !isset($data['mail']) ||
+            !isset($data['password']) ||
+            !isset($data['passwordConfirm'])
+        ) {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur de paramètres',
+            ];
+        } else if ($data['password'] != $data['passwordConfirm']) {
+            $response = [
+                'code' => 0,
+                'message' => 'Les mots de passe ne correspondent pas',
+            ];
+        } else {
             $user = new EntitieUser([
-                "nickName" => $nickName,
-                "password" => $mdp
+                'nickName' => $data['nickName'],
+                'firstName' => $data['firstName'],
+                'lastName' => $data['lastName'],
+                'mail' => $data['mail'],
+                'password' => $data['password'],
             ]);
             $userModel = new ModelUser();
             $userModel->register($user);
-            header("Location: " . BASE_URL . "login");
+            $response = [
+                'code' => 1,
+                'message' => 'Inscription réussie',
+            ];
         }
+        echo json_encode($response);
     }
 
 
@@ -134,16 +160,16 @@ class ControllerUser
     public function deleteUser()
     {
         $response = [
-            'errno' => 1,
-            'errmsg' => 'Erreur inconnue',
+            'code' => 1,
+            'message' => 'Erreur inconnue',
             'data' => []
         ];
         if (!$_SESSION) {
-            $response['errmsg'] = 'Utilisateur non connecté';
+            $response['message'] = 'Utilisateur non connecté';
         } else if (!$_POST['id_user']) {
-            $response['errmsg'] = 'Paramètre manquant';
+            $response['message'] = 'Paramètre manquant';
         } else if ($_SESSION['role'] != 'admin') {
-            $response['errmsg'] = 'Utilisateur non autorisé';
+            $response['message'] = 'Utilisateur non autorisé';
         } else {
             $id_user = $_POST['id_user'];
             $modelUser = new ModelUser();
@@ -152,8 +178,8 @@ class ControllerUser
             ]);
             $modelUser->deleteUser($user);
             $response = [
-                'errno' => 0,
-                'errmsg' => 'Utilisateur supprimé',
+                'code' => 0,
+                'message' => 'Utilisateur supprimé',
                 'data' => [
                     'id_user' => $id_user
                 ]

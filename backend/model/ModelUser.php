@@ -8,14 +8,13 @@ extends ClassDatabase
 
     public function register(EntitieUser $user)
     {
-        $query = "INSERT INTO users (nickName, password) VALUES (:nickName, :password)";
+        $query = "INSERT INTO users (nickName, firstName, lastName, mail, password) VALUES (:nickName, :firstName, :lastName, :mail, :password)";
         $req = $this->conn->prepare($query);
-
-        $nickName = htmlspecialchars(strip_tags($user->getNickName()));
-        $password_hash = password_hash($user->getPassword(), PASSWORD_BCRYPT);
-
-        $req->bindParam(":nickName", $nickName);
-        $req->bindParam(":password", $password_hash);
+        $req->bindValue(":nickName", $user->getNickName());
+        $req->bindValue(":firstName", $user->getFirstName());
+        $req->bindValue(":lastName", $user->getLastName());
+        $req->bindValue(":mail", $user->getMail());
+        $req->bindValue(":password", $user->getPassword());
 
         return $req->execute();
     }

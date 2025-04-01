@@ -368,8 +368,8 @@ class JWT
     {
         $obj = \json_decode($input, false, 512, JSON_BIGINT_AS_STRING);
 
-        if ($errno = \json_last_error()) {
-            self::handleJsonError($errno);
+        if ($code = \json_last_error()) {
+            self::handleJsonError($code);
         } elseif ($obj === null && $input !== 'null') {
             throw new DomainException('Null result with non-null input');
         }
@@ -388,8 +388,8 @@ class JWT
     public static function jsonEncode(array $input): string
     {
         $json = \json_encode($input, \JSON_UNESCAPED_SLASHES);
-        if ($errno = \json_last_error()) {
-            self::handleJsonError($errno);
+        if ($code = \json_last_error()) {
+            self::handleJsonError($code);
         } elseif ($json === 'null') {
             throw new DomainException('Null result with non-null input');
         }
@@ -504,13 +504,13 @@ class JWT
     /**
      * Helper method to create a JSON error.
      *
-     * @param int $errno An error number from json_last_error()
+     * @param int $code An error number from json_last_error()
      *
      * @throws DomainException
      *
      * @return void
      */
-    private static function handleJsonError(int $errno): void
+    private static function handleJsonError(int $code): void
     {
         $messages = [
             JSON_ERROR_DEPTH => 'Maximum stack depth exceeded',
@@ -520,9 +520,9 @@ class JWT
             JSON_ERROR_UTF8 => 'Malformed UTF-8 characters' //PHP >= 5.3.3
         ];
         throw new DomainException(
-            isset($messages[$errno])
-            ? $messages[$errno]
-            : 'Unknown JSON error: ' . $errno
+            isset($messages[$code])
+                ? $messages[$code]
+                : 'Unknown JSON error: ' . $code
         );
     }
 
@@ -569,7 +569,7 @@ class JWT
         return self::encodeDER(
             self::ASN1_SEQUENCE,
             self::encodeDER(self::ASN1_INTEGER, $r) .
-            self::encodeDER(self::ASN1_INTEGER, $s)
+                self::encodeDER(self::ASN1_INTEGER, $s)
         );
     }
 

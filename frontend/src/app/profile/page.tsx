@@ -14,7 +14,7 @@ export default function ProfilePage() {
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`);
                 setDataUser(response.data.data);
-                if (response.data.errmsg == "error") {
+                if (response.data.message == "error") {
                     router.push("/connexion");
                 }
             } catch (error) {
