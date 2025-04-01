@@ -4,6 +4,7 @@ import axios from "axios";
 import { useLoginStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { SERVER_PROPS_EXPORT_ERROR } from "next/dist/lib/constants";
 
 export default function ConnexionPage() {
     const [mail, setMail] = useState("");
@@ -23,7 +24,7 @@ export default function ConnexionPage() {
                     setIsLoggedIn(true);
                     router.push("/profile");
                 } else {
-                    console.error("Erreur lors de la connexion :", response.data);
+                    console.error("Erreur lors de la connexion :", response.data.message);
                 }
             })
             .catch((error) => {
