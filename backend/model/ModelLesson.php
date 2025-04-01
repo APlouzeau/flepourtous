@@ -12,7 +12,7 @@ class ModelLesson extends  ClassDatabase
         foreach ($datas as $data) {
             $lesson =
                 [
-                    'id' => $data['id'],
+                    'id_lesson' => $data['id_lesson'],
                     'title' => $data['title'],
                     'shortDescription' => $data['shortDescription'],
                     'imagePath' => $data['imagePath'],
@@ -30,7 +30,7 @@ class ModelLesson extends  ClassDatabase
         $data = $req->fetch();
         $lesson =
             [
-                'id' => $data['id'],
+                'id_lesson' => $data['id_lesson'],
                 'title' => $data['title'],
                 'fullDescription' => $data['fullDescription'],
                 'imagePath' => $data['imagePath'],

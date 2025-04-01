@@ -1,9 +1,45 @@
 "use client";
+import axios from "axios";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLoginStore } from "@/store/auth";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
+    const { isLoggedIn, setIsLoggedIn } = useLoginStore();
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkLoginStatus = async () => {
+            try {
+                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`).then((response) => {
+                    if (response.data.errmsg == "Utilisateur connecté") {
+                        setIsLoggedIn(true);
+                    } else {
+                        setIsLoggedIn(false);
+                    }
+                });
+            } catch (error) {
+                console.error("Erreur lors de la vérification de la connexion :", error);
+            }
+        };
+        checkLoginStatus();
+    }, [setIsLoggedIn]);
+
+    const handleLogout = async () => {
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`);
+            if (response.data.errmsg == "Deconnexion réussie.") {
+                setIsLoggedIn(false);
+                router.push("/");
+            } else {
+                console.error("Erreur lors de la déconnexion :", response.data);
+            }
+        } catch (error) {
+            console.error("Erreur lors de la déconnexion :", error);
+        }
+    };
 
     return (
         <header className="h-auto md:h-96 bg-purple-800 m-2 flex flex-col rounded-b-box">
@@ -70,6 +106,42 @@ export default function Header() {
                             Avis élèves
                         </Link>
                     </li>
+                    <li className="hidden md:block text-purple-700 text-4xl">|</li>
+                    {isLoggedIn ? (
+                        <>
+                            <li className="flex-1 flex px-4">
+                                <Link
+                                    href="/profile"
+                                    className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Profil
+                                </Link>
+                            </li>
+                            <li className="hidden md:block text-purple-700 text-4xl">|</li>
+                            <li className="flex-1 flex px-4">
+                                <button
+                                    className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
+                                    onClick={() => {
+                                        setIsOpen(false);
+                                        handleLogout();
+                                    }}
+                                >
+                                    Deconnexion
+                                </button>
+                            </li>
+                        </>
+                    ) : (
+                        <li className="flex-1 flex px-4">
+                            <Link
+                                href="/connexion"
+                                className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
+                                onClick={() => setIsLoggedIn(false)}
+                            >
+                                Connexion
+                            </Link>
+                        </li>
+                    )}
                 </ul>
             </nav>
         </header>

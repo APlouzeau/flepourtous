@@ -8,13 +8,13 @@ extends ClassDatabase
 
     public function register(EntitieUser $user)
     {
-        $query = "INSERT INTO Users (pseudo, password) VALUES (:pseudo, :password)";
+        $query = "INSERT INTO users (nickName, password) VALUES (:nickName, :password)";
         $req = $this->conn->prepare($query);
 
-        $pseudo = htmlspecialchars(strip_tags($user->getpseudo()));
+        $nickName = htmlspecialchars(strip_tags($user->getNickName()));
         $password_hash = password_hash($user->getPassword(), PASSWORD_BCRYPT);
 
-        $req->bindParam(":pseudo", $pseudo);
+        $req->bindParam(":nickName", $nickName);
         $req->bindParam(":password", $password_hash);
 
         return $req->execute();
@@ -22,7 +22,7 @@ extends ClassDatabase
 
     public function getAllUsers()
     {
-        $req = $this->conn->query('SELECT id, nickName, firstname, mail FROM users ORDER BY nickName');
+        $req = $this->conn->query('SELECT id, nickName, firstName, mail FROM users ORDER BY nickName');
         $datas = $req->fetchAll();
         $users = [];
         foreach ($datas as $data) {
@@ -34,30 +34,30 @@ extends ClassDatabase
 
     public function login(EntitieUser $userVerify)
     {
-        $query = "SELECT * FROM Users WHERE pseudo = :pseudo";
+        $query = "SELECT * FROM users WHERE mail = :mail";
         $req = $this->conn->prepare($query);
-        $req->bindValue(":pseudo", $userVerify->getPseudo());
+        $req->bindValue(":mail", $userVerify->getMail());
         $req->execute();
 
-        // Récupérer les données de l'utilisateur
-        $user = $req->fetch();
-        if ($user) {
-            // Vérifier si le mot de passe correspond
-            if ($userVerify->getPassword() == $user['password']) {
+        $data = $req->fetch(PDO::FETCH_ASSOC);
+        if ($data) {
+            if ($userVerify->getPassword() == $data['password']) {
                 //  if (password_verify($userVerify->getPassword(), $user['password'])) {
-                return new EntitieUser(
+                $user =
                     [
-                        'id_user' => $user['id_user'],
-                        'pseudo' => $user['pseudo'],
-                        'mail' => $user['mail'],
-                        'role' => $user['role']
-                    ]
-                );
+                        'id_user' => $data['id_user'],
+                        'nickName' => $data['nickName'],
+                        'firstName' => $data['firstName'],
+                        'lastName' => $data['lastName'],
+                        'mail' => $data['mail'],
+                        'role' => $data['role'],
+                    ];
+                return $user;
             } else {
-                return false; // Mot de passe incorrect
+                return false;
             }
         } else {
-            return false; // Utilisateur non trouvé
+            return false;
         }
     }
 
@@ -67,7 +67,20 @@ extends ClassDatabase
         $req->bindValue(":id_user", $user->getId_user(), PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
-        return $data ? new EntitieUser($data) : null;
+        if ($data) {
+            $user =
+                [
+                    'id_user' => $data['id_user'],
+                    'nickName' => $data['nickName'],
+                    'firstName' => $data['firstName'],
+                    'lastName' => $data['lastName'],
+                    'mail' => $data['mail'],
+                    'role' => $data['role'],
+                ];
+        } else {
+            return null; // Utilisateur non trouvé
+        }
+        return $data ? $user : null;
     }
 
     public function deleteUser(EntitieUser $user)

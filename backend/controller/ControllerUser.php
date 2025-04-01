@@ -1,77 +1,92 @@
 <?php
 
+/* use Firebase\JWT\JWT;
+use Firebase\JWT\Key; */
+
 class ControllerUser
 {
-    public function homePage()
+
+    public function verifyConnect()
     {
-        $titlePage = " : Accueil";
-        require_once APP_PATH . "/views/head.php";
-        require_once APP_PATH . "/views/header.php";
-        require_once APP_PATH . "/views/home.php";
-        require_once APP_PATH . "/views/footer.php";
-    }
-    public function loginPage()
-    {
-        $titlePage = " : Connexion";
-        require_once APP_PATH . "/views/head.php";
-        require_once APP_PATH . "/views/header.php";
-        require_once APP_PATH . "/views/login.php";
-        require_once APP_PATH . "/views/footer.php";
+        if (isset($_SESSION['id_user']) && !empty($_SESSION['id_user'])) {
+            $response = [
+                'errno' => 0,
+                'errmsg' => 'Utilisateur connecté',
+            ];
+        } else {
+            $response = [
+                'errno' => 1,
+                'errmsg' => 'Utilisateur non connecté'
+            ];
+        }
+        echo json_encode($response);
     }
 
     public function login()
     {
-        $error = '';
-
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $pseudo = $_POST['pseudo'];
-            $password = $_POST['password'];
+            $mail = $data['mail'];
+            $password = $data['password'];
 
             $userModel = new ModelUser();
             $user = new EntitieUser([
-                'pseudo' => $pseudo,
+                'mail' => $mail,
                 'password' => $password
             ]);
+
+
             $userVerify = $userModel->login($user);
             if ($userVerify) {
-
+                /* $response = JWT::encode($userVerify, JWT_KEY, 'HS256'); */
                 $_SESSION = [
-                    'id_user' => $userVerify->getid_user(),
-                    'pseudo' => $userVerify->getPseudo(),
-                    'firstname' => $userVerify->getPseudo(),
-                    'email' => $userVerify->getMail(),
+                    'id_user' => $userVerify['id_user'],
+                    'nickName' => $userVerify['nickName'],
+                    'role' => $userVerify['role'],
+                    'mail' => $userVerify['mail'],
+                    'firstName' => $userVerify['firstName'],
+                    'lastName' => $userVerify['lastName'],
                 ];
-
-                $this->homePage();
+                $response =
+                    "Connexion réussie.";
+                /*                         "SESSION" => $_SESSION, */
             } else {
-                $error = "Nom ou mot de passe incorrect.";
-                require_once APP_PATH . "/views/login.php";
+                $response = "Nom ou mot de passe incorrect.";
             }
+            echo json_encode($response);
         }
     }
 
     public function logout()
     {
-        session_start();
         session_destroy();
-        header("Location: index.php");
-        exit();
+        $_SESSION = [];
+        echo json_encode([
+            'errno' => 0,
+            'errmsg' => 'Deconnexion réussie.'
+        ]);
     }
 
 
 
-    public function profilPage()
+    public function getUserInformations()
     {
-        $titlePage = "Coffee Forum : Profil";
-        $modelUser = new ModelUser();
-        $user = new EntitieUser([
-            'id_user' => $_SESSION['id_user']
-        ]);
-        require_once APP_PATH . "/views/head.php";
-        require_once APP_PATH . "/views/header.php";
-        $userChecked = $modelUser->getUser($user);
-        require_once APP_PATH . "/views/profile.php";
-        require_once APP_PATH . "/views/footer.php";
+        if (!isset($_SESSION['id_user']) || empty($_SESSION['id_user'])) {
+            $response['errmsg'] = 'error';
+        } else {
+            $modelUser = new ModelUser();
+            $user = new EntitieUser([
+                'id_user' => $_SESSION['id_user']
+            ]);
+            $response = [
+                'errmsg' => 'Utilisateur trouvé',
+                'data' =>
+                $modelUser->getUser($user)
+
+            ];
+        }
+        echo json_encode($response);
     }
     public function registerPage()
     {
@@ -84,11 +99,11 @@ class ControllerUser
 
     public function register()
     {
-        if (isset($_POST['pseudo']) and !empty($_POST['password'])) {
-            $pseudo = htmlspecialchars($_POST['pseudo']);
+        if (isset($_POST['nickName']) and !empty($_POST['password'])) {
+            $nickName = htmlspecialchars($_POST['nickName']);
             $mdp = sha1($_POST['password']);
             $user = new EntitieUser([
-                "pseudo" => $pseudo,
+                "nickName" => $nickName,
                 "password" => $mdp
             ]);
             $userModel = new ModelUser();
@@ -126,7 +141,7 @@ class ControllerUser
         if (!$_SESSION) {
             $response['errmsg'] = 'Utilisateur non connecté';
         } else if (!$_POST['id_user']) {
-            $response['errmsg'] = 'Paramêtre manquant';
+            $response['errmsg'] = 'Paramètre manquant';
         } else if ($_SESSION['role'] != 'admin') {
             $response['errmsg'] = 'Utilisateur non autorisé';
         } else {
