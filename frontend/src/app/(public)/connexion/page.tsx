@@ -4,7 +4,6 @@ import axios from "axios";
 import { useLoginStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { SERVER_PROPS_EXPORT_ERROR } from "next/dist/lib/constants";
 
 export default function ConnexionPage() {
     const [mail, setMail] = useState("");
@@ -21,9 +20,11 @@ export default function ConnexionPage() {
             })
             .then((response) => {
                 if (response.data.code == 1) {
+                    document.cookie = "auth_verified=true; path=/; max-age=3600";
                     setIsLoggedIn(true);
                     router.push("/profile");
                 } else {
+                    document.cookie = "auth_verified=false; path=/; max-age=0";
                     console.error("Erreur lors de la connexion :", response.data.message);
                 }
             })

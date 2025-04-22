@@ -1,5 +1,5 @@
 export interface userDataProps {
-    id_user: number;
+    idUser: number;
     nickName: string;
     firstName: string;
     mail: string;

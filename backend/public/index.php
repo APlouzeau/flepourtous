@@ -2,11 +2,10 @@
 #if (session_status() === PHP_SESSION_NONE) {
 session_start();
 
-header("Access-Control-Allow-Origin: *"); // Adaptez à votre URL frontend
-//header("Access-Control-Allow-Origin: " . $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME']); // Adaptez à votre URL frontend
-//header("Content-Type: application/json"); méthode
-//header("Access-Control-Allow-Headers: Content-Type, Authorization");
-#}
+header("Access-Control-Allow-Origin: http://localhost:3000");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Credentials: true");
 define("APP_PATH", __DIR__ . "/../");
 define("BASE_URL", "/");
 require_once APP_PATH . "config/config.php";

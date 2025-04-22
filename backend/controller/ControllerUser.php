@@ -1,14 +1,18 @@
 <?php
 
-/* use Firebase\JWT\JWT;
-use Firebase\JWT\Key; */
 
 class ControllerUser
 {
+    public function verifyConnectBack()
+    {
+        if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
+            return true;
+        }
+    }
 
     public function verifyConnect()
     {
-        if (isset($_SESSION['id_user']) && !empty($_SESSION['id_user'])) {
+        if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             $response = [
                 'code' => 1,
                 'message' => 'Utilisateur connecté',
@@ -24,6 +28,7 @@ class ControllerUser
 
     public function login()
     {
+
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -39,9 +44,8 @@ class ControllerUser
 
             $userVerify = $userModel->login($user);
             if ($userVerify) {
-                /* $response = JWT::encode($userVerify, JWT_KEY, 'HS256'); */
                 $_SESSION = [
-                    'id_user' => $userVerify['id_user'],
+                    'idUser' => $userVerify['idUser'],
                     'nickName' => $userVerify['nickName'],
                     'role' => $userVerify['role'],
                     'mail' => $userVerify['mail'],
@@ -76,12 +80,12 @@ class ControllerUser
 
     public function getUserInformations()
     {
-        if (!isset($_SESSION['id_user']) || empty($_SESSION['id_user'])) {
+        if (!isset($_SESSION['idUser']) || empty($_SESSION['idUser'])) {
             $response['message'] = 'error';
         } else {
             $modelUser = new ModelUser();
             $user = new EntitieUser([
-                'id_user' => $_SESSION['id_user']
+                'idUser' => $_SESSION['idUser']
             ]);
             $response = [
                 'code' => 1,
@@ -166,22 +170,22 @@ class ControllerUser
         ];
         if (!$_SESSION) {
             $response['message'] = 'Utilisateur non connecté';
-        } else if (!$_POST['id_user']) {
+        } else if (!$_POST['idUser']) {
             $response['message'] = 'Paramètre manquant';
         } else if ($_SESSION['role'] != 'admin') {
             $response['message'] = 'Utilisateur non autorisé';
         } else {
-            $id_user = $_POST['id_user'];
+            $idUser = $_POST['idUser'];
             $modelUser = new ModelUser();
             $user = new EntitieUser([
-                'id_user' => $id_user
+                'idUser' => $idUser
             ]);
             $modelUser->deleteUser($user);
             $response = [
                 'code' => 0,
                 'message' => 'Utilisateur supprimé',
                 'data' => [
-                    'id_user' => $id_user
+                    'idUser' => $idUser
                 ]
             ];
         }

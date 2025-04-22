@@ -21,7 +21,7 @@ extends ClassDatabase
 
     public function getAllUsers()
     {
-        $req = $this->conn->query('SELECT id, nickName, firstName, mail FROM users ORDER BY nickName');
+        $req = $this->conn->query('SELECT idUser, nickName, firstName, mail FROM users ORDER BY nickName');
         $datas = $req->fetchAll();
         $users = [];
         foreach ($datas as $data) {
@@ -44,7 +44,7 @@ extends ClassDatabase
                 //  if (password_verify($userVerify->getPassword(), $user['password'])) {
                 $user =
                     [
-                        'id_user' => $data['id_user'],
+                        'idUser' => $data['idUser'],
                         'nickName' => $data['nickName'],
                         'firstName' => $data['firstName'],
                         'lastName' => $data['lastName'],
@@ -62,14 +62,14 @@ extends ClassDatabase
 
     public function getUser(EntitieUser $user)
     {
-        $req = $this->conn->prepare('SELECT * FROM users WHERE id_user = :id_user');
-        $req->bindValue(":id_user", $user->getId_user(), PDO::PARAM_INT);
+        $req = $this->conn->prepare('SELECT * FROM users WHERE idUser = :idUser');
+        $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
         if ($data) {
             $user =
                 [
-                    'id_user' => $data['id_user'],
+                    'idUser' => $data['idUser'],
                     'nickName' => $data['nickName'],
                     'firstName' => $data['firstName'],
                     'lastName' => $data['lastName'],
@@ -84,8 +84,8 @@ extends ClassDatabase
 
     public function deleteUser(EntitieUser $user)
     {
-        $req = $this->conn->prepare('DELETE FROM users WHERE id_user = :id_user');
-        $req->bindValue(":id_user", $user->getId_user(), PDO::PARAM_INT);
+        $req = $this->conn->prepare('DELETE FROM users WHERE idUser = :idUser');
+        $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
         return $req->execute();
     }
 }

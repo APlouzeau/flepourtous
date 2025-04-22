@@ -2,7 +2,7 @@
 
 class EntitieLesson
 {
-    private int $id_lesson;
+    private int $idLesson;
     private string $title;
     private string $shortDescription;
     private string $fullDescription;
@@ -27,9 +27,9 @@ class EntitieLesson
     /**
      * Get the value of id
      */
-    public function getId_lesson()
+    public function getIdLesson()
     {
-        return $this->id_lesson;
+        return $this->idLesson;
     }
 
     /**
@@ -37,9 +37,9 @@ class EntitieLesson
      *
      * @return  self
      */
-    public function setId_lesson($id_lesson)
+    public function setIdLesson($idLesson)
     {
-        $this->id_lesson = $id_lesson;
+        $this->idLesson = $idLesson;
 
         return $this;
     }

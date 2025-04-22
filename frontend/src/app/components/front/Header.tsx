@@ -32,6 +32,7 @@ export default function Header() {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`);
             if (response.data.message == "Deconnexion réussie.") {
                 setIsLoggedIn(false);
+                document.cookie = "auth_verified=false; path=/; max-age=0";
                 router.push("/");
             } else {
                 console.error("Erreur lors de la déconnexion :", response.data);
@@ -42,9 +43,9 @@ export default function Header() {
     };
 
     return (
-        <header className="h-auto md:h-96 bg-purple-800 m-2 flex flex-col rounded-b-box">
+        <header className="h-auto md:h-96 bg-pink-300 m-2 flex flex-col rounded-lg">
             <div className="flex-1 flex items-center justify-center p-4">
-                <Link href="/" className="font-bold text-white text-4xl md:text-8xl text-center">
+                <Link href="/" className="font-bold text-8xl shadow-black text-white text-center">
                     FLE pour tous
                 </Link>
             </div>
@@ -66,77 +67,88 @@ export default function Header() {
             </button>
 
             <nav className={`${isOpen ? "block" : "hidden"} md:block`}>
-                <ul className="menu menu-vertical md:menu-horizontal bg-blue-200 rounded-b-box w-full justify-around px-4 text-xl font-bold">
-                    <li className="flex-1 flex px-4">
+                {/* Remplacé les classes DaisyUI par des classes Tailwind standard */}
+                <ul className="flex flex-col md:flex-row bg-blue-200 rounded-b-lg w-full justify-around px-4 text-xl font-bold">
+                    <li className="flex-1 py-2 md:py-4">
                         <Link
                             href="/"
-                            className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
+                            className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2"
                             onClick={() => setIsOpen(false)}
                         >
                             Présentation
                         </Link>
                     </li>
-                    <li className="hidden md:block text-purple-700 text-4xl">|</li>
-                    <li className="flex-1 flex px-4">
+                    <li className="hidden md:flex items-center justify-center text-purple-700 text-4xl">|</li>
+                    <li className="flex-1 py-2 md:py-4">
                         <Link
                             href="/offre-de-cours"
-                            className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
+                            className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2"
                             onClick={() => setIsOpen(false)}
                         >
                             Offre de cours
                         </Link>
                     </li>
-                    <li className="hidden md:block text-purple-700 text-4xl">|</li>
-                    <li className="flex-1 flex px-4">
+                    <li className="hidden md:flex items-center justify-center text-purple-700 text-4xl">|</li>
+                    <li className="flex-1 py-2 md:py-4">
                         <Link
                             href="/ressources"
-                            className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
+                            className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2"
                             onClick={() => setIsOpen(false)}
                         >
                             Ressources utilisées
                         </Link>
                     </li>
-                    <li className="hidden md:block text-purple-700 text-4xl">|</li>
-                    <li className="flex-1 flex px-4">
+                    <li className="hidden md:flex items-center justify-center text-purple-700 text-4xl">|</li>
+                    <li className="flex-1 py-2 md:py-4">
                         <Link
                             href="/avis-eleves"
-                            className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
+                            className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2"
                             onClick={() => setIsOpen(false)}
                         >
                             Avis élèves
                         </Link>
                     </li>
-                    <li className="hidden md:block text-purple-700 text-4xl">|</li>
+                    <li className="hidden md:flex items-center justify-center text-purple-700 text-4xl">|</li>
                     {isLoggedIn ? (
                         <>
-                            <li className="flex-1 flex px-4">
+                            <li className="flex-1 py-2 md:py-4">
                                 <Link
                                     href="/profile"
-                                    className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
+                                    className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2"
                                     onClick={() => setIsOpen(false)}
                                 >
                                     Profil
                                 </Link>
                             </li>
-                            <li className="hidden md:block text-purple-700 text-4xl">|</li>
-                            <li className="flex-1 flex px-4">
+                            <li className="hidden md:flex items-center justify-center text-purple-700 text-4xl">|</li>
+                            <li className="flex-1 py-2 md:py-4">
+                                <Link
+                                    href="/calendrier"
+                                    className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2"
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    Calendrier
+                                </Link>
+                            </li>
+                            <li className="hidden md:flex items-center justify-center text-purple-700 text-4xl">|</li>
+                            <li className="flex-1 py-2 md:py-4">
                                 <button
-                                    className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
+                                    className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2"
                                     onClick={() => {
                                         setIsOpen(false);
                                         handleLogout();
                                     }}
                                 >
-                                    Deconnexion
+                                    Déconnexion
                                 </button>
                             </li>
                         </>
                     ) : (
-                        <li className="flex-1 flex px-4">
+                        <li className="flex-1 py-2 md:py-4">
                             <Link
                                 href="/connexion"
-                                className="w-full text-center justify-center hover:bg-purple-400 transition-colors duration-300"
-                                onClick={() => setIsLoggedIn(false)}
+                                className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2"
+                                onClick={() => setIsOpen(false)}
                             >
                                 Connexion
                             </Link>

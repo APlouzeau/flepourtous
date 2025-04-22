@@ -2,7 +2,7 @@
 
 class EntitieUser
 {
-    private int $id_user;
+    private int $idUser;
     private string $firstName;
     private string $lastName;
     private string $role;
@@ -11,7 +11,7 @@ class EntitieUser
     private string $password;
     private string $adress;
     private string $country;
-    private string $date_inscription;
+    private string $dateInscription;
 
     // Constructeur pour hydrater les données à partir d'un tableau
     public function __construct(array $data)
@@ -30,14 +30,14 @@ class EntitieUser
         }
     }
 
-    public function getId_user()
+    public function getIdUser()
     {
-        return $this->id_user;
+        return $this->idUser;
     }
 
-    public function setId_user($id_user)
+    public function setIdUser($idUser)
     {
-        $this->id_user = $id_user;
+        $this->idUser = $idUser;
 
         return $this;
     }
@@ -124,13 +124,13 @@ class EntitieUser
 
         return $this;
     }
-    public function getDate_inscription()
+    public function getDateInscription()
     {
-        return $this->date_inscription;
+        return $this->dateInscription;
     }
-    public function setDate_inscription($date_inscription)
+    public function setDateInscription($dateInscription)
     {
-        $this->date_inscription = $date_inscription;
+        $this->dateInscription = $dateInscription;
 
         return $this;
     }

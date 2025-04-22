@@ -40,7 +40,7 @@ export default function ProfilePage() {
             <p>Voici vos informations :</p>
             {dataUser && (
                 <>
-                    <p>ID : {dataUser.id_user}</p>
+                    <p>ID : {dataUser.idUser}</p>
                     <p>Mail : {dataUser.mail}</p>
                     <p>Prénom : {dataUser.firstName}</p>
                     <p>Nom : {dataUser.lastName}</p>
