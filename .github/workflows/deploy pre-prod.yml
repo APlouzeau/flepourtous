@@ -22,4 +22,6 @@ jobs:
                   git pull origin dev
                   cd frontend
                   pnpm i
-                  pm2 restart flepourtous-preprod
+                  pm2 stop flepourtous-preprod
+                  pnpm run build
+                  pm2 start flepourtous-preprod
