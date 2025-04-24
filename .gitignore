@@ -53,3 +53,6 @@ config.php
 
 #githubaction
 githubaction.yml
+
+#htaccess
+/backend/public/.htaccess
