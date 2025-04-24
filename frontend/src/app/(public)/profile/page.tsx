@@ -12,7 +12,7 @@ export default function ProfilePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user`);
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/userInformations`);
                 setDataUser(response.data.data);
                 if (response.data.message == "error") {
                     router.push("/connexion");

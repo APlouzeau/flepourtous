@@ -10,7 +10,6 @@
         "lint": "next lint"
     },
     "dependencies": {
-        "@clerk/nextjs": "^6.13.0",
         "@google-cloud/local-auth": "^2.1.0",
         "@radix-ui/react-slot": "^1.1.2",
         "axios": "^1.8.4",

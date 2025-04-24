@@ -14,10 +14,19 @@ export default function ConnexionPage() {
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         axios
-            .post(`${process.env.NEXT_PUBLIC_API_URL}/login`, {
-                mail,
-                password,
-            })
+            .post(
+                `${process.env.NEXT_PUBLIC_API_URL}/login`,
+                {
+                    mail,
+                    password,
+                },
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            )
             .then((response) => {
                 if (response.data.code == 1) {
                     document.cookie = "auth_verified=true; path=/; max-age=3600";

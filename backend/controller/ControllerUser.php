@@ -54,7 +54,8 @@ class ControllerUser
                 ];
                 $response = [
                     'code' => 1,
-                    'message' => 'Connexion réussie.'
+                    'message' => 'Connexion réussie.',
+                    'data' => $_SESSION
                 ];
             } else {
                 $response = [
@@ -62,8 +63,13 @@ class ControllerUser
                     'message' => 'Nom ou mot de passe incorrect.'
                 ];
             }
-            echo json_encode($response);
+        } else {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur de méthode'
+            ];
         }
+        echo json_encode($response);
     }
 
     public function logout()
@@ -80,8 +86,12 @@ class ControllerUser
 
     public function getUserInformations()
     {
+        exit();
         if (!isset($_SESSION['idUser']) || empty($_SESSION['idUser'])) {
-            $response['message'] = 'error';
+            $response = [
+                'code' => 0,
+                'message' => 'Utilisateur non connecté',
+            ];
         } else {
             $modelUser = new ModelUser();
             $user = new EntitieUser([
@@ -107,7 +117,7 @@ class ControllerUser
                 'code' => 0,
                 'message' => 'Erreur de méthode',
             ];
-        } else if (
+        } elseif (
             !isset($data['nickName']) ||
             !isset($data['firstName']) ||
             !isset($data['lastName']) ||
@@ -119,7 +129,7 @@ class ControllerUser
                 'code' => 0,
                 'message' => 'Erreur de paramètres',
             ];
-        } else if ($data['password'] != $data['passwordConfirm']) {
+        } elseif ($data['password'] != $data['passwordConfirm']) {
             $response = [
                 'code' => 0,
                 'message' => 'Les mots de passe ne correspondent pas',
@@ -133,11 +143,18 @@ class ControllerUser
                 'password' => $data['password'],
             ]);
             $userModel = new ModelUser();
-            $userModel->register($user);
-            $response = [
-                'code' => 1,
-                'message' => 'Inscription réussie',
-            ];
+            $register = $userModel->register($user);
+
+            !$register  ?
+                $response = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de l\'enregistrement en base de données',
+                ]
+                :
+                $response = [
+                    'code' => 1,
+                    'message' => 'Inscription réussie',
+                ];
         }
         echo json_encode($response);
     }
@@ -148,7 +165,6 @@ class ControllerUser
         // Ajouter les headers CORS pour permettre la communication entre domaines
 
 
-        $result = array("message" => "Hello from PHP!");
 
         $modelUser = new ModelUser();
         $users = $modelUser->getAllUsers();
@@ -170,9 +186,9 @@ class ControllerUser
         ];
         if (!$_SESSION) {
             $response['message'] = 'Utilisateur non connecté';
-        } else if (!$_POST['idUser']) {
+        } elseif (!$_POST['idUser']) {
             $response['message'] = 'Paramètre manquant';
-        } else if ($_SESSION['role'] != 'admin') {
+        } elseif ($_SESSION['role'] != 'admin') {
             $response['message'] = 'Utilisateur non autorisé';
         } else {
             $idUser = $_POST['idUser'];

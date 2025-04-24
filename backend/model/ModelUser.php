@@ -8,15 +8,17 @@ extends ClassDatabase
 
     public function register(EntitieUser $user)
     {
-        $query = "INSERT INTO users (nickName, firstName, lastName, mail, password) VALUES (:nickName, :firstName, :lastName, :mail, :password)";
+        $query = "INSERT INTO users (firstName, lastName, mail, nickName, password) VALUES (:firstName, :lastName, :mail, :nickName, :password)";
         $req = $this->conn->prepare($query);
-        $req->bindValue(":nickName", $user->getNickName());
         $req->bindValue(":firstName", $user->getFirstName());
         $req->bindValue(":lastName", $user->getLastName());
         $req->bindValue(":mail", $user->getMail());
+        $req->bindValue(":nickName", $user->getNickName());
         $req->bindValue(":password", $user->getPassword());
 
-        return $req->execute();
+        $req->execute();
+
+        return true;
     }
 
     public function getAllUsers()

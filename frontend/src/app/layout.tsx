@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "./components/front/Header";
 import Footer from "./components/front/Footer";
-import { ClerkProvider } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -22,14 +21,12 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <ClerkProvider>
-            <html lang="fr">
-                <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
-                    <Header />
-                    <main className="">{children}</main>
-                    <Footer />
-                </body>
-            </html>
-        </ClerkProvider>
+        <html lang="fr">
+            <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
+                <Header />
+                <main className="">{children}</main>
+                <Footer />
+            </body>
+        </html>
     );
 }

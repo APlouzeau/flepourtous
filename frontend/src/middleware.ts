@@ -4,13 +4,13 @@ const isProtectedRoute = ["/calendrier", "/profile"];
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const phpSession = request.cookies.get("PHPSESSID");
     const authStatus = request.cookies.get("auth_verified");
     if (isProtectedRoute.includes(pathname)) {
-        if (!phpSession || authStatus?.value !== "true") {
+        if (authStatus?.value !== "true") {
             return NextResponse.redirect(new URL("/connexion", request.url));
         }
     }
+
     return NextResponse.next();
 }
 export const config = {
