@@ -86,7 +86,6 @@ class ControllerUser
 
     public function getUserInformations()
     {
-        exit();
         if (!isset($_SESSION['idUser']) || empty($_SESSION['idUser'])) {
             $response = [
                 'code' => 0,
