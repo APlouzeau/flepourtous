@@ -1,25 +1,19 @@
 import type { Metadata } from "next";
-import { Roboto, Montserrat } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "./components/Header/Header";
-import Footer from "./components/Footer/Footer";
-
-const roboto = Roboto({
-    weight: ["100", "300", "400", "500", "700"], // ajoutez les weights dont vous avez besoin
-    subsets: ["latin"],
-    variable: "--font-roboto",
-});
-
-const montserrat = Montserrat({
-    weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
-    variable: "--font-montserrat",
-    subsets: ["latin"],
-});
+import Header from "./components/front/Header";
+import Footer from "./components/front/Footer";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
     title: "FLE pour tous",
     description: "Cours de français langue étrangère pour tous les niveaux",
 };
+
+const inter = Inter({
+    subsets: ["latin"],
+    variable: "--font-inter",
+});
 
 export default function RootLayout({
     children,
@@ -28,12 +22,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="fr">
-            <body
-                data-theme="synthwave"
-                className={`${montserrat.variable} ${roboto.variable} font-sans antialiased min-h-screen flex flex-col justify-between`}
-            >
+            <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
                 <Header />
-                <main className="min-">{children}</main>
+                <main className="">{children}</main>
                 <Footer />
             </body>
         </html>

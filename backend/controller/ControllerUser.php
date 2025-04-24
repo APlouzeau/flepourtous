@@ -1,100 +1,161 @@
 <?php
 
+
 class ControllerUser
 {
-    public function homePage()
+    public function verifyConnectBack()
     {
-        $titlePage = " : Accueil";
-        require_once APP_PATH . "/views/head.php";
-        require_once APP_PATH . "/views/header.php";
-        require_once APP_PATH . "/views/home.php";
-        require_once APP_PATH . "/views/footer.php";
+        if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
+            return true;
+        }
     }
-    public function loginPage()
+
+    public function verifyConnect()
     {
-        $titlePage = " : Connexion";
-        require_once APP_PATH . "/views/head.php";
-        require_once APP_PATH . "/views/header.php";
-        require_once APP_PATH . "/views/login.php";
-        require_once APP_PATH . "/views/footer.php";
+        if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
+            $response = [
+                'code' => 1,
+                'message' => 'Utilisateur connecté',
+            ];
+        } else {
+            $response = [
+                'code' => 0,
+                'message' => 'Utilisateur non connecté'
+            ];
+        }
+        echo json_encode($response);
     }
 
     public function login()
     {
-        $error = '';
 
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $pseudo = $_POST['pseudo'];
-            $password = $_POST['password'];
+            $mail = $data['mail'];
+            $password = $data['password'];
 
             $userModel = new ModelUser();
             $user = new EntitieUser([
-                'pseudo' => $pseudo,
+                'mail' => $mail,
                 'password' => $password
             ]);
+
+
             $userVerify = $userModel->login($user);
             if ($userVerify) {
-
                 $_SESSION = [
-                    'id_user' => $userVerify->getid_user(),
-                    'pseudo' => $userVerify->getPseudo(),
-                    'firstname' => $userVerify->getPseudo(),
-                    'email' => $userVerify->getMail(),
+                    'idUser' => $userVerify['idUser'],
+                    'nickName' => $userVerify['nickName'],
+                    'role' => $userVerify['role'],
+                    'mail' => $userVerify['mail'],
+                    'firstName' => $userVerify['firstName'],
+                    'lastName' => $userVerify['lastName'],
                 ];
-
-                $this->homePage();
+                $response = [
+                    'code' => 1,
+                    'message' => 'Connexion réussie.',
+                    'data' => $_SESSION
+                ];
             } else {
-                $error = "Nom ou mot de passe incorrect.";
-                require_once APP_PATH . "/views/login.php";
+                $response = [
+                    'code' => 0,
+                    'message' => 'Nom ou mot de passe incorrect.'
+                ];
             }
+        } else {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur de méthode'
+            ];
         }
+        echo json_encode($response);
     }
 
     public function logout()
     {
-        session_start();
         session_destroy();
-        header("Location: index.php");
-        exit();
-    }
-
-
-
-    public function profilPage()
-    {
-        $titlePage = "Coffee Forum : Profil";
-        $modelUser = new ModelUser();
-        $user = new EntitieUser([
-            'id_user' => $_SESSION['id_user']
+        $_SESSION = [];
+        echo json_encode([
+            'code' => 1,
+            'message' => 'Deconnexion réussie.'
         ]);
-        require_once APP_PATH . "/views/head.php";
-        require_once APP_PATH . "/views/header.php";
-        $userChecked = $modelUser->getUser($user);
-        require_once APP_PATH . "/views/profile.php";
-        require_once APP_PATH . "/views/footer.php";
     }
-    public function registerPage()
+
+
+
+    public function getUserInformations()
     {
-        $titlePage = "Ecoloquiz : Inscription";
-        require_once APP_PATH . "/views/head.php";
-        require_once APP_PATH . "/views/header.php";
-        require_once APP_PATH . "/views/register.php";
-        require_once APP_PATH . "/views/footer.php";
+        if (!isset($_SESSION['idUser']) || empty($_SESSION['idUser'])) {
+            $response = [
+                'code' => 0,
+                'message' => 'Utilisateur non connecté',
+            ];
+        } else {
+            $modelUser = new ModelUser();
+            $user = new EntitieUser([
+                'idUser' => $_SESSION['idUser']
+            ]);
+            $response = [
+                'code' => 1,
+                'message' => 'Utilisateur trouvé',
+                'data' =>
+                $modelUser->getUser($user)
+
+            ];
+        }
+        echo json_encode($response);
     }
 
     public function register()
     {
-        if (isset($_POST['pseudo']) and !empty($_POST['password'])) {
-            $pseudo = htmlspecialchars($_POST['pseudo']);
-            $mdp = sha1($_POST['password']);
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+        if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur de méthode',
+            ];
+        } elseif (
+            !isset($data['nickName']) ||
+            !isset($data['firstName']) ||
+            !isset($data['lastName']) ||
+            !isset($data['mail']) ||
+            !isset($data['password']) ||
+            !isset($data['passwordConfirm'])
+        ) {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur de paramètres',
+            ];
+        } elseif ($data['password'] != $data['passwordConfirm']) {
+            $response = [
+                'code' => 0,
+                'message' => 'Les mots de passe ne correspondent pas',
+            ];
+        } else {
             $user = new EntitieUser([
-                "pseudo" => $pseudo,
-                "password" => $mdp
+                'nickName' => $data['nickName'],
+                'firstName' => $data['firstName'],
+                'lastName' => $data['lastName'],
+                'mail' => $data['mail'],
+                'password' => $data['password'],
             ]);
             $userModel = new ModelUser();
-            $userModel->register($user);
-            header("Location: " . BASE_URL . "login");
+            $register = $userModel->register($user);
+
+            !$register  ?
+                $response = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de l\'enregistrement en base de données',
+                ]
+                :
+                $response = [
+                    'code' => 1,
+                    'message' => 'Inscription réussie',
+                ];
         }
+        echo json_encode($response);
     }
 
 
@@ -103,7 +164,6 @@ class ControllerUser
         // Ajouter les headers CORS pour permettre la communication entre domaines
 
 
-        $result = array("message" => "Hello from PHP!");
 
         $modelUser = new ModelUser();
         $users = $modelUser->getAllUsers();
@@ -119,28 +179,28 @@ class ControllerUser
     public function deleteUser()
     {
         $response = [
-            'errno' => 1,
-            'errmsg' => 'Erreur inconnue',
+            'code' => 1,
+            'message' => 'Erreur inconnue',
             'data' => []
         ];
         if (!$_SESSION) {
-            $response['errmsg'] = 'Utilisateur non connecté';
-        } else if (!$_POST['id_user']) {
-            $response['errmsg'] = 'Paramêtre manquant';
-        } else if ($_SESSION['role'] != 'admin') {
-            $response['errmsg'] = 'Utilisateur non autorisé';
+            $response['message'] = 'Utilisateur non connecté';
+        } elseif (!$_POST['idUser']) {
+            $response['message'] = 'Paramètre manquant';
+        } elseif ($_SESSION['role'] != 'admin') {
+            $response['message'] = 'Utilisateur non autorisé';
         } else {
-            $id_user = $_POST['id_user'];
+            $idUser = $_POST['idUser'];
             $modelUser = new ModelUser();
             $user = new EntitieUser([
-                'id_user' => $id_user
+                'idUser' => $idUser
             ]);
             $modelUser->deleteUser($user);
             $response = [
-                'errno' => 0,
-                'errmsg' => 'Utilisateur supprimé',
+                'code' => 0,
+                'message' => 'Utilisateur supprimé',
                 'data' => [
-                    'id_user' => $id_user
+                    'idUser' => $idUser
                 ]
             ];
         }

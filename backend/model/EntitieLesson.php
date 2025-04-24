@@ -2,11 +2,12 @@
 
 class EntitieLesson
 {
-    private int $id;
+    private int $idLesson;
     private string $title;
     private string $shortDescription;
     private string $fullDescription;
     private ?string $imagePath;
+    private int $slug;
 
     public function __construct(array $data)
     {
@@ -26,9 +27,9 @@ class EntitieLesson
     /**
      * Get the value of id
      */
-    public function getId()
+    public function getIdLesson()
     {
-        return $this->id;
+        return $this->idLesson;
     }
 
     /**
@@ -36,9 +37,9 @@ class EntitieLesson
      *
      * @return  self
      */
-    public function setId($id)
+    public function setIdLesson($idLesson)
     {
-        $this->id = $id;
+        $this->idLesson = $idLesson;
 
         return $this;
     }
@@ -119,6 +120,25 @@ class EntitieLesson
     public function setImagePath($imagePath)
     {
         $this->imagePath = $imagePath;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of slug
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+    /**
+     * Set the value of slug
+     *
+     * @return  self
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
 
         return $this;
     }

@@ -5,5 +5,4 @@
         <button type="submit" name="login">Connexion</button>
     </form>
     <a href="<?= BASE_URL . "register" ?>"><button>Vous n'avez pas de compte? Inscrivez-vous ici</button></a>
-    coucou
 </div>

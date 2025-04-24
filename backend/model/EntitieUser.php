@@ -2,13 +2,16 @@
 
 class EntitieUser
 {
-    private int $id_user;
-    private string $pseudo;
-    private string $mail;
-    private string $password;
-    private string $date_inscription;
-    private string $score;
+    private int $idUser;
+    private string $firstName;
+    private string $lastName;
     private string $role;
+    private string $mail;
+    private string $nickName;
+    private string $password;
+    private string $adress;
+    private string $country;
+    private string $dateInscription;
 
     // Constructeur pour hydrater les données à partir d'un tableau
     public function __construct(array $data)
@@ -27,142 +30,107 @@ class EntitieUser
         }
     }
 
-    /**
-     * Get the value of id_user
-     */
-    public function getId_user()
+    public function getIdUser()
     {
-        return $this->id_user;
+        return $this->idUser;
     }
 
-    /**
-     * Set the value of id_user
-     *
-     * @return  self
-     */
-    public function setId_user($id_user)
+    public function setIdUser($idUser)
     {
-        $this->id_user = $id_user;
+        $this->idUser = $idUser;
 
         return $this;
     }
 
-    /**
-     * Get the value of pseudo
-     */
-    public function getPseudo()
+    public function getFirstName()
     {
-        return $this->pseudo;
+        return $this->firstName;
     }
 
-    /**
-     * Set the value of pseudo
-     *
-     * @return  self
-     */
-    public function setPseudo($pseudo)
+    public function setFirstName($firstName)
     {
-        $this->pseudo = $pseudo;
+        $this->firstName = $firstName;
 
         return $this;
     }
 
-    /**
-     * Get the value of mail
-     */
+    public function getLastName()
+    {
+        return $this->lastName;
+    }
+    public function setLastName($lastName)
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+    public function getRole()
+    {
+        return $this->role;
+    }
+    public function setRole($role)
+    {
+        $this->role = $role;
+
+        return $this;
+    }
     public function getMail()
     {
         return $this->mail;
     }
-
-    /**
-     * Set the value of mail
-     *
-     * @return  self
-     */
     public function setMail($mail)
     {
         $this->mail = $mail;
 
         return $this;
     }
+    public function getNickName()
+    {
+        return $this->nickName;
+    }
+    public function setNickName($nickName)
+    {
+        $this->nickName = $nickName;
 
-    /**
-     * Get the value of password
-     */
+        return $this;
+    }
     public function getPassword()
     {
         return $this->password;
     }
-
-    /**
-     * Set the value of password
-     *
-     * @return  self
-     */
     public function setPassword($password)
     {
         $this->password = $password;
 
         return $this;
     }
-
-    /**
-     * Get the value of date_inscription
-     */
-    public function getDate_inscription()
+    public function getAdress()
     {
-        return $this->date_inscription;
+        return $this->adress;
     }
-
-    /**
-     * Set the value of date_inscription
-     *
-     * @return  self
-     */
-    public function setDate_inscription($date_inscription)
+    public function setAdress($adress)
     {
-        $this->date_inscription = $date_inscription;
+        $this->adress = $adress;
 
         return $this;
     }
-
-    /**
-     * Get the value of score
-     */
-    public function getScore()
+    public function getCountry()
     {
-        return $this->score;
+        return $this->country;
     }
-
-    /**
-     * Set the value of score
-     *
-     * @return  self
-     */
-    public function setScore($score)
+    public function setCountry($country)
     {
-        $this->score = $score;
+        $this->country = $country;
 
         return $this;
     }
-
-    /**
-     * Get the value of role
-     */
-    public function getRole()
+    public function getDateInscription()
     {
-        return $this->role;
+        return $this->dateInscription;
     }
-
-    /**
-     * Set the value of role
-     *
-     * @return  self
-     */
-    public function setRole($role)
+    public function setDateInscription($dateInscription)
     {
-        $this->role = $role;
+        $this->dateInscription = $dateInscription;
 
         return $this;
     }
