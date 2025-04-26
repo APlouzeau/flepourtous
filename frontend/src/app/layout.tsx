@@ -23,9 +23,9 @@ export default function RootLayout({
     return (
         <html lang="fr">
             <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
-                <Header />
+                {/* <Header /> */}
                 <main className="">{children}</main>
-                <Footer />
+                {/* <Footer /> */}
             </body>
         </html>
     );

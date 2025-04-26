@@ -10,15 +10,46 @@ export default function Header() {
     const { isLoggedIn, setIsLoggedIn } = useLoginStore();
     const router = useRouter();
 
+    useEffect(() => {}, [isOpen]);
+
     useEffect(() => {
         const checkLoginStatus = async () => {
             try {
                 await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`).then((response) => {
                     if (response.data.message == "Utilisateur connecté") {
                         setIsLoggedIn(true);
-                    } else {
-                        setIsLoggedIn(false);
-                    }
+                    } else {    useEffect(() => {
+                        const checkLoginStatus = async () => {
+                            try {
+                                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`).then((response) => {
+                                    if (response.data.message == "Utilisateur connecté") {
+                                        setIsLoggedIn(true);
+                                    } else {
+                                        setIsLoggedIn(false);
+                                    }
+                                });
+                            } catch (error) {
+                                console.error("Erreur lors de la vérification de la connexion :", error);
+                            }
+                        };
+                        checkLoginStatus();
+                    }, [setIsLoggedIn]);
+                    }    useEffect(() => {
+                        const checkLoginStatus = async () => {
+                            try {
+                                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`).then((response) => {
+                                    if (response.data.message == "Utilisateur connecté") {
+                                        setIsLoggedIn(true);
+                                    } else {
+                                        setIsLoggedIn(false);
+                                    }
+                                });
+                            } catch (error) {
+                                console.error("Erreur lors de la vérification de la connexion :", error);
+                            }
+                        };
+                        checkLoginStatus();
+                    }, [setIsLoggedIn]);
                 });
             } catch (error) {
                 console.error("Erreur lors de la vérification de la connexion :", error);
