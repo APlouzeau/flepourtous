@@ -3,13 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 const isProtectedRoute = ["/calendrier", "/profile"];
 
 export function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-    const authStatus = request.cookies.get("auth_verified");
+    /*     const { pathname } = request.nextUrl;
+    const authStatus = request.cookies.get("PHPSESSID");
     if (isProtectedRoute.includes(pathname)) {
         if (authStatus?.value !== "true") {
             return NextResponse.redirect(new URL("/connexion", request.url));
         }
-    }
+    } */
 
     return NextResponse.next();
 }
