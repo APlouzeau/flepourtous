@@ -1,4 +1,4 @@
-export interface userDataProps {
+export interface UserDataProps {
     idUser: number;
     nickName: string;
     firstName: string;
@@ -6,3 +6,7 @@ export interface userDataProps {
     lastName: string;
     role: string;
 }
+
+export type UserConnectProps = {
+    userConnect: boolean;
+};

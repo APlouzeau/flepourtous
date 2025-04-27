@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 
 export default async function ProfilePage() {
     const cookie = (await cookies()).get("PHPSESSID");
+    console.log("ProfilePage cookie", cookie);
     const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/userInformations`,
         {},

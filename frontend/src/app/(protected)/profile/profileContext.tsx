@@ -1,12 +1,12 @@
 "use client";
 
-import { userDataProps } from "@/app/types/userData";
+import { UserDataProps } from "@/app/types/userData";
 import { createContext, Dispatch, SetStateAction, ReactNode, useState } from "react";
 
 // Context
 export type ContextType = {
-    dataUser: userDataProps | null;
-    setDataUser: Dispatch<SetStateAction<userDataProps | null>>;
+    dataUser: UserDataProps | null;
+    setDataUser: Dispatch<SetStateAction<UserDataProps | null>>;
 };
 
 export const Context = createContext<ContextType>({} as ContextType);
@@ -14,7 +14,7 @@ export const Context = createContext<ContextType>({} as ContextType);
 // Provider
 type ProviderProps = {
     children: ReactNode;
-    initialUser?: userDataProps | null;
+    initialUser?: UserDataProps | null;
 };
 
 export default function Provider({ children, initialUser = null }: ProviderProps) {
