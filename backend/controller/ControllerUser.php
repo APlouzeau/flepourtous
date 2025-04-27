@@ -12,6 +12,7 @@ class ControllerUser
 
     public function verifyConnect()
     {
+        //var_dump(getallheaders());
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             $response = [
                 'code' => 1,
@@ -44,14 +45,12 @@ class ControllerUser
 
             $userVerify = $userModel->login($user);
             if ($userVerify) {
-                $_SESSION = [
-                    'idUser' => $userVerify['idUser'],
-                    'nickName' => $userVerify['nickName'],
-                    'role' => $userVerify['role'],
-                    'mail' => $userVerify['mail'],
-                    'firstName' => $userVerify['firstName'],
-                    'lastName' => $userVerify['lastName'],
-                ];
+                $_SESSION['idUser'] = $userVerify['idUser'];
+                $_SESSION['nickName'] = $userVerify['nickName'];
+                $_SESSION['role'] = $userVerify['role'];
+                $_SESSION['mail'] = $userVerify['mail'];
+                $_SESSION['firstName'] = $userVerify['firstName'];
+                $_SESSION['lastName'] = $userVerify['lastName'];
                 $response = [
                     'code' => 1,
                     'message' => 'Connexion réussie.',
@@ -74,8 +73,9 @@ class ControllerUser
 
     public function logout()
     {
+        $_SESSION = null;
+        setcookie(session_name(), "",  0, "/");
         session_destroy();
-        $_SESSION = [];
         echo json_encode([
             'code' => 1,
             'message' => 'Deconnexion réussie.'

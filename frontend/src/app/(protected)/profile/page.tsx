@@ -1,53 +1,28 @@
-"use client";
-import { userDataProps } from "@/app/types/userData";
+import Provider from "./profileContext";
+import DisplayUserProfile from "./display";
 import axios from "axios";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { cookies } from "next/headers";
 
-export default function ProfilePage() {
-    const [dataUser, setDataUser] = useState<userDataProps | null>(null);
-    const [loading, setLoading] = useState(true);
-    const router = useRouter();
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/userInformations`);
-                setDataUser(response.data.data);
-                if (response.data.message == "error") {
-                    router.push("/connexion");
-                }
-            } catch (error) {
-                console.error("Erreur lors de la récupération des données :", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [router]);
-
-    useEffect(() => {
-        // Rediriger seulement quand le chargement est terminé et les données sont nulles
-        if (!loading && dataUser === null) {
-            router.push("/connexion");
+export default async function ProfilePage() {
+    const cookie = (await cookies()).get("PHPSESSID");
+    console.log("cookie", cookie);
+    const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/userInformations`,
+        {},
+        {
+            headers: {
+                Cookie: `PHPSESSID=${cookie?.value}`,
+                "Content-Type": "application/json",
+            },
+            withCredentials: true,
         }
-    }, [loading, dataUser, router]);
+    );
+    const userData = res.data.data;
+    console.log("ProfilePage UserData", userData);
 
     return (
-        <>
-            <h2 className="mt-12 text-5xl font-bold text-center">Profil</h2>
-            <p>Bienvenue sur votre profil !</p>
-            <p>Voici vos informations :</p>
-            {dataUser && (
-                <>
-                    <p>ID : {dataUser.idUser}</p>
-                    <p>Mail : {dataUser.mail}</p>
-                    <p>Prénom : {dataUser.firstName}</p>
-                    <p>Nom : {dataUser.lastName}</p>
-                    <p>Rôle : {dataUser.role}</p>
-                </>
-            )}
-            <p>Vous êtes connecté !</p>
-        </>
+        <Provider initialUser={userData}>
+            <DisplayUserProfile />
+        </Provider>
     );
 }
