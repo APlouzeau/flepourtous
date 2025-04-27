@@ -24,5 +24,8 @@ export default async function ProfilePage() {
         <Provider initialUser={userData}>
             <DisplayUserProfile />
         </Provider>
+        <Provider initialUser={userData}>
+            <DisplayUserProfile />
+        </Provider>
     );
 }
