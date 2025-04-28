@@ -2,26 +2,22 @@
 import axios from "axios";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { useLoginStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
-import { checkLoginStatus } from "@/utils/session";
 
-export default function Header() {
+type HeaderProps = {
+    user: boolean;
+};
+
+export default function Header({ user }: HeaderProps) {
     const [isOpen, setIsOpen] = useState(false);
-    const { isLoggedIn, setIsLoggedIn } = useLoginStore();
     const router = useRouter();
 
     useEffect(() => {}, [isOpen]);
-
-    useEffect(() => {
-        checkLoginStatus();
-    }, [setIsLoggedIn]);
 
     const handleLogout = async () => {
         try {
             const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/logout`);
             if (response.data.message == "Deconnexion réussie.") {
-                setIsLoggedIn(false);
                 document.cookie = "auth_verified=false; path=/; max-age=0";
                 router.push("/");
             } else {
@@ -99,7 +95,7 @@ export default function Header() {
                         </Link>
                     </li>
                     <li className="hidden md:flex items-center justify-center text-purple-700 text-4xl">|</li>
-                    {isLoggedIn ? (
+                    {user ? (
                         <>
                             <li className="flex-1 py-2 md:py-4">
                                 <Link

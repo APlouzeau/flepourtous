@@ -1,14 +1,12 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
-import { useLoginStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function ConnexionPage() {
     const [mail, setMail] = useState("");
     const [password, setPassword] = useState("");
-    const { setIsLoggedIn } = useLoginStore();
     const router = useRouter();
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -29,7 +27,7 @@ export default function ConnexionPage() {
             )
             .then((response) => {
                 if (response.data.code == 1) {
-                    setIsLoggedIn(true);
+                    document.cookie = `session = ${response.data} ; path=/; max-age=3600`; // 1 hour
                     router.push("/profile");
                 } else {
                     console.error("Erreur lors de la connexion :", response.data.message);
