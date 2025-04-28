@@ -1,12 +1,14 @@
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 const isProtectedRoute = ["/calendrier", "/profile"];
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const authStatus = request.cookies.get("auth_verified");
+    const authStatus = (await cookies()).get("PHPSESSID");
+    console.log("Auth status:", authStatus);
     if (isProtectedRoute.includes(pathname)) {
-        if (authStatus?.value !== "true") {
+        if (!authStatus?.value) {
             return NextResponse.redirect(new URL("/connexion", request.url));
         }
     }

@@ -29,11 +29,9 @@ export default function ConnexionPage() {
             )
             .then((response) => {
                 if (response.data.code == 1) {
-                    document.cookie = "auth_verified=true; path=/; max-age=3600";
                     setIsLoggedIn(true);
                     router.push("/profile");
                 } else {
-                    document.cookie = "auth_verified=false; path=/; max-age=0";
                     console.error("Erreur lors de la connexion :", response.data.message);
                 }
             })

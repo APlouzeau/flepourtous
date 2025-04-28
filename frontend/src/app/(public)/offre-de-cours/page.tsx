@@ -5,6 +5,7 @@ import axios from "axios";
 export default async function OfferPage() {
     const response = await axios.get(`${process.env.API_URL}/lessons`);
     const lessons: LessonProps[] = await response.data;
+
     return (
         <>
             <h2 className="mt-12 text-5xl font-bold text-center">Offre de cours</h2>

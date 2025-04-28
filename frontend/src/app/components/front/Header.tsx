@@ -4,6 +4,7 @@ import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { useLoginStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
+import { checkLoginStatus } from "@/utils/session";
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
@@ -13,48 +14,6 @@ export default function Header() {
     useEffect(() => {}, [isOpen]);
 
     useEffect(() => {
-        const checkLoginStatus = async () => {
-            try {
-                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`).then((response) => {
-                    if (response.data.message == "Utilisateur connecté") {
-                        setIsLoggedIn(true);
-                    } else {    useEffect(() => {
-                        const checkLoginStatus = async () => {
-                            try {
-                                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`).then((response) => {
-                                    if (response.data.message == "Utilisateur connecté") {
-                                        setIsLoggedIn(true);
-                                    } else {
-                                        setIsLoggedIn(false);
-                                    }
-                                });
-                            } catch (error) {
-                                console.error("Erreur lors de la vérification de la connexion :", error);
-                            }
-                        };
-                        checkLoginStatus();
-                    }, [setIsLoggedIn]);
-                    }    useEffect(() => {
-                        const checkLoginStatus = async () => {
-                            try {
-                                await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`).then((response) => {
-                                    if (response.data.message == "Utilisateur connecté") {
-                                        setIsLoggedIn(true);
-                                    } else {
-                                        setIsLoggedIn(false);
-                                    }
-                                });
-                            } catch (error) {
-                                console.error("Erreur lors de la vérification de la connexion :", error);
-                            }
-                        };
-                        checkLoginStatus();
-                    }, [setIsLoggedIn]);
-                });
-            } catch (error) {
-                console.error("Erreur lors de la vérification de la connexion :", error);
-            }
-        };
         checkLoginStatus();
     }, [setIsLoggedIn]);
 
