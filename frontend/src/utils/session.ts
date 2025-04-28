@@ -1,27 +1,23 @@
-import axios from "axios";
 import { cookies } from "next/headers";
+import axios from "axios";
 
-export const checkLoginStatus = async () => {
+export async function checkLoginStatus() {
+    const cookie = (await cookies()).get("PHPSESSID");
+    if (!cookie) return null;
     try {
-        const cookie = (await cookies()).get("PHPSESSID");
-        const response = await axios.post(
+        const res = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`,
             {},
             {
-                headers: {
-                    Cookie: `PHPSESSID=${cookie?.value}`,
-                    "Content-Type": "application/json",
-                },
+                headers: { Cookie: `PHPSESSID=${cookie.value}` },
                 withCredentials: true,
             }
         );
-        if (response.data.message == "Utilisateur connecté") {
-            return true;
-        } else {
-            return false;
+        if (res.data.code === 1) {
+            return res.data.data; // ou ce que tu veux afficher dans Header
         }
-    } catch (error) {
-        console.error("Erreur lors de la vérification de la connexion :", error);
-        return false;
+        return null;
+    } catch {
+        return null;
     }
-};
+}
