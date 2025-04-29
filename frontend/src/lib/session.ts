@@ -1,21 +1,20 @@
 "use server";
-import { NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import axios from "axios";
 import { redirect } from "next/navigation";
 
-export async function createSession(request: NextRequest) {
+export async function createSession(cookieValue: string) {
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const session = request.cookies?.get("PHPSESSID")?.value;
-    console.log("getSession :", session);
+
+    console.log("getSession :", cookieValue);
 
     const cookieStore = await cookies();
 
-    if (!session) {
+    if (!cookieValue) {
         console.log("No session found");
         return null;
     }
-    cookieStore.set("session", session, {
+    cookieStore.set("session", cookieValue, {
         httpOnly: true,
         secure: true,
         expires: expiresAt,

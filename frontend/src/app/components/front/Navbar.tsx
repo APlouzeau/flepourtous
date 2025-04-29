@@ -51,7 +51,7 @@ export default async function Navbar() {
                     <>
                         <li className="flex-1 py-2 md:py-4">
                             <Link
-                                href="/profile"
+                                href="/profil"
                                 className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2"
                             >
                                 Profil

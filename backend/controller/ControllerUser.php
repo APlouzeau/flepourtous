@@ -12,7 +12,6 @@ class ControllerUser
 
     public function verifyConnect()
     {
-        //var_dump(getallheaders());
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             $response = [
                 'code' => 1,
@@ -73,9 +72,9 @@ class ControllerUser
 
     public function logout()
     {
-        $_SESSION = null;
-        setcookie(session_name(), "",  0, "/");
+        session_unset();
         session_destroy();
+        setcookie(session_name(), "", time() - 3600, "/");
         echo json_encode([
             'code' => 1,
             'message' => 'Deconnexion réussie.'

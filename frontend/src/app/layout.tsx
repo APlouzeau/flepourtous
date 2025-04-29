@@ -4,7 +4,6 @@ import "./globals.css";
 import Header from "./components/front/Header";
 import Footer from "./components/front/Footer";
 import { cn } from "@/lib/utils";
-import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = {
     title: "FLE pour tous",
@@ -15,9 +14,6 @@ const inter = Inter({
     subsets: ["latin"],
     variable: "--font-inter",
 });
-
-/* const session = await getSession();
-console.log("layout cookie : ", session.get("session")?.value); */
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
     return (

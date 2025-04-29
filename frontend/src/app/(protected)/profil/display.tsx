@@ -3,7 +3,7 @@
 import { useContext } from "react";
 import { Context } from "./profileContext";
 
-export default function DisplayUserProfile() {
+export default function DisplayUserprofil() {
     const { dataUser } = useContext(Context);
 
     return (

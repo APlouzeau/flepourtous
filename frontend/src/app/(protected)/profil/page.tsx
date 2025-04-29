@@ -1,9 +1,9 @@
 import Provider from "./profileContext";
-import DisplayUserProfile from "./display";
+import DisplayUserprofil from "./display";
 import axios from "axios";
 import { cookies } from "next/headers";
 
-export default async function ProfilePage() {
+export default async function profilPage() {
     const cookie = (await cookies()).get("PHPSESSID");
     const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/userInformations`,
@@ -17,11 +17,11 @@ export default async function ProfilePage() {
         }
     );
     const userData = res.data.data;
-    console.log("ProfilePage UserData", userData);
+    console.log("profilPage UserData", userData);
 
     return (
         <Provider initialUser={userData}>
-            <DisplayUserProfile />
+            <DisplayUserprofil />
         </Provider>
     );
 }

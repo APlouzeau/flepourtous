@@ -1,10 +1,11 @@
+import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-const isProtectedRoute = ["/calendrier", "/profile"];
+const isProtectedRoute = ["/calendrier", "/profil"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const authStatus = request.cookies.get("PHPSESSID")?.value;
+    const authStatus = (await cookies()).get("session")?.value;
     console.log("Auth status:", authStatus);
     if (isProtectedRoute.includes(pathname)) {
         if (!authStatus) {
