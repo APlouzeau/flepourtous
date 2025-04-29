@@ -2,10 +2,14 @@
 import { cookies } from "next/headers";
 import axios from "axios";
 import { redirect } from "next/navigation";
+import { SignJWT, jwtVerify } from "jose";
 
 export async function createSession(cookieValue: string) {
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
+    const jwt = await new SignJWT({ cookieValue })
+        .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt()
+        .setExpirationTime("1h")
+        .sign(new TextEncoder().encode(process.env.JWT_SECRET));
     console.log("getSession :", cookieValue);
 
     const cookieStore = await cookies();
@@ -14,14 +18,19 @@ export async function createSession(cookieValue: string) {
         console.log("No session found");
         return null;
     }
-    cookieStore.set("session", cookieValue, {
+    cookieStore.set("session", jwt, {
         httpOnly: true,
         secure: true,
-        expires: expiresAt,
         sameSite: "lax",
         path: "/",
+        expires: new Date(Date.now() + 1 * 60 * 60 * 1000),
     });
     return cookieStore.get("session");
+}
+
+export async function verifyToken(jwt: string) {
+    const { payload } = await jwtVerify(jwt, new TextEncoder().encode(process.env.JWT_SECRET));
+    return payload;
 }
 
 export async function getSession() {
