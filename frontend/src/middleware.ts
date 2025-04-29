@@ -4,10 +4,10 @@ const isProtectedRoute = ["/calendrier", "/profile"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const authStatus = request.cookies.get("PHPSESSID");
+    const authStatus = request.cookies.get("PHPSESSID")?.value;
     console.log("Auth status:", authStatus);
     if (isProtectedRoute.includes(pathname)) {
-        if (!authStatus?.value) {
+        if (!authStatus) {
             return NextResponse.redirect(new URL("/connexion", request.url));
         }
     }

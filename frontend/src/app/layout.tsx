@@ -4,7 +4,7 @@ import "./globals.css";
 import Header from "./components/front/Header";
 import Footer from "./components/front/Footer";
 import { cn } from "@/lib/utils";
-import { checkLoginStatus } from "@/utils/session";
+import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = {
     title: "FLE pour tous",
@@ -16,12 +16,14 @@ const inter = Inter({
     variable: "--font-inter",
 });
 
+/* const session = await getSession();
+console.log("layout cookie : ", session.get("session")?.value); */
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-    const user = await checkLoginStatus();
     return (
         <html lang="fr">
             <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
-                {<Header user={user} />}
+                {<Header />}
                 <main className="">{children}</main>
                 {<Footer />}
             </body>
