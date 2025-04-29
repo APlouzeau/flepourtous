@@ -15,11 +15,7 @@ const inter = Inter({
     variable: "--font-inter",
 });
 
-export default function RootLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="fr">
             <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>

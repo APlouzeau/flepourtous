@@ -1,5 +1,6 @@
 <?php
 /* if (session_status() === PHP_SESSION_NONE) { */
+
 session_start();
 /* } */
 header("Access-Control-Allow-Origin: http://localhost:3000");

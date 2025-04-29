@@ -1,20 +1,21 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-const isProtectedRoute = ["/calendrier", "/profile"];
+const isProtectedRoute = ["/calendrier", "/profil"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const authStatus = (await cookies()).get("PHPSESSID");
+    const authStatus = (await cookies()).get("session")?.value;
     console.log("Auth status:", authStatus);
     if (isProtectedRoute.includes(pathname)) {
-        if (!authStatus?.value) {
+        if (!authStatus) {
             return NextResponse.redirect(new URL("/connexion", request.url));
         }
     }
 
     return NextResponse.next();
 }
+
 export const config = {
     matcher: [
         // Skip Next.js internals and all static files, unless found in search params
