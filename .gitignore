@@ -54,3 +54,9 @@ config.php
 #githubaction
 githubaction.yml
 
+#google
+/backend/config/credentials.json
+/backend/config/service-account-key.json
+/backend/vendor/
+/backend/config/client_*
+/backend/config/flepourtous-*
