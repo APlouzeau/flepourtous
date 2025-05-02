@@ -6,15 +6,18 @@ const isProtectedRoute = ["/calendrier", "/profil"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    console.log("Auth status:", verifyToken);
     if (isProtectedRoute.includes(pathname)) {
         const authStatus = (await cookies()).get("session")?.value;
-        if (!authStatus && authStatus !== undefined) {
+        if (!authStatus) {
+            return NextResponse.redirect(new URL("/connexion", request.url));
+        }
+
+        try {
             const verifiedToken = await verifyToken(authStatus);
             if (!verifiedToken) {
-                console.log("Token is invalid or expired");
                 return NextResponse.redirect(new URL("/connexion", request.url));
             }
+        } catch {
             return NextResponse.redirect(new URL("/connexion", request.url));
         }
     }
