@@ -1,14 +1,23 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { verifyToken } from "./lib/session";
 
 const isProtectedRoute = ["/calendrier", "/profil"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const authStatus = (await cookies()).get("session")?.value;
-    console.log("Auth status:", authStatus);
     if (isProtectedRoute.includes(pathname)) {
+        const authStatus = (await cookies()).get("session")?.value;
         if (!authStatus) {
+            return NextResponse.redirect(new URL("/connexion", request.url));
+        }
+
+        try {
+            const verifiedToken = await verifyToken(authStatus);
+            if (!verifiedToken) {
+                return NextResponse.redirect(new URL("/connexion", request.url));
+            }
+        } catch {
             return NextResponse.redirect(new URL("/connexion", request.url));
         }
     }
