@@ -1,6 +1,9 @@
 <?php
 
 require_once APP_PATH . 'vendor/autoload.php';
+
+
+
 if (!class_exists('Google_Service_Calendar')) {
     die('ERREUR : La classe Google_Service_Calendar n\'a pas été trouvée par l\'autoloader.');
 }
@@ -57,27 +60,27 @@ class ControllerCalendar
         // Récupérer les données du POST (envoyées depuis le frontend)
         $postData = json_decode(file_get_contents('php://input'), true);
 
-        if (!$postData || !isset($postData['summary']) || !isset($postData['start']) || !isset($postData['end'])) {
+        /*         if (!$postData || !isset($postData['summary']) || !isset($postData['start']) || !isset($postData['end'])) {
             http_response_code(400); // Bad Request
             header('Content-Type: application/json');
             echo json_encode(['error' => 'Données manquantes pour créer l\'événement (summary, start, end requis).']);
             return;
-        }
+        } */
 
         try {
             $client = $this->getClient();
             $service = new Google_Service_Calendar($client);
-            $calendarId = 'primary'; // Ou l'ID de ton calendrier partagé
+            $calendarId = 'ef7995ba9623e0baa51a0050ba9c48ab6a191193f402b024ddcf27864434b807@group.calendar.google.com'; // Ou l'ID de ton calendrier partagé
 
             $event = new Google_Service_Calendar_Event([
-                'summary' => $postData['summary'], // Ex: 'RDV avec ' . $postData['userName']
-                'description' => $postData['description'] ?? '', // Description optionnelle
+                'summary' => 'test via api', // Ex: 'RDV avec ' . $postData['userName']
+                'description' => 'description' ?? '', // Description optionnelle
                 'start' => [
-                    'dateTime' => $postData['start'], // Format RFC3339 : '2025-05-03T10:00:00+02:00'
+                    'dateTime' => '2025-05-03T11:00:00+02:00', // Format RFC3339 : '2025-05-03T10:00:00+02:00'
                     'timeZone' => 'Europe/Paris', // Adapte à ton fuseau horaire
                 ],
                 'end' => [
-                    'dateTime' => $postData['end'], // Format RFC3339 : '2025-05-03T11:00:00+02:00'
+                    'dateTime' => '2025-05-03T11:20:00+02:00', // Format RFC3339 : '2025-05-03T11:00:00+02:00'
                     'timeZone' => 'Europe/Paris', // Adapte à ton fuseau horaire
                 ],
                 // Tu peux ajouter des participants ici si tu veux inviter l'utilisateur par email
