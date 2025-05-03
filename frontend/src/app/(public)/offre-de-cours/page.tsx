@@ -3,7 +3,7 @@ import type { LessonProps } from "@/app/types/lessons";
 import axios from "axios";
 
 export default async function OfferPage() {
-    const response = await axios.get(`${process.env.API_URL}/lessons`);
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/lessons`);
     const lessons: LessonProps[] = await response.data;
 
     return (

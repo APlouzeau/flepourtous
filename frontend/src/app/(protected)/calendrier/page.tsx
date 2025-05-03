@@ -25,7 +25,7 @@ export default function CalendarPage() {
             </div>
             <Button asChild>
                 <Link
-                    href="/calendrier/ajouter-rendez-vous"
+                    href="/calendrier/nouveau-rendez-vous"
                     className="bg-blue-500 text-white hover:bg-blue-700 font-bold py-2 px-4 rounded"
                 >
                     Nouveau RDV

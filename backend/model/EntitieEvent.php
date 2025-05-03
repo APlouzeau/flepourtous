@@ -3,13 +3,14 @@
 class EntitieEvent
 {
     private int $idEvent;
-    private string $name;
+    private string $userId;
     private string $description;
-    private int $duration;
-    private string $isActive;
+    private string $duration;
     private string $createdAt;
+    private string $startDateTime;
     private string $updatedAt;
-    private int $userId;
+    private string $status;
+    private int $roomLink;
 
     public function __construct(array $data)
     {
@@ -36,16 +37,7 @@ class EntitieEvent
 
         return $this;
     }
-    public function getName()
-    {
-        return $this->name;
-    }
-    public function setName($name)
-    {
-        $this->name = $name;
 
-        return $this;
-    }
     public function getDescription()
     {
         return $this->description;
@@ -66,16 +58,7 @@ class EntitieEvent
 
         return $this;
     }
-    public function getIsActive()
-    {
-        return $this->isActive;
-    }
-    public function setIsActive($isActive)
-    {
-        $this->isActive = $isActive;
 
-        return $this;
-    }
     public function getCreatedAt()
     {
         return $this->createdAt;
@@ -103,6 +86,66 @@ class EntitieEvent
     public function setUserId($userId)
     {
         $this->userId = $userId;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of startDateTime
+     */
+    public function getStartDateTime()
+    {
+        return $this->startDateTime;
+    }
+
+    /**
+     * Set the value of startDateTime
+     *
+     * @return  self
+     */
+    public function setStartDateTime($startDateTime)
+    {
+        $this->startDateTime = $startDateTime;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of status
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * Set the value of status
+     *
+     * @return  self
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of roomLink
+     */
+    public function getRoomLink()
+    {
+        return $this->roomLink;
+    }
+
+    /**
+     * Set the value of roomLink
+     *
+     * @return  self
+     */
+    public function setRoomLink($roomLink)
+    {
+        $this->roomLink = $roomLink;
 
         return $this;
     }

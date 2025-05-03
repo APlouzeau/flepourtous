@@ -9,7 +9,7 @@ class EntitieUser
     private string $mail;
     private string $nickName;
     private string $password;
-    private string $adress;
+    private string $address;
     private string $country;
     private string $dateInscription;
 
@@ -104,13 +104,13 @@ class EntitieUser
 
         return $this;
     }
-    public function getAdress()
+    public function getAddress()
     {
-        return $this->adress;
+        return $this->address;
     }
-    public function setAdress($adress)
+    public function setAddress($address)
     {
-        $this->adress = $adress;
+        $this->address = $address;
 
         return $this;
     }

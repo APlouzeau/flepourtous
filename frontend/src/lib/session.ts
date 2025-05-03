@@ -56,3 +56,12 @@ export async function logout() {
     (await cookies()).delete("session");
     redirect("/");
 }
+
+export async function getCookieBackend() {
+    const cookie = (await cookies()).get("PHPSESSID");
+    if (!cookie) {
+        console.log("No session found");
+        return null;
+    }
+    return cookie.value;
+}

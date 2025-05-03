@@ -21,4 +21,4 @@ $router->addRoute('GET', BASE_URL . "api/offre-de-cours/(?<slug>[a-zA-Z0-9\-]+)"
 
 //Events
 $router->addRoute('GET', BASE_URL . "api/listEvents", 'ControllerCalendar', 'listEvents');
-$router->addRoute('GET', BASE_URL . "api/testEvent", 'ControllerCalendar', 'createEvent');
+$router->addRoute('POST', BASE_URL . "api/createEvent", 'ControllerCalendar', 'createEvent');
