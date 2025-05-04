@@ -1,8 +1,6 @@
 import Provider from "./profileContext";
 import DisplayUserprofil from "./display";
 import axios from "axios";
-import { cookies } from "next/headers";
-import { get } from "http";
 import { getCookieBackend } from "@/lib/session";
 
 export default async function profilPage() {
