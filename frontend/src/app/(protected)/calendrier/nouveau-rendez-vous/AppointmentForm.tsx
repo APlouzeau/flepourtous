@@ -1,9 +1,22 @@
-import { registerAppointment } from "./AppointmentAction";
-import { useId } from "react";
+"use client";
+import { getAvailableTimeSlots, registerAppointment } from "./AppointmentAction";
+import { useEffect, useId } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useState } from "react";
 
 export default function NewAppointmentForm() {
+    const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
+    const [timeSlots, setTimeSlots] = useState<string[]>([]);
+
+    useEffect(() => {
+        const searchAvailableTimeSlots = async () => {
+            const availabledSlots = await getAvailableTimeSlots(date);
+            setTimeSlots(availabledSlots);
+        };
+        searchAvailableTimeSlots();
+    }, [date]);
+
     return (
         <form
             action={registerAppointment}
@@ -17,6 +30,8 @@ export default function NewAppointmentForm() {
                         type="date"
                         id="startDate"
                         name="startDate"
+                        onChange={(e) => setDate(e.target.value)}
+                        value={date}
                         required
                         className="w-full p-2 border border-gray-300 rounded"
                     />
@@ -24,14 +39,19 @@ export default function NewAppointmentForm() {
             </div>
             <div className="mb-4">
                 <label htmlFor="startTime" className="block text-gray-700 font-bold mb-2">
-                    Heure
-                    <input
-                        type="time"
+                    Horaire
+                    <select
                         id="startTime"
                         name="startTime"
                         required
                         className="w-full p-2 border border-gray-300 rounded"
-                    />
+                    >
+                        {timeSlots.map((slot) => (
+                            <option key={slot} value={slot}>
+                                {slot}
+                            </option>
+                        ))}
+                    </select>
                 </label>
             </div>
             <div className="mb-4">

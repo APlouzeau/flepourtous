@@ -214,4 +214,27 @@ class ControllerCalendar
         }
         echo json_encode($response);
     }
+
+    public function getAvailableTimeSlots()
+    {
+        $userController = new ControllerUser();
+        $userController->verifyConnectBack();
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+        $modelEvent = new ModelEvent();
+        $events = $modelEvent->getAvailableTimeSlots($data['date']);
+        if (count($events) == 0) {
+            $response = [
+                'code' => 0,
+                'message' => 'Pas de rendez-vous'
+            ];
+        } else {
+            $response = [
+                'code' => 1,
+                'message' => 'Rendez-vous récupérés avec succès',
+                'data' => $events
+            ];
+        }
+        echo json_encode($events);
+    }
 }

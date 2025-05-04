@@ -4,6 +4,28 @@ require_once APP_PATH . "/class/ClassDatabase.php";
 
 class ModelEvent extends  ClassDatabase
 {
+
+    public function getAvailableTimeSlots($date)
+    {
+        $req = $this->conn->prepare('SELECT startDateTime, duration FROM event WHERE DATE(startDateTime) = :date');
+        $req->bindValue(':date', $date, PDO::PARAM_STR);
+        $req->execute();
+        $datas = $req->fetchAll();
+        $occupiedTimeSlot = [];
+        if (count($datas) != 0) {
+            foreach ($datas as $data) {
+                $currentSlotTime = new DateTime($data['startDateTime']);
+                $numberOfSlots = ceil($data['duration'] / 15);
+                for ($i = 0; $i < $numberOfSlots; $i++) {
+                    $occupiedTimeSlot[] = $currentSlotTime->format('H:i');
+                    $currentSlotTime->modify('+15 minutes');
+                }
+            }
+        }
+        $occupiedTimeSlot = array_unique($occupiedTimeSlot);
+        sort($occupiedTimeSlot);
+        return array_values($occupiedTimeSlot);
+    }
     public function getEventsUser(int $idUser)
     {
         $req = $this->conn->prepare('SELECT * FROM event WHERE userId = :idUser');
@@ -31,7 +53,7 @@ class ModelEvent extends  ClassDatabase
                 ];
             }
         }
-        //count($datas) == 0 ? $events = [] : $events = $datas;
+        sort($events);
         return $events;
     }
 

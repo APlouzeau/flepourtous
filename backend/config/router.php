@@ -24,3 +24,4 @@ $router->addRoute('GET', BASE_URL . "api/listEvents", 'ControllerCalendar', 'lis
 $router->addRoute('POST', BASE_URL . "api/createEvent", 'ControllerCalendar', 'createEvent');
 $router->addRoute('POST', BASE_URL . "api/listEventsUser", 'ControllerCalendar', 'listEventsUser');
 $router->addRoute('POST', BASE_URL . "api/deleteEvent", 'ControllerCalendar', 'deleteEvent');
+$router->addRoute('POST', BASE_URL . "api/getAvailableTimeSlots", 'ControllerCalendar', 'getAvailableTimeSlots');
