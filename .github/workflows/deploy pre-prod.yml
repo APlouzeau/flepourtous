@@ -20,6 +20,9 @@ jobs:
                   cd ~/projects/flepourtous
                   git checkout dev
                   git pull origin dev
+                  cd backend
+                  composer install --no-dev --optimize-autoloader
+                  cd ..
                   cd frontend
                   pnpm i
                   pm2 stop flepourtous-preprod
