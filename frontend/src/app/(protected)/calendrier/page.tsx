@@ -1,23 +1,34 @@
-"use client";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import Link from "next/link";
-import { useEffect } from "react";
+import { getCookieBackend } from "@/lib/session";
+import AppointmentRow from "./AppointmentRow";
+import { showBasicAppointmentProps } from "@/app/types/appointments";
 
-export default function CalendarPage() {
-    console.log(`${process.env.NEXT_PUBLIC_API_URL}/getEvents`);
-
-    useEffect(() => {
-        const fetchEvents = async () => {
-            try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/getEvents`);
-                console.log("Events data:", response.data);
-            } catch (error) {
-                console.error("Error fetching events:", error);
+export default async function CalendarPage() {
+    const cookie = await getCookieBackend();
+    let appointmentList: showBasicAppointmentProps[] = [];
+    try {
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/listEventsUser`,
+            {},
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${cookie}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
             }
-        };
-        fetchEvents();
-    }, []);
+        );
+        console.log("Response from listEventsUser:", response.data);
+        if (response.data && Array.isArray(response.data)) {
+            appointmentList = response.data;
+        } else {
+            console.warn("La réponse de l'API ne contient pas de tableau d'événements valide dans .data");
+        }
+    } catch (error) {
+        console.error("Error during listEvents:", error);
+    }
     return (
         <>
             <div className="flex flex-col items-center justify-center  bg-gray-100">
@@ -31,6 +42,7 @@ export default function CalendarPage() {
                     Nouveau RDV
                 </Link>
             </Button>
+            <AppointmentRow listAppointments={appointmentList} />
         </>
     );
 }

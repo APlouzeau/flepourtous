@@ -1,4 +1,7 @@
-import registerAppointment from "./AppointmentAction";
+import { registerAppointment } from "./AppointmentAction";
+import { useId } from "react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export default function NewAppointmentForm() {
     return (
@@ -34,13 +37,28 @@ export default function NewAppointmentForm() {
             <div className="mb-4">
                 <label htmlFor="duration" className="block text-gray-700 font-bold mb-2">
                     Durée
-                    <input
-                        type="time"
-                        id="duration"
+                    <RadioGroup
+                        defaultValue="30"
                         name="duration"
-                        required
-                        className="w-full p-2 border border-gray-300 rounded"
-                    />
+                        className="[--primary:var(--color-indigo-500)] [--ring:var(--color-indigo-300)] in-[.dark]:[--primary:var(--color-indigo-500)] in-[.dark]:[--ring:var(--color-indigo-900)]"
+                    >
+                        <div className="flex items-center gap-2">
+                            <RadioGroupItem value="30" id="1" />
+                            <Label htmlFor="1">30</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <RadioGroupItem value="45" id="2" />
+                            <Label htmlFor="2">45</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <RadioGroupItem value="60" id="3" />
+                            <Label htmlFor="3">60</Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <RadioGroupItem value="90" id="4" />
+                            <Label htmlFor="4">90</Label>
+                        </div>
+                    </RadioGroup>
                 </label>
             </div>
             <div>

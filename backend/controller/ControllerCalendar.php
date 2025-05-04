@@ -35,17 +35,15 @@ class ControllerCalendar
             $client = $this->getClient(); // Obtient le client authentifié via le compte de service
             $service = new Google_Service_Calendar($client);
 
-            // Utilise l'ID du calendrier que tu as partagé avec le compte de service
-            // Souvent 'primary' si c'est ton agenda principal, sinon l'ID spécifique du calendrier.
-            $calendarId = 'ef7995ba9623e0baa51a0050ba9c48ab6a191193f402b024ddcf27864434b807@group.calendar.google.com'; // Ou l'ID de ton calendrier partagé
 
-            $events = $service->events->listEvents($calendarId, [
+
+            $events = $service->events->listEvents(GOOGLE_CALENDAR_ID, [
                 'maxResults' => 10,
                 'orderBy' => 'startTime',
                 'singleEvents' => true,
                 //'timeMin' => date('c'),
             ]);
-            header('Content-Type: application/json'); // Important pour la réponse JSON
+            header('Content-Type: application/json');
             echo json_encode($events->getItems());
         } catch (Exception $e) {
             http_response_code(500); // Erreur serveur
@@ -54,7 +52,6 @@ class ControllerCalendar
         }
     }
 
-    // Tu peux maintenant ajouter une méthode pour créer un événement
     public function createEvent()
     {
         $userController = new ControllerUser();
@@ -76,31 +73,6 @@ class ControllerCalendar
         $updatedAt = date('Y-m-d H:i:s');
         $status = 'active';
 
-        $event = new EntitieEvent([
-            'userId' => $userId,
-            'description' => $description,
-            'duration' => $duration,
-            'createdAt' => $createdAt,
-            'startDateTime' => $startDateTime,
-            'updatedAt' => $updatedAt,
-            'status' => $status
-        ]);
-        $modelEvent = new ModelEvent();
-        $registerEventSuccess = $modelEvent->createEvent($event);
-        if (!$registerEventSuccess) {
-            $response = [
-                'code' => 0,
-                'message' => 'Erreur lors de l\'enregistrement de l\'événement en base de données',
-            ];
-            echo json_encode($response);
-            return;
-        } else {
-            $response = [
-                'code' => 1,
-                'message' => 'Événement enregistré en base de données avec succès',
-            ];
-        }
-
         try {
             $timeZone = new DateTimeZone('Europe/Paris');
             $startObj = new DateTime($startDateTime, $timeZone);
@@ -114,33 +86,61 @@ class ControllerCalendar
 
             $client = $this->getClient();
             $service = new Google_Service_Calendar($client);
-            $calendarId = 'ef7995ba9623e0baa51a0050ba9c48ab6a191193f402b024ddcf27864434b807@group.calendar.google.com'; // Ou l'ID de ton calendrier partagé
 
             $event = new Google_Service_Calendar_Event([
-                'summary' => $_SESSION['firstName'] . " " . $_SESSION['lastName'], // Ex: 'RDV avec ' . $data['userName']
-                'description' => $description ?? '', // Description optionnelle
+                'summary' => $_SESSION['firstName'] . " " . $_SESSION['lastName'],
+                'description' => $description ?? '',
                 'start' => [
                     'dateTime' => $googleStartDateTime, // Format RFC3339 : '2025-05-03T10:00:00+02:00'
-                    'timeZone' => 'Europe/Paris', // Adapte à ton fuseau horaire
+                    'timeZone' => 'Europe/Paris',
                 ],
                 'end' => [
                     'dateTime' => $googleEndDateTime, // Format RFC3339 : '2025-05-03T11:00:00+02:00'
-                    'timeZone' => 'Europe/Paris', // Adapte à ton fuseau horaire
+                    'timeZone' => 'Europe/Paris',
                 ],
-                // Tu peux ajouter des participants ici si tu veux inviter l'utilisateur par email
-                // 'attendees' => [
-                //     ['email' => $data['userEmail']],
-                // ],
+
             ]);
 
-            $createdEvent = $service->events->insert($calendarId, $event);
+            $createdEvent = $service->events->insert(GOOGLE_CALENDAR_ID, $event);
+            if (!$createdEvent) {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de la création de l\'événement dans Google Calendar',
+                ];
+                echo json_encode($response);
+                return;
+            }
+            $eventId = $createdEvent->getId();
+            $eventDatabase = new EntitieEvent([
+                'eventId' => $eventId,
+                'userId' => $userId,
+                'description' => $description,
+                'duration' => $duration,
+                'createdAt' => $createdAt,
+                'startDateTime' => $startDateTime,
+                'updatedAt' => $updatedAt,
+                'status' => $status
+            ]);
+            $modelEvent = new ModelEvent();
+            $registerEventSuccess = $modelEvent->createEvent($eventDatabase);
+            if (!$registerEventSuccess) {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de l\'enregistrement de l\'événement en base de données',
+                ];
+                echo json_encode($response);
+                return;
+            } else {
+                $response = [
+                    'code' => 1,
+                    'message' => 'Événement enregistré en base de données avec succès',
+                ];
+            }
 
-            header('Content-Type: application/json');
             echo json_encode(['success' => true, 'eventId' => $createdEvent->getId()]);
         } catch (Exception $e) {
-            http_response_code(500);
-            header('Content-Type: application/json');
             echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage()]);
+            return;
         }
         echo json_encode($response);
     }
@@ -162,6 +162,54 @@ class ControllerCalendar
                 'code' => 1,
                 'message' => 'Rendez-vous récupérés avec succès',
                 'data' => $events
+            ];
+        }
+        echo json_encode($events);
+    }
+
+    public function deleteEvent()
+    {
+        $userController = new ControllerUser();
+        $userController->verifyConnectBack();
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+        echo json_encode("data");
+        echo json_encode($data);
+
+        if (!$data || !isset($data['eventId'])) {
+            $response = [
+                'code' => 0,
+                'message' => 'Données manquantes pour supprimer l\'événement (eventId requis).'
+            ];
+            echo json_encode($response);
+            return;
+        }
+        $client = $this->getClient();
+        $service = new Google_Service_Calendar($client);
+        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['eventId']);
+
+        if (!$deletedEvent) {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur lors de la suppression de l\'événement dans Google Calendar',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $modelEvent = new ModelEvent();
+        $deleteEventSuccess = $modelEvent->deleteEvent($data['eventId']);
+        if (!$deleteEventSuccess) {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur lors de la suppression de l\'événement en base de données',
+            ];
+            echo json_encode($response);
+            return;
+        } else {
+            $response = [
+                'code' => 1,
+                'message' => 'Événement supprimé de la base de données avec succès',
             ];
         }
         echo json_encode($response);

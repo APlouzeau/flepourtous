@@ -68,7 +68,7 @@ export default async function Navbar() {
                         </li>
                         <li className="hidden md:flex items-center justify-center text-purple-700 text-4xl">|</li>
                         <li className="flex-1 py-2 md:py-4">
-                            <form action={logout} method="POST">
+                            <form action={logout}>
                                 <button className="block w-full text-center hover:bg-purple-400 transition-colors duration-300 py-2">
                                     Déconnexion
                                 </button>

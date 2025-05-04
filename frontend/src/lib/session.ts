@@ -38,7 +38,7 @@ export async function getSession() {
 }
 
 export async function logout() {
-    const session = (await cookies()).get("session")?.value;
+    const session = await getCookieBackend();
     if (session) {
         await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/logout`,
@@ -58,10 +58,13 @@ export async function logout() {
 }
 
 export async function getCookieBackend() {
-    const cookie = (await cookies()).get("PHPSESSID");
-    if (!cookie) {
-        console.log("No session found");
-        return null;
+    const cookieNext = (await cookies()).get("session");
+    if (cookieNext) {
+        const cookie = (await cookies()).get("PHPSESSID");
+        if (!cookie) {
+            console.log("No session found");
+            return null;
+        }
+        return cookie.value;
     }
-    return cookie.value;
 }
