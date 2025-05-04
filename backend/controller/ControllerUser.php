@@ -3,10 +3,21 @@
 
 class ControllerUser
 {
+    private $userNotConnected = [
+        'code' => 0,
+        'message' => 'Utilisateur non connecté'
+    ];
+
     public function verifyConnectBack()
     {
+        error_log("VERIFY - Session ID: " . session_id() . " - Session Data: " . print_r($_SESSION, true)); // <-- AJOUTE ÇA
+
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             return true;
+        } else {
+            $response = $this->userNotConnected;
+            echo json_encode($response);
+            exit();
         }
     }
 
@@ -18,10 +29,7 @@ class ControllerUser
                 'message' => 'Utilisateur connecté',
             ];
         } else {
-            $response = [
-                'code' => 0,
-                'message' => 'Utilisateur non connecté'
-            ];
+            $response = $this->userNotConnected;
         }
         echo json_encode($response);
     }
@@ -50,6 +58,7 @@ class ControllerUser
                 $_SESSION['mail'] = $userVerify['mail'];
                 $_SESSION['firstName'] = $userVerify['firstName'];
                 $_SESSION['lastName'] = $userVerify['lastName'];
+                error_log("LOGIN - Session Data after setting: " . print_r($_SESSION, true)); // <-- AJOUTE ÇA
                 $response = [
                     'code' => 1,
                     'message' => 'Connexion réussie.',
@@ -85,25 +94,19 @@ class ControllerUser
 
     public function getUserInformations()
     {
+        $this->verifyConnectBack();
+        $modelUser = new ModelUser();
+        $user = new EntitieUser([
+            'idUser' => $_SESSION['idUser']
+        ]);
+        $response = [
+            'code' => 1,
+            'message' => 'Utilisateur trouvé',
+            'data' =>
+            $modelUser->getUser($user)
 
-        if (!isset($_SESSION['idUser']) || empty($_SESSION['idUser'])) {
-            $response = [
-                'code' => 0,
-                'message' => 'Utilisateur non connecté',
-            ];
-        } else {
-            $modelUser = new ModelUser();
-            $user = new EntitieUser([
-                'idUser' => $_SESSION['idUser']
-            ]);
-            $response = [
-                'code' => 1,
-                'message' => 'Utilisateur trouvé',
-                'data' =>
-                $modelUser->getUser($user)
+        ];
 
-            ];
-        }
         echo json_encode($response);
     }
 

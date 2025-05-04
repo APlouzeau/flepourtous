@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "./lib/session";
 
-const isProtectedRoute = ["/calendrier", "/profil"];
+const isProtectedRoute = ["/calendrier", "/profil", "/calendrier/nouveau-rendez-vous"];
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
