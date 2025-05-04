@@ -18,6 +18,7 @@ jobs:
             - name: deploy
               run: |
                   cd ~/projects/flepourtous
+                  git restore .
                   git checkout dev
                   git pull origin dev
                   cd frontend
