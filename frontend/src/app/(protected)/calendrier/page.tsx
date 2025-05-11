@@ -1,13 +1,14 @@
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import Link from "next/link";
-import { getCookieBackend, getRole, verifyToken } from "@/lib/session";
+import { getCookieBackend, getRole } from "@/lib/session";
 import { showBasicAppointmentProps } from "@/app/types/appointments";
 import TableUser from "./TableUser";
 import TableAdmin from "./TableAdmin";
 
 export default async function CalendarPage() {
     const cookie = await getCookieBackend();
+    const role = await getRole();
     const role = await getRole();
     let appointmentList: showBasicAppointmentProps[] = [];
     try {

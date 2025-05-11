@@ -26,7 +26,6 @@ export default function LoginForm() {
             )
             .then(async (response) => {
                 if (response.data.code == 1) {
-                    const cookieValue = `${response.data.data} `;
                     await createSession(response.data.data.role);
                     redirect("/profil");
                 } else {
