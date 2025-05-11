@@ -10,7 +10,6 @@ export default async function profilPage() {
         {},
         {
             headers: {
-                //Cookie: cookie,
                 Cookie: `PHPSESSID=${cookie}`,
                 "Content-Type": "application/json",
             },
@@ -18,7 +17,6 @@ export default async function profilPage() {
         }
     );
     const userData = res.data.data;
-    console.log("profilPage UserData", userData);
 
     return (
         <Provider initialUser={userData}>

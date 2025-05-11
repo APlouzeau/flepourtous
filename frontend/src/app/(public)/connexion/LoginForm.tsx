@@ -26,9 +26,7 @@ export default function LoginForm() {
             )
             .then(async (response) => {
                 if (response.data.code == 1) {
-                    const cookieValue = `${response.data.data} `;
-                    console.log("cookieValue :", cookieValue);
-                    await createSession(cookieValue);
+                    await createSession(response.data.data.role);
                     redirect("/profil");
                 } else {
                     console.error("Erreur lors de la connexion :", response.data.message);

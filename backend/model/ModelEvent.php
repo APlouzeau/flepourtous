@@ -59,7 +59,7 @@ class ModelEvent extends  ClassDatabase
 
     public function createEvent(EntitieEvent $event)
     {
-        $req = $this->conn->prepare('INSERT INTO event (eventId, userId, description, duration, createdAt, startDateTime, updatedAt, status) VALUES (:eventId, :userId, :description, :duration, :createdAt, :startDateTime, :updatedAt, :status)');
+        $req = $this->conn->prepare('INSERT INTO event (eventId, userId, description, duration, createdAt, startDateTime, updatedAt, status, visioLink) VALUES (:eventId, :userId, :description, :duration, :createdAt, :startDateTime, :updatedAt, :status, :visioLink)');
         $req->bindValue(':eventId', $event->getEventId(), PDO::PARAM_STR);
         $req->bindValue(':userId', $event->getUserId(), PDO::PARAM_INT);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
@@ -68,6 +68,7 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
         $req->bindValue(':updatedAt', $event->getUpdatedAt(), PDO::PARAM_STR);
         $req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
+        $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
         $req->execute();
         return $req->execute();
     }
@@ -77,5 +78,35 @@ class ModelEvent extends  ClassDatabase
         $req = $this->conn->prepare('DELETE FROM event WHERE eventId = :eventId');
         $req->bindValue(':eventId', $eventId, PDO::PARAM_STR);
         return $req->execute();
+    }
+
+    public function getAllEvents()
+    {
+        $req = $this->conn->prepare('
+            SELECT eventId, description, duration, status, visioLink, firstName, lastName, startDateTime FROM event
+            INNER JOIN users ON event.userId = users.idUser
+            ORDER BY startDateTime;');
+        $req->execute();
+        $datas = $req->fetchAll();
+        if (count($datas) == 0) {
+            return [];
+        } else {
+            foreach ($datas as $data) {
+                $dateObj = new DateTime($data['startDateTime']);
+                $startDate = $dateObj->format('d/m/Y');
+                $startTime = $dateObj->format('H:i');
+                $events[] = [
+                    'eventId' => $data['eventId'],
+                    'studentName' => $data['firstName'] . ' ' . $data['lastName'],
+                    'description' => $data['description'],
+                    'duration' => $data['duration'],
+                    'status' => $data['status'],
+                    'startDate' => $startDate,
+                    'startTime' => $startTime,
+                    'visioLink' => $data['visioLink'],
+                ];
+            }
+        }
+        return $events;
     }
 }

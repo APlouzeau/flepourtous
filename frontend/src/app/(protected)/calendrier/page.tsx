@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/button";
 import axios from "axios";
 import Link from "next/link";
-import { getCookieBackend } from "@/lib/session";
-import AppointmentRow from "./AppointmentRow";
+import { getCookieBackend, getRole } from "@/lib/session";
 import { showBasicAppointmentProps } from "@/app/types/appointments";
+import TableUser from "./TableUser";
+import TableAdmin from "./TableAdmin";
 
 export default async function CalendarPage() {
     const cookie = await getCookieBackend();
+    const role = await getRole();
     let appointmentList: showBasicAppointmentProps[] = [];
     try {
         const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/listEventsUser`,
+            `${process.env.NEXT_PUBLIC_API_URL}/listEvents`,
             {},
             {
                 headers: {
@@ -20,9 +22,9 @@ export default async function CalendarPage() {
                 withCredentials: true,
             }
         );
-        console.log("Response from listEventsUser:", response.data);
-        if (response.data && Array.isArray(response.data)) {
-            appointmentList = response.data;
+        console.log("Response from listEvents:", response.data);
+        if (response.data && Array.isArray(response.data.data)) {
+            appointmentList = response.data.data;
         } else {
             console.warn("La réponse de l'API ne contient pas de tableau d'événements valide dans .data");
         }
@@ -42,7 +44,11 @@ export default async function CalendarPage() {
                     Nouveau RDV
                 </Link>
             </Button>
-            <AppointmentRow listAppointments={appointmentList} />
+            {role !== "admin" ? (
+                <TableUser listAppointments={appointmentList}></TableUser>
+            ) : (
+                <TableAdmin listAppointments={appointmentList}></TableAdmin>
+            )}
         </>
     );
 }
