@@ -1,10 +1,11 @@
 import Provider from "./profileContext";
 import DisplayUserprofil from "./display";
 import axios from "axios";
-import { getCookieBackend } from "@/lib/session";
+import { getCookieBackend, getCountry } from "@/lib/session";
 
 export default async function profilPage() {
     const cookie = await getCookieBackend();
+    const country = await getCountry();
     const res = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}/userInformations`,
         {},
@@ -19,8 +20,11 @@ export default async function profilPage() {
     const userData = res.data.data;
 
     return (
-        <Provider initialUser={userData}>
-            <DisplayUserprofil />
-        </Provider>
+        <div>
+            <div>{country}</div>
+            <Provider initialUser={userData}>
+                <DisplayUserprofil />
+            </Provider>
+        </div>
     );
 }

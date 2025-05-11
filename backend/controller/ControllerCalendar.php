@@ -143,6 +143,7 @@ class ControllerCalendar
                     'enable_video_processing_ui' => true,
                     'enable_chat' => true,
                     'enable_advanced_chat' => true,
+                    'enable_recording' => 'local',
                 ]
             ];
 
