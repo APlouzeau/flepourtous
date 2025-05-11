@@ -64,8 +64,9 @@ export async function getCountry() {
     }
     try {
         const response = await axios.get(`https://ipapi.co/${userIP}/json/`);
+
         if (response.data && response.data.country_name) {
-            return response.data.country_name;
+            return response.data;
         } else {
             console.log("No country name found in the response");
             return null;
