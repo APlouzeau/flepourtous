@@ -1,5 +1,5 @@
 "use server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import axios from "axios";
 import { redirect } from "next/navigation";
 import { SignJWT, jwtVerify } from "jose";
@@ -47,10 +47,34 @@ export async function verifyToken(jwt: string) {
 }
 
 export async function getCountry() {
-    const response = await axios.get("https://api.ipify.org?format=json");
-    const userIP = await response.data.ip;
-    const getCountry = await axios.get(`https://ipapi.co/${userIP}/country/`);
-    return getCountry.data;
+    const forwardedFor = (await headers()).get("x-forwarded-for");
+    const realIp = (await headers()).get("x-real-ip");
+
+    let userIP: string | null = null;
+    if (forwardedFor) {
+        userIP = forwardedFor.split(",")[0];
+    } else if (realIp) {
+        userIP = realIp;
+    } else {
+        userIP = null;
+    }
+    if (!userIP) {
+        console.log("No IP address found");
+        return null;
+    }
+    try {
+        const response = await axios.get(`https://ipapi.co/${userIP}/json/`);
+
+        if (response.data && response.data.country_name) {
+            return response.data;
+        } else {
+            console.log("No country name found in the response");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error fetching country information:", error);
+        return null;
+    }
 }
 
 export async function getSession() {
