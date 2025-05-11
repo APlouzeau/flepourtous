@@ -10,6 +10,18 @@ if (!class_exists('Google_Service_Calendar')) {
 class ControllerCalendar
 {
 
+    public function listEvents()
+    {
+        $userController = new ControllerUser();
+        $userController->verifyConnectBack();
+
+        if ($_SESSION['role'] != 'admin') {
+            $this->listEventsUser();
+        } else {
+            $this->listEventsMain();
+        }
+    }
+
     private function getClient()
     {
         $keyFilePath = APP_PATH . 'config/service-account-key.json'; // Chemin vers ta clé JSON
@@ -31,25 +43,22 @@ class ControllerCalendar
 
     public function listEventsMain()
     {
-        try {
-            $client = $this->getClient(); // Obtient le client authentifié via le compte de service
-            $service = new Google_Service_Calendar($client);
-
-
-
-            $events = $service->events->listEvents(GOOGLE_CALENDAR_ID, [
-                'maxResults' => 10,
-                'orderBy' => 'startTime',
-                'singleEvents' => true,
-                //'timeMin' => date('c'),
-            ]);
-            header('Content-Type: application/json');
-            echo json_encode($events->getItems());
-        } catch (Exception $e) {
-            http_response_code(500); // Erreur serveur
-            header('Content-Type: application/json');
-            echo json_encode(['error' => 'Erreur lors de la récupération des événements: ' . $e->getMessage()]);
+        $modelEvent = new ModelEvent();
+        $events = $modelEvent->getAllEvents();
+        if (count($events) == 0) {
+            $response = [
+                'code' => 0,
+                'message' => 'Pas de rendez-vous'
+            ];
+        } else {
+            $response = [
+                'code' => 1,
+                'message' => 'Rendez-vous récupérés avec succès',
+                'data' => $events
+            ];
         }
+        echo json_encode($response);
+        return;
     }
 
     public function createEvent()
@@ -72,6 +81,7 @@ class ControllerCalendar
         $createdAt = date('Y-m-d H:i:s');
         $updatedAt = date('Y-m-d H:i:s');
         $status = 'active';
+        $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
 
         try {
             $timeZone = new DateTimeZone('Europe/Paris');
@@ -84,11 +94,13 @@ class ControllerCalendar
             $googleStartDateTime = $startObj->format(DateTime::RFC3339);
             $googleEndDateTime = $endObj->format(DateTime::RFC3339);
 
+
+            //GOOGLE CALENDAR
             $client = $this->getClient();
             $service = new Google_Service_Calendar($client);
 
             $event = new Google_Service_Calendar_Event([
-                'summary' => $_SESSION['firstName'] . " " . $_SESSION['lastName'],
+                'summary' => $appointmentName,
                 'description' => $description ?? '',
                 'start' => [
                     'dateTime' => $googleStartDateTime, // Format RFC3339 : '2025-05-03T10:00:00+02:00'
@@ -110,6 +122,54 @@ class ControllerCalendar
                 echo json_encode($response);
                 return;
             }
+
+            //Visio
+            $visioApiKey = VISIO_API_KEY; // Remplacez par votre clé API
+            $url = 'https://api.daily.co/v1/rooms/';
+
+            $startDateTimeUnix = strtotime($startDateTime);
+            $durationInSeconds = $duration * 60; // Convertir la durée en secondes
+            $data = [
+                'privacy' => 'public',
+                'properties' => [
+                    'nbf' => $startDateTimeUnix - 15 * 60,
+                    'exp' => $startDateTimeUnix + $durationInSeconds + 15 * 60,
+                    'start_audio_off' => false,
+                    'start_video_off' => false,
+                    'enable_pip_ui' => true,
+                    'enable_people_ui' => true,
+                    'enable_emoji_reactions' => true,
+                    'enable_screenshare' => true,
+                    'enable_video_processing_ui' => true,
+                    'enable_chat' => true,
+                    'enable_advanced_chat' => true,
+                ]
+            ];
+
+            $options = [
+                'http' => [
+                    'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $visioApiKey,
+                    'method' => 'POST',
+                    'content' => json_encode($data)
+                ]
+            ];
+
+            $context = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+
+            if ($result === FALSE) {
+                $responseVisio = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de la création de la room visio',
+                ];
+                echo json_encode($responseVisio);
+                return;
+            } else {
+                $responseVisio = json_decode($result, true);
+                $roomUrl = $responseVisio['url'];
+            }
+
+            //DATABASE
             $eventId = $createdEvent->getId();
             $eventDatabase = new EntitieEvent([
                 'eventId' => $eventId,
@@ -119,7 +179,8 @@ class ControllerCalendar
                 'createdAt' => $createdAt,
                 'startDateTime' => $startDateTime,
                 'updatedAt' => $updatedAt,
-                'status' => $status
+                'status' => $status,
+                'visioLink' => $roomUrl,
             ]);
             $modelEvent = new ModelEvent();
             $registerEventSuccess = $modelEvent->createEvent($eventDatabase);
@@ -164,7 +225,7 @@ class ControllerCalendar
                 'data' => $events
             ];
         }
-        echo json_encode($events);
+        echo json_encode($response);
     }
 
     public function deleteEvent()
