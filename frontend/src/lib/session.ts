@@ -46,6 +46,13 @@ export async function verifyToken(jwt: string) {
     return payload;
 }
 
+export async function getCountry() {
+    const response = await axios.get("https://api.ipify.org?format=json");
+    const userIP = await response.data.ip;
+    const getCountry = await axios.get(`https://ipapi.co/${userIP}/country/`);
+    return getCountry.data;
+}
+
 export async function getSession() {
     return await cookies();
 }
