@@ -9,7 +9,6 @@ import TableAdmin from "./TableAdmin";
 export default async function CalendarPage() {
     const cookie = await getCookieBackend();
     const role = await getRole();
-    const role = await getRole();
     let appointmentList: showBasicAppointmentProps[] = [];
     try {
         const response = await axios.post(
