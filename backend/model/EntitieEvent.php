@@ -10,7 +10,7 @@ class EntitieEvent
     private string $startDateTime;
     private string $updatedAt;
     private string $status;
-    private int $visioLink;
+    private string $visioLink;
 
     public function __construct(array $data)
     {

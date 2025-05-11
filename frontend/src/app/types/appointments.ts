@@ -1,9 +1,10 @@
 export interface showBasicAppointmentProps {
     eventId: number;
+    studentName: string;
     description: string;
-    startDate: string;
-    startTime: string;
     duration: string;
     status: string;
+    startDate: string;
+    startTime: string;
     visioLink: string;
 }

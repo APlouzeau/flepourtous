@@ -4,17 +4,19 @@ import axios from "axios";
 import { redirect } from "next/navigation";
 import { SignJWT, jwtVerify } from "jose";
 
-export async function createSession(cookieValue: string) {
-    const jwt = await new SignJWT({ cookieValue })
+export async function createSession(userRole: string) {
+    const cookie = (await cookies()).get("PHPSESSID");
+    const cookiePHP = cookie?.value;
+
+    const jwt = await new SignJWT({ cookiePHP, role: userRole })
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
         .setExpirationTime("1h")
         .sign(new TextEncoder().encode(process.env.JWT_SECRET));
-    console.log("getSession :", cookieValue);
 
     const cookieStore = await cookies();
 
-    if (!cookieValue) {
+    if (!cookiePHP) {
         console.log("No session found");
         return null;
     }
@@ -26,6 +28,17 @@ export async function createSession(cookieValue: string) {
         expires: new Date(Date.now() + 1 * 60 * 60 * 1000),
     });
     return cookieStore.get("session");
+}
+
+export async function getRole() {
+    const sessionCookie = (await cookies()).get("session");
+    if (!sessionCookie) {
+        console.log("No session found");
+        return null;
+    }
+    const session = sessionCookie.value;
+    const payload = await verifyToken(session);
+    return payload.role;
 }
 
 export async function verifyToken(jwt: string) {
@@ -58,13 +71,16 @@ export async function logout() {
 }
 
 export async function getCookieBackend() {
-    const cookieNext = (await cookies()).get("session");
-    if (cookieNext) {
-        const cookie = (await cookies()).get("PHPSESSID");
-        if (!cookie) {
-            console.log("No session found");
-            return null;
-        }
-        return cookie.value;
+    const jwtSessionCookie = (await cookies()).get("session");
+    if (!jwtSessionCookie) {
+        console.log("No JWT session cookie found in getCookieBackend");
+        return null;
+    }
+    try {
+        const payload = await verifyToken(jwtSessionCookie.value);
+        return payload.cookiePHP as string | null;
+    } catch (error) {
+        console.error("Error verifying token in getCookieBackend:", error);
+        return null;
     }
 }
