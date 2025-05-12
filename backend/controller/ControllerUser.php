@@ -146,32 +146,39 @@ class ControllerUser
                         'message' => $validationPassword['message'],
                     ];
                 } else {
-                    $user = new EntitieUser([
-                        'nickName' => $data['nickName'],
-                        'firstName' => $data['firstName'],
-                        'lastName' => $data['lastName'],
-                        'mail' => $data['mail'],
-                        'password' => $data['password'],
-                    ]);
                     $userModel = new ModelUser();
-                    $register = $userModel->register($user);
-
-                    !$register  ?
+                    $checkMail = $userModel->checkMail($data['mail']);
+                    if ($checkMail) {
                         $response = [
                             'code' => 0,
-                            'message' => 'Erreur lors de l\'enregistrement en base de données',
-                        ]
-                        :
-                        $response = [
-                            'code' => 1,
-                            'message' => 'Inscription réussie',
+                            'message' => 'Adresse e-mail déjà utilisée',
                         ];
+                    } else {
+                        $user = new EntitieUser([
+                            'nickName' => $data['nickName'],
+                            'firstName' => $data['firstName'],
+                            'lastName' => $data['lastName'],
+                            'mail' => $data['mail'],
+                            'password' => $data['password'],
+                        ]);
+                        $register = $userModel->register($user);
+
+                        !$register  ?
+                            $response = [
+                                'code' => 0,
+                                'message' => 'Erreur lors de l\'enregistrement en base de données',
+                            ]
+                            :
+                            $response = [
+                                'code' => 1,
+                                'message' => 'Inscription réussie',
+                            ];
+                    }
                 }
             }
+            echo json_encode($response);
         }
-        echo json_encode($response);
     }
-
 
     public function listUsers()
     {
