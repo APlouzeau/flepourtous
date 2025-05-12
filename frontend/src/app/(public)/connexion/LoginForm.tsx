@@ -7,6 +7,7 @@ import { useState } from "react";
 export default function LoginForm() {
     const [mail, setMail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -29,7 +30,7 @@ export default function LoginForm() {
                     await createSession(response.data.data.role);
                     redirect("/profil");
                 } else {
-                    console.error("Erreur lors de la connexion :", response.data.message);
+                    setError(response.data.message);
                 }
             });
     };
@@ -57,6 +58,7 @@ export default function LoginForm() {
                     className="w-full p-2 border border-gray-300 rounded"
                 />
             </div>
+            {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
             <button type="submit" className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700">
                 Se connecter
             </button>

@@ -12,6 +12,7 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const router = useRouter();
+    const [error, setError] = useState("");
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -28,7 +29,7 @@ export default function RegisterPage() {
                 if (response.data.code == 1) {
                     router.push("/connexion");
                 } else {
-                    console.error("Erreur lors de la connexion :", response.data.message);
+                    setError(response.data.message);
                 }
                 console.log("test : ", response.data);
             })
@@ -102,6 +103,7 @@ export default function RegisterPage() {
                             className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
+                    {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
                     <button className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 mt-2 text-lg">
                         Inscription
                     </button>
