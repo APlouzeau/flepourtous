@@ -15,7 +15,7 @@ extends ClassDatabase
         $req->bindValue(":lastName", $user->getLastName());
         $req->bindValue(":mail", $user->getMail());
         $req->bindValue(":nickName", $user->getNickName());
-        $req->bindValue(":password", password_hash($user->getPassword(), PASSWORD_BCRYPT));
+        $req->bindValue(":password", $user->getPassword());
 
         $req->execute();
         return true;
@@ -89,5 +89,14 @@ extends ClassDatabase
         $req = $this->conn->prepare('DELETE FROM users WHERE idUser = :idUser');
         $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
         return $req->execute();
+    }
+
+    public function checkMail(string $mail)
+    {
+        $query = "SELECT * FROM users WHERE mail = :mail";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":mail", $mail);
+        $req->execute();
+        return $req->fetchColumn() > 0;
     }
 }
