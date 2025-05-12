@@ -9,15 +9,15 @@ extends ClassDatabase
     public function register(EntitieUser $user)
     {
         $query = "INSERT INTO users (firstName, lastName, mail, nickName, password) VALUES (:firstName, :lastName, :mail, :nickName, :password)";
+
         $req = $this->conn->prepare($query);
         $req->bindValue(":firstName", $user->getFirstName());
         $req->bindValue(":lastName", $user->getLastName());
         $req->bindValue(":mail", $user->getMail());
         $req->bindValue(":nickName", $user->getNickName());
-        $req->bindValue(":password", $user->getPassword());
+        $req->bindValue(":password", password_hash($user->getPassword(), PASSWORD_BCRYPT));
 
         $req->execute();
-
         return true;
     }
 
@@ -42,8 +42,8 @@ extends ClassDatabase
 
         $data = $req->fetch(PDO::FETCH_ASSOC);
         if ($data) {
-            if ($userVerify->getPassword() == $data['password']) {
-                //  if (password_verify($userVerify->getPassword(), $user['password'])) {
+            //if ($userVerify->getPassword() == $data['password']) {
+            if (password_verify($userVerify->getPassword(), $data['password'])) {
                 $user =
                     [
                         'idUser' => $data['idUser'],

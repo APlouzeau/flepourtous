@@ -58,7 +58,7 @@ class ControllerUser
                 $_SESSION['mail'] = $userVerify['mail'];
                 $_SESSION['firstName'] = $userVerify['firstName'];
                 $_SESSION['lastName'] = $userVerify['lastName'];
-                error_log("LOGIN - Session Data after setting: " . print_r($_SESSION, true)); // <-- AJOUTE ÇA
+                error_log("LOGIN - Session Data after setting: " . print_r($_SESSION, true));
                 $response = [
                     'code' => 1,
                     'message' => 'Connexion réussie.',
@@ -131,32 +131,43 @@ class ControllerUser
                 'code' => 0,
                 'message' => 'Erreur de paramètres',
             ];
-        } elseif ($data['password'] != $data['passwordConfirm']) {
-            $response = [
-                'code' => 0,
-                'message' => 'Les mots de passe ne correspondent pas',
-            ];
         } else {
-            $user = new EntitieUser([
-                'nickName' => $data['nickName'],
-                'firstName' => $data['firstName'],
-                'lastName' => $data['lastName'],
-                'mail' => $data['mail'],
-                'password' => $data['password'],
-            ]);
-            $userModel = new ModelUser();
-            $register = $userModel->register($user);
-
-            !$register  ?
+            $validationUserInformations = $this->controlUserInformations($data);
+            if ($validationUserInformations['code'] == 0) {
                 $response = [
                     'code' => 0,
-                    'message' => 'Erreur lors de l\'enregistrement en base de données',
-                ]
-                :
-                $response = [
-                    'code' => 1,
-                    'message' => 'Inscription réussie',
+                    'message' => $validationUserInformations['message'],
                 ];
+            } else {
+                $validationPassword = $this->controlUserPasswordFormat($data);
+                if ($validationPassword['code'] == 0) {
+                    $response = [
+                        'code' => 0,
+                        'message' => $validationPassword['message'],
+                    ];
+                } else {
+                    $user = new EntitieUser([
+                        'nickName' => $data['nickName'],
+                        'firstName' => $data['firstName'],
+                        'lastName' => $data['lastName'],
+                        'mail' => $data['mail'],
+                        'password' => $data['password'],
+                    ]);
+                    $userModel = new ModelUser();
+                    $register = $userModel->register($user);
+
+                    !$register  ?
+                        $response = [
+                            'code' => 0,
+                            'message' => 'Erreur lors de l\'enregistrement en base de données',
+                        ]
+                        :
+                        $response = [
+                            'code' => 1,
+                            'message' => 'Inscription réussie',
+                        ];
+                }
+            }
         }
         echo json_encode($response);
     }
@@ -209,5 +220,57 @@ class ControllerUser
         }
         echo json_encode($response);
         exit();
+    }
+
+    public function controlUserInformations($data)
+    {
+        if (!filter_var($data['mail'], FILTER_VALIDATE_EMAIL)) {
+            $response = [
+                'code' => 0,
+                'message' => 'Adresse e-mail invalide',
+            ];
+        } elseif (strlen($data['nickName']) < 3) {
+            $response = [
+                'code' => 0,
+                'message' => 'Le pseudo doit contenir au moins 3 caractères',
+            ];
+        } elseif (strlen($data['firstName']) < 3) {
+            $response = [
+                'code' => 0,
+                'message' => 'Le prénom doit contenir au moins 3 caractères',
+            ];
+        } elseif (strlen($data['lastName']) < 3) {
+            $response = [
+                'code' => 0,
+                'message' => 'Le nom doit contenir au moins 3 caractères',
+            ];
+        } else {
+            $response = [
+                'code' => 1,
+                'message' => 'Informations valides',
+            ];
+        }
+        return $response;
+    }
+
+    public function controlUserPasswordFormat($data)
+    {
+        if (strlen($data['password']) < 12) {
+            $response = [
+                'code' => 0,
+                'message' => 'Le mot de passe doit contenir au moins 12 caractères',
+            ];
+        } elseif ($data['password'] != $data['passwordConfirm']) {
+            $response = [
+                'code' => 0,
+                'message' => 'Les mots de passe ne correspondent pas',
+            ];
+        } else {
+            $response = [
+                'code' => 1,
+                'message' => 'Mot de passe valide',
+            ];
+        }
+        return $response;
     }
 }
