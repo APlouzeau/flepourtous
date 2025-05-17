@@ -46,6 +46,19 @@ export async function verifyToken(jwt: string) {
     return payload;
 }
 
+export async function generateRefreshedToken(payload: { cookiePHP: string; role: string }) {
+    const newJwt = await new SignJWT({ cookiePHP: payload.cookiePHP, role: payload.role })
+        .setProtectedHeader({ alg: "HS256" })
+        .setIssuedAt() // Définit une nouvelle date d'émission
+        .setExpirationTime("1h") // Définit une nouvelle expiration (1h à partir de maintenant)
+        .sign(new TextEncoder().encode(process.env.JWT_SECRET));
+
+    return {
+        token: newJwt,
+        expires: new Date(Date.now() + 1 * 60 * 60 * 1000), // Calcule la nouvelle date d'expiration exacte
+    };
+}
+
 export async function getCountry() {
     const forwardedFor = (await headers()).get("x-forwarded-for");
     const realIp = (await headers()).get("x-real-ip");
