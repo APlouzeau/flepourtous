@@ -18,8 +18,8 @@ jobs:
             - name: deploy
               run: |
                   cd ~/projects/flepourtous
-                  git checkout dev
-                  git pull origin dev
+                  git checkout preprod
+                  git pull origin preprod
                   cd backend
                   composer install --no-dev --optimize-autoloader
                   cd ..
