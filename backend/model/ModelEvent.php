@@ -5,7 +5,7 @@ require_once APP_PATH . "/class/ClassDatabase.php";
 class ModelEvent extends  ClassDatabase
 {
 
-    public function getAvailableTimeSlots($date)
+    public function getOccupiedTimeSlots($date)
     {
         $req = $this->conn->prepare('SELECT startDateTime, duration FROM event WHERE DATE(startDateTime) = :date');
         $req->bindValue(':date', $date, PDO::PARAM_STR);
@@ -17,14 +17,16 @@ class ModelEvent extends  ClassDatabase
                 $currentSlotTime = new DateTime($data['startDateTime']);
                 $numberOfSlots = ceil($data['duration'] / 15);
                 for ($i = 0; $i < $numberOfSlots; $i++) {
-                    $occupiedTimeSlot[] = $currentSlotTime->format('H:i');
+                    $occupiedTimeSlot[] = $currentSlotTime->format('Y-m-d H:i:s');
                     $currentSlotTime->modify('+15 minutes');
                 }
             }
+            $occupiedTimeSlot = array_unique($occupiedTimeSlot);
+            sort($occupiedTimeSlot);
+            return array_values($occupiedTimeSlot);
+        } else {
+            return [];
         }
-        $occupiedTimeSlot = array_unique($occupiedTimeSlot);
-        sort($occupiedTimeSlot);
-        return array_values($occupiedTimeSlot);
     }
     public function getEventsUser(int $idUser)
     {
@@ -36,20 +38,16 @@ class ModelEvent extends  ClassDatabase
             $events = [];
         } else {
             foreach ($datas as $data) {
-                $dateObj = new DateTime($data['startDateTime']);
-                $startDate = $dateObj->format('d/m/Y');
-                $startTime = $dateObj->format('H:i');
                 $events[] = [
                     'eventId' => $data['eventId'],
                     'userId' => $data['userId'],
                     'description' => $data['description'],
                     'duration' => $data['duration'],
                     'createdAt' => $data['createdAt'],
-                    'startDate' => $startDate,
-                    'startTime' => $startTime,
                     'updatedAt' => $data['updatedAt'],
                     'status' => $data['status'],
                     'visioLink' => $data['visioLink'],
+                    'startDateTime' => $data['startDateTime'],
                 ];
             }
         }
@@ -92,18 +90,14 @@ class ModelEvent extends  ClassDatabase
             return [];
         } else {
             foreach ($datas as $data) {
-                $dateObj = new DateTime($data['startDateTime']);
-                $startDate = $dateObj->format('d/m/Y');
-                $startTime = $dateObj->format('H:i');
                 $events[] = [
                     'eventId' => $data['eventId'],
                     'studentName' => $data['firstName'] . ' ' . $data['lastName'],
                     'description' => $data['description'],
                     'duration' => $data['duration'],
                     'status' => $data['status'],
-                    'startDate' => $startDate,
-                    'startTime' => $startTime,
                     'visioLink' => $data['visioLink'],
+                    'startDateTime' => $data['startDateTime'],
                 ];
             }
         }

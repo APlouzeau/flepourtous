@@ -4,7 +4,6 @@ export interface showBasicAppointmentProps {
     description: string;
     duration: string;
     status: string;
-    startDate: string;
-    startTime: string;
     visioLink: string;
+    startDateTime: string;
 }
