@@ -1,5 +1,7 @@
 <?php
 
+use Google\Service\Adsense\TimeZone;
+
 require_once APP_PATH . 'vendor/autoload.php';
 
 
@@ -90,6 +92,7 @@ class ControllerCalendar
                 return;
             }
         };
+
         $startDateTime = $data['startDate'] . ' ' . $data['startTime'] . ':00';
         $userTimeZone = $data['userTimeZone'];
         $userStartDateTime = new DateTime($startDateTime, new DateTimeZone($userTimeZone));
@@ -332,26 +335,72 @@ class ControllerCalendar
         echo json_encode($response);
     }
 
-    public function getAvailableTimeSlots()
+    public function getOccupiedTimeSlots()
     {
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
+
+        $utcTimeZone = new DateTimeZone('UTC'); // La timezone de la base de données
+        $luluTimeZone = new DateTimeZone('Europe/Paris');
+
+        //$userTimeZone = new DateTimeZone($data['userTimeZone']); // Timzone de l'utilisateur
+        $userTimeZone = new DateTimeZone('Asia/Tokyo'); // Timzone de l'utilisateur
+
+        $userDate = $data['date']; // La date demandée par l'utilisateur
+
+        $startTime = new DateTime($userDate . ' 08:00:00', $luluTimeZone); // Crée un objet DateTime pour 8h00
+        $startTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
+
+        $endTime = new DateTime($userDate . ' 22:00:00', $luluTimeZone);
+        $endTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
+
+        $startLunch = new DateTime($userDate . ' 12:00:00', $luluTimeZone);
+        $startLunch->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
+
+        $endLunch = new DateTime($userDate . ' 14:00:00', $luluTimeZone);
+        $endLunch->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
+
+        $userDateReference = new DateTime($userDate . "00:00:00", $userTimeZone); // Crée un objet DateTime avec la date UTC
+        $userDateUtc = $userDateReference->setTimezone($utcTimeZone)->format('Y-m-d'); // Crée un objet DateTime avec la date UTC
+
+
         $modelEvent = new ModelEvent();
-        $events = $modelEvent->getAvailableTimeSlots($data['date']);
-        if (count($events) == 0) {
-            $response = [
-                'code' => 0,
-                'message' => 'Pas de rendez-vous'
-            ];
-        } else {
-            $response = [
-                'code' => 1,
-                'message' => 'Rendez-vous récupérés avec succès',
-                'data' => $events
-            ];
+        $events = $modelEvent->getOccupiedTimeSlots($startTime->format('Y-m-d')); // Récupère les événements de la base de données
+        $availableTimeSlots = [];
+
+        $interval = new DateInterval('PT15M');
+        $morning = new DatePeriod($startTime, $interval, $startLunch);
+        $afternoon = new DatePeriod($endLunch, $interval, $endTime);
+
+        foreach ($morning as $time) {
+            $timeString = (clone $time)->format('Y-m-d H:i:s');
+            if (!in_array($timeString, $events)) {
+                $availableTimeSlots[] = $time;
+            }
         }
-        echo json_encode($events);
+
+        foreach ($afternoon as $time) {
+            $timeString = (clone $time)->format('Y-m-d H:i:s');
+            if (!in_array($timeString, $events)) {
+                $availableTimeSlots[] = $time;
+            }
+        }
+
+        $lookupTimestamps = array_map(function ($element) {
+            return $element->getTimestamp();
+        }, $availableTimeSlots);
+
+        $finalAvailableTimeSlots = [];
+
+        foreach ($availableTimeSlots as $slotTime) {
+            $slotTooShort = (clone $slotTime)->modify('+15 minutes');
+            if (in_array($slotTooShort->getTimestamp(), $lookupTimestamps)) {
+                $finalAvailableTimeSlots[] = $slotTime->setTimezone($userTimeZone)->format('H:i');
+            }
+        }
+
+        echo json_encode($finalAvailableTimeSlots);
     }
 }

@@ -1,10 +1,11 @@
 "use client";
 import { getAvailableTimeSlots, registerAppointment } from "./AppointmentAction";
-import { useEffect, useId, useMemo } from "react";
+import { use, useEffect, useId, useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { SelectNative } from "@/components/ui/select-native";
+import { time } from "console";
 
 export default function NewAppointmentForm() {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -12,11 +13,11 @@ export default function NewAppointmentForm() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    const [timezone, setTimezone] = useState<string>("");
+    const [userTimezone, setUserTimezone] = useState<string>("");
 
     useEffect(() => {
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        setTimezone(userTimezone);
+        setUserTimezone(userTimezone);
     }, []);
 
     const id = useId();
@@ -45,11 +46,22 @@ export default function NewAppointmentForm() {
 
     useEffect(() => {
         const searchAvailableTimeSlots = async () => {
-            const availabledSlots = await getAvailableTimeSlots(date);
-            setTimeSlots(availabledSlots);
+            if (date && userTimezone) {
+                setLoading(true);
+                try {
+                    const availabledSlots = await getAvailableTimeSlots(date, userTimezone);
+                    setTimeSlots(availabledSlots);
+                } catch (error) {
+                    console.error("Error fetching available time slots:", error);
+                } finally {
+                    setLoading(false);
+                }
+            } else {
+                setTimeSlots([]);
+            }
         };
         searchAvailableTimeSlots();
-    }, [date]);
+    }, [date, userTimezone]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -70,10 +82,10 @@ export default function NewAppointmentForm() {
 
     return (
         <form onSubmit={handleSubmit} method="POST" className="max-w-md mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
-            {timezone && (
+            {userTimezone && (
                 <div className="space-y-2 min-w-[300px]">
                     <Label htmlFor={id}>Fuseau Horaire (native)</Label>
-                    <SelectNative id={id} name="userTimeZone" defaultValue={timezone}>
+                    <SelectNative id={id} name="userTimeZone" defaultValue={userTimezone}>
                         {formattedTimezones.map(({ value, label }) => (
                             <option key={value} value={value}>
                                 {label}
