@@ -63,6 +63,8 @@ class ControllerCalendar
 
     public function createEvent()
     {
+
+
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
@@ -76,29 +78,51 @@ class ControllerCalendar
         }
         $userId = $_SESSION['idUser'];
         $description = $data['description'];
-        $duration = 30; //$data['duration'];
+        $duration = $data['duration'];
         $startDateTime = $data['startDate'] . ' ' . $data['startTime'] . ':00';
         $createdAt = date('Y-m-d H:i:s');
         $updatedAt = date('Y-m-d H:i:s');
         $status = 'active';
         $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
+        $userTimeZone = $data['userTimeZone'];
+        $userStartDateTime = new DateTime($startDateTime, new DateTimeZone($userTimeZone));
+        $userStartDateTimeUTC = $userStartDateTime->setTimezone(new DateTimeZone('UTC'));
+        $userStartDateTimeUTCToString = $userStartDateTimeUTC->format('Y-m-d H:i:s');
+
 
         try {
-            $timeZone = new DateTimeZone('Europe/Paris');
-            $startObj = new DateTime($startDateTime, $timeZone);
+            $utcDateTimeForGoogle = new DateTime($userStartDateTimeUTCToString, new DateTimeZone('UTC'));
+
+            $parisStartDateTime = (clone $utcDateTimeForGoogle)->setTimezone(new DateTimeZone('Europe/Paris'));
+            $googleStartDateTime = $parisStartDateTime->format(DateTime::RFC3339);
+
             $interval = new DateInterval('PT' . $duration . 'M');
+            $utcEndDateTimeForGoogle = (clone $utcDateTimeForGoogle)->add($interval);
+            $parisEndDateTime = $utcEndDateTimeForGoogle->setTimezone(new DateTimeZone('Europe/Paris'));
+            $googleEndDateTime = $parisEndDateTime->format(DateTime::RFC3339);
 
-            $endObj = clone $startObj;
-            $endObj->add($interval);
-
-            $googleStartDateTime = $startObj->format(DateTime::RFC3339);
-            $googleEndDateTime = $endObj->format(DateTime::RFC3339);
-
-
-            //GOOGLE CALENDAR
+            //GOOGLE INSTANCE
             $client = $this->getClient();
             $service = new Google_Service_Calendar($client);
 
+            // GOOGLE CALENDAR CHECK
+            $checkParams = [
+                'timeMin' => $googleStartDateTime,
+                'timeMax' => $googleEndDateTime,
+                'timeZone' => 'Europe/Paris',
+                'singleEvents' => true,
+            ];
+            $existingEvents = $service->events->listEvents(GOOGLE_CALENDAR_ID, $checkParams);
+            if (count($existingEvents->getItems()) > 0) {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Un événement existe déjà à cette date et heure.',
+                ];
+                echo json_encode($response);
+                return;
+            }
+
+            //GOOGLE CALENDAR register
             $event = new Google_Service_Calendar_Event([
                 'summary' => $appointmentName,
                 'description' => $description ?? '',
@@ -124,12 +148,12 @@ class ControllerCalendar
             }
 
             //Visio
-            $visioApiKey = VISIO_API_KEY; // Remplacez par votre clé API
+            $visioApiKey = VISIO_API_KEY;
             $url = 'https://api.daily.co/v1/rooms/';
 
-            $startDateTimeUnix = strtotime($startDateTime);
+            $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
             $durationInSeconds = $duration * 60; // Convertir la durée en secondes
-            $data = [
+            $visio = [
                 'privacy' => 'public',
                 'properties' => [
                     'nbf' => $startDateTimeUnix - 15 * 60,
@@ -151,7 +175,7 @@ class ControllerCalendar
                 'http' => [
                     'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $visioApiKey,
                     'method' => 'POST',
-                    'content' => json_encode($data)
+                    'content' => json_encode($visio)
                 ]
             ];
 
@@ -178,7 +202,7 @@ class ControllerCalendar
                 'description' => $description,
                 'duration' => $duration,
                 'createdAt' => $createdAt,
-                'startDateTime' => $startDateTime,
+                'startDateTime' => $userStartDateTimeUTCToString,
                 'updatedAt' => $updatedAt,
                 'status' => $status,
                 'visioLink' => $roomUrl,
@@ -198,12 +222,10 @@ class ControllerCalendar
                     'message' => 'Événement enregistré en base de données avec succès',
                 ];
             }
-
-            echo json_encode(['success' => true, 'eventId' => $createdEvent->getId()]);
         } catch (Exception $e) {
             echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage()]);
             return;
-        }
+        };
         echo json_encode($response);
     }
 

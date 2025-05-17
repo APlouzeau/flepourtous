@@ -11,9 +11,8 @@ export async function registerAppointment(formData: FormData) {
         startDate: formData.get("startDate"),
         startTime: formData.get("startTime"),
         duration: formData.get("duration"),
+        userTimeZone: formData.get("userTimeZone"),
     };
-    console.log("send : Form data:", formData);
-    console.log("Data to be sent:", data);
 
     try {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/createEvent`, data, {
@@ -23,9 +22,14 @@ export async function registerAppointment(formData: FormData) {
             },
             withCredentials: true,
         });
-        console.log("Response from register:", response.data);
-    } catch (error) {
+        console.log("Response from appointmentAction:", response.data);
+        return response.data;
+    } catch (error: any) {
         console.error("Error during registration:", error);
+        if (error.response && error.response.data) {
+            return error.response.data;
+        }
+        return { code: 0, message: "Une erreur s'est produite lors de l'enregistrement." };
     }
 }
 

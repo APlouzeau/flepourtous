@@ -44,13 +44,10 @@ class ControllerUser
             $password = $data['password'];
 
             $userModel = new ModelUser();
-            $user = new EntitieUser([
-                'mail' => $mail,
-                'password' => $password
-            ]);
 
 
-            $userVerify = $userModel->login($user);
+
+            $userVerify = $userModel->login($mail, $password);
             if ($userVerify) {
                 $_SESSION['idUser'] = $userVerify['idUser'];
                 $_SESSION['nickName'] = $userVerify['nickName'];
@@ -229,7 +226,7 @@ class ControllerUser
         exit();
     }
 
-    public function controlUserInformations($data)
+    public function controlUserInformations(array $data)
     {
         if (!filter_var($data['mail'], FILTER_VALIDATE_EMAIL)) {
             $response = [
@@ -260,7 +257,7 @@ class ControllerUser
         return $response;
     }
 
-    public function controlUserPasswordFormat($data)
+    public function controlUserPasswordFormat(array $data)
     {
         if (strlen($data['password']) < 12) {
             $response = [

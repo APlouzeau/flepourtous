@@ -36,20 +36,16 @@ class ModelEvent extends  ClassDatabase
             $events = [];
         } else {
             foreach ($datas as $data) {
-                $dateObj = new DateTime($data['startDateTime']);
-                $startDate = $dateObj->format('d/m/Y');
-                $startTime = $dateObj->format('H:i');
                 $events[] = [
                     'eventId' => $data['eventId'],
                     'userId' => $data['userId'],
                     'description' => $data['description'],
                     'duration' => $data['duration'],
                     'createdAt' => $data['createdAt'],
-                    'startDate' => $startDate,
-                    'startTime' => $startTime,
                     'updatedAt' => $data['updatedAt'],
                     'status' => $data['status'],
                     'visioLink' => $data['visioLink'],
+                    'startDateTime' => $data['startDateTime'],
                 ];
             }
         }
