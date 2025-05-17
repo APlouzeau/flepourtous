@@ -345,8 +345,8 @@ class ControllerCalendar
         $utcTimeZone = new DateTimeZone('UTC'); // La timezone de la base de données
         $luluTimeZone = new DateTimeZone('Europe/Paris');
 
-        //$userTimeZone = new DateTimeZone($data['userTimeZone']); // Timzone de l'utilisateur
-        $userTimeZone = new DateTimeZone('Asia/Tokyo'); // Timzone de l'utilisateur
+        $userTimeZone = new DateTimeZone($data['userTimeZone']); // Timzone de l'utilisateur
+        //$userTimeZone = new DateTimeZone('Asia/Tokyo'); // Timzone de l'utilisateur
 
         $userDate = $data['date']; // La date demandée par l'utilisateur
 
