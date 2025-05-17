@@ -64,6 +64,7 @@ export default function NewAppointmentForm() {
             setSuccess(response.message || "Rendez-vous enregistré avec succès !");
         } else {
             setError(response.message || "Une erreur s'est produite lors de l'enregistrement.");
+            console.log("Error response:", response.data);
         }
     };
 

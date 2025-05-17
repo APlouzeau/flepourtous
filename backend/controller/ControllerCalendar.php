@@ -72,22 +72,55 @@ class ControllerCalendar
 
         if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration'])) {
             http_response_code(400); // Bad Request
-            header('Content-Type: application/json');
-            echo json_encode(['error' => 'Données manquantes pour créer l\'événement (description, start, end requis).']);
+            $response = [
+                'code' => 0,
+                'message' => 'Données manquante pour créer le rendez-vous.',
+            ];
+            echo json_encode($response);
             return;
-        }
-        $userId = $_SESSION['idUser'];
-        $description = $data['description'];
-        $duration = $data['duration'];
+        } else {
+            $availableDuration = [30, 45, 60];
+            if ($data['duration'] && !in_array($data['duration'], $availableDuration)) {
+                http_response_code(400);
+                $response = [
+                    'code' => 0,
+                    'message' => 'La durée doit être de 30, 45 ou 60 minutes.',
+                ];
+                echo json_encode($response);
+                return;
+            }
+        };
         $startDateTime = $data['startDate'] . ' ' . $data['startTime'] . ':00';
-        $createdAt = date('Y-m-d H:i:s');
-        $updatedAt = date('Y-m-d H:i:s');
-        $status = 'active';
-        $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
         $userTimeZone = $data['userTimeZone'];
         $userStartDateTime = new DateTime($startDateTime, new DateTimeZone($userTimeZone));
         $userStartDateTimeUTC = $userStartDateTime->setTimezone(new DateTimeZone('UTC'));
         $userStartDateTimeUTCToString = $userStartDateTimeUTC->format('Y-m-d H:i:s');
+        $nowUTC = new DateTime('now', new DateTimeZone('UTC'));
+        $appointDateTimeMin = $nowUTC->add(new DateInterval('PT8H'));
+
+        if ($userStartDateTimeUTC < $appointDateTimeMin) {
+            http_response_code(400); // Bad Request
+            $response = [
+                'code' => 0,
+                'message' => 'La date et l\'heure de début doivent être au moins 8 heures dans le futur.',
+                'data' => [
+                    'appointDateTimeMin' => $appointDateTimeMin->format('Y-m-d H:i:s'),
+                    'userStartDateTimeUTCToString' => $userStartDateTimeUTCToString,
+
+                ]
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $userId = $_SESSION['idUser'];
+        $description = $data['description'];
+        $duration = $data['duration'];
+        $createdAt = date('Y-m-d H:i:s');
+        $updatedAt = date('Y-m-d H:i:s');
+        $status = 'active';
+        $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
+
 
 
         try {

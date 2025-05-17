@@ -13,7 +13,7 @@ export async function registerAppointment(formData: FormData) {
         duration: formData.get("duration"),
         userTimeZone: formData.get("userTimeZone"),
     };
-
+    console.log("Data to be sent:", data);
     try {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/createEvent`, data, {
             headers: {
