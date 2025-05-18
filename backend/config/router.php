@@ -25,3 +25,6 @@ $router->addRoute('POST', BASE_URL . "api/createEvent", 'ControllerCalendar', 'c
 $router->addRoute('POST', BASE_URL . "api/listEvents", 'ControllerCalendar', 'listEvents');
 $router->addRoute('POST', BASE_URL . "api/deleteEvent", 'ControllerCalendar', 'deleteEvent');
 $router->addRoute('POST', BASE_URL . "api/getAvailableTimeSlots", 'ControllerCalendar', 'getOccupiedTimeSlots');
+
+//Google
+$router->addRoute('POST', BASE_URL . "api/handleGoogleNotification", 'ControllerGoogle', 'handleGoogleNotification');
