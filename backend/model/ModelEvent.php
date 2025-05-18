@@ -71,6 +71,19 @@ class ModelEvent extends  ClassDatabase
         return $req->execute();
     }
 
+    public function updateEvent(EntitieEvent $event)
+    {
+        $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, updatedAt = :updatedAt, status = :status, visioLink = :visioLink, startDateTime = :startDateTime WHERE eventId = :eventId');
+        $req->bindValue(':eventId', $event->getEventId(), PDO::PARAM_STR);
+        $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
+        $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
+        $req->bindValue(':updatedAt', $event->getUpdatedAt(), PDO::PARAM_STR);
+        $req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
+        $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
+        $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
+        return $req->execute();
+    }
+
     public function deleteEvent(string $eventId)
     {
         $req = $this->conn->prepare('DELETE FROM event WHERE eventId = :eventId');
@@ -102,5 +115,18 @@ class ModelEvent extends  ClassDatabase
             }
         }
         return $events;
+    }
+
+    public function checkEvent(EntitieEvent $event)
+    {
+        $req = $this->conn->prepare('SELECT * FROM event WHERE eventId = :eventId');
+        $req->bindValue(':eventId', $event->getEventId(), PDO::PARAM_STR);
+        $req->execute();
+        $datas = $req->fetch();
+        if ($datas) {
+            $this->updateEvent($event);
+        } else {
+            $this->createEvent($event);
+        }
     }
 }
