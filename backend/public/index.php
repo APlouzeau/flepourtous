@@ -7,6 +7,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-W
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 define("APP_PATH", __DIR__ . "/../");
 define("BASE_URL", "/");
+
 require_once APP_PATH . "config/config.php";
 
 spl_autoload_register(function ($class_name) {

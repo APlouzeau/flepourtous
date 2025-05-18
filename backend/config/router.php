@@ -28,3 +28,4 @@ $router->addRoute('POST', BASE_URL . "api/getAvailableTimeSlots", 'ControllerCal
 
 //Google
 $router->addRoute('POST', BASE_URL . "api/handleGoogleNotification", 'ControllerGoogle', 'handleGoogleNotification');
+$router->addRoute('POST', BASE_URL . "api/setupGoogleWatch", 'ControllerGoogle', 'setupCalendarWatch');
