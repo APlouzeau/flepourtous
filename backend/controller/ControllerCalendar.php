@@ -31,11 +31,11 @@ class ControllerCalendar
             throw new Exception("Fichier de clé du compte de service introuvable : " . $keyFilePath);
         }
 
-        $client = new Google_Client();
+        $client = new \Google\Client();
         // Utilise setAuthConfig avec le chemin du fichier de clé
         $client->setAuthConfig($keyFilePath);
         // Ajoute le scope nécessaire pour accéder à Calendar
-        $client->addScope(Google_Service_Calendar::CALENDAR);
+        $client->addScope(Google\Service\Calendar::CALENDAR);
 
         // Pas besoin de setAccessToken, setRedirectUri, etc.
         // Le compte de service s'authentifie avec la clé.
@@ -139,7 +139,7 @@ class ControllerCalendar
 
             //GOOGLE INSTANCE
             $client = $this->getClient();
-            $service = new Google_Service_Calendar($client);
+            $service = new Google\Service\Calendar($client);
 
             // GOOGLE CALENDAR CHECK
             $checkParams = [
@@ -159,7 +159,7 @@ class ControllerCalendar
             }
 
             //GOOGLE CALENDAR register
-            $event = new Google_Service_Calendar_Event([
+            $event = new Google\Service\Calendar\Event([
                 'summary' => $appointmentName,
                 'description' => $description ?? '',
                 'start' => [
@@ -305,7 +305,7 @@ class ControllerCalendar
             return;
         }
         $client = $this->getClient();
-        $service = new Google_Service_Calendar($client);
+        $service = new Google\Service\Calendar($client);
         $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['eventId']);
 
         if (!$deletedEvent) {
