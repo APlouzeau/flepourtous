@@ -47,9 +47,15 @@ export default function NewAppointmentForm() {
         const searchAvailableTimeSlots = async () => {
             if (date && userTimezone) {
                 setLoading(true);
+                setError(null);
+                setTimeSlots([]);
                 try {
                     const availabledSlots = await getAvailableTimeSlots(date, userTimezone);
-                    setTimeSlots(availabledSlots);
+                    if (availabledSlots.length == 0) {
+                        setError("Aucun créneau horaire disponible pour cette date.");
+                    } else {
+                        setTimeSlots(availabledSlots);
+                    }
                 } catch (error) {
                     console.error("Error fetching available time slots:", error);
                 } finally {
@@ -57,6 +63,7 @@ export default function NewAppointmentForm() {
                 }
             } else {
                 setTimeSlots([]);
+                setError(null);
             }
         };
         searchAvailableTimeSlots();

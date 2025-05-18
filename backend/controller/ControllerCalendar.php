@@ -373,17 +373,20 @@ class ControllerCalendar
         $interval = new DateInterval('PT15M');
         $morning = new DatePeriod($startTime, $interval, $startLunch);
         $afternoon = new DatePeriod($endLunch, $interval, $endTime);
+        $now = new DateTime('now', $utcTimeZone);
+        $nextPossibleAppointment = (clone $now)->modify('+8 hours');
+
 
         foreach ($morning as $time) {
             $timeString = (clone $time)->format('Y-m-d H:i:s');
-            if (!in_array($timeString, $events)) {
+            if (!in_array($timeString, $events) && $time >= $nextPossibleAppointment) {
                 $availableTimeSlots[] = $time;
             }
         }
 
         foreach ($afternoon as $time) {
             $timeString = (clone $time)->format('Y-m-d H:i:s');
-            if (!in_array($timeString, $events)) {
+            if (!in_array($timeString, $events) && $time >= $nextPossibleAppointment) {
                 $availableTimeSlots[] = $time;
             }
         }
