@@ -31,11 +31,11 @@ class ControllerCalendar
             throw new Exception("Fichier de clé du compte de service introuvable : " . $keyFilePath);
         }
 
-        $client = new Google_Client();
+        $client = new \Google\Client();
         // Utilise setAuthConfig avec le chemin du fichier de clé
         $client->setAuthConfig($keyFilePath);
         // Ajoute le scope nécessaire pour accéder à Calendar
-        $client->addScope(Google_Service_Calendar::CALENDAR);
+        $client->addScope(Google\Service\Calendar::CALENDAR);
 
         // Pas besoin de setAccessToken, setRedirectUri, etc.
         // Le compte de service s'authentifie avec la clé.
@@ -79,7 +79,7 @@ class ControllerCalendar
                 'message' => 'Données manquante pour créer le rendez-vous.',
             ];
             echo json_encode($response);
-            return;
+            exit();
         } else {
             $availableDuration = [30, 45, 60];
             if ($data['duration'] && !in_array($data['duration'], $availableDuration)) {
@@ -89,7 +89,7 @@ class ControllerCalendar
                     'message' => 'La durée doit être de 30, 45 ou 60 minutes.',
                 ];
                 echo json_encode($response);
-                return;
+                exit();
             }
         };
 
@@ -109,11 +109,10 @@ class ControllerCalendar
                 'data' => [
                     'appointDateTimeMin' => $appointDateTimeMin->format('Y-m-d H:i:s'),
                     'userStartDateTimeUTCToString' => $userStartDateTimeUTCToString,
-
                 ]
             ];
             echo json_encode($response);
-            return;
+            exit();
         }
 
         $userId = $_SESSION['idUser'];
@@ -123,8 +122,6 @@ class ControllerCalendar
         $updatedAt = date('Y-m-d H:i:s');
         $status = 'active';
         $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
-
-
 
         try {
             $utcDateTimeForGoogle = new DateTime($userStartDateTimeUTCToString, new DateTimeZone('UTC'));
@@ -139,7 +136,7 @@ class ControllerCalendar
 
             //GOOGLE INSTANCE
             $client = $this->getClient();
-            $service = new Google_Service_Calendar($client);
+            $service = new Google\Service\Calendar($client);
 
             // GOOGLE CALENDAR CHECK
             $checkParams = [
@@ -155,11 +152,11 @@ class ControllerCalendar
                     'message' => 'Un événement existe déjà à cette date et heure.',
                 ];
                 echo json_encode($response);
-                return;
+                exit();
             }
 
             //GOOGLE CALENDAR register
-            $event = new Google_Service_Calendar_Event([
+            $event = new Google\Service\Calendar\Event([
                 'summary' => $appointmentName,
                 'description' => $description ?? '',
                 'start' => [
@@ -170,7 +167,6 @@ class ControllerCalendar
                     'dateTime' => $googleEndDateTime, // Format RFC3339 : '2025-05-03T11:00:00+02:00'
                     'timeZone' => 'Europe/Paris',
                 ],
-
             ]);
 
             $createdEvent = $service->events->insert(GOOGLE_CALENDAR_ID, $event);
@@ -180,7 +176,7 @@ class ControllerCalendar
                     'message' => 'Erreur lors de la création de l\'événement dans Google Calendar',
                 ];
                 echo json_encode($response);
-                return;
+                exit();
             }
 
             //Visio
@@ -305,7 +301,7 @@ class ControllerCalendar
             return;
         }
         $client = $this->getClient();
-        $service = new Google_Service_Calendar($client);
+        $service = new Google\Service\Calendar($client);
         $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['eventId']);
 
         if (!$deletedEvent) {
@@ -373,17 +369,20 @@ class ControllerCalendar
         $interval = new DateInterval('PT15M');
         $morning = new DatePeriod($startTime, $interval, $startLunch);
         $afternoon = new DatePeriod($endLunch, $interval, $endTime);
+        $now = new DateTime('now', $utcTimeZone);
+        $nextPossibleAppointment = (clone $now)->modify('+8 hours');
+
 
         foreach ($morning as $time) {
             $timeString = (clone $time)->format('Y-m-d H:i:s');
-            if (!in_array($timeString, $events)) {
+            if (!in_array($timeString, $events) && $time >= $nextPossibleAppointment) {
                 $availableTimeSlots[] = $time;
             }
         }
 
         foreach ($afternoon as $time) {
             $timeString = (clone $time)->format('Y-m-d H:i:s');
-            if (!in_array($timeString, $events)) {
+            if (!in_array($timeString, $events) && $time >= $nextPossibleAppointment) {
                 $availableTimeSlots[] = $time;
             }
         }
