@@ -1,11 +1,10 @@
 "use client";
 import { getAvailableTimeSlots, registerAppointment } from "./AppointmentAction";
-import { use, useEffect, useId, useMemo } from "react";
+import { useEffect, useId, useMemo } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { SelectNative } from "@/components/ui/select-native";
-import { time } from "console";
 
 export default function NewAppointmentForm() {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);

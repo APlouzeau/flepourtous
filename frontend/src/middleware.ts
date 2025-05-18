@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, generateRefreshedToken } from "./lib/session";
 
@@ -10,7 +9,7 @@ const REFRESH_IF_OLDER_THAN_MS = ONE_HOUR_IN_MS / 2;
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     // Commencer par une réponse par défaut qui continue la chaîne des middlewares
-    let response = NextResponse.next();
+    const response = NextResponse.next();
 
     if (isProtectedRoute.includes(pathname)) {
         const sessionCookie = request.cookies.get("session");
@@ -55,16 +54,11 @@ export async function middleware(request: NextRequest) {
                     path: "/",
                     expires: newExpires,
                 });
-                // console.log("Session token refreshed. New expiration:", newExpires);
             }
-            // Si le token est valide et n'a pas besoin de rafraîchissement, ou s'il vient d'être rafraîchi,
-            // la 'response' (qui est NextResponse.next() ou celle avec le cookie mis à jour) est retournée.
             return response;
         } catch (error) {
-            // console.error("Middleware token verification error:", error);
-            // Le token est invalide (expiré, malformé, signature incorrecte)
+            console.error("Middleware token verification error:", error);
             const redirectResponse = NextResponse.redirect(new URL("/connexion", request.url));
-            // Supprimer le cookie invalide du navigateur
             redirectResponse.cookies.delete("session");
             return redirectResponse;
         }

@@ -51,7 +51,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
     };
 
     if (!userTimezone) {
-        return <p>Chargement du fuseau horaire de l'utilisateur...</p>;
+        return <p>Chargement du fuseau horaire de l&apos;utilisateur...</p>;
     }
 
     return (

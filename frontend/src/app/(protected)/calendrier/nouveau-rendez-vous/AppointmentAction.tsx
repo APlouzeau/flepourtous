@@ -24,9 +24,9 @@ export async function registerAppointment(formData: FormData) {
         });
         console.log("Response from appointmentAction:", response.data);
         return response.data;
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error during registration:", error);
-        if (error.response && error.response.data) {
+        if (axios.isAxiosError(error) && error.response && error.response.data) {
             return error.response.data;
         }
         return { code: 0, message: "Une erreur s'est produite lors de l'enregistrement." };
