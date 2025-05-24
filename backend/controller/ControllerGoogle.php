@@ -20,6 +20,13 @@ class ControllerGoogle
     public function setupCalendarWatch()
     {
         try {
+            $apiKey = $_SERVER['HTTP_API_KEY'] ?? null;
+            error_log("Clé API reçue : " . $apiKey);
+            if ($apiKey !== CRON_KEY) {
+                http_response_code(403);
+                echo "Clé API invalide.";
+                return;
+            }
             $client = $this->getClient();
             $service = new Google\Service\Calendar($client);
 
@@ -27,12 +34,12 @@ class ControllerGoogle
             $channel->setId(uniqid('flepourtous_channel_', false));
             $channel->setType('web_hook');
             $channel->setAddress(URI . "api/handleGoogleNotification"); // L'URL de votre webhook
-            $channel->setParams(['ttl' => 3600]); // Durée de vie du canal en secondes
+            $channel->setParams(['ttl' => 7 * 24 * 3600]); // Durée de vie du canal en secondes
             $channel->setToken(GOOGLE_TOKEN); // Un token pour vérifier l'authenticité de la notification
             $watchResponse = $service->events->watch(GOOGLE_CALENDAR_ID, $channel);
 
             $modelGoogle = new ModelGoogle();
-            $modelGoogle->saveWatchResponse($watchResponse);
+            $modelGoogle->checkChannel($watchResponse);
 
             echo "Canal de notification configuré. ID: " . $watchResponse->getId() . " Expire le: " . date('Y-m-d H:i:s', $watchResponse->getExpiration() / 1000);
         } catch (Exception $e) {
@@ -48,11 +55,11 @@ class ControllerGoogle
         $channelTokenHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_TOKEN'] ?? null; // Si tu as défini un toke
 
         $modelGoogle = new ModelGoogle();
-        $response = $modelGoogle->checkIfResponseExists($channelIdHeader);
+        $channel = $modelGoogle->checkIfChannelExists($channelIdHeader);
 
-        echo json_encode("Coucou");
-        if ($response) {
-            if ($channelTokenHeader !== $response['token']) {
+        if ($channel) {
+            if ($channelTokenHeader !== $channel['token']) {
+                http_response_code(401);
                 echo "Token non valide.";
                 return;
             }
@@ -74,6 +81,10 @@ class ControllerGoogle
                 case 'not_exists':
                     error_log("Notification reçue. ID de la notification : " . $channelIdHeader . ", État de la ressource : " . $resourceStateHeader . ", Numéro de message : " . $messageNumberHeader);
             }
+        } else {
+            http_response_code(404);
+            echo "Canal de notification non trouvé.";
+            error_log("Canal de notification non trouvé pour l'ID : " . $channelIdHeader);
         }
     }
 
@@ -161,40 +172,36 @@ class ControllerGoogle
             $dtStart = new DateTime($startDateTimeISO);
             $startDateTimeFormatted = $dtStart->format('Y-m-d H:i:s');
         } catch (Exception $e) {
-            error_log("Événement Google ID: " . $eventId . " - Erreur de formatage de startDateTimeISO: " . $startDateTimeISO . " - Erreur: " . $e->getMessage());
-            return; // Ne pas traiter si la date est invalide
+
+            return; 
         }
 
-        // Calcul de la durée de manière plus robuste
+        // Calcul de la durée de 
         try {
             $dtEnd = new DateTime($endDateTimeISO);
-            // $duration = (strtotime($endDateTimeISO) - strtotime($startDateTimeISO)) / 60; // Ancienne méthode
-            $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60; // Nouvelle méthode plus fiable
+
+            $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60; 
         } catch (Exception $e) {
-            error_log("Événement Google ID: " . $eventId . " - Erreur de calcul de duration avec startDateTimeISO: " . $startDateTimeISO . " et endDateTimeISO: " . $endDateTimeISO . " - Erreur: " . $e->getMessage());
             return; // Ne pas traiter si les dates pour la durée sont invalides
         }
 
         $description = $event->getSummary(); 
-error_log("ControllerGoogle - eventId: " . $eventId . " - Valeur de startDateTimeFormatted AVANT création EntitieEvent: " . $startDateTimeFormatted);
+
         $attendees = $event->getAttendees();
         $userId = null;
         if (!empty($attendees) && isset($attendees[0]) && $attendees[0] instanceof \Google\Service\Calendar\EventAttendee && $attendees[0]->getEmail()) {
             $userEmail = $attendees[0]->getEmail();
             $userId = $modelUser->checkMail($userEmail);
             if ($userId === null || $userId === false) {
-                error_log("Utilisateur non trouvé pour l'email: " . $userEmail . " (Événement Google ID: " . $eventId . ")");
                 return;
             }
         } else {
-            error_log("Aucun participant valide trouvé pour l'événement Google ID: " . $eventId . " pour déterminer l'utilisateur. Tentative avec le créateur/organisateur.");
             // Tentative avec le créateur
             $creator = $event->getCreator();
             if ($creator && $creator->getEmail()) {
                 $creatorEmail = $creator->getEmail();
                 $userId = $modelUser->checkMail($creatorEmail);
                 if ($userId === null || $userId === false) {
-                    error_log("Utilisateur non trouvé pour l'email du créateur: " . $creatorEmail . " (Événement Google ID: " . $eventId . ")");
                     return; // Ou autre logique
                 }
             } else {
@@ -204,11 +211,10 @@ error_log("ControllerGoogle - eventId: " . $eventId . " - Valeur de startDateTim
                     $organizerEmail = $organizer->getEmail();
                     $userId = $modelUser->checkMail($organizerEmail);
                     if ($userId === null || $userId === false) {
-                        error_log("Utilisateur non trouvé pour l'email de l'organisateur: " . $organizerEmail . " (Événement Google ID: " . $eventId . ")");
                         return; // Ou autre logique
                     }
                 } else {
-                    error_log("Ni participant, ni créateur, ni organisateur avec email trouvé pour l'événement Google ID: " . $eventId);
+
                     return; // Ou autre logique si aucun utilisateur ne peut être déterminé
                 }
             }
@@ -216,15 +222,17 @@ error_log("ControllerGoogle - eventId: " . $eventId . " - Valeur de startDateTim
 
 
         //--------------------------------------------
-   error_log("ControllerGoogle - eventId: " . $eventId . " - Valeur de startDateTimeFormatted AVANT création EntitieEvent: " . $startDateTimeFormatted);
-        error_log("ControllerGoogle - eventId: " . $eventId . " - Type de startDateTimeFormatted: " . gettype($startDateTimeFormatted));
+
+        $startDateTimeUtc = new DateTime($startDateTimeFormatted, new DateTimeZone('Europe/Paris'));
+        $startDateTimeUtc->setTimezone(new DateTimeZone('UTC'));
+        $startDateTimeUtcFormatted = $startDateTimeUtc->format('Y-m-d H:i:s');
 
         $eventDatabase = new EntitieEvent([
             'eventId' => $eventId,
             'userId' => $userId,
             'description' => $description,
             'duration' => $duration,
-            'startDateTime' => $startDateTimeFormatted,
+            'startDateTime' => $startDateTimeUtcFormatted,
         ]);
 
         $status = $event->getStatus();

@@ -2,8 +2,9 @@
 
 class EntitieGoogle
 {
-    private string $idResponse;
-    private string $idResource;
+    private string $canalId;
+    private string $resourceId;
+    private string $resourceUri;
     private int $expiration;
 
     public function __construct(array $data)
@@ -21,63 +22,42 @@ class EntitieGoogle
         }
     }
 
-    /**
-     * Get the value of idResponse
-     */
-    public function getIdResponse()
+    public function getCanalId(): string
     {
-        return $this->idResponse;
+        return $this->canalId;
     }
-
-    /**
-     * Set the value of idResponse
-     *
-     * @return  self
-     */
-    public function setIdResponse($idResponse)
+    public function setCanalId(string $canalId): self
     {
-        $this->idResponse = $idResponse;
-
+        $this->canalId = $canalId;
         return $this;
     }
-
-    /**
-     * Get the value of idResource
-     */
-    public function getIdResource()
+    public function getResourceId(): string
     {
-        return $this->idResource;
+        return $this->resourceId;
     }
-
-    /**
-     * Set the value of idResource
-     *
-     * @return  self
-     */
-    public function setIdResource($idResource)
+    public function setResourceId(string $resourceId): self
     {
-        $this->idResource = $idResource;
-
+        $this->resourceId = $resourceId;
         return $this;
     }
-
-    /**
-     * Get the value of expiration
-     */
-    public function getExpiration()
+    public function getResourceUri(): string
+    {
+        return $this->ressourceUri;
+    }
+    public function setResourceUri(string $resourceUri): self
+    {
+        $this->resourceUri = $resourceUri;
+        return $this;
+    }
+    public function getExpiration(): int
     {
         return $this->expiration;
     }
-
-    /**
-     * Set the value of expiration
-     *
-     * @return  self
-     */
-    public function setExpiration($expiration)
+    public function setExpiration(int $expiration): self
     {
         $this->expiration = $expiration;
-
         return $this;
     }
+
+    
 }

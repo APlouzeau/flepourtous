@@ -60,3 +60,6 @@ githubaction.yml
 /backend/vendor/
 /backend/config/client_*
 /backend/config/flepourtous-*
+
+#cron
+renew_google_watch.sh
