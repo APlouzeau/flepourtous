@@ -341,7 +341,7 @@ class ControllerCalendar
         $utcTimeZone = new DateTimeZone('UTC'); // La timezone de la base de données
         $luluTimeZone = new DateTimeZone('Europe/Paris');
 
-        $userTimeZone = new DateTimeZone($data['userTimeZone']); // Timzone de l'utilisateur
+        $userTimeZone = new DateTimeZone($data['userTimeZone']); // Timezone de l'utilisateur
         //$userTimeZone = new DateTimeZone('Asia/Tokyo'); // Timzone de l'utilisateur
 
         $userDate = $data['date']; // La date demandée par l'utilisateur
@@ -352,37 +352,46 @@ class ControllerCalendar
         $endTime = new DateTime($userDate . ' 22:00:00', $luluTimeZone);
         $endTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
 
-        $startLunch = new DateTime($userDate . ' 12:00:00', $luluTimeZone);
+/*         $startLunch = new DateTime($userDate . ' 12:00:00', $luluTimeZone);
         $startLunch->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
 
         $endLunch = new DateTime($userDate . ' 14:00:00', $luluTimeZone);
-        $endLunch->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
+        $endLunch->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime */
 
         $userDateReference = new DateTime($userDate . "00:00:00", $userTimeZone); // Crée un objet DateTime avec la date UTC
         $userDateUtc = $userDateReference->setTimezone($utcTimeZone)->format('Y-m-d'); // Crée un objet DateTime avec la date UTC
 
+        $controllerGoogle = new ControllerGoogle();
+        $events = $controllerGoogle->getAvaibilityOnGoogleCalendar($startTime, $endTime);
 
-        $modelEvent = new ModelEvent();
-        $events = $modelEvent->getOccupiedTimeSlots($startTime->format('Y-m-d')); // Récupère les événements de la base de données
+        error_log("Google Busy Periods (pour le jour demandé): " . print_r($events, true));
+
+        $interval = new DateInterval('PT15M'); // Intervalle de 15 minutes
+        $occupiedTimeSlots = [];
+
+        foreach ($events as $event) {
+            $periodStart = $event->getStart();
+            $periodEnd = $event->getEnd();
+            $period = new DatePeriod(
+                new DateTime($periodStart, new DateTimeZone('UTC')),
+                $interval,
+                new DateTime($periodEnd, new DateTimeZone('UTC'))
+            );
+            foreach ($period as $dt) {
+                $occupiedTimeSlots[] = $dt->setTimezone($utcTimeZone)->format('Y-m-d H:i:s');
+            }
+        }
+
         $availableTimeSlots = [];
 
-        $interval = new DateInterval('PT15M');
-        $morning = new DatePeriod($startTime, $interval, $startLunch);
-        $afternoon = new DatePeriod($endLunch, $interval, $endTime);
+        $day = new DatePeriod($startTime, $interval, $endTime);
         $now = new DateTime('now', $utcTimeZone);
         $nextPossibleAppointment = (clone $now)->modify('+8 hours');
 
 
-        foreach ($morning as $time) {
+        foreach ($day as $time) {
             $timeString = (clone $time)->format('Y-m-d H:i:s');
-            if (!in_array($timeString, $events) && $time >= $nextPossibleAppointment) {
-                $availableTimeSlots[] = $time;
-            }
-        }
-
-        foreach ($afternoon as $time) {
-            $timeString = (clone $time)->format('Y-m-d H:i:s');
-            if (!in_array($timeString, $events) && $time >= $nextPossibleAppointment) {
+            if (!in_array($timeString, $occupiedTimeSlots) && $time >= $nextPossibleAppointment) {
                 $availableTimeSlots[] = $time;
             }
         }
@@ -398,8 +407,8 @@ class ControllerCalendar
             if (in_array($slotTooShort->getTimestamp(), $lookupTimestamps)) {
                 $finalAvailableTimeSlots[] = $slotTime->setTimezone($userTimeZone)->format('H:i');
             }
-        }
-
+        } 
+        //echo json_encode($occupiedTimeSlots);
         echo json_encode($finalAvailableTimeSlots);
     }
 }

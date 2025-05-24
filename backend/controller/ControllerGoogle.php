@@ -123,6 +123,9 @@ class ControllerGoogle
                 $eventsResults = $service->events->listEvents($calendarId, ['syncToken' => $nextSyncToken]);
                 $events = $eventsResults->getItems();
                 foreach ($events as $event) {
+                    if ($event->getSummary() === 'Pause') {
+                        return; // Ignorer les événements de type "Pause"
+                    }
                     $this->updateCalendar($event);
                 }
             } catch (Exception $e) {
@@ -244,5 +247,34 @@ class ControllerGoogle
             $modelEvent->checkEvent($eventDatabase);
         }
 
+    }
+
+    public function getAvaibilityOnGoogleCalendar($startDateTime, $endDateTime)
+    {
+        $client = $this->getClient();
+        $service = new \Google\Service\Calendar($client);
+        $calendarId = GOOGLE_CALENDAR_ID;
+
+        $startDateTimeGoogle = $startDateTime->format(DateTime::RFC3339);
+        $endDateTimeGoogle = $endDateTime->format(DateTime::RFC3339);
+
+        try {
+            $freebusyQuery = new Google\Service\Calendar\FreeBusyRequest();
+            $freebusyQuery->setTimeMin($startDateTimeGoogle);
+            $freebusyQuery->setTimeMax($endDateTimeGoogle);
+            $freebusyQuery->setItems([['id' => $calendarId]]);
+
+            $freebusyResponse = $service->freebusy->query($freebusyQuery);
+            $calendarsData = $freebusyResponse->getCalendars();
+            $calendarSpecificData = $calendarsData[$calendarId];
+            $busySlots = $calendarSpecificData->getBusy();
+
+            error_log("Disponibilité récupérée pour la période du " . $startDateTime->format('Y-m-d H:i:s') . " au " . $endDateTime->format('Y-m-d H:i:s') . "\n");
+            
+            return $busySlots;
+        } catch (Exception $e) {
+            error_log('Erreur lors de la récupération de la disponibilité : ' . $e->getMessage());
+            return null;
+        }
     }
 }
