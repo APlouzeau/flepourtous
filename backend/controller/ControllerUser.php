@@ -10,7 +10,7 @@ class ControllerUser
 
     public function verifyConnectBack()
     {
-        error_log("VERIFY - Session ID: " . session_id() . " - Session Data: " . print_r($_SESSION, true)); // <-- AJOUTE ÇA
+
 
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             return true;

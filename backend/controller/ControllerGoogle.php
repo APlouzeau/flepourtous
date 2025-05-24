@@ -138,12 +138,6 @@ class ControllerGoogle
     public function updateCalendar($event)
     {
 
-        //
-        //error_log("Traitement de l'événement Google (print_r): " . print_r($event, true));
-        // error_log("Traitement de l'événement Google (var_export): " . var_export($event, true));
-        // error_log("Traitement de l'événement Google (json_encode): " . json_encode($event, JSON_PRETTY_PRINT));
-
-
         $modelUser = new ModelUser();
         $modelEvent = new ModelEvent();
         $eventId = $event->getId();
@@ -176,7 +170,7 @@ class ControllerGoogle
             return; 
         }
 
-        // Calcul de la durée de 
+        
         try {
             $dtEnd = new DateTime($endDateTimeISO);
 
@@ -227,12 +221,20 @@ class ControllerGoogle
         $startDateTimeUtc->setTimezone(new DateTimeZone('UTC'));
         $startDateTimeUtcFormatted = $startDateTimeUtc->format('Y-m-d H:i:s');
 
+        $controllerVisio = new ControllerVisio();
+        $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
+        if (!$roomUrl) {
+            error_log("Erreur lors de la création de la room visio pour l'événement ID: " . $eventId);
+            return; // Ne pas continuer si la room visio n'a pas pu être créée
+        }
+
         $eventDatabase = new EntitieEvent([
             'eventId' => $eventId,
             'userId' => $userId,
             'description' => $description,
             'duration' => $duration,
             'startDateTime' => $startDateTimeUtcFormatted,
+            'visioLink' => $roomUrl,
         ]);
 
         $status = $event->getStatus();

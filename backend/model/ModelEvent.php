@@ -57,26 +57,26 @@ class ModelEvent extends  ClassDatabase
 
     public function createEvent(EntitieEvent $event)
     {
-        $req = $this->conn->prepare('INSERT INTO event (eventId, userId, description, duration, startDateTime) VALUES (:eventId, :userId, :description, :duration, :startDateTime)');
+        $req = $this->conn->prepare('INSERT INTO event (eventId, userId, description, duration, startDateTime, visioLink) VALUES (:eventId, :userId, :description, :duration, :startDateTime, :visioLink)');
         $req->bindValue(':eventId', $event->getEventId(), PDO::PARAM_STR);
         $req->bindValue(':userId', $event->getUserId(), PDO::PARAM_INT);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
         //$req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
-        //$req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
+        $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
         $createdEvent = $req->execute();
         return $createdEvent;
     }
 
     public function updateEvent(EntitieEvent $event)
     {
-        $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime WHERE eventId = :eventId');
+        $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, visioLink = :visioLink WHERE eventId = :eventId');
         $req->bindValue(':eventId', $event->getEventId(), PDO::PARAM_STR);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
         //$req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
-        //$req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
+        $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
         return $req->execute();
     }
