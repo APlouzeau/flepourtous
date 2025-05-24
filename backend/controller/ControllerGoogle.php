@@ -243,5 +243,6 @@ class ControllerGoogle
         } else {
             $modelEvent->checkEvent($eventDatabase);
         }
+
     }
 }
