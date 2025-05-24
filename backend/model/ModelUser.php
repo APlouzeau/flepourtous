@@ -93,10 +93,16 @@ extends ClassDatabase
 
     public function checkMail(string $mail)
     {
-        $query = "SELECT * FROM users WHERE mail = :mail";
+        $query = "SELECT idUser FROM users WHERE mail = :mail";
         $req = $this->conn->prepare($query);
         $req->bindValue(":mail", $mail);
-        $req->execute();
-        return $req->fetchColumn() > 0;
+        $data = $req->execute();
+        if ($data) {
+            $idUser = $req->fetch(PDO::FETCH_ASSOC)['idUser'];
+            error_log("Mail already exists: " . $mail . " - ID: " . $idUser);
+            return $idUser;
+        } else {
+            return false;
+        }
     }
 }

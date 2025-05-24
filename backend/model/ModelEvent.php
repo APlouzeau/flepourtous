@@ -57,29 +57,29 @@ class ModelEvent extends  ClassDatabase
 
     public function createEvent(EntitieEvent $event)
     {
-        $req = $this->conn->prepare('INSERT INTO event (eventId, userId, description, duration, createdAt, startDateTime, updatedAt, status, visioLink) VALUES (:eventId, :userId, :description, :duration, :createdAt, :startDateTime, :updatedAt, :status, :visioLink)');
+          error_log("ModelEvent::createEvent - eventId: " . $event->getEventId() . " - Valeur de UserId() DANS createEvent: " . $event->getUserId());
+        error_log("ModelEvent::createEvent - eventId: " . $event->getEventId() . " - Type de getStartDateTime(): " . gettype($event->getStartDateTime()));
+        $req = $this->conn->prepare('INSERT INTO event (eventId, userId, description, duration, startDateTime) VALUES (:eventId, :userId, :description, :duration, :startDateTime)');
         $req->bindValue(':eventId', $event->getEventId(), PDO::PARAM_STR);
         $req->bindValue(':userId', $event->getUserId(), PDO::PARAM_INT);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
-        $req->bindValue(':createdAt', $event->getCreatedAt(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
-        $req->bindValue(':updatedAt', $event->getUpdatedAt(), PDO::PARAM_STR);
-        $req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
-        $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
-        $req->execute();
-        return $req->execute();
+        //$req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
+        //$req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
+        $createdEvent = $req->execute();
+        return $createdEvent;
     }
 
     public function updateEvent(EntitieEvent $event)
     {
-        $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, updatedAt = :updatedAt, status = :status, visioLink = :visioLink, startDateTime = :startDateTime WHERE eventId = :eventId');
+        $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime WHERE eventId = :eventId');
         $req->bindValue(':eventId', $event->getEventId(), PDO::PARAM_STR);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
-        $req->bindValue(':updatedAt', $event->getUpdatedAt(), PDO::PARAM_STR);
-        $req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
-        $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
+        //$req->bindValue(':updatedAt', $event->getUpdatedAt(), PDO::PARAM_STR);
+        //$req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
+        //$req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
         return $req->execute();
     }

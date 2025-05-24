@@ -1,9 +1,6 @@
 name: Deploy Next on pre-prod
 
 on:
-    push:
-        branches:
-            - preprod
     pull_request:
         branches:
             - preprod
