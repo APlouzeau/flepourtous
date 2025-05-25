@@ -50,4 +50,23 @@ class ControllerVisio
             return $roomUrl;
         }
     }
+
+    public function deleteRoom ($eventId) {
+        $modelEvent = new ModelEvent();
+        $event = $modelEvent->getEventById($eventId);
+        $path = parse_url($event['visioLink'], PHP_URL_PATH);
+        $roomNameOnly = $path ? ltrim($path, '/') : null;
+        $visioApiKey = VISIO_API_KEY;
+        $apiUrl = 'https://api.daily.co/v1/rooms/' . $roomNameOnly; 
+
+        $options = [
+            'http' => [
+                'header' => "Authorization: Bearer " . $visioApiKey, 
+                'method' => 'DELETE',
+                'ignore_errors' => true 
+            ]
+        ];
+        $context = stream_context_create($options);
+        $result = file_get_contents($apiUrl,false, $context);
+    }
 }

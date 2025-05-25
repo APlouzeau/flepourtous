@@ -28,6 +28,7 @@ class ModelEvent extends  ClassDatabase
             return [];
         }
     }
+    
     public function getEventsUser(int $idUser)
     {
         $req = $this->conn->prepare('SELECT * FROM event WHERE userId = :idUser');
@@ -114,16 +115,36 @@ class ModelEvent extends  ClassDatabase
         return $events;
     }
 
-    public function checkEvent(EntitieEvent $event)
+    public function checkEvent(string $eventId)
     {
         $req = $this->conn->prepare('SELECT * FROM event WHERE eventId = :eventId');
-        $req->bindValue(':eventId', $event->getEventId(), PDO::PARAM_STR);
+        $req->bindValue(':eventId', $eventId);
         $req->execute();
         $datas = $req->fetch();
         if ($datas) {
-            $this->updateEvent($event);
+            return true;
         } else {
-            $this->createEvent($event);
+            return false;
+        }
+    }
+
+    public function getEventById(string $eventId)
+    {
+        $req = $this->conn->prepare('SELECT * FROM event WHERE eventId = :eventId');
+        $req->bindValue(':eventId', $eventId, PDO::PARAM_STR);
+        $req->execute();
+        $data = $req->fetch();
+        if ($data) {
+            return [
+                'eventId' => $data['eventId'],
+                'userId' => $data['userId'],
+                'description' => $data['description'],
+                'duration' => $data['duration'],
+                'startDateTime' => $data['startDateTime'],
+                'visioLink' => $data['visioLink'],
+            ];
+        } else {
+            return null;
         }
     }
 }

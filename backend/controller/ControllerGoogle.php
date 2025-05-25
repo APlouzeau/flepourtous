@@ -123,7 +123,7 @@ class ControllerGoogle
                 $eventsResults = $service->events->listEvents($calendarId, ['syncToken' => $nextSyncToken]);
                 $events = $eventsResults->getItems();
                 foreach ($events as $event) {
-                    if ($event->getSummary() === 'Pause') {
+                    if ($event->getSummary() === 'Pause' || $event->getSummary() === 'Absent') {
                         return; // Ignorer les événements de type "Pause"
                     }
                     $this->updateCalendar($event);
@@ -144,7 +144,7 @@ class ControllerGoogle
         $modelUser = new ModelUser();
         $modelEvent = new ModelEvent();
         $eventId = $event->getId();
-        // --- Début des vérifications robustes ---
+        // --- Début des vérifications  ---
         $eventStart = $event->getStart();
         if (!$eventStart) {
             error_log("Événement Google ID: " . $eventId . " n'a pas de propriété 'start'. Skipping.");
@@ -223,29 +223,48 @@ class ControllerGoogle
         $startDateTimeUtc = new DateTime($startDateTimeFormatted, new DateTimeZone('Europe/Paris'));
         $startDateTimeUtc->setTimezone(new DateTimeZone('UTC'));
         $startDateTimeUtcFormatted = $startDateTimeUtc->format('Y-m-d H:i:s');
-
+        
         $controllerVisio = new ControllerVisio();
-        $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
+
+        $status = $event->getStatus();
+        if ($status == 'cancelled') {
+            $controllerVisio->deleteRoom($eventId);
+            $modelEvent->deleteEvent($eventId);
+        } else {
+            $eventExist = $modelEvent->checkEvent($eventId);
+            if ($eventExist) {
+                $controllerVisio->deleteRoom($eventId);
+                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
+    
+                $eventDatabase = new EntitieEvent([
+                    'eventId' => $eventId,
+                    'userId' => $userId,
+                    'description' => $description,
+                    'duration' => $duration,
+                    'startDateTime' => $startDateTimeUtcFormatted,
+                    'visioLink' => $roomUrl,
+                ]);
+
+                $modelEvent->updateEvent($eventDatabase);
+            } else {
+                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
+                $eventDatabase = new EntitieEvent([
+                    'eventId' => $eventId,
+                    'userId' => $userId,
+                    'description' => $description,
+                    'duration' => $duration,
+                    'startDateTime' => $startDateTimeUtcFormatted,
+                    'visioLink' => $roomUrl,
+                ]);
+                $modelEvent->createEvent($eventDatabase);
+            }
+
+        }
         if (!$roomUrl) {
             error_log("Erreur lors de la création de la room visio pour l'événement ID: " . $eventId);
             return; // Ne pas continuer si la room visio n'a pas pu être créée
         }
 
-        $eventDatabase = new EntitieEvent([
-            'eventId' => $eventId,
-            'userId' => $userId,
-            'description' => $description,
-            'duration' => $duration,
-            'startDateTime' => $startDateTimeUtcFormatted,
-            'visioLink' => $roomUrl,
-        ]);
-
-        $status = $event->getStatus();
-        if ($status == 'cancelled') {
-            $modelEvent->deleteEvent($eventId);
-        } else {
-            $modelEvent->checkEvent($eventDatabase);
-        }
 
     }
 
