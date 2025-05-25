@@ -147,4 +147,42 @@ class ModelEvent extends  ClassDatabase
             return null;
         }
     }
+
+    public function checkEventForNextHour(string $dateNow) {
+        
+        $req = $this->conn->prepare('
+        SELECT 
+            u.firstName, 
+            u.lastName, 
+            u.mail, 
+            e.description, 
+            e.startDateTime, 
+            e.visioLink
+        FROM event e 
+        INNER JOIN users u ON e.userId = u.idUser
+        WHERE 
+            startDateTime >= :dateNow 
+            AND startDateTime <= DATE_ADD(:dateNow, INTERVAL 1 HOUR);');
+
+        $req->bindValue(':dateNow', $dateNow, PDO::PARAM_STR);
+        $req->execute();
+        $datas = $req->fetchAll();
+        if (count($datas) > 0) {
+            $events = [];
+            foreach ($datas as $data) {
+                $events[] = [
+                    'firstName' => $data['firstName'],
+                    'lastName' => $data['lastName'],
+                    'mail' => $data['mail'],
+                    'description' => $data['description'],
+                    'startDateTime' => $data['startDateTime'],
+                    'visioLink' => $data['visioLink'],
+                ];
+            }
+            return $events; // Il y a des événements dans l'heure à venir
+        } else {
+            return false; // Pas d'événements dans l'heure à venir
+        }
+        
+    }
 }

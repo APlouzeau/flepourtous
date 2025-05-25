@@ -63,4 +63,54 @@ class ControllerMail
             }
         }
     }
+
+    public function sendMailToAlertForNextAppointment()
+    {
+        error_log("Verifying if there are upcoming events in the next hour...");
+
+            $apiKey = $_SERVER['HTTP_API_KEY'] ?? null; 
+        if ($apiKey !== CRON_KEY) { 
+        error_log("Unauthorized attempt to access sendMailToAlertForNextAppointment. IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        http_response_code(403); // Forbidden
+        echo json_encode(['code' => 0, 'message' => 'Accès non autorisé']);
+        return false; // Ou exit();
+    }
+
+        $dateNow = new DateTime("now", new DateTimeZone('UTC'));
+        ;
+
+        $modelEvent = new ModelEvent();
+        $eventsToAlert = $modelEvent->checkEventForNextHour($dateNow->format('Y-m-d H:i:s'));
+        if (!$eventsToAlert) {
+            error_log("No upcoming events found.");
+            return false; // No events found in the next hour
+        }
+
+        foreach ($eventsToAlert as $event) {
+            try {
+                $this->mailer->addAddress($event['mail']);
+                $this->mailer->isHTML(true);
+                $this->mailer->Subject = "Rappel de votre rendez-vous sur FlePourTous";
+                
+                $emailBody = "Bonjour " . htmlspecialchars($event['firstName'] . " " . $event['lastName']) . ",<br><br>";
+                $emailBody .= "Ceci est un rappel pour votre rendez-vous prévu le " . htmlspecialchars($event['startDateTime']) . " UTC.<br>";
+                $emailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
+                if ($event['visioLink']) {
+                    $emailBody .= "Lien de visio : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "Lien de visio . </a><br>";
+                }
+                $emailBody .= "<br>Cordialement,<br>L'équipe Flepourtous";
+                $this->mailer->Body = $emailBody;
+                
+                $this->mailer->send();
+                
+            } catch (Exception $e) {
+                error_log("Mailer Error: " . $this->mailer->ErrorInfo);
+            } finally {
+                if ($this->mailer) {
+                    $this->mailer->clearAddresses(); // Clear addresses after sending
+                    $this->mailer->clearAttachments(); // Clear attachments if any
+                }
+            }
+        }
+    }
 }

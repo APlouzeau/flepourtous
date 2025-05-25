@@ -411,4 +411,12 @@ class ControllerCalendar
         //echo json_encode($occupiedTimeSlots);
         echo json_encode($finalAvailableTimeSlots);
     }
+
+    public function alertEvent() {
+
+        $dateNow = new DateTime('now', new DateTimeZone('UTC'));
+        $modelEvent = new ModelEvent();
+
+    }
+
 }
