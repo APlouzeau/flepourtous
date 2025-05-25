@@ -48,6 +48,23 @@ if (!class_exists($handler['controller']) || $handler['controller'] == 'Controll
         $controller = new ControllerError();
         $controller->index($handler, $method, $uri);
     } else {
-        $controller->{$handler['action']}($handler['params']['slug'] ?? null, $handler['params']['id'] ?? null);
+
+        $actionParams = [];
+        $reflectionMethod = new ReflectionMethod($handler['controller'], $handler['action']);
+        $methodParameters = $reflectionMethod->getParameters();
+
+        foreach ($methodParameters as $reflectionParameter) {
+            $paramName = $reflectionParameter->getName();
+            if (isset($handler['params'][$paramName])) {
+                $actionParams[] = $handler['params'][$paramName];
+            } elseif ($reflectionParameter->isDefaultValueAvailable()) {
+                $actionParams[] = $reflectionParameter->getDefaultValue();
+            } else {
+
+                $actionParams[] = null;
+            }
+        }
+
+        call_user_func_array([$controller, $handler['action']], $actionParams);
     }
 }

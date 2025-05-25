@@ -18,7 +18,6 @@ export default async function profilPage() {
         }
     );
     const userData = res.data.data;
-    console.log("Response from userInformations:", country);
     return (
         <div>
             <div>{country}</div>

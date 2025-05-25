@@ -12,6 +12,8 @@ class EntitieUser
     private string $address;
     private string $country;
     private string $dateInscription;
+    private int $isVerified;
+    private string $verifyToken;
 
     // Constructeur pour hydrater les données à partir d'un tableau
     public function __construct(array $data)
@@ -131,6 +133,46 @@ class EntitieUser
     public function setDateInscription($dateInscription)
     {
         $this->dateInscription = $dateInscription;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of isVerified
+     */
+    public function getIsVerified()
+    {
+        return $this->isVerified;
+    }
+
+    /**
+     * Set the value of isVerified
+     *
+     * @return  self
+     */
+    public function setIsVerified($isVerified)
+    {
+        $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of verifyToken
+     */
+    public function getVerifyToken()
+    {
+        return $this->verifyToken;
+    }
+
+    /**
+     * Set the value of verifyToken
+     *
+     * @return  self
+     */
+    public function setVerifyToken($verifyToken)
+    {
+        $this->verifyToken = $verifyToken;
 
         return $this;
     }

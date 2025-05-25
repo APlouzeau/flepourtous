@@ -8,7 +8,7 @@ extends ClassDatabase
 
     public function register(EntitieUser $user)
     {
-        $query = "INSERT INTO users (firstName, lastName, mail, nickName, password) VALUES (:firstName, :lastName, :mail, :nickName, :password)";
+        $query = "INSERT INTO users (firstName, lastName, mail, nickName, password, verifyToken) VALUES (:firstName, :lastName, :mail, :nickName, :password, :verifyToken)";
 
         $req = $this->conn->prepare($query);
         $req->bindValue(":firstName", $user->getFirstName());
@@ -16,6 +16,7 @@ extends ClassDatabase
         $req->bindValue(":mail", $user->getMail());
         $req->bindValue(":nickName", $user->getNickName());
         $req->bindValue(":password", $user->getPassword());
+        $req->bindValue(":verifyToken", $user->getVerifyToken());
 
         $req->execute();
         return true;
@@ -42,29 +43,32 @@ extends ClassDatabase
 
         $data = $req->fetch(PDO::FETCH_ASSOC);
         if ($data) {
-            //if ($userVerify->getPassword() == $data['password']) {
-            if (password_verify($password, $data['password'])) {
-                $user =
-                    [
-                        'idUser' => $data['idUser'],
-                        'nickName' => $data['nickName'],
-                        'firstName' => $data['firstName'],
-                        'lastName' => $data['lastName'],
-                        'mail' => $data['mail'],
-                        'role' => $data['role'],
-                    ];
-                return $user;
+            if ($data['isVerified'] == 0) {
+                error_log("User not verified: " . $mail);
+                return false; // Utilisateur non vérifié
             } else {
-                return false;
+                //if ($userVerify->getPassword() == $data['password']) {
+                if (password_verify($password, $data['password'])) {
+                    $user =
+                        [
+                            'idUser' => $data['idUser'],
+                            'nickName' => $data['nickName'],
+                            'firstName' => $data['firstName'],
+                            'lastName' => $data['lastName'],
+                            'mail' => $data['mail'],
+                            'role' => $data['role'],
+                        ];
+                    return $user;
+                } else {
+                    return false;
+                }
             }
-        } else {
-            return false;
         }
     }
 
     public function getUser(EntitieUser $user)
     {
-        $req = $this->conn->prepare('SELECT * FROM users WHERE idUser = :idUser');
+        $req = $this->conn->prepare('SELECT idUser, nickName, firstName, lastName, mail FROM users WHERE idUser = :idUser');
         $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
@@ -76,7 +80,6 @@ extends ClassDatabase
                     'firstName' => $data['firstName'],
                     'lastName' => $data['lastName'],
                     'mail' => $data['mail'],
-                    'role' => $data['role'],
                 ];
         } else {
             return null; // Utilisateur non trouvé
@@ -96,12 +99,30 @@ extends ClassDatabase
         $query = "SELECT idUser FROM users WHERE mail = :mail";
         $req = $this->conn->prepare($query);
         $req->bindValue(":mail", $mail);
-        $data = $req->execute();
+        $req->execute();
+        $data = $req->fetch(PDO::FETCH_ASSOC);
         if ($data) {
             $idUser = $req->fetch(PDO::FETCH_ASSOC)['idUser'];
             error_log("Mail already exists: " . $mail . " - ID: " . $idUser);
             return $idUser;
         } else {
+            return false;
+        }
+    }
+
+    public function verifyEmail(string $verifyToken)
+    {
+        $query = "UPDATE users SET isVerified = 1 WHERE verifyToken = :verifyToken";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":verifyToken", $verifyToken);
+        if ($req->execute()) {
+            $query = "UPDATE users SET verifyToken = NULL WHERE verifyToken = :verifyToken";
+            $req = $this->conn->prepare($query);
+            $req->bindValue(":verifyToken", $verifyToken);
+            $req->execute();
+            return true;
+        } else {
+            error_log("Email verification failed for link: " . $verifyToken);
             return false;
         }
     }
