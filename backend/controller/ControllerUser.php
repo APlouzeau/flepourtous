@@ -233,20 +233,20 @@ class ControllerUser
                 'code' => 0,
                 'message' => 'Adresse e-mail invalide',
             ];
-        } elseif (strlen($data['nickName']) < 3) {
+        } elseif (strlen($data['nickName']) < 2) {
             $response = [
                 'code' => 0,
-                'message' => 'Le pseudo doit contenir au moins 3 caractères',
+                'message' => 'Le pseudo doit contenir au moins 2 caractères',
             ];
-        } elseif (strlen($data['firstName']) < 3) {
+        } elseif (strlen($data['firstName']) < 2) {
             $response = [
                 'code' => 0,
-                'message' => 'Le prénom doit contenir au moins 3 caractères',
+                'message' => 'Le prénom doit contenir au moins 2 caractères',
             ];
-        } elseif (strlen($data['lastName']) < 3) {
+        } elseif (strlen($data['lastName']) < 2) {
             $response = [
                 'code' => 0,
-                'message' => 'Le nom doit contenir au moins 3 caractères',
+                'message' => 'Le nom doit contenir au moins 2 caractères',
             ];
         } else {
             $response = [
