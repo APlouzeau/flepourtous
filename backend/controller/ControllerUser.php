@@ -151,13 +151,17 @@ class ControllerUser
                             'message' => 'Adresse e-mail déjà utilisée',
                         ];
                     } else {
+                        $verificationToken = hash('sha256', $data['mail'] . $data['nickName'] . CRON_KEY);
                         $user = new EntitieUser([
                             'nickName' => $data['nickName'],
                             'firstName' => $data['firstName'],
                             'lastName' => $data['lastName'],
                             'mail' => $data['mail'],
                             'password' => $data['password'],
+                            'verifyToken' => $verificationToken,
                         ]);
+                        $controllerMail = new ControllerMail();
+                        /*                         $sendMail = $controllerMail->sendMailToRegister($user, $verificationToken); */
                         $register = $userModel->register($user);
 
                         !$register  ?
@@ -168,13 +172,38 @@ class ControllerUser
                             :
                             $response = [
                                 'code' => 1,
-                                'message' => 'Inscription réussie',
+                                'message' => 'Inscription réussie, vous allez recevoir un e-mail de vérification.',
                             ];
                     }
                 }
             }
             echo json_encode($response);
         }
+    }
+
+    public function verifyEmail($token = null)
+    {
+        if (!$token) {
+            $response = [
+                'code' => 0,
+                'message' => 'Token manquant',
+            ];
+        } else {
+            $modelUser = new ModelUser();
+            $user = $modelUser->verifyEmail($token);
+            if ($user) {
+                $response = [
+                    'code' => 1,
+                    'message' => 'Adresse e-mail vérifiée avec succès',
+                ];
+            } else {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de la vérification de l\'adresse e-mail',
+                ];
+            }
+        }
+        echo json_encode($response);
     }
 
     public function listUsers()

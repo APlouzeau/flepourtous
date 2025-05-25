@@ -1,7 +1,8 @@
 {
     "require": {
         "firebase/php-jwt": "^6.11",
-        "google/apiclient": "^2.0"
+        "google/apiclient": "^2.0",
+        "phpmailer/phpmailer": "^6.10"
     },
     "scripts": {
         "pre-autoload-dump": "Google\\Task\\Composer::cleanup"

@@ -13,6 +13,7 @@ export default function RegisterPage() {
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const router = useRouter();
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -27,7 +28,7 @@ export default function RegisterPage() {
             })
             .then((response) => {
                 if (response.data.code == 1) {
-                    router.push("/connexion");
+                    setSuccess(response.data.message);
                 } else {
                     setError(response.data.message);
                 }
@@ -104,6 +105,7 @@ export default function RegisterPage() {
                         />
                     </div>
                     {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+                    {success && <p className="text-green-500 text-sm text-center mb-4">{success}</p>}
                     <button className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 mt-2 text-lg">
                         Inscription
                     </button>
