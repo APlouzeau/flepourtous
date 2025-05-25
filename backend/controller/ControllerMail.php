@@ -21,12 +21,15 @@ class ControllerMail
             $this->mailer->SMTPAuth = true;
             $this->mailer->Username = MAIL_USERNAME;
             $this->mailer->Password = MAIL_PASSWORD;
-            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Use PHPMailer::ENCRYPTION_STARTTLS for TLS
+            $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             $this->mailer->Port = MAIL_PORT;
+            $this->mailer->SMTPDebug = SMTP::DEBUG_SERVER;
 
             $this->mailer->CharSet = 'UTF-8';
 
             $this->mailer->setFrom(MAIL_USERNAME, 'FlePourTous - Support');
+
+
         } catch (Exception $e) {
             error_log("Mailer Error: " . $this->mailer->ErrorInfo);
             throw new Exception("Mailer could not be initialized: " . $e->getMessage());
@@ -35,16 +38,17 @@ class ControllerMail
 
     public function sendMailToRegister(EntitieUser $user, $verificationToken)
     {
+        error_log("Sending registration email to: " . $user->getMail());
         try {
             $this->mailer->addAddress($user->getMail());
             $this->mailer->isHTML(true);
             $this->mailer->Subject = "Vérification de votre adresse e-mail pour le site FlePourTous";
 
-            $emailBody = "Bonjour " . htmlspecialchars($user->getFirstName() . $user->getLastName()) . ",<br><br>";
+            $emailBody = "Bonjour " . htmlspecialchars($user->getFirstName() . " " . $user->getLastName()) . ",<br><br>";
             $emailBody .= "Merci de vous être inscrit sur FlePourTous ! Veuillez cliquer sur le lien ci-dessous pour vérifier votre adresse email :<br>";
             $emailBody .= "<a href=\"" . htmlspecialchars(URI . "api/verify-email/" . $verificationToken) . "\">" . htmlspecialchars($verificationToken) . "</a><br><br>";
             $emailBody .= "Si vous n'avez pas créé de compte, veuillez ignorer cet email.<br><br>";
-            $emailBody .= "Cordialement,<br>L'équipe FlePourTous";
+            $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
             $this->mailer->Body = $emailBody;
 
             $this->mailer->send();

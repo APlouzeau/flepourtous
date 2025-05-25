@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -11,7 +10,6 @@ export default function RegisterPage() {
     const [mail, setMail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
-    const router = useRouter();
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 

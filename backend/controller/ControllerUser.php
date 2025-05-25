@@ -161,7 +161,7 @@ class ControllerUser
                             'verifyToken' => $verificationToken,
                         ]);
                         $controllerMail = new ControllerMail();
-                        /*                         $sendMail = $controllerMail->sendMailToRegister($user, $verificationToken); */
+                                                 $sendMail = $controllerMail->sendMailToRegister($user, $verificationToken); 
                         $register = $userModel->register($user);
 
                         !$register  ?
