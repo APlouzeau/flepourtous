@@ -13,11 +13,10 @@ export default function DisplayUserprofil() {
             <p>Voici vos informations :</p>
             {dataUser && (
                 <>
-                    <p>ID : {dataUser.idUser}</p>
+                    <p>Pseudo : {dataUser.nickName}</p>
                     <p>Mail : {dataUser.mail}</p>
                     <p>Prénom : {dataUser.firstName}</p>
                     <p>Nom : {dataUser.lastName}</p>
-                    <p>Rôle : {dataUser.role}</p>
                 </>
             )}
             <p>Vous êtes connecté !</p>
