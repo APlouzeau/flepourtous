@@ -46,7 +46,7 @@ class ControllerMail
 
             $emailBody = "Bonjour " . htmlspecialchars($user->getFirstName() . " " . $user->getLastName()) . ",<br><br>";
             $emailBody .= "Merci de vous être inscrit sur FlePourTous ! Veuillez cliquer sur le lien ci-dessous pour vérifier votre adresse email :<br>";
-            $emailBody .= "<a href=\"" . htmlspecialchars(URI . "api/verify-email/" . $verificationToken) . "\">" . htmlspecialchars($verificationToken) . "</a><br><br>";
+            $emailBody .= "<a href=\"" . htmlspecialchars(URI . "api/verify-email/" . $verificationToken) . "\">" . "Lien de confirmation</a><br><br>";
             $emailBody .= "Si vous n'avez pas créé de compte, veuillez ignorer cet email.<br><br>";
             $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
             $this->mailer->Body = $emailBody;

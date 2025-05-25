@@ -188,6 +188,7 @@ class ControllerUser
                 'code' => 0,
                 'message' => 'Token manquant',
             ];
+            header('Location: ' . URI . 'echec?raison=token_manquant');
         } else {
             $modelUser = new ModelUser();
             $user = $modelUser->verifyEmail($token);
@@ -196,11 +197,13 @@ class ControllerUser
                     'code' => 1,
                     'message' => 'Adresse e-mail vérifiée avec succès',
                 ];
+                header('Location: ' . URI . 'success');
             } else {
                 $response = [
                     'code' => 0,
                     'message' => 'Erreur lors de la vérification de l\'adresse e-mail',
                 ];
+                header('Location: ' . URI . 'echec?raison=token_invalide');
             }
         }
         echo json_encode($response);

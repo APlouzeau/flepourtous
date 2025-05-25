@@ -1,5 +1,9 @@
 #!/bin/bash
 
+pm2 stop flepourtous-preprod
+
+rm -rf /home/projects/flepourtous-preprod/.next
+
 # Build the Next.js application
 npm run build
 

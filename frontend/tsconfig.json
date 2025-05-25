@@ -29,6 +29,6 @@
         "next-env.d.ts",
         ".next/types/**/*.ts",
         "src/app/users/page.js"
-    ],
+, "src/app/(public)/success/success"    ],
     "exclude": ["node_modules"]
 }

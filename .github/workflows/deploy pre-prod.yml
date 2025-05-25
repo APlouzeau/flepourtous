@@ -23,5 +23,6 @@ jobs:
                   cd frontend
                   pnpm i
                   pm2 stop flepourtous-preprod
+                  rm -rf .next
                   pnpm run build
                   pm2 start flepourtous-preprod
