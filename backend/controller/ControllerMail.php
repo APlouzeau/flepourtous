@@ -72,7 +72,6 @@ class ControllerMail
         if ($apiKey !== CRON_KEY) { 
         error_log("Unauthorized attempt to access sendMailToAlertForNextAppointment. IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
         http_response_code(403); // Forbidden
-        echo json_encode(['code' => 0, 'message' => 'Accès non autorisé']);
         return false; // Ou exit();
     }
 
@@ -86,23 +85,50 @@ class ControllerMail
             return false; // No events found in the next hour
         }
 
+        
         foreach ($eventsToAlert as $event) {
             try {
+                $appointmentDateTime = new DateTime($event['startDateTime'], new DateTimeZone('UTC'));
+                $appointmentHour = $appointmentDateTime->format('H:i');
+
                 $this->mailer->addAddress($event['mail']);
+                $this->mailer->addCC(TEACHER_MAIL);
                 $this->mailer->isHTML(true);
-                $this->mailer->Subject = "Rappel de votre rendez-vous sur FlePourTous";
+                $this->mailer->Subject = "Appointment reminder on FlePourTous";
                 
-                $emailBody = "Bonjour " . htmlspecialchars($event['firstName'] . " " . $event['lastName']) . ",<br><br>";
-                $emailBody .= "Ceci est un rappel pour votre rendez-vous prévu le " . htmlspecialchars($event['startDateTime']) . " UTC.<br>";
+                $emailBody = "Dear " . htmlspecialchars($event['firstName'] . " " . $event['lastName']) . ",<br><br>";
+                $emailBody .= "This is a reminder for your appointment at " . htmlspecialchars($appointmentHour) . " UTC.<br>";
+                
+                if ($event['description'] != '') {
                 $emailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
-                if ($event['visioLink']) {
-                    $emailBody .= "Lien de visio : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "Lien de visio . </a><br>";
                 }
-                $emailBody .= "<br>Cordialement,<br>L'équipe Flepourtous";
+
+                if ($event['visioLink'] != '') {
+                    $emailBody .= "VisioLink : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "click here at appointment time. </a><br>";
+                }
+                $emailBody .= "<br>Warm regards,<br>Flepourtous Team";
                 $this->mailer->Body = $emailBody;
                 
                 $this->mailer->send();
-                
+                $this->mailer->clearAddresses();
+
+                if (defined('TEACHER_MAIL') && TEACHER_MAIL != '') {
+                    $dateTimeUtc = new DateTime($event['startDateTime'], new DateTimeZone('UTC'));
+                    $dateTimeParis = $dateTimeUtc->setTimezone(new DateTimeZone('Europe/Paris'));
+                    $this->mailer->addAddress(TEACHER_MAIL);
+                    $this->mailer->Subject = "Rappel de rendez-vous pour " . htmlspecialchars($event['firstName'] . " " . $event['lastName']);
+                    $teacherEmailBody = "Un rappel a été envoyé à l'élève.<br><br>";
+                    $teacherEmailBody .= "Rendez-vous prévu à : " . htmlspecialchars($dateTimeParis->format('H:i')) . " UTC.<br>";
+                    if ($event['description'] != '') {
+                        $teacherEmailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
+                    }
+                    if ($event['visioLink'] != '') {
+                        $teacherEmailBody .= "Lien de visio : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "Cliquez ici à l'heure du rendez-vous</a><br>";
+                    }
+                    $teacherEmailBody .= "<br>Cordialement,<br>L'équipe Flepourtous<br><br><br><br>Alex quoi :D";
+                    $this->mailer->Body = $teacherEmailBody;
+                    $this->mailer->send();
+                }
             } catch (Exception $e) {
                 error_log("Mailer Error: " . $this->mailer->ErrorInfo);
             } finally {

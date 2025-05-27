@@ -161,8 +161,8 @@ class ModelEvent extends  ClassDatabase
         FROM event e 
         INNER JOIN users u ON e.userId = u.idUser
         WHERE 
-            startDateTime >= :dateNow 
-            AND startDateTime <= DATE_ADD(:dateNow, INTERVAL 1 HOUR);');
+            startDateTime >= DATE_ADD(:dateNow, INTERVAL 55 minute)
+            AND startDateTime <= DATE_ADD(:dateNow, INTERVAL 65 minute);');
 
         $req->bindValue(':dateNow', $dateNow, PDO::PARAM_STR);
         $req->execute();
