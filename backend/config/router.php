@@ -25,7 +25,7 @@ $router->addRoute('GET', BASE_URL . "api/listEvents", 'ControllerCalendar', 'lis
 $router->addRoute('POST', BASE_URL . "api/createEvent", 'ControllerCalendar', 'createEvent');
 $router->addRoute('POST', BASE_URL . "api/listEvents", 'ControllerCalendar', 'listEvents');
 $router->addRoute('POST', BASE_URL . "api/deleteEvent", 'ControllerCalendar', 'deleteEvent');
-$router->addRoute('POST', BASE_URL . "api/getAvailableTimeSlots", 'ControllerCalendar', 'getOccupiedTimeSlots');
+$router->addRoute('POST', BASE_URL . "api/getAvailableTimeSlots", 'ControllerCalendar', 'getAvailablesTimeSlots');
 $router->addRoute('POST', BASE_URL . "api/sendMailToAlertForNextAppointment", 'ControllerMail', 'sendMailToAlertForNextAppointment');
 
 //Google

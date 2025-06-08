@@ -331,7 +331,7 @@ class ControllerCalendar
         echo json_encode($response);
     }
 
-    public function getOccupiedTimeSlots()
+    public function getAvailablesTimeSlots()
     {
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
@@ -339,30 +339,20 @@ class ControllerCalendar
         $data = json_decode($requestBody, true);
 
         $utcTimeZone = new DateTimeZone('UTC'); // La timezone de la base de données
-        $luluTimeZone = new DateTimeZone('Europe/Paris');
+        $frenchTimeZone = new DateTimeZone('Europe/Paris');
 
         $userTimeZone = new DateTimeZone($data['userTimeZone']); // Timezone de l'utilisateur
-        //$userTimeZone = new DateTimeZone('Asia/Tokyo'); // Timzone de l'utilisateur
 
         $userDate = $data['date']; // La date demandée par l'utilisateur
 
-        $startTime = new DateTime($userDate . ' 08:00:00', $luluTimeZone); // Crée un objet DateTime pour 8h00
+        $startTime = new DateTime($userDate . ' 08:00:00', $frenchTimeZone); // Crée un objet DateTime pour 8h00 (heure minimum de rendez-vous)
         $startTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
 
-        $endTime = new DateTime($userDate . ' 22:00:00', $luluTimeZone);
+        $endTime = new DateTime($userDate . ' 22:00:00', $frenchTimeZone); // Crée un objet DateTime pour 22h00 (heure de maximale de fin de journée)
         $endTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
 
-/*         $startLunch = new DateTime($userDate . ' 12:00:00', $luluTimeZone);
-        $startLunch->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
-
-        $endLunch = new DateTime($userDate . ' 14:00:00', $luluTimeZone);
-        $endLunch->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime */
-
-        $userDateReference = new DateTime($userDate . "00:00:00", $userTimeZone); // Crée un objet DateTime avec la date UTC
-        $userDateUtc = $userDateReference->setTimezone($utcTimeZone)->format('Y-m-d'); // Crée un objet DateTime avec la date UTC
-
         $controllerGoogle = new ControllerGoogle();
-        $events = $controllerGoogle->getAvaibilityOnGoogleCalendar($startTime, $endTime);
+        $events = $controllerGoogle->getOccupiedSlotsOnGoogleCalendar($startTime, $endTime);
 
         error_log("Google Busy Periods (pour le jour demandé): " . print_r($events, true));
 
@@ -407,16 +397,14 @@ class ControllerCalendar
             if (in_array($slotTooShort->getTimestamp(), $lookupTimestamps)) {
                 $finalAvailableTimeSlots[] = $slotTime->setTimezone($userTimeZone)->format('H:i');
             }
-        } 
-        //echo json_encode($occupiedTimeSlots);
+        }
         echo json_encode($finalAvailableTimeSlots);
     }
 
-    public function alertEvent() {
+    public function alertEvent()
+    {
 
         $dateNow = new DateTime('now', new DateTimeZone('UTC'));
         $modelEvent = new ModelEvent();
-
     }
-
 }

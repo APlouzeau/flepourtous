@@ -170,19 +170,19 @@ class ControllerGoogle
             $startDateTimeFormatted = $dtStart->format('Y-m-d H:i:s');
         } catch (Exception $e) {
 
-            return; 
+            return;
         }
 
-        
+
         try {
             $dtEnd = new DateTime($endDateTimeISO);
 
-            $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60; 
+            $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
         } catch (Exception $e) {
             return; // Ne pas traiter si les dates pour la durée sont invalides
         }
 
-        $description = $event->getSummary(); 
+        $description = $event->getSummary();
 
         $attendees = $event->getAttendees();
         $userId = null;
@@ -223,7 +223,7 @@ class ControllerGoogle
         $startDateTimeUtc = new DateTime($startDateTimeFormatted, new DateTimeZone('Europe/Paris'));
         $startDateTimeUtc->setTimezone(new DateTimeZone('UTC'));
         $startDateTimeUtcFormatted = $startDateTimeUtc->format('Y-m-d H:i:s');
-        
+
         $controllerVisio = new ControllerVisio();
 
         $status = $event->getStatus();
@@ -235,7 +235,7 @@ class ControllerGoogle
             if ($eventExist) {
                 $controllerVisio->deleteRoom($eventId);
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
-    
+
                 $eventDatabase = new EntitieEvent([
                     'eventId' => $eventId,
                     'userId' => $userId,
@@ -258,17 +258,14 @@ class ControllerGoogle
                 ]);
                 $modelEvent->createEvent($eventDatabase);
             }
-
         }
         if (!$roomUrl) {
             error_log("Erreur lors de la création de la room visio pour l'événement ID: " . $eventId);
             return; // Ne pas continuer si la room visio n'a pas pu être créée
         }
-
-
     }
 
-    public function getAvaibilityOnGoogleCalendar($startDateTime, $endDateTime)
+    public function getOccupiedSlotsOnGoogleCalendar($startDateTime, $endDateTime)
     {
         $client = $this->getClient();
         $service = new \Google\Service\Calendar($client);
@@ -289,7 +286,7 @@ class ControllerGoogle
             $busySlots = $calendarSpecificData->getBusy();
 
             error_log("Disponibilité récupérée pour la période du " . $startDateTime->format('Y-m-d H:i:s') . " au " . $endDateTime->format('Y-m-d H:i:s') . "\n");
-            
+
             return $busySlots;
         } catch (Exception $e) {
             error_log('Erreur lors de la récupération de la disponibilité : ' . $e->getMessage());
