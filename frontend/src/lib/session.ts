@@ -114,6 +114,7 @@ export async function logout() {
 }
 
 export async function getCookieBackend() {
+    console.log("Fetching cookie from backend");
     const jwtSessionCookie = (await cookies()).get("session");
     if (!jwtSessionCookie) {
         console.log("No JWT session cookie found in getCookieBackend");

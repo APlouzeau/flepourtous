@@ -54,12 +54,12 @@ export async function deleteAppointment(eventId: string) {
     }
 }
 
-export async function getAvailableTimeSlots(date: string, userTimeZone: string) {
+export async function getAvailableTimeSlots(date: string, userTimeZone: string, selectedDuration: string) {
     const cookie = await getCookieBackend();
     try {
         const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/getAvailableTimeSlots`,
-            { date, userTimeZone },
+            { date, userTimeZone, selectedDuration },
             {
                 headers: {
                     Cookie: `PHPSESSID=${cookie}`,
@@ -68,8 +68,6 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string) 
                 withCredentials: true,
             }
         );
-        console.log("Response from getAvailableTimeSlots:", response.data);
-        /*         const availableTimeSlots = generateTimeSlots(8, 22, 15, response.data); */
         return response.data;
     } catch (error) {
         console.error("Error during fetching available time slots:", error);

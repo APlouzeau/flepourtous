@@ -251,7 +251,7 @@ class ControllerCalendar
             } else {
                 $response = [
                     'code' => 1,
-                    'message' => 'Événement enregistré en base de données avec succès',
+                    'message' => 'Événement enregistré avec succès',
                 ];
             }
         } catch (Exception $e) {
@@ -378,29 +378,53 @@ class ControllerCalendar
         $now = new DateTime('now', $utcTimeZone);
         $nextPossibleAppointment = (clone $now)->modify('+8 hours');
 
-
+        
         foreach ($day as $time) {
             $timeString = (clone $time)->format('Y-m-d H:i:s');
             if (!in_array($timeString, $occupiedTimeSlots) && $time >= $nextPossibleAppointment) {
                 $availableTimeSlots[] = $time;
             }
         }
-
         $lookupTimestamps = array_map(function ($element) {
             return $element->getTimestamp();
         }, $availableTimeSlots);
-
+        
         $finalAvailableTimeSlots = [];
+        $occupiedTimeSlotsForAppointment = $data['selectedDuration'] / 15; // nombre de slots de 15 minutes nécessaires pour l'occupation
+        
+        foreach ($availableTimeSlots as $potentialStartSlot) {
+            $isSlotSuitable = true;
+            for ($i = 1; $i < $occupiedTimeSlotsForAppointment; $i++) {
+                $nextBlockToCheckTime = (clone $potentialStartSlot)->modify('+' . (15 * $i) . ' minutes');
+                if (!in_array($nextBlockToCheckTime->getTimestamp(), $lookupTimestamps)) {
+                    $isSlotSuitable = false; 
+                    break;
+                }
+            }
 
-        foreach ($availableTimeSlots as $slotTime) {
-            $slotTooShort = (clone $slotTime)->modify('+15 minutes');
-            if (in_array($slotTooShort->getTimestamp(), $lookupTimestamps)) {
-                $finalAvailableTimeSlots[] = $slotTime->setTimezone($userTimeZone)->format('H:i');
+            if ($isSlotSuitable) {
+                $finalAvailableTimeSlots[] = $potentialStartSlot->setTimezone($userTimeZone)->format('H:i');
             }
         }
-        echo json_encode($finalAvailableTimeSlots);
-    }
-
+        if (count($finalAvailableTimeSlots) == 0) {
+            $response = [
+                'code' => 0,
+                'message' => 'Aucun créneau disponible pour cette date.',
+            ];
+            echo json_encode($response);
+            return;
+        }
+        if (count($finalAvailableTimeSlots) > 0) {
+            $response = [
+                'code' => 1,
+                'message' => 'Créneaux disponibles récupérés avec succès',
+                'data' => $finalAvailableTimeSlots,
+            ];
+            echo json_encode($response);
+            return;
+        }
+    }   
+    
     public function alertEvent()
     {
 
