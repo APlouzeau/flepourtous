@@ -11,7 +11,6 @@ class ControllerUser
     public function verifyConnectBack()
     {
 
-        var_dump($_SESSION);
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             return true;
         } else {

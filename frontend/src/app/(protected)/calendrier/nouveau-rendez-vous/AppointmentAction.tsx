@@ -78,13 +78,17 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
 export async function getAllLessonsWithPrices() {
     const cookie = await getCookieBackend();
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`, {
-            headers: {
-                Cookie: `PHPSESSID=${cookie}`,
-                "Content-Type": "application/json",
-            },
-            withCredentials: true,
-        });
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`,
+            {},
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${cookie}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            }
+        );
         return response.data;
     } catch (error) {
         console.error("Error fetching lessons information:", error);
