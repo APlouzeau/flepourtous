@@ -18,7 +18,8 @@ $router->addRoute('GET', BASE_URL . "api/verify-email/{token}", 'ControllerUser'
 
 //Lessons
 $router->addRoute('GET', BASE_URL . "api/lessons", 'ControllerLesson', 'getAllLessons');
-$router->addRoute('GET', BASE_URL . "api/offre-de-cours/(?<slug>[a-zA-Z0-9\-]+)", 'ControllerLesson', 'getLessonByName');
+$router->addRoute('GET', BASE_URL . "api/offre-de-cours/{slug}", 'ControllerLesson', 'getLessonByName');
+$router->addRoute('POST', BASE_URL . "api/getAllLessonsWithPrices", 'ControllerLesson', 'getAllLessonsWithPrices');
 
 //Events
 $router->addRoute('GET', BASE_URL . "api/listEvents", 'ControllerCalendar', 'listEvents');

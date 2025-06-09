@@ -227,9 +227,9 @@ class ControllerCalendar
             }
 
             //DATABASE
-            $eventId = $createdEvent->getId();
+            $idEvent = $createdEvent->getId();
             $eventDatabase = new EntitieEvent([
-                'eventId' => $eventId,
+                'idEvent' => $idEvent,
                 'userId' => $userId,
                 'description' => $description,
                 'duration' => $duration,
@@ -292,17 +292,17 @@ class ControllerCalendar
         echo json_encode("data");
         echo json_encode($data);
 
-        if (!$data || !isset($data['eventId'])) {
+        if (!$data || !isset($data['idEvent'])) {
             $response = [
                 'code' => 0,
-                'message' => 'Données manquantes pour supprimer l\'événement (eventId requis).'
+                'message' => 'Données manquantes pour supprimer l\'événement (idEvent requis).'
             ];
             echo json_encode($response);
             return;
         }
         $client = $this->getClient();
         $service = new Google\Service\Calendar($client);
-        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['eventId']);
+        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
 
         if (!$deletedEvent) {
             $response = [
@@ -314,7 +314,7 @@ class ControllerCalendar
         }
 
         $modelEvent = new ModelEvent();
-        $deleteEventSuccess = $modelEvent->deleteEvent($data['eventId']);
+        $deleteEventSuccess = $modelEvent->deleteEvent($data['idEvent']);
         if (!$deleteEventSuccess) {
             $response = [
                 'code' => 0,
@@ -378,7 +378,7 @@ class ControllerCalendar
         $now = new DateTime('now', $utcTimeZone);
         $nextPossibleAppointment = (clone $now)->modify('+8 hours');
 
-        
+
         foreach ($day as $time) {
             $timeString = (clone $time)->format('Y-m-d H:i:s');
             if (!in_array($timeString, $occupiedTimeSlots) && $time >= $nextPossibleAppointment) {
@@ -388,16 +388,16 @@ class ControllerCalendar
         $lookupTimestamps = array_map(function ($element) {
             return $element->getTimestamp();
         }, $availableTimeSlots);
-        
+
         $finalAvailableTimeSlots = [];
         $occupiedTimeSlotsForAppointment = $data['selectedDuration'] / 15; // nombre de slots de 15 minutes nécessaires pour l'occupation
-        
+
         foreach ($availableTimeSlots as $potentialStartSlot) {
             $isSlotSuitable = true;
             for ($i = 1; $i < $occupiedTimeSlotsForAppointment; $i++) {
                 $nextBlockToCheckTime = (clone $potentialStartSlot)->modify('+' . (15 * $i) . ' minutes');
                 if (!in_array($nextBlockToCheckTime->getTimestamp(), $lookupTimestamps)) {
-                    $isSlotSuitable = false; 
+                    $isSlotSuitable = false;
                     break;
                 }
             }
@@ -423,8 +423,8 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
-    }   
-    
+    }
+
     public function alertEvent()
     {
 

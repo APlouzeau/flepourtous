@@ -6,3 +6,17 @@ export interface LessonProps {
     slug: string;
 }
 export type lessons = LessonProps[];
+
+export interface Lesson {
+    title: string;
+    fullDescription: string;
+    imagePath: string;
+    slug: string;
+    times: [
+        {
+            duration: number;
+            price: number;
+        }
+    ];
+}
+export type allLessons = Lesson[];

@@ -72,7 +72,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                     {listAppointments.map((item) => {
                         const { date: localDate, time: localTime } = formatDateInUserTimezone(item.startDateTime);
                         return (
-                            <TableRow key={item.eventId}>
+                            <TableRow key={item.idEvent}>
                                 <TableCell className="font-medium">{item.description}</TableCell>
                                 <TableCell>{localDate}</TableCell>
                                 <TableCell>{localTime}</TableCell>
@@ -91,9 +91,9 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                                     <button
                                         onClick={async () => {
                                             try {
-                                                console.log(`Tentative d'annulation pour l'ID: ${item.eventId}`);
-                                                await deleteAppointment(item.eventId.toString());
-                                                alert(`Rendez-vous ${item.eventId} annulé (ou tentative lancée).`);
+                                                console.log(`Tentative d'annulation pour l'ID: ${item.idEvent}`);
+                                                await deleteAppointment(item.idEvent.toString());
+                                                alert(`Rendez-vous ${item.idEvent} annulé (ou tentative lancée).`);
                                             } catch (error) {
                                                 console.error("Erreur lors de l'annulation:", error);
                                                 alert("Erreur lors de l'annulation du rendez-vous.");

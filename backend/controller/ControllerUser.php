@@ -11,7 +11,7 @@ class ControllerUser
     public function verifyConnectBack()
     {
 
-
+        var_dump($_SESSION);
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             return true;
         } else {
@@ -161,7 +161,7 @@ class ControllerUser
                             'verifyToken' => $verificationToken,
                         ]);
                         $controllerMail = new ControllerMail();
-                                                 $sendMail = $controllerMail->sendMailToRegister($user, $verificationToken); 
+                        $sendMail = $controllerMail->sendMailToRegister($user, $verificationToken);
                         $register = $userModel->register($user);
 
                         !$register  ?

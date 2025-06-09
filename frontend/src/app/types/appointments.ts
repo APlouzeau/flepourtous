@@ -1,5 +1,5 @@
 export interface showBasicAppointmentProps {
-    eventId: number;
+    idEvent: number;
     studentName: string;
     description: string;
     duration: string;

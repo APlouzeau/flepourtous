@@ -143,24 +143,24 @@ class ControllerGoogle
 
         $modelUser = new ModelUser();
         $modelEvent = new ModelEvent();
-        $eventId = $event->getId();
+        $idEvent = $event->getId();
         // --- Début des vérifications  ---
         $eventStart = $event->getStart();
         if (!$eventStart) {
-            error_log("Événement Google ID: " . $eventId . " n'a pas de propriété 'start'. Skipping.");
+            error_log("Événement Google ID: " . $idEvent . " n'a pas de propriété 'start'. Skipping.");
             return;
         }
         $startDateTimeISO = $eventStart->getDateTime() ?: $eventStart->getDate();
 
         $eventEnd = $event->getEnd();
         if (!$eventEnd) {
-            error_log("\nÉvénement Google ID: " . $eventId . " n'a pas de propriété 'end'. Skipping.");
+            error_log("\nÉvénement Google ID: " . $idEvent . " n'a pas de propriété 'end'. Skipping.");
             return;
         }
         $endDateTimeISO = $eventEnd->getDateTime() ?: $eventEnd->getDate();
 
         if (empty($startDateTimeISO) || empty($endDateTimeISO)) {
-            error_log("\nÉvénement Google ID: " . $eventId . " a des dates de début/fin invalides après traitement. Skipping.");
+            error_log("\nÉvénement Google ID: " . $idEvent . " a des dates de début/fin invalides après traitement. Skipping.");
             return;
         }
 
@@ -228,16 +228,16 @@ class ControllerGoogle
 
         $status = $event->getStatus();
         if ($status == 'cancelled') {
-            $controllerVisio->deleteRoom($eventId);
-            $modelEvent->deleteEvent($eventId);
+            $controllerVisio->deleteRoom($idEvent);
+            $modelEvent->deleteEvent($idEvent);
         } else {
-            $eventExist = $modelEvent->checkEvent($eventId);
+            $eventExist = $modelEvent->checkEvent($idEvent);
             if ($eventExist) {
-                $controllerVisio->deleteRoom($eventId);
+                $controllerVisio->deleteRoom($idEvent);
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
 
                 $eventDatabase = new EntitieEvent([
-                    'eventId' => $eventId,
+                    'idEvent' => $idEvent,
                     'userId' => $userId,
                     'description' => $description,
                     'duration' => $duration,
@@ -249,7 +249,7 @@ class ControllerGoogle
             } else {
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
                 $eventDatabase = new EntitieEvent([
-                    'eventId' => $eventId,
+                    'idEvent' => $idEvent,
                     'userId' => $userId,
                     'description' => $description,
                     'duration' => $duration,
@@ -260,7 +260,7 @@ class ControllerGoogle
             }
         }
         if (!$roomUrl) {
-            error_log("Erreur lors de la création de la room visio pour l'événement ID: " . $eventId);
+            error_log("Erreur lors de la création de la room visio pour l'événement ID: " . $idEvent);
             return; // Ne pas continuer si la room visio n'a pas pu être créée
         }
     }
