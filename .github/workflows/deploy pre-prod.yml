@@ -15,6 +15,7 @@ jobs:
             - name: deploy
               run: |
                   cd ~/projects/flepourtous
+                  git restore .
                   git checkout preprod
                   git pull origin preprod
                   cd backend
