@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { SelectNative } from "@/components/ui/select-native";
+import { redirect } from "next/navigation";
+
 
 export default function NewAppointmentForm() {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -13,6 +15,7 @@ export default function NewAppointmentForm() {
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [userTimezone, setUserTimezone] = useState<string>("");
+    const [selectedDuration, setSelectedDuration] = useState<string>("30");
 
     useEffect(() => {
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -45,16 +48,19 @@ export default function NewAppointmentForm() {
 
     useEffect(() => {
         const searchAvailableTimeSlots = async () => {
-            if (date && userTimezone) {
+            if (date && userTimezone && selectedDuration) {
                 setLoading(true);
                 setError(null);
                 setTimeSlots([]);
                 try {
-                    const availabledSlots = await getAvailableTimeSlots(date, userTimezone);
-                    if (availabledSlots.length == 0) {
-                        setError("Aucun créneau horaire disponible pour cette date.");
-                    } else {
-                        setTimeSlots(availabledSlots);
+                    const availabledSlots = await getAvailableTimeSlots(date, userTimezone, selectedDuration);
+                    if (availabledSlots.code == 0) {
+                        setError(availabledSlots.message || "Aucun créneau disponible pour cette date.");
+                    } 
+                    if (availabledSlots.code == 1 && availabledSlots.data.length > 0) {
+                        setError(null);
+                        setTimeout(() => {
+                        setTimeSlots(availabledSlots.data); }, 500);
                     }
                 } catch (error) {
                     console.error("Error fetching available time slots:", error);
@@ -67,7 +73,8 @@ export default function NewAppointmentForm() {
             }
         };
         searchAvailableTimeSlots();
-    }, [date, userTimezone]);
+    }, [date, userTimezone, selectedDuration]);
+
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -80,6 +87,9 @@ export default function NewAppointmentForm() {
         setLoading(false);
         if (response.code === 1) {
             setSuccess(response.message || "Rendez-vous enregistré avec succès !");
+            setTimeout(() => {
+                redirect("/calendrier");
+            }, 2000); 
         } else {
             setError(response.message || "Une erreur s'est produite lors de l'enregistrement.");
             console.log("Error response:", response.data);
@@ -135,6 +145,7 @@ export default function NewAppointmentForm() {
                 <label htmlFor="duration" className="block text-gray-700 font-bold mb-2">
                     Durée
                     <RadioGroup
+                        onValueChange={(value:string) => setSelectedDuration(value)}
                         defaultValue="30"
                         name="duration"
                         className="[--primary:var(--color-indigo-500)] [--ring:var(--color-indigo-300)] in-[.dark]:[--primary:var(--color-indigo-500)] in-[.dark]:[--ring:var(--color-indigo-900)]"
@@ -150,10 +161,6 @@ export default function NewAppointmentForm() {
                         <div className="flex items-center gap-2">
                             <RadioGroupItem value="60" id="3" disabled={loading} />
                             <Label htmlFor="3">60</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="90" id="4" disabled={loading} />
-                            <Label htmlFor="4">90</Label>
                         </div>
                     </RadioGroup>
                 </label>
@@ -175,9 +182,9 @@ export default function NewAppointmentForm() {
             <button
                 type="submit"
                 className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50"
-                disabled={loading}
+                disabled={loading || error !==null || timeSlots.length === 0}
             >
-                {loading ? "Enregistrement..." : "Réserver"}
+                {loading ? "Veuillez patienter..." : "Réserver"}
             </button>
         </form>
     );
