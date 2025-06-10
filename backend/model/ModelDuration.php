@@ -19,7 +19,6 @@ class ModelDuration extends  ClassDatabase
         return $durations;
     }
 
-
     public function getDurationById(int $idDuration)
     {
         $req = $this->conn->prepare('SELECT * FROM duration WHERE idDuration = :idDuration');
@@ -34,7 +33,6 @@ class ModelDuration extends  ClassDatabase
         }
         return null;
     }
-
 
     public function createDuration(EntitieDuration $duration)
     {

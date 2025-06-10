@@ -22,6 +22,6 @@ class ControllerLesson
         $userController->verifyConnectBack();
         $modelLesson = new ModelLesson();
         $lessons = $modelLesson->getAllLessonsWithPrices();
-        echo json_encode($lessons);
+        echo json_encode(array_values($lessons));
     }
 }

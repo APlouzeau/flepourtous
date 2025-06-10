@@ -1,10 +1,9 @@
-import { allLessons } from "@/app/types/lessons";
+import { lessonsWithPrices } from "@/app/types/lessons";
 import { getAllLessonsWithPrices } from "./AppointmentAction";
 import NewAppointmentForm from "./AppointmentForm";
 
 export default async function NewAppointmentPage() {
-    const lessons: allLessons = await getAllLessonsWithPrices();
-    console.log("Lessons data:", lessons);
+    const lessons: lessonsWithPrices = await getAllLessonsWithPrices();
     return (
         <div className="flex flex-col items-center justify-center bg-gray-100">
             <h1 className="text-4xl font-bold mb-4">Nouveau Rendez-vous</h1>

@@ -58,7 +58,7 @@ class ModelLesson extends  ClassDatabase
     public function getAllLessonsWithPrices()
     {
         $req = $this->conn->query('
-        SELECT lesson.idLesson, lesson.title, lesson.shortDescription, lesson.imagePath, lesson.slug, prices.price, duration.duration
+        SELECT lesson.idLesson, lesson.title, prices.price, duration.duration
         FROM lesson
         INNER JOIN lessonPrices ON lessonPrices.id_lesson = lesson.idLesson
         INNER JOIN prices ON lessonPrices.id_price = prices.idPrice
@@ -67,17 +67,23 @@ class ModelLesson extends  ClassDatabase
         $datas = $req->fetchAll();
         $lessons = [];
         foreach ($datas as $data) {
-            $lesson =
-                [
-                    'idLesson' => $data['idLesson'],
-                    'title' => $data['title'],
-                    'shortDescription' => $data['shortDescription'],
-                    'imagePath' => $data['imagePath'],
-                    'slug' => $data['slug'],
+            if (isset($lessons[$data['idLesson']])) {
+                $lessons[$data['idLesson']]['price'][] = [
                     'price' => $data['price'],
                     'duration' => $data['duration']
                 ];
-            $lessons[] = $lesson;
+            } else {
+                $lessons[$data['idLesson']] = [
+                    'idLesson' => $data['idLesson'],
+                    'title' => $data['title'],
+                    'price' => [
+                        [
+                            'price' => $data['price'],
+                            'duration' => $data['duration']
+                        ]
+                    ],
+                ];
+            }
         }
         return $lessons;
     }

@@ -6,9 +6,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { SelectNative } from "@/components/ui/select-native";
 import { redirect } from "next/navigation";
-import { allLessons } from "@/app/types/lessons";
+import { lessonsWithPrices } from "@/app/types/lessons";
 
-export default function NewAppointmentForm({ lessons }: { lessons: allLessons }) {
+export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
     const [timeSlots, setTimeSlots] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
@@ -17,7 +17,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: allLessons })
     const [userTimezone, setUserTimezone] = useState<string>("");
     const [selectedDuration, setSelectedDuration] = useState<string>("30");
 
-    console.log("Lessons data:", lessons);
+    console.log("Lessons:", lessons);
 
     useEffect(() => {
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -145,6 +145,32 @@ export default function NewAppointmentForm({ lessons }: { lessons: allLessons })
             </div>
             <div className="mb-4">
                 <label htmlFor="duration" className="block text-gray-700 font-bold mb-2">
+                    cours
+                    <RadioGroup
+                        //onValueChange={(value: string) => setSelectedDuration(value)}
+                        name="coucou"
+                        className="[--primary:var(--color-indigo-500)] [--ring:var(--color-indigo-300)] in-[.dark]:[--primary:var(--color-indigo-500)] in-[.dark]:[--ring:var(--color-indigo-900)]"
+                    >
+                        {lessons &&
+                            lessons.length > 0 &&
+                            lessons.map((lesson) => (
+                                <div key={lesson.idLesson} className="flex items-center gap-2">
+                                    <RadioGroupItem
+                                        value={lesson.price[0].duration.toString()}
+                                        id={`lesson-${lesson.idLesson}`}
+                                        disabled={loading}
+                                        onChange={() => setSelectedDuration(lesson.price[0].duration.toString())}
+                                    />
+                                    <Label
+                                        htmlFor={`lesson-${lesson.idLesson}`}
+                                    >{`${lesson.title} (${lesson.price[0].duration} min)`}</Label>
+                                </div>
+                            ))}
+                    </RadioGroup>
+                </label>
+            </div>
+            {/*             <div className="mb-4">
+                <label htmlFor="duration" className="block text-gray-700 font-bold mb-2">
                     Durée
                     <RadioGroup
                         onValueChange={(value: string) => setSelectedDuration(value)}
@@ -166,7 +192,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: allLessons })
                         </div>
                     </RadioGroup>
                 </label>
-            </div>
+            </div> */}
             <div>
                 <label htmlFor="description" className="block text-gray-700 font-bold mb-2">
                     Commentaire (optionnel)
