@@ -101,7 +101,16 @@ class ControllerUser
             'data' =>
             $modelUser->getUser($user)
 
+
         ];
+
+        $modelEvent = new ModelEvent();
+        $wallet = $modelEvent->getWalletFromUser($_SESSION['idUser']);
+        if ($wallet !== false) {
+            $response['data']['wallet'] = $wallet;
+        } else {
+            $response['data']['wallet'] = null;
+        }
 
         echo json_encode($response);
     }

@@ -191,4 +191,24 @@ class ModelEvent extends  ClassDatabase
             return false; // Pas d'événements dans l'heure à venir
         }
     }
+
+    public function getWalletFromUser(int $idUser)
+    {
+        $req = $this->conn->prepare('
+        SELECT SUM(p.price) AS wallet
+        FROM event e
+        INNER JOIN lesson l ON e.id_lesson = l.idLesson
+        INNER JOIN lessonPrices lp ON lp.id_lesson = l.idLesson
+        INNER JOIN prices p ON p.idPrice = lp.id_price
+        INNER JOIN duration d ON d.idDuration = lp.id_duration
+        WHERE userID = :idUser AND e.duration = d.duration AND e.status = "Avoir"');
+        $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
+        $req->execute();
+        $data = $req->fetch();
+        if ($data && $data['wallet'] !== null) {
+            return $data['wallet'];
+        } else {
+            return false;
+        }
+    }
 }

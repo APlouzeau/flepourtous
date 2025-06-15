@@ -15,6 +15,7 @@ $router->addRoute('GET', BASE_URL . "home", 'ControllerUser', 'homePage');
 $router->addRoute('GET', BASE_URL . "api/users", 'ControllerUser', 'listUsers');
 $router->addRoute('POST', BASE_URL . "api/userInformations", 'ControllerUser', 'getUserInformations');
 $router->addRoute('GET', BASE_URL . "api/verify-email/{token}", 'ControllerUser', 'verifyEmail');
+$router->addRoute('POST', BASE_URL . "api/getWallet", 'ControllerOrder', 'getWallet');
 
 //Lessons
 $router->addRoute('GET', BASE_URL . "api/lessons", 'ControllerLesson', 'getAllLessons');
