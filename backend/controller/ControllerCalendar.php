@@ -72,7 +72,7 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration'])) {
+        if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['idLesson'])) {
             http_response_code(400); // Bad Request
             $response = [
                 'code' => 0,
@@ -115,6 +115,7 @@ class ControllerCalendar
             exit();
         }
 
+        $idLesson = (int)$data['idLesson'];
         $userId = $_SESSION['idUser'];
         $description = $data['description'];
         $duration = $data['duration'];
@@ -238,13 +239,16 @@ class ControllerCalendar
                 'updatedAt' => $updatedAt,
                 'status' => $status,
                 'visioLink' => $roomUrl,
+                'id_lesson' => $idLesson,
             ]);
+
             $modelEvent = new ModelEvent();
             $registerEventSuccess = $modelEvent->createEvent($eventDatabase);
             if (!$registerEventSuccess) {
                 $response = [
                     'code' => 0,
                     'message' => 'Erreur lors de l\'enregistrement de l\'événement en base de données',
+                    'data' => $eventDatabase
                 ];
                 echo json_encode($response);
                 return;
@@ -255,10 +259,10 @@ class ControllerCalendar
                 ];
             }
         } catch (Exception $e) {
-            echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(), $eventDatabase]);
             return;
         };
-        echo json_encode($response);
+        //echo json_encode($response);
     }
 
     public function listEventsUser()

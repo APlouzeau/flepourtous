@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { SelectNative } from "@/components/ui/select-native";
 import { redirect } from "next/navigation";
-import { lessonsWithPrices } from "@/app/types/lessons";
+import { lessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
 
 export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -15,9 +15,8 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [userTimezone, setUserTimezone] = useState<string>("");
-    const [selectedDuration, setSelectedDuration] = useState<string>("30");
-
-    console.log("Lessons:", lessons);
+    const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
+    const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);
 
     useEffect(() => {
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -61,9 +60,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
                     }
                     if (availabledSlots.code == 1 && availabledSlots.data.length > 0) {
                         setError(null);
-                        setTimeout(() => {
-                            setTimeSlots(availabledSlots.data);
-                        }, 500);
+                        setTimeSlots(availabledSlots.data);
                     }
                 } catch (error) {
                     console.error("Error fetching available time slots:", error);
@@ -85,6 +82,15 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
         setSuccess(null);
 
         const formData = new FormData(e.currentTarget);
+        if (selectedLesson && selectedLesson.idLesson != null) {
+            formData.append("idLesson", selectedLesson.idLesson.toString());
+            console.log("formadata : ", formData.getAll);
+        } else {
+            console.error("Aucun cours sélectionné pour envoyer l'idLesson");
+            setError("Veuillez sélectionner un cours.");
+            setLoading(false);
+            return;
+        }
         const response = await registerAppointment(formData);
         setLoading(false);
         if (response.code === 1) {
@@ -144,11 +150,17 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
                 </label>
             </div>
             <div className="mb-4">
-                <label htmlFor="duration" className="block text-gray-700 font-bold mb-2">
+                <label htmlFor="lesson" className="block text-gray-700 font-bold mb-2">
                     cours
                     <RadioGroup
-                        //onValueChange={(value: string) => setSelectedDuration(value)}
-                        name="coucou"
+                        onValueChange={(value: string) => {
+                            const lesson = lessons.find((l) => l.title === value);
+                            if (lesson) {
+                                setSelectedLesson(lesson);
+                                setSelectedDuration(null);
+                            }
+                        }}
+                        name="lesson"
                         className="[--primary:var(--color-indigo-500)] [--ring:var(--color-indigo-300)] in-[.dark]:[--primary:var(--color-indigo-500)] in-[.dark]:[--ring:var(--color-indigo-900)]"
                     >
                         {lessons &&
@@ -156,43 +168,42 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
                             lessons.map((lesson) => (
                                 <div key={lesson.idLesson} className="flex items-center gap-2">
                                     <RadioGroupItem
-                                        value={lesson.price[0].duration.toString()}
+                                        value={lesson.title}
                                         id={`lesson-${lesson.idLesson}`}
                                         disabled={loading}
-                                        onChange={() => setSelectedDuration(lesson.price[0].duration.toString())}
                                     />
-                                    <Label
-                                        htmlFor={`lesson-${lesson.idLesson}`}
-                                    >{`${lesson.title} (${lesson.price[0].duration} min)`}</Label>
+                                    <Label htmlFor={`lesson-${lesson.idLesson}`}>{`${lesson.title}`}</Label>
                                 </div>
                             ))}
                     </RadioGroup>
                 </label>
             </div>
-            {/*             <div className="mb-4">
+            <div className="mb-4">
                 <label htmlFor="duration" className="block text-gray-700 font-bold mb-2">
                     Durée
                     <RadioGroup
+                        defaultValue=""
                         onValueChange={(value: string) => setSelectedDuration(value)}
-                        defaultValue="30"
                         name="duration"
                         className="[--primary:var(--color-indigo-500)] [--ring:var(--color-indigo-300)] in-[.dark]:[--primary:var(--color-indigo-500)] in-[.dark]:[--ring:var(--color-indigo-900)]"
                     >
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="30" id="1" disabled={loading} />
-                            <Label htmlFor="1">30</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="45" id="2" disabled={loading} />
-                            <Label htmlFor="2">45</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="60" id="3" disabled={loading} />
-                            <Label htmlFor="3">60</Label>
-                        </div>
+                        {selectedLesson &&
+                            selectedLesson.price != null &&
+                            selectedLesson.price.map((durationPriceOption, index) => (
+                                <div key={durationPriceOption.duration} className="flex items-center gap-2">
+                                    <RadioGroupItem
+                                        value={durationPriceOption.duration.toString()}
+                                        id={`duration-option-${selectedLesson.idLesson}-${durationPriceOption.duration}`}
+                                        disabled={loading}
+                                    />
+                                    <Label
+                                        htmlFor={`duration-option-${selectedLesson.idLesson}-${durationPriceOption.duration}`}
+                                    >{`${durationPriceOption.duration} mn (${durationPriceOption.price}$)`}</Label>
+                                </div>
+                            ))}
                     </RadioGroup>
                 </label>
-            </div> */}
+            </div>
             <div>
                 <label htmlFor="description" className="block text-gray-700 font-bold mb-2">
                     Commentaire (optionnel)
@@ -210,7 +221,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
             <button
                 type="submit"
                 className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50"
-                disabled={loading || error !== null || timeSlots.length === 0}
+                disabled={loading || error !== null || timeSlots.length === 0 || !selectedLesson || !selectedDuration}
             >
                 {loading ? "Veuillez patienter..." : "Réserver"}
             </button>

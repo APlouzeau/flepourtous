@@ -73,7 +73,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                         const { date: localDate, time: localTime } = formatDateInUserTimezone(item.startDateTime);
                         return (
                             <TableRow key={item.idEvent}>
-                                <TableCell className="font-medium">{item.description}</TableCell>
+                                <TableCell className="font-medium">{item.title}</TableCell>
                                 <TableCell>{localDate}</TableCell>
                                 <TableCell>{localTime}</TableCell>
                                 <TableCell>{item.duration} mn</TableCell>
