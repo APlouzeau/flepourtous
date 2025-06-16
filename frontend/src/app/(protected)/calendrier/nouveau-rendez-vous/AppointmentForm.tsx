@@ -93,7 +93,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
             return;
         }
         const response = await registerAppointment(formData);
-        setLoading(false);
+        setLoading(true);
         if (response.code === 1 || response.code === 10) {
             setSuccess(response.message || "Rendez-vous enregistré avec succès !");
             setTimeout(() => {
@@ -101,6 +101,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
             }, 2000);
         } else {
             setError(response.message || "Une erreur s'est produite lors de l'enregistrement.");
+            setLoading(false);
         }
     };
 
@@ -218,13 +219,6 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
             {error && <p className="text-red-500 text-sm text-center my-2">{error}</p>}
             {success && <p className="text-green-500 text-sm text-center my-2">{success}</p>}
 
-            {/* <button
-                type="submit"
-                className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50"
-                disabled={loading || error !== null || timeSlots.length === 0 || !selectedLesson || !selectedDuration}
-            >
-                {loading ? "Veuillez patienter..." : "Réserver"}
-            </button> */}
             <Button
                 type="submit"
                 className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50"
