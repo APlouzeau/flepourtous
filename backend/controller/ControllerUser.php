@@ -11,7 +11,6 @@ class ControllerUser
     public function verifyConnectBack()
     {
 
-
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             return true;
         } else {
@@ -102,7 +101,16 @@ class ControllerUser
             'data' =>
             $modelUser->getUser($user)
 
+
         ];
+
+        $modelEvent = new ModelEvent();
+        $wallet = $modelEvent->getWalletFromUser($_SESSION['idUser']);
+        if ($wallet !== false) {
+            $response['data']['wallet'] = $wallet;
+        } else {
+            $response['data']['wallet'] = null;
+        }
 
         echo json_encode($response);
     }
@@ -161,7 +169,7 @@ class ControllerUser
                             'verifyToken' => $verificationToken,
                         ]);
                         $controllerMail = new ControllerMail();
-                        /*                         $sendMail = $controllerMail->sendMailToRegister($user, $verificationToken); */
+                        $sendMail = $controllerMail->sendMailToRegister($user, $verificationToken);
                         $register = $userModel->register($user);
 
                         !$register  ?
@@ -188,6 +196,7 @@ class ControllerUser
                 'code' => 0,
                 'message' => 'Token manquant',
             ];
+            header('Location: ' . URI . 'echec?raison=token_manquant');
         } else {
             $modelUser = new ModelUser();
             $user = $modelUser->verifyEmail($token);
@@ -196,11 +205,13 @@ class ControllerUser
                     'code' => 1,
                     'message' => 'Adresse e-mail vérifiée avec succès',
                 ];
+                header('Location: ' . URI . 'success');
             } else {
                 $response = [
                     'code' => 0,
                     'message' => 'Erreur lors de la vérification de l\'adresse e-mail',
                 ];
+                header('Location: ' . URI . 'echec?raison=token_invalide');
             }
         }
         echo json_encode($response);

@@ -2,6 +2,7 @@
 
 import { getCookieBackend } from "@/lib/session";
 import axios from "axios";
+import { cp } from "fs";
 import { revalidatePath } from "next/cache";
 
 export async function registerAppointment(formData: FormData) {
@@ -12,8 +13,9 @@ export async function registerAppointment(formData: FormData) {
         startTime: formData.get("startTime"),
         duration: formData.get("duration"),
         userTimeZone: formData.get("userTimeZone"),
+        idLesson: formData.get("idLesson"),
     };
-
+    console.log("Data to be sent:", data);
     try {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/createEvent`, data, {
             headers: {
@@ -33,12 +35,12 @@ export async function registerAppointment(formData: FormData) {
     }
 }
 
-export async function deleteAppointment(eventId: string) {
+export async function deleteAppointment(idEvent: string) {
     const cookie = await getCookieBackend();
     try {
         const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/deleteEvent`,
-            { eventId },
+            { idEvent },
             {
                 headers: {
                     Cookie: `PHPSESSID=${cookie}`,
@@ -54,12 +56,12 @@ export async function deleteAppointment(eventId: string) {
     }
 }
 
-export async function getAvailableTimeSlots(date: string, userTimeZone: string) {
+export async function getAvailableTimeSlots(date: string, userTimeZone: string, selectedDuration: string) {
     const cookie = await getCookieBackend();
     try {
         const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/getAvailableTimeSlots`,
-            { date, userTimeZone },
+            { date, userTimeZone, selectedDuration },
             {
                 headers: {
                     Cookie: `PHPSESSID=${cookie}`,
@@ -68,11 +70,30 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string) 
                 withCredentials: true,
             }
         );
-        console.log("Response from getAvailableTimeSlots:", response.data);
-        /*         const availableTimeSlots = generateTimeSlots(8, 22, 15, response.data); */
         return response.data;
     } catch (error) {
         console.error("Error during fetching available time slots:", error);
+        return [];
+    }
+}
+
+export async function getAllLessonsWithPrices() {
+    const cookie = await getCookieBackend();
+    try {
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`,
+            {},
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${cookie}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching lessons information:", error);
         return [];
     }
 }

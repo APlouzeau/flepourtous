@@ -143,24 +143,24 @@ class ControllerGoogle
 
         $modelUser = new ModelUser();
         $modelEvent = new ModelEvent();
-        $eventId = $event->getId();
+        $idEvent = $event->getId();
         // --- Début des vérifications  ---
         $eventStart = $event->getStart();
         if (!$eventStart) {
-            error_log("Événement Google ID: " . $eventId . " n'a pas de propriété 'start'. Skipping.");
+            error_log("Événement Google ID: " . $idEvent . " n'a pas de propriété 'start'. Skipping.");
             return;
         }
         $startDateTimeISO = $eventStart->getDateTime() ?: $eventStart->getDate();
 
         $eventEnd = $event->getEnd();
         if (!$eventEnd) {
-            error_log("\nÉvénement Google ID: " . $eventId . " n'a pas de propriété 'end'. Skipping.");
+            error_log("\nÉvénement Google ID: " . $idEvent . " n'a pas de propriété 'end'. Skipping.");
             return;
         }
         $endDateTimeISO = $eventEnd->getDateTime() ?: $eventEnd->getDate();
 
         if (empty($startDateTimeISO) || empty($endDateTimeISO)) {
-            error_log("\nÉvénement Google ID: " . $eventId . " a des dates de début/fin invalides après traitement. Skipping.");
+            error_log("\nÉvénement Google ID: " . $idEvent . " a des dates de début/fin invalides après traitement. Skipping.");
             return;
         }
 
@@ -170,19 +170,19 @@ class ControllerGoogle
             $startDateTimeFormatted = $dtStart->format('Y-m-d H:i:s');
         } catch (Exception $e) {
 
-            return; 
+            return;
         }
 
-        
+
         try {
             $dtEnd = new DateTime($endDateTimeISO);
 
-            $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60; 
+            $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
         } catch (Exception $e) {
             return; // Ne pas traiter si les dates pour la durée sont invalides
         }
 
-        $description = $event->getSummary(); 
+        $description = $event->getSummary();
 
         $attendees = $event->getAttendees();
         $userId = null;
@@ -223,21 +223,21 @@ class ControllerGoogle
         $startDateTimeUtc = new DateTime($startDateTimeFormatted, new DateTimeZone('Europe/Paris'));
         $startDateTimeUtc->setTimezone(new DateTimeZone('UTC'));
         $startDateTimeUtcFormatted = $startDateTimeUtc->format('Y-m-d H:i:s');
-        
+
         $controllerVisio = new ControllerVisio();
 
         $status = $event->getStatus();
         if ($status == 'cancelled') {
-            $controllerVisio->deleteRoom($eventId);
-            $modelEvent->deleteEvent($eventId);
+            $controllerVisio->deleteRoom($idEvent);
+            $modelEvent->deleteEvent($idEvent);
         } else {
-            $eventExist = $modelEvent->checkEvent($eventId);
+            $eventExist = $modelEvent->checkEvent($idEvent);
             if ($eventExist) {
-                $controllerVisio->deleteRoom($eventId);
+                $controllerVisio->deleteRoom($idEvent);
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
-    
+
                 $eventDatabase = new EntitieEvent([
-                    'eventId' => $eventId,
+                    'idEvent' => $idEvent,
                     'userId' => $userId,
                     'description' => $description,
                     'duration' => $duration,
@@ -249,7 +249,7 @@ class ControllerGoogle
             } else {
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
                 $eventDatabase = new EntitieEvent([
-                    'eventId' => $eventId,
+                    'idEvent' => $idEvent,
                     'userId' => $userId,
                     'description' => $description,
                     'duration' => $duration,
@@ -258,17 +258,14 @@ class ControllerGoogle
                 ]);
                 $modelEvent->createEvent($eventDatabase);
             }
-
         }
         if (!$roomUrl) {
-            error_log("Erreur lors de la création de la room visio pour l'événement ID: " . $eventId);
+            error_log("Erreur lors de la création de la room visio pour l'événement ID: " . $idEvent);
             return; // Ne pas continuer si la room visio n'a pas pu être créée
         }
-
-
     }
 
-    public function getAvaibilityOnGoogleCalendar($startDateTime, $endDateTime)
+    public function getOccupiedSlotsOnGoogleCalendar($startDateTime, $endDateTime)
     {
         $client = $this->getClient();
         $service = new \Google\Service\Calendar($client);
@@ -289,7 +286,7 @@ class ControllerGoogle
             $busySlots = $calendarSpecificData->getBusy();
 
             error_log("Disponibilité récupérée pour la période du " . $startDateTime->format('Y-m-d H:i:s') . " au " . $endDateTime->format('Y-m-d H:i:s') . "\n");
-            
+
             return $busySlots;
         } catch (Exception $e) {
             error_log('Erreur lors de la récupération de la disponibilité : ' . $e->getMessage());

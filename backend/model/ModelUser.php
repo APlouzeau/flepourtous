@@ -112,6 +112,14 @@ extends ClassDatabase
 
     public function verifyEmail(string $verifyToken)
     {
+        $req = $this->conn->prepare("SELECT idUser FROM users WHERE verifyToken = :verifyToken");
+        $req->bindValue(":verifyToken", $verifyToken);
+        $req->execute();
+        $data = $req->fetch(PDO::FETCH_ASSOC);
+        if (!$data) {
+            error_log("Invalid verification token: " . $verifyToken);
+            return false; // Token invalide
+        }
         $query = "UPDATE users SET isVerified = 1 WHERE verifyToken = :verifyToken";
         $req = $this->conn->prepare($query);
         $req->bindValue(":verifyToken", $verifyToken);

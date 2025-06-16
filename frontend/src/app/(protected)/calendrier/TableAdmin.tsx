@@ -69,7 +69,7 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
                     {listAppointments.map((item) => {
                         const { date: localDate, time: localTime } = formatDateInUserTimezone(item.startDateTime);
                         return (
-                            <TableRow key={item.eventId}>
+                            <TableRow key={item.idEvent}>
                                 <TableCell className="font-medium">{item.studentName}</TableCell>
                                 {/* Ajout de la cellule pour le nom de l'élève */}
                                 <TableCell className="font-medium">{item.description}</TableCell>
@@ -83,11 +83,11 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
                                 <button
                                     onClick={async () => {
                                         try {
-                                            console.log(`Tentative d'annulation pour l'ID: ${item.eventId}`);
+                                            console.log(`Tentative d'annulation pour l'ID: ${item.idEvent}`);
                                             // Appelle la Server Action importée en passant l'ID converti en string
-                                            await deleteAppointment(item.eventId.toString());
+                                            await deleteAppointment(item.idEvent.toString());
                                             // Il faut ajouter revalidatePath dans la Server Action.
-                                            alert(`Rendez-vous ${item.eventId} annulé (ou tentative lancée).`); // Feedback simple
+                                            alert(`Rendez-vous ${item.idEvent} annulé (ou tentative lancée).`); // Feedback simple
                                         } catch (error) {
                                             console.error("Erreur lors de l'annulation:", error);
                                             alert("Erreur lors de l'annulation du rendez-vous.");

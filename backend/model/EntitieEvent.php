@@ -2,7 +2,7 @@
 
 class EntitieEvent
 {
-    private string $eventId;
+    private string $idEvent;
     private string $userId;
     private string $description;
     private int $duration;
@@ -11,6 +11,7 @@ class EntitieEvent
     private string $updatedAt;
     private string $status;
     private string $visioLink;
+    private int $id_lesson;
 
     public function __construct(array $data)
     {
@@ -27,13 +28,13 @@ class EntitieEvent
         }
     }
 
-    public function getEventId()
+    public function getIdEvent()
     {
-        return $this->eventId;
+        return $this->idEvent;
     }
-    public function setEventId($eventId)
+    public function setIdEvent($idEvent)
     {
-        $this->eventId = $eventId;
+        $this->idEvent = $idEvent;
 
         return $this;
     }
@@ -146,6 +147,26 @@ class EntitieEvent
     public function setVisioLink($visioLink)
     {
         $this->visioLink = $visioLink;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of id_lesson
+     */
+    public function getId_lesson()
+    {
+        return $this->id_lesson;
+    }
+
+    /**
+     * Set the value of id_lesson
+     *
+     * @return  self
+     */
+    public function setId_lesson($id_lesson)
+    {
+        $this->id_lesson = $id_lesson;
 
         return $this;
     }

@@ -32,13 +32,8 @@ class ControllerCalendar
         }
 
         $client = new \Google\Client();
-        // Utilise setAuthConfig avec le chemin du fichier de clé
         $client->setAuthConfig($keyFilePath);
-        // Ajoute le scope nécessaire pour accéder à Calendar
         $client->addScope(Google\Service\Calendar::CALENDAR);
-
-        // Pas besoin de setAccessToken, setRedirectUri, etc.
-        // Le compte de service s'authentifie avec la clé.
 
         return $client;
     }
@@ -72,7 +67,7 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration'])) {
+        if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['idLesson'])) {
             http_response_code(400); // Bad Request
             $response = [
                 'code' => 0,
@@ -115,6 +110,7 @@ class ControllerCalendar
             exit();
         }
 
+        $idLesson = (int)$data['idLesson'];
         $userId = $_SESSION['idUser'];
         $description = $data['description'];
         $duration = $data['duration'];
@@ -227,9 +223,9 @@ class ControllerCalendar
             }
 
             //DATABASE
-            $eventId = $createdEvent->getId();
+            $idEvent = $createdEvent->getId();
             $eventDatabase = new EntitieEvent([
-                'eventId' => $eventId,
+                'idEvent' => $idEvent,
                 'userId' => $userId,
                 'description' => $description,
                 'duration' => $duration,
@@ -238,24 +234,35 @@ class ControllerCalendar
                 'updatedAt' => $updatedAt,
                 'status' => $status,
                 'visioLink' => $roomUrl,
+                'id_lesson' => $idLesson,
             ]);
+
             $modelEvent = new ModelEvent();
-            $registerEventSuccess = $modelEvent->createEvent($eventDatabase);
-            if (!$registerEventSuccess) {
+            $createdEvent = $modelEvent->createEvent($eventDatabase);
+            $modelPrice = new ModelPrices();
+            $price = $modelPrice->getPriceForAppointment($duration, $idLesson);
+            $modelLesson = new ModelLesson();
+            $lesson = $modelLesson->getLessonById($idLesson);
+            $_SESSION['wallet'] = $price;
+            $_SESSION['lesson_name'] = $lesson['title'];
+            $_SESSION['event_id'] = $idEvent;
+
+            if (!$createdEvent) {
                 $response = [
-                    'code' => 0,
+                    'code' => 10,
                     'message' => 'Erreur lors de l\'enregistrement de l\'événement en base de données',
+                    'data' => $eventDatabase
                 ];
                 echo json_encode($response);
                 return;
             } else {
                 $response = [
                     'code' => 1,
-                    'message' => 'Événement enregistré en base de données avec succès',
+                    'message' => 'Événement enregistré avec succès',
                 ];
             }
         } catch (Exception $e) {
-            echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(), $eventDatabase]);
             return;
         };
         echo json_encode($response);
@@ -292,17 +299,17 @@ class ControllerCalendar
         echo json_encode("data");
         echo json_encode($data);
 
-        if (!$data || !isset($data['eventId'])) {
+        if (!$data || !isset($data['idEvent'])) {
             $response = [
                 'code' => 0,
-                'message' => 'Données manquantes pour supprimer l\'événement (eventId requis).'
+                'message' => 'Données manquantes pour supprimer l\'événement (idEvent requis).'
             ];
             echo json_encode($response);
             return;
         }
         $client = $this->getClient();
         $service = new Google\Service\Calendar($client);
-        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['eventId']);
+        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
 
         if (!$deletedEvent) {
             $response = [
@@ -314,7 +321,7 @@ class ControllerCalendar
         }
 
         $modelEvent = new ModelEvent();
-        $deleteEventSuccess = $modelEvent->deleteEvent($data['eventId']);
+        $deleteEventSuccess = $modelEvent->deleteEvent($data['idEvent']);
         if (!$deleteEventSuccess) {
             $response = [
                 'code' => 0,
@@ -331,7 +338,7 @@ class ControllerCalendar
         echo json_encode($response);
     }
 
-    public function getOccupiedTimeSlots()
+    public function getAvailablesTimeSlots()
     {
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
@@ -339,30 +346,20 @@ class ControllerCalendar
         $data = json_decode($requestBody, true);
 
         $utcTimeZone = new DateTimeZone('UTC'); // La timezone de la base de données
-        $luluTimeZone = new DateTimeZone('Europe/Paris');
+        $frenchTimeZone = new DateTimeZone('Europe/Paris');
 
         $userTimeZone = new DateTimeZone($data['userTimeZone']); // Timezone de l'utilisateur
-        //$userTimeZone = new DateTimeZone('Asia/Tokyo'); // Timzone de l'utilisateur
 
         $userDate = $data['date']; // La date demandée par l'utilisateur
 
-        $startTime = new DateTime($userDate . ' 08:00:00', $luluTimeZone); // Crée un objet DateTime pour 8h00
+        $startTime = new DateTime($userDate . ' 08:00:00', $frenchTimeZone); // Crée un objet DateTime pour 8h00 (heure minimum de rendez-vous)
         $startTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
 
-        $endTime = new DateTime($userDate . ' 22:00:00', $luluTimeZone);
+        $endTime = new DateTime($userDate . ' 22:00:00', $frenchTimeZone); // Crée un objet DateTime pour 22h00 (heure de maximale de fin de journée)
         $endTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
 
-/*         $startLunch = new DateTime($userDate . ' 12:00:00', $luluTimeZone);
-        $startLunch->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
-
-        $endLunch = new DateTime($userDate . ' 14:00:00', $luluTimeZone);
-        $endLunch->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime */
-
-        $userDateReference = new DateTime($userDate . "00:00:00", $userTimeZone); // Crée un objet DateTime avec la date UTC
-        $userDateUtc = $userDateReference->setTimezone($utcTimeZone)->format('Y-m-d'); // Crée un objet DateTime avec la date UTC
-
         $controllerGoogle = new ControllerGoogle();
-        $events = $controllerGoogle->getAvaibilityOnGoogleCalendar($startTime, $endTime);
+        $events = $controllerGoogle->getOccupiedSlotsOnGoogleCalendar($startTime, $endTime);
 
         error_log("Google Busy Periods (pour le jour demandé): " . print_r($events, true));
 
@@ -395,20 +392,50 @@ class ControllerCalendar
                 $availableTimeSlots[] = $time;
             }
         }
-
         $lookupTimestamps = array_map(function ($element) {
             return $element->getTimestamp();
         }, $availableTimeSlots);
 
         $finalAvailableTimeSlots = [];
+        $occupiedTimeSlotsForAppointment = $data['selectedDuration'] / 15; // nombre de slots de 15 minutes nécessaires pour l'occupation
 
-        foreach ($availableTimeSlots as $slotTime) {
-            $slotTooShort = (clone $slotTime)->modify('+15 minutes');
-            if (in_array($slotTooShort->getTimestamp(), $lookupTimestamps)) {
-                $finalAvailableTimeSlots[] = $slotTime->setTimezone($userTimeZone)->format('H:i');
+        foreach ($availableTimeSlots as $potentialStartSlot) {
+            $isSlotSuitable = true;
+            for ($i = 1; $i < $occupiedTimeSlotsForAppointment; $i++) {
+                $nextBlockToCheckTime = (clone $potentialStartSlot)->modify('+' . (15 * $i) . ' minutes');
+                if (!in_array($nextBlockToCheckTime->getTimestamp(), $lookupTimestamps)) {
+                    $isSlotSuitable = false;
+                    break;
+                }
             }
-        } 
-        //echo json_encode($occupiedTimeSlots);
-        echo json_encode($finalAvailableTimeSlots);
+
+            if ($isSlotSuitable) {
+                $finalAvailableTimeSlots[] = $potentialStartSlot->setTimezone($userTimeZone)->format('H:i');
+            }
+        }
+        if (count($finalAvailableTimeSlots) == 0) {
+            $response = [
+                'code' => 0,
+                'message' => 'Aucun créneau disponible pour cette date.',
+            ];
+            echo json_encode($response);
+            return;
+        }
+        if (count($finalAvailableTimeSlots) > 0) {
+            $response = [
+                'code' => 1,
+                'message' => 'Créneaux disponibles récupérés avec succès',
+                'data' => $finalAvailableTimeSlots,
+            ];
+            echo json_encode($response);
+            return;
+        }
+    }
+
+    public function alertEvent()
+    {
+
+        $dateNow = new DateTime('now', new DateTimeZone('UTC'));
+        $modelEvent = new ModelEvent();
     }
 }

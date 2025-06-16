@@ -114,6 +114,7 @@ export async function logout() {
 }
 
 export async function getCookieBackend() {
+    console.log("Fetching cookie from backend");
     const jwtSessionCookie = (await cookies()).get("session");
     if (!jwtSessionCookie) {
         console.log("No JWT session cookie found in getCookieBackend");
@@ -124,6 +125,31 @@ export async function getCookieBackend() {
         return payload.cookiePHP as string | null;
     } catch (error) {
         console.error("Error verifying token in getCookieBackend:", error);
+        return null;
+    }
+}
+
+export async function getWallet() {
+    const session = await getCookieBackend();
+    if (!session) {
+        console.log("No session found in getWallet");
+        return null;
+    }
+    try {
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/getWallet`,
+            {},
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${session}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            }
+        );
+        return response.data.data || "0";
+    } catch (error) {
+        console.error("Error fetching wallet:", error);
         return null;
     }
 }

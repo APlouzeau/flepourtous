@@ -22,7 +22,6 @@ export default async function CalendarPage() {
                 withCredentials: true,
             }
         );
-        console.log("Response from listEvents:", response.data);
         if (response.data && Array.isArray(response.data.data)) {
             appointmentList = response.data.data;
         } else {

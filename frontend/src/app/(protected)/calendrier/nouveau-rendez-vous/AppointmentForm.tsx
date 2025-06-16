@@ -5,14 +5,20 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { SelectNative } from "@/components/ui/select-native";
+import { lessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
-export default function NewAppointmentForm() {
+export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
     const [timeSlots, setTimeSlots] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [userTimezone, setUserTimezone] = useState<string>("");
+    const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
+    const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -45,16 +51,18 @@ export default function NewAppointmentForm() {
 
     useEffect(() => {
         const searchAvailableTimeSlots = async () => {
-            if (date && userTimezone) {
+            if (date && userTimezone && selectedDuration) {
                 setLoading(true);
                 setError(null);
                 setTimeSlots([]);
                 try {
-                    const availabledSlots = await getAvailableTimeSlots(date, userTimezone);
-                    if (availabledSlots.length == 0) {
-                        setError("Aucun créneau horaire disponible pour cette date.");
-                    } else {
-                        setTimeSlots(availabledSlots);
+                    const availabledSlots = await getAvailableTimeSlots(date, userTimezone, selectedDuration);
+                    if (availabledSlots.code == 0) {
+                        setError(availabledSlots.message || "Aucun créneau disponible pour cette date.");
+                    }
+                    if (availabledSlots.code == 1 && availabledSlots.data.length > 0) {
+                        setError(null);
+                        setTimeSlots(availabledSlots.data);
                     }
                 } catch (error) {
                     console.error("Error fetching available time slots:", error);
@@ -67,7 +75,7 @@ export default function NewAppointmentForm() {
             }
         };
         searchAvailableTimeSlots();
-    }, [date, userTimezone]);
+    }, [date, userTimezone, selectedDuration]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -76,13 +84,23 @@ export default function NewAppointmentForm() {
         setSuccess(null);
 
         const formData = new FormData(e.currentTarget);
+        if (selectedLesson && selectedLesson.idLesson != null) {
+            formData.append("idLesson", selectedLesson.idLesson.toString());
+        } else {
+            console.error("Aucun cours sélectionné pour envoyer l'idLesson");
+            setError("Veuillez sélectionner un cours.");
+            setLoading(false);
+            return;
+        }
         const response = await registerAppointment(formData);
         setLoading(false);
-        if (response.code === 1) {
+        if (response.code === 1 || response.code === 10) {
             setSuccess(response.message || "Rendez-vous enregistré avec succès !");
+            setTimeout(() => {
+                router.push("/calendrier/nouveau-rendez-vous/paiement");
+            }, 2000);
         } else {
             setError(response.message || "Une erreur s'est produite lors de l'enregistrement.");
-            console.log("Error response:", response.data);
         }
     };
 
@@ -132,29 +150,57 @@ export default function NewAppointmentForm() {
                 </label>
             </div>
             <div className="mb-4">
+                <label htmlFor="lesson" className="block text-gray-700 font-bold mb-2">
+                    cours
+                    <RadioGroup
+                        onValueChange={(value: string) => {
+                            const lesson = lessons.find((l) => l.title === value);
+                            if (lesson) {
+                                setSelectedLesson(lesson);
+                                setSelectedDuration(null);
+                            }
+                        }}
+                        name="lesson"
+                        className="[--primary:var(--color-indigo-500)] [--ring:var(--color-indigo-300)] in-[.dark]:[--primary:var(--color-indigo-500)] in-[.dark]:[--ring:var(--color-indigo-900)]"
+                    >
+                        {lessons &&
+                            lessons.length > 0 &&
+                            lessons.map((lesson) => (
+                                <div key={lesson.idLesson} className="flex items-center gap-2">
+                                    <RadioGroupItem
+                                        value={lesson.title}
+                                        id={`lesson-${lesson.idLesson}`}
+                                        disabled={loading}
+                                    />
+                                    <Label htmlFor={`lesson-${lesson.idLesson}`}>{`${lesson.title}`}</Label>
+                                </div>
+                            ))}
+                    </RadioGroup>
+                </label>
+            </div>
+            <div className="mb-4">
                 <label htmlFor="duration" className="block text-gray-700 font-bold mb-2">
                     Durée
                     <RadioGroup
-                        defaultValue="30"
+                        defaultValue=""
+                        onValueChange={(value: string) => setSelectedDuration(value)}
                         name="duration"
                         className="[--primary:var(--color-indigo-500)] [--ring:var(--color-indigo-300)] in-[.dark]:[--primary:var(--color-indigo-500)] in-[.dark]:[--ring:var(--color-indigo-900)]"
                     >
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="30" id="1" disabled={loading} />
-                            <Label htmlFor="1">30</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="45" id="2" disabled={loading} />
-                            <Label htmlFor="2">45</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="60" id="3" disabled={loading} />
-                            <Label htmlFor="3">60</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="90" id="4" disabled={loading} />
-                            <Label htmlFor="4">90</Label>
-                        </div>
+                        {selectedLesson &&
+                            selectedLesson.price != null &&
+                            selectedLesson.price.map((durationPriceOption, index) => (
+                                <div key={durationPriceOption.duration} className="flex items-center gap-2">
+                                    <RadioGroupItem
+                                        value={durationPriceOption.duration.toString()}
+                                        id={`duration-option-${selectedLesson.idLesson}-${durationPriceOption.duration}`}
+                                        disabled={loading}
+                                    />
+                                    <Label
+                                        htmlFor={`duration-option-${selectedLesson.idLesson}-${durationPriceOption.duration}`}
+                                    >{`${durationPriceOption.duration} mn (${durationPriceOption.price}$)`}</Label>
+                                </div>
+                            ))}
                     </RadioGroup>
                 </label>
             </div>
@@ -172,13 +218,19 @@ export default function NewAppointmentForm() {
             {error && <p className="text-red-500 text-sm text-center my-2">{error}</p>}
             {success && <p className="text-green-500 text-sm text-center my-2">{success}</p>}
 
-            <button
+            {/* <button
                 type="submit"
                 className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50"
-                disabled={loading}
+                disabled={loading || error !== null || timeSlots.length === 0 || !selectedLesson || !selectedDuration}
             >
-                {loading ? "Enregistrement..." : "Réserver"}
-            </button>
+                {loading ? "Veuillez patienter..." : "Réserver"}
+            </button> */}
+            <Button
+                type="submit"
+                className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50"
+            >
+                {loading ? "Veuillez patienter..." : "Réserver"}
+            </Button>
         </form>
     );
 }
