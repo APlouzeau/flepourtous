@@ -17,7 +17,7 @@ export default function DisplayUserprofil() {
                     <p>Mail : {dataUser.mail}</p>
                     <p>Prénom : {dataUser.firstName}</p>
                     <p>Nom : {dataUser.lastName}</p>
-                    <p>Porte-Monnaie disponible : {dataUser.wallet} $</p>
+                    <p>Porte-Monnaie disponible : {dataUser.wallet != null ? dataUser.wallet : 0} € </p>
                 </>
             )}
             <p>Vous êtes connecté !</p>

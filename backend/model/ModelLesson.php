@@ -87,4 +87,23 @@ class ModelLesson extends  ClassDatabase
         }
         return $lessons;
     }
+
+    public function getLessonById($idLesson)
+    {
+        $req = $this->conn->prepare('SELECT * FROM lesson WHERE idLesson = :idLesson');
+        $req->bindValue(':idLesson', $idLesson, PDO::PARAM_INT);
+        $req->execute();
+        $data = $req->fetch();
+        if ($data) {
+            return [
+                'idLesson' => $data['idLesson'],
+                'title' => $data['title'],
+                'shortDescription' => $data['shortDescription'],
+                'fullDescription' => $data['fullDescription'],
+                'imagePath' => $data['imagePath'],
+                'slug' => $data['slug']
+            ];
+        }
+        return null;
+    }
 }

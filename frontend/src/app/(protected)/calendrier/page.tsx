@@ -22,10 +22,8 @@ export default async function CalendarPage() {
                 withCredentials: true,
             }
         );
-        console.log("Response from listEvents:", response.data);
         if (response.data && Array.isArray(response.data.data)) {
             appointmentList = response.data.data;
-            console.log("Appointment list:", appointmentList);
         } else {
             console.warn("La réponse de l'API ne contient pas de tableau d'événements valide dans .data");
         }

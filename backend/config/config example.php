@@ -26,4 +26,6 @@ define("MAIL_PASSWORD", "");
 define("MAIL_PORT", 465);
 
 define("TEACHER_MAIL", "");
+
+define("STRIPE_SECRET_KEY", "");
 http://pma.localhost/index.php?route=/server/sql

@@ -33,3 +33,12 @@ $router->addRoute('POST', BASE_URL . "api/sendMailToAlertForNextAppointment", 'C
 //Google
 $router->addRoute('POST', BASE_URL . "api/handleGoogleNotification", 'ControllerGoogle', 'handleGoogleNotification');
 $router->addRoute('POST', BASE_URL . "api/setupGoogleWatch", 'ControllerGoogle', 'setupCalendarWatch');
+
+//Stripe
+$router->addRoute('POST', BASE_URL . "api/checkout-session", 'ControllerOrder', 'checkout');
+$router->addRoute('POST', BASE_URL . "api/payment-status", 'ControllerOrder', 'status');
+$router->addRoute('POST', BASE_URL . "api/verify-payment", 'ControllerOrder', 'verifyPayment');
+
+
+//debug
+$router->addRoute('GET', BASE_URL . "api/debug", 'ControllerDebug', 'debug');

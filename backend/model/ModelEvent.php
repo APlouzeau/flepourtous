@@ -72,8 +72,8 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':id_lesson', $event->getId_lesson(), PDO::PARAM_INT);
         //$req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
-        $createdEvent = $req->execute();
-        return $createdEvent;
+
+        return $req->execute();
     }
 
     public function updateEvent(EntitieEvent $event)
@@ -210,5 +210,12 @@ class ModelEvent extends  ClassDatabase
         } else {
             return false;
         }
+    }
+
+    public function setEventStatusPaid(string $idEvent)
+    {
+        $req = $this->conn->prepare('UPDATE event SET status = "Payé" WHERE idEvent = :idEvent');
+        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        return $req->execute();
     }
 }

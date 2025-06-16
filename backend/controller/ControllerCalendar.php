@@ -32,13 +32,8 @@ class ControllerCalendar
         }
 
         $client = new \Google\Client();
-        // Utilise setAuthConfig avec le chemin du fichier de clé
         $client->setAuthConfig($keyFilePath);
-        // Ajoute le scope nécessaire pour accéder à Calendar
         $client->addScope(Google\Service\Calendar::CALENDAR);
-
-        // Pas besoin de setAccessToken, setRedirectUri, etc.
-        // Le compte de service s'authentifie avec la clé.
 
         return $client;
     }
@@ -243,10 +238,18 @@ class ControllerCalendar
             ]);
 
             $modelEvent = new ModelEvent();
-            $registerEventSuccess = $modelEvent->createEvent($eventDatabase);
-            if (!$registerEventSuccess) {
+            $createdEvent = $modelEvent->createEvent($eventDatabase);
+            $modelPrice = new ModelPrices();
+            $price = $modelPrice->getPriceForAppointment($duration, $idLesson);
+            $modelLesson = new ModelLesson();
+            $lesson = $modelLesson->getLessonById($idLesson);
+            $_SESSION['wallet'] = $price;
+            $_SESSION['lesson_name'] = $lesson['title'];
+            $_SESSION['event_id'] = $idEvent;
+
+            if (!$createdEvent) {
                 $response = [
-                    'code' => 0,
+                    'code' => 10,
                     'message' => 'Erreur lors de l\'enregistrement de l\'événement en base de données',
                     'data' => $eventDatabase
                 ];
@@ -262,7 +265,7 @@ class ControllerCalendar
             echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(), $eventDatabase]);
             return;
         };
-        //echo json_encode($response);
+        echo json_encode($response);
     }
 
     public function listEventsUser()

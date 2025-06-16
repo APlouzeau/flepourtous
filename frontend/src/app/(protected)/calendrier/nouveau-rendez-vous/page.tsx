@@ -1,9 +1,7 @@
 import { lessonsWithPrices } from "@/app/types/lessons";
 import { getAllLessonsWithPrices } from "./AppointmentAction";
 import NewAppointmentForm from "./AppointmentForm";
-import axios from "axios";
 import { getWallet } from "@/lib/session";
-import { DotsVerticalIcon } from "@radix-ui/react-icons";
 
 export default async function NewAppointmentPage() {
     const lessons: lessonsWithPrices = await getAllLessonsWithPrices();

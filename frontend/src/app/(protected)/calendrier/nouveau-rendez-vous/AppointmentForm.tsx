@@ -5,8 +5,9 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { SelectNative } from "@/components/ui/select-native";
-import { redirect } from "next/navigation";
 import { lessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -17,6 +18,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
     const [userTimezone, setUserTimezone] = useState<string>("");
     const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
     const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -84,7 +86,6 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
         const formData = new FormData(e.currentTarget);
         if (selectedLesson && selectedLesson.idLesson != null) {
             formData.append("idLesson", selectedLesson.idLesson.toString());
-            console.log("formadata : ", formData.getAll);
         } else {
             console.error("Aucun cours sélectionné pour envoyer l'idLesson");
             setError("Veuillez sélectionner un cours.");
@@ -93,14 +94,13 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
         }
         const response = await registerAppointment(formData);
         setLoading(false);
-        if (response.code === 1) {
+        if (response.code === 1 || response.code === 10) {
             setSuccess(response.message || "Rendez-vous enregistré avec succès !");
             setTimeout(() => {
-                redirect("/calendrier");
+                router.push("/calendrier/nouveau-rendez-vous/paiement");
             }, 2000);
         } else {
             setError(response.message || "Une erreur s'est produite lors de l'enregistrement.");
-            console.log("Error response:", response.data);
         }
     };
 
@@ -218,13 +218,19 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
             {error && <p className="text-red-500 text-sm text-center my-2">{error}</p>}
             {success && <p className="text-green-500 text-sm text-center my-2">{success}</p>}
 
-            <button
+            {/* <button
                 type="submit"
                 className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50"
                 disabled={loading || error !== null || timeSlots.length === 0 || !selectedLesson || !selectedDuration}
             >
                 {loading ? "Veuillez patienter..." : "Réserver"}
-            </button>
+            </button> */}
+            <Button
+                type="submit"
+                className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50"
+            >
+                {loading ? "Veuillez patienter..." : "Réserver"}
+            </Button>
         </form>
     );
 }
