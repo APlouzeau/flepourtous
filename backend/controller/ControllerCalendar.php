@@ -239,13 +239,6 @@ class ControllerCalendar
 
             $modelEvent = new ModelEvent();
             $createdEvent = $modelEvent->createEvent($eventDatabase);
-            $modelPrice = new ModelPrices();
-            $price = $modelPrice->getPriceForAppointment($duration, $idLesson);
-            $modelLesson = new ModelLesson();
-            $lesson = $modelLesson->getLessonById($idLesson);
-            $_SESSION['wallet'] = $price;
-            $_SESSION['lesson_name'] = $lesson['title'];
-            $_SESSION['event_id'] = $idEvent;
 
             if (!$createdEvent) {
                 $response = [
@@ -255,12 +248,38 @@ class ControllerCalendar
                 ];
                 echo json_encode($response);
                 return;
-            } else {
-                $response = [
-                    'code' => 1,
-                    'message' => 'Événement enregistré avec succès',
-                ];
             }
+
+            $modelPrice = new ModelPrices();
+            $price = $modelPrice->getPriceForAppointment($duration, $idLesson);
+
+            if (!$price) {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de la récupération du prix pour le rendez-vous',
+                ];
+                echo json_encode($response);
+                return;
+            }
+
+            $modelLesson = new ModelLesson();
+            $lesson = $modelLesson->getLessonById($idLesson);
+            if (!$lesson) {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de la récupération des informations de la leçon',
+                ];
+                echo json_encode($response);
+                return;
+            }
+
+            $_SESSION['wallet'] = $price;
+            $_SESSION['lesson_name'] = $lesson['title'];
+            $_SESSION['event_id'] = $idEvent;
+            $response = [
+                'code' => 1,
+                'message' => 'Événement enregistré avec succès',
+            ];
         } catch (Exception $e) {
             echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(), $eventDatabase]);
             return;

@@ -70,15 +70,16 @@ class ControllerOrder
     {
         $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
 
+        $controllerUser = new ControllerUser();
+        $controllerUser->verifyConnectBack();
+
         try {
-            // retrieve JSON from POST body
             $jsonStr = file_get_contents('php://input');
             $jsonObj = json_decode($jsonStr);
 
             $session = $stripe->checkout->sessions->retrieve($jsonObj->session_id);
 
             if ($session->payment_status === 'paid') {
-
                 $modelEvent = new ModelEvent();
                 $status = $modelEvent->setEventStatusPaid($session->metadata->event_id);
             }
@@ -92,6 +93,9 @@ class ControllerOrder
                 ]);
                 http_response_code(200);
             }
+            unset($_SESSION['wallet']);
+            unset($_SESSION['lesson_name']);
+            unset($_SESSION['event_id']);
         } catch (\Stripe\Exception\ApiErrorException $e) {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);

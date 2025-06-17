@@ -1,5 +1,7 @@
 <?php
 
+use Google\Service\Slides\RerouteLineRequest;
+
 require_once APP_PATH . "/class/ClassDatabase.php";
 
 class ModelEvent extends  ClassDatabase
@@ -69,10 +71,12 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
-        $req->bindValue(':id_lesson', $event->getId_lesson(), PDO::PARAM_INT);
-        //$req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
+        $req->bindValue(':id_lesson', $event->getId_lesson(), PDO::PARAM_INT);
 
+        if (!$req->execute()) {
+            return false;
+        }
         return $req->execute();
     }
 
@@ -212,10 +216,13 @@ class ModelEvent extends  ClassDatabase
         }
     }
 
-    public function setEventStatusPaid(string $idEvent)
+    public function setEventStatusPaid(string $idEvent): bool
     {
         $req = $this->conn->prepare('UPDATE event SET status = "Payé" WHERE idEvent = :idEvent');
         $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        if (!$req->execute()) {
+            return false;
+        }
         return $req->execute();
     }
 }

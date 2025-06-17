@@ -70,7 +70,7 @@ class ModelPrices extends  ClassDatabase
         return null;
     }
 
-    public function getPriceForAppointment(int $durationValue, int $idLesson)
+    public function getPriceForAppointment(int $durationValue, int $idLesson): float|null
     {
         $req = $this->conn->prepare('
             SELECT price
