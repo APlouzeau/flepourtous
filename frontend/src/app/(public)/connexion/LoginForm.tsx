@@ -1,8 +1,10 @@
 "use client";
 import { createSession } from "@/lib/session";
 import axios from "axios";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useState } from "react";
+import Button from "../../components/front/Button";
 
 export default function LoginForm() {
     const [mail, setMail] = useState("");
@@ -34,20 +36,21 @@ export default function LoginForm() {
                 }
             });
     };
+    
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="mb-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
                 <input
                     type="email"
-                    placeholder="Mail"
+                    placeholder="Adresse email"
                     name="mail"
                     value={mail}
                     onChange={(e) => setMail(e.target.value)}
                     required
-                    className="w-full p-2 border border-gray-300 rounded"
+                    className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
                 />
             </div>
-            <div className="mb-4">
+            <div>
                 <input
                     type="password"
                     name="password"
@@ -55,13 +58,25 @@ export default function LoginForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full p-2 border border-gray-300 rounded"
+                    className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
                 />
             </div>
-            {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
-            <button type="submit" className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700">
-                Se connecter
-            </button>
+            
+            <div className="flex items-center justify-between text-sm">
+                <label className="flex items-center">
+                    <input type="checkbox" className="mr-2 rounded" />
+                    <span className="text-gray-600">Se souvenir de moi</span>
+                </label>
+                <Link href="/mot-de-passe-oublie" className="text-red-600 hover:text-red-700">
+                    Mot de passe oublié?
+                </Link>
+            </div>
+            
+            {error && <p className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-xl">{error}</p>}
+            
+            <Button variant="black" type="submit" className="w-full">
+                Connexion
+            </Button>
         </form>
     );
 }

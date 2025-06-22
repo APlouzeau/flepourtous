@@ -1,0 +1,27 @@
+interface TestimonialCardProps {
+    quote: string;
+    author: string;
+    role: string;
+    bgColor: string;
+    image?: string;
+}
+
+export default function TestimonialCard({ quote, author, role, bgColor, image }: TestimonialCardProps) {
+    return (
+        <div className={`${bgColor} p-6 rounded-lg shadow-lg`}>
+            <div className="flex items-start mb-4">
+                {image && (
+                    <div className="w-12 h-12 bg-gray-300 rounded-full mr-4 flex-shrink-0 overflow-hidden">
+                        <img src={image} alt={author} className="w-full h-full object-cover" />
+                    </div>
+                )}
+                <div className="text-2xl text-gray-600">"</div>
+            </div>
+            <p className="text-gray-800 mb-4 leading-relaxed">{quote}</p>
+            <div className="border-t border-gray-300 pt-4">
+                <p className="font-semibold text-gray-800">{author}</p>
+                <p className="text-sm text-gray-600">{role}</p>
+            </div>
+        </div>
+    );
+} 
