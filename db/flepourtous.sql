@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS `googleSync` (
   `nextSyncToken` varchar(90) NOT NULL
 );
 
-
 DROP TABLE IF EXISTS `lesson`;
 CREATE TABLE IF NOT EXISTS `lesson` (
   `lessonId` int(11) NOT NULL AUTO_INCREMENT,

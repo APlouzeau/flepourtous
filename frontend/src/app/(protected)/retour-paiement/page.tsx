@@ -1,4 +1,3 @@
-import { loadStripe } from "@stripe/stripe-js";
 import PaymentReturn from "./PaymentReturn";
 import { getCookieBackend } from "@/lib/session";
 
@@ -26,8 +25,6 @@ export default async function PaymentReturnPage({ searchParams }: { searchParams
             </div>
         );
     }
-
-    const stripePromise = loadStripe(stripePublicKey);
 
     return <PaymentReturn sessionId={sessionId} cookie={cookie} />;
 }
