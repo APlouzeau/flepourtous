@@ -19,23 +19,22 @@ export default function Home() {
                                 Augmenter votre niveau en Français avec <span className="text-red-600">FLE</span>
                             </h1>
                             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                                Développer vos FLE Pour Tous, votre partenaire de cours de français en ligne avec des méthodes efficaces et des cours personnalisés pour atteindre vos objectifs.
+                                Développer vos FLE Pour Tous, votre partenaire de cours de français en ligne avec des
+                                méthodes efficaces et des cours personnalisés pour atteindre vos objectifs.
                             </p>
                             <Button variant="black" href="/inscription">
                                 Prendre rendez-vous
                             </Button>
                         </div>
                         <div className="relative">
-                            
-                                <div className="relative h-96 rounded-lg overflow-hidden">
-                                    <Image
-                                        src="/images/triomphe.jpg"
-                                        alt="Apprentissage du français"
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                            
+                            <div className="relative h-96 rounded-lg overflow-hidden">
+                                <Image
+                                    src="/images/triomphe.jpg"
+                                    alt="Apprentissage du français"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -77,7 +76,8 @@ export default function Home() {
                             Présentation des différentes <span className="text-red-600">Formules</span>
                         </h2>
                         <p className="text-xl text-gray-600">
-                            Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
+                            Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
                         </p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8">
@@ -113,9 +113,7 @@ export default function Home() {
             <section className="bg-[#1D1E1C] py-36 px-4">
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-12">
-                        <h2 className="text-4xl font-bold text-white mb-4">
-                            Les stats parlent d'elles même
-                        </h2>
+                        <h2 className="text-4xl font-bold text-white mb-4">Les stats parlent d'elles même</h2>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         <StatCard number="1500+" description="Élèves satisfaits" />
@@ -130,9 +128,7 @@ export default function Home() {
             <section className="bg-gray-50 py-16 px-4">
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-12">
-                        <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                            Hear it from my students
-                        </h2>
+                        <h2 className="text-4xl font-bold text-gray-900 mb-4">Hear it from my students</h2>
                     </div>
                     <div className="grid md:grid-cols-3 gap-6 mb-6">
                         <TestimonialCard
@@ -175,12 +171,8 @@ export default function Home() {
             <section className="bg-white py-16 px-4">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-12">
-                        <h2 className="text-4xl font-bold text-gray-900 mb-4">
-                            Votre feuille de route
-                        </h2>
-                        <p className="text-xl text-gray-600">
-                            Questions fréquemment posées
-                        </p>
+                        <h2 className="text-4xl font-bold text-gray-900 mb-4">Votre feuille de route</h2>
+                        <p className="text-xl text-gray-600">Questions fréquemment posées</p>
                     </div>
                     <div className="space-y-4">
                         <FAQItem
@@ -218,7 +210,9 @@ export default function Home() {
                         Saisissez <span className="text-red-600">🎯</span> le Moment – Rejoignez FLE
                     </h2>
                     <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                        Chaque journée est une occasion de progresser. Investissez dans votre avenir dès aujourd'hui avec FLE Pour Tous. L'excellence en français n'attend pas – elle se construit maintenant, un cours après l'autre.
+                        Chaque journée est une occasion de progresser. Investissez dans votre avenir dès aujourd'hui
+                        avec FLE Pour Tous. L'excellence en français n'attend pas – elle se construit maintenant, un
+                        cours après l'autre.
                     </p>
                     <Button variant="white" href="/inscription">
                         Démarrer maintenant
