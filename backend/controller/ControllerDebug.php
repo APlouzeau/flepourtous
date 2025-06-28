@@ -2,5 +2,8 @@
 
 class ControllerDebug
 {
-    public function debug() {}
+    public function debug()
+    {
+        var_dump($_SERVER);
+    }
 }
