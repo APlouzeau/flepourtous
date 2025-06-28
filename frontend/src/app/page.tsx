@@ -1,4 +1,4 @@
-import Link from "next/link";
+/* eslint-disable react/no-unescaped-entities */
 import Image from "next/image";
 import FeatureCard from "./components/front/FeatureCard";
 import FormulaCard from "./components/front/FormulaCard";

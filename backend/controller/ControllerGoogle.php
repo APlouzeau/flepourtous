@@ -33,7 +33,7 @@ class ControllerGoogle
             $channel = new Google\Service\Calendar\Channel();
             $channel->setId(uniqid('flepourtous_channel_', false));
             $channel->setType('web_hook');
-            $channel->setAddress(URI . "api/handleGoogleNotification"); // L'URL de votre webhook
+            $channel->setAddress(URI . "api/handleGoogleNotification"); // L'URL du webhook
             $channel->setParams(['ttl' => 7 * 24 * 3600]); // Durée de vie du canal en secondes
             $channel->setToken(GOOGLE_TOKEN); // Un token pour vérifier l'authenticité de la notification
             $watchResponse = $service->events->watch(GOOGLE_CALENDAR_ID, $channel);
@@ -144,6 +144,7 @@ class ControllerGoogle
         $modelUser = new ModelUser();
         $modelEvent = new ModelEvent();
         $idEvent = $event->getId();
+
         // --- Début des vérifications  ---
         $eventStart = $event->getStart();
         if (!$eventStart) {
