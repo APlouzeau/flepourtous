@@ -194,4 +194,10 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':lessonPrice', $lessonPrice, PDO::PARAM_INT);
         $req->execute();
     }
+
+    public function deleteWaitingEvent()
+    {
+        $req = $this->conn->prepare('DELETE FROM event WHERE createdAt < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 8 HOUR) AND status = "En attente"');
+        $req->execute();
+    }
 }
