@@ -11,8 +11,8 @@ class ControllerOrder
 
         $userId = $_SESSION['idUser'] ?? null;
 
-        $modelEvent = new ModelEvent();
-        $wallet = $modelEvent->getWalletFromUser($userId);
+        $modelUser = new ModelUser();
+        $wallet = $modelUser->getWalletFromUser($userId);
 
         if ($wallet === false) {
             $response = [
@@ -41,12 +41,12 @@ class ControllerOrder
         $lessonName = $_SESSION['lesson_name'];
         $eventId = $_SESSION['event_id'];
 
-        $modelEvent = new ModelEvent();
-        $userWallet = $modelEvent->getWalletFromUser($idUser);
+        $userWallet = $modelUser->getWalletFromUser($idUser);
 
         $amount = $userWallet - $lessonPrice;
 
         if ($amount >= 0) {
+            $modelEvent = new ModelEvent();
             $modelUser->updateWallet($idUser, $amount);
             $modelEvent->setEventStatusPaid($eventId);
             echo json_encode([
@@ -54,12 +54,11 @@ class ControllerOrder
                 'payment_method' => 'wallet',
                 'message' => 'Le paiement a été effectué avec succès via votre portefeuille.',
             ]);
+            return;
         }
 
         if ($amount < 0) {
             $amountToPay = abs($amount);
-
-            $modelUser->updateWallet($idUser, 0);
 
             $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
 
@@ -105,8 +104,12 @@ class ControllerOrder
 
             if ($session->payment_status === 'paid') {
 
+                $idUser = $session->metadata->user_id;
                 $modelEvent = new ModelEvent();
                 $status = $modelEvent->setEventStatusPaid($session->metadata->event_id);
+                $modelUser = new ModelUser();
+
+                $modelUser->updateWallet($idUser, 0);
             }
 
             if (isset($status) && $status === true) {
@@ -127,43 +130,37 @@ class ControllerOrder
         }
     }
 
-    public function verifyPayment()
+    public function refuseAppointment()
     {
         $controllerUser = new ControllerUser();
         $controllerUser->verifyConnectBack();
 
         $input = json_decode(file_get_contents('php://input'), true);
-        $sessionId = $input['session_id'] ?? null;
+        $eventId = $input['event_id'];
+        $idUser = $input['id_user'];
 
-        try {
-            $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+        if ($eventId) {
+            $modelEvent = new ModelEvent();
+            $modelPrices = new ModelPrices();
+            $lessonPrice = $modelPrices->getPriceByEventId($eventId);
+            $status = $modelEvent->setEventStatusRefused($eventId, $idUser, $lessonPrice);
 
-            $session = $stripe->checkout->sessions->retrieve($sessionId);
-            if ($session->payment_status === 'paid') {
-                $modelEvent = new ModelEvent();
-                $status = $modelEvent->setEventStatusPaid($session->metadata->event_id);
-
-                if ($status == true) {
-                    echo json_encode([
-                        'success' => true,
-                        'message' => 'Paiement confirmé',
-                        'session' => [
-                            'id' => $session->id,
-                            'payment_status' => $session->payment_status,
-                            'amount_total' => $session->amount_total
-                        ]
-                    ]);
-                }
+            if ($status) {
+                echo json_encode([
+                    'code' => 1,
+                    'message' => 'Rendez-vous refusé avec succès.'
+                ]);
             } else {
                 echo json_encode([
-                    'success' => false,
-                    'message' => 'Paiement non confirmé',
-                    'payment_status' => $session->payment_status
+                    'code' => 0,
+                    'message' => 'Échec du refus du rendez-vous.'
                 ]);
             }
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        } else {
+            echo json_encode([
+                'code' => 0,
+                'message' => 'ID de l\'événement manquant.'
+            ]);
         }
     }
 }

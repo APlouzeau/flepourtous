@@ -148,4 +148,20 @@ extends ClassDatabase
             return false;
         }
     }
+
+    public function getWalletFromUser(int $idUser)
+    {
+        $req = $this->conn->prepare('
+        SELECT wallet
+        FROM users
+        WHERE idUser = :idUser');
+        $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
+        $req->execute();
+        $data = $req->fetch();
+        if ($data && $data['wallet'] !== null) {
+            return $data['wallet'];
+        } else {
+            return false;
+        }
+    }
 }

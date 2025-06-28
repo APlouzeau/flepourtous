@@ -192,26 +192,22 @@ class ModelEvent extends  ClassDatabase
         }
     }
 
-    public function getWalletFromUser(int $idUser)
-    {
-        $req = $this->conn->prepare('
-        SELECT wallet
-        FROM users
-        WHERE idUser = :idUser');
-        $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
-        $req->execute();
-        $data = $req->fetch();
-        if ($data && $data['wallet'] !== null) {
-            return $data['wallet'];
-        } else {
-            return false;
-        }
-    }
-
     public function setEventStatusPaid(string $idEvent)
     {
         $req = $this->conn->prepare('UPDATE event SET status = "Payé" WHERE idEvent = :idEvent');
         $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
         return $req->execute();
+    }
+
+    public function setEventStatusRefused(string $idEvent, int $idUser, int $lessonPrice)
+    {
+        $req = $this->conn->prepare('
+        UPDATE users SET wallet = wallet + :lessonPrice WHERE idUser = :idUser;
+        UPDATE event SET status = "Refusé" WHERE idEvent = :idEvent
+        ');
+        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
+        $req->bindValue(':lessonPrice', $lessonPrice, PDO::PARAM_INT);
+        $req->execute();
     }
 }
