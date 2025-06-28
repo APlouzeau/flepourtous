@@ -189,7 +189,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPr
                     >
                         {selectedLesson &&
                             selectedLesson.price != null &&
-                            selectedLesson.price.map((durationPriceOption, index) => (
+                            selectedLesson.price.map((durationPriceOption) => (
                                 <div key={durationPriceOption.duration} className="flex items-center gap-2">
                                     <RadioGroupItem
                                         value={durationPriceOption.duration.toString()}

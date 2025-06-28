@@ -56,7 +56,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
         if (sessionId) {
             checkPaymentStatus();
         }
-    }, [sessionId, router]);
+    }, [sessionId, router, cookie]);
 
     return (
         <div className="p-4 md:p-8 text-center max-w-md mx-auto">
