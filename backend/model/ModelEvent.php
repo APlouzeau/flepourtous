@@ -122,8 +122,7 @@ class ModelEvent extends  ClassDatabase
         $req = $this->conn->prepare('SELECT * FROM event WHERE idEvent = :idEvent');
         $req->bindValue(':idEvent', $idEvent);
         $req->execute();
-        $datas = $req->fetch();
-        return $datas ? true : false;
+        return $req->fetch();
     }
 
     public function getEventById(string $idEvent)
@@ -197,7 +196,21 @@ class ModelEvent extends  ClassDatabase
 
     public function deleteWaitingEvent()
     {
-        $req = $this->conn->prepare('DELETE FROM event WHERE createdAt < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 8 HOUR) AND status = "En attente"');
-        $req->execute();
+        $condition = 'WHERE createdAt < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 8 HOUR) AND status = "En attente"';
+
+        $this->conn->beginTransaction();
+
+        $selectReq = $this->conn->prepare("SELECT userId, startDateTime FROM event {$condition}");
+        $selectReq->execute();
+        $datas = $selectReq->fetchAll();
+
+        if (!empty($datas)) {
+            $deleteReq = $this->conn->prepare("DELETE FROM event {$condition}");
+            $deleteReq->execute();
+        }
+
+        $this->conn->commit();
+
+        return $datas;
     }
 }

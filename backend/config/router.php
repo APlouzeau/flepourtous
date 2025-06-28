@@ -30,7 +30,7 @@ $router->addRoute('POST', BASE_URL . "api/deleteEvent", 'ControllerCalendar', 'd
 $router->addRoute('POST', BASE_URL . "api/getAvailableTimeSlots", 'ControllerCalendar', 'getAvailablesTimeSlots');
 $router->addRoute('POST', BASE_URL . "api/sendMailToAlertForNextAppointment", 'ControllerMail', 'sendMailToAlertForNextAppointment');
 $router->addRoute('POST', BASE_URL . "api/prepareRepayment", 'ControllerOrder', 'prepareRepayment');
-$router->addRoute('POST', BASE_URL . "api/deleteWaitingEvent", 'ModelEvent', 'deleteWaitingEvent');
+$router->addRoute('POST', BASE_URL . "api/deleteWaitingEvent", 'ControllerCalendar', 'checkWaitingEvents');
 
 //Google
 $router->addRoute('POST', BASE_URL . "api/handleGoogleNotification", 'ControllerGoogle', 'handleGoogleNotification');

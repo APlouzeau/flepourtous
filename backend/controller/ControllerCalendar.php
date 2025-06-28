@@ -438,4 +438,20 @@ class ControllerCalendar
         $dateNow = new DateTime('now', new DateTimeZone('UTC'));
         $modelEvent = new ModelEvent();
     }
+
+    public function checkWaitingEvents()
+    {
+        $modelEvent = new ModelEvent();
+        $userWithEventDelete = $modelEvent->deleteWaitingEvent();
+        if (!$userWithEventDelete) {
+            $controllerMail = new ControllerMail();
+            foreach ($userWithEventDelete as $user) {
+                $controllerMail->sendMailToAlertForNextAppointment();
+            }
+            $response = [
+                'code' => 1,
+                'message' => 'Vérification des événements en attente effectuée avec succès',
+            ];
+        echo json_encode($response);
+    }
 }

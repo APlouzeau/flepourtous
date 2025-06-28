@@ -28,8 +28,6 @@ class ControllerMail
             $this->mailer->CharSet = 'UTF-8';
 
             $this->mailer->setFrom(MAIL_USERNAME, 'FlePourTous - Support');
-
-
         } catch (Exception $e) {
             error_log("Mailer Error: " . $this->mailer->ErrorInfo);
             throw new Exception("Mailer could not be initialized: " . $e->getMessage());
@@ -68,15 +66,14 @@ class ControllerMail
     {
         error_log("Verifying if there are upcoming events in the next hour...");
 
-            $apiKey = $_SERVER['HTTP_API_KEY'] ?? null; 
-        if ($apiKey !== CRON_KEY) { 
-        error_log("Unauthorized attempt to access sendMailToAlertForNextAppointment. IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-        http_response_code(403); // Forbidden
-        return false; // Ou exit();
-    }
+        $apiKey = $_SERVER['HTTP_API_KEY'] ?? null;
+        if ($apiKey !== CRON_KEY) {
+            error_log("Unauthorized attempt to access sendMailToAlertForNextAppointment. IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            http_response_code(403); // Forbidden
+            return false; // Ou exit();
+        }
 
-        $dateNow = new DateTime("now", new DateTimeZone('UTC'));
-        ;
+        $dateNow = new DateTime("now", new DateTimeZone('UTC'));;
 
         $modelEvent = new ModelEvent();
         $eventsToAlert = $modelEvent->checkEventForNextHour($dateNow->format('Y-m-d H:i:s'));
@@ -85,7 +82,7 @@ class ControllerMail
             return false; // No events found in the next hour
         }
 
-        
+
         foreach ($eventsToAlert as $event) {
             try {
                 $appointmentDateTime = new DateTime($event['startDateTime'], new DateTimeZone('UTC'));
@@ -95,12 +92,12 @@ class ControllerMail
                 $this->mailer->addCC(TEACHER_MAIL);
                 $this->mailer->isHTML(true);
                 $this->mailer->Subject = "Appointment reminder on FlePourTous";
-                
+
                 $emailBody = "Dear " . htmlspecialchars($event['firstName'] . " " . $event['lastName']) . ",<br><br>";
                 $emailBody .= "This is a reminder for your appointment at " . htmlspecialchars($appointmentHour) . " UTC.<br>";
-                
+
                 if ($event['description'] != '') {
-                $emailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
+                    $emailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
                 }
 
                 if ($event['visioLink'] != '') {
@@ -108,7 +105,7 @@ class ControllerMail
                 }
                 $emailBody .= "<br>Warm regards,<br>Flepourtous Team";
                 $this->mailer->Body = $emailBody;
-                
+
                 $this->mailer->send();
                 $this->mailer->clearAddresses();
 
@@ -139,4 +136,6 @@ class ControllerMail
             }
         }
     }
+
+    public function sendMailToAlertEventDeleteBecauseNotPaid() {}
 }
