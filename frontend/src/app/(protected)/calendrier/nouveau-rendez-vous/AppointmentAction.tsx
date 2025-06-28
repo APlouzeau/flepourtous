@@ -2,7 +2,6 @@
 
 import { getCookieBackend } from "@/lib/session";
 import axios from "axios";
-import { cp } from "fs";
 import { revalidatePath } from "next/cache";
 
 export async function registerAppointment(formData: FormData) {
