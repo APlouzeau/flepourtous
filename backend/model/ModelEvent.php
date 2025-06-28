@@ -32,9 +32,7 @@ class ModelEvent extends  ClassDatabase
     public function getEventsUser(int $idUser)
     {
         $req = $this->conn->prepare('
-        SELECT idEvent, userId, description, duration, createdAt, updatedAt, status, visioLink, startDateTime, title 
-        FROM event 
-        INNER JOIN lesson l ON event.id_lesson = l.idLesson
+        SELECT idEvent, userId, description, duration, createdAt, updatedAt, status, visioLink, startDateTime, title FROM event INNER JOIN lesson l ON event.id_lesson = l.idLesson
         WHERE userId = :idUser');
         $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
         $req->execute();
@@ -70,7 +68,6 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
         $req->bindValue(':id_lesson', $event->getId_lesson(), PDO::PARAM_INT);
-        //$req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
 
         return $req->execute();
@@ -82,7 +79,6 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
-        //$req->bindValue(':status', $event->getStatus(), PDO::PARAM_STR);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
         return $req->execute();
@@ -127,11 +123,7 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':idEvent', $idEvent);
         $req->execute();
         $datas = $req->fetch();
-        if ($datas) {
-            return true;
-        } else {
-            return false;
-        }
+        return $datas ? true : false;
     }
 
     public function getEventById(string $idEvent)
@@ -158,18 +150,10 @@ class ModelEvent extends  ClassDatabase
     {
 
         $req = $this->conn->prepare('
-        SELECT 
-            u.firstName, 
-            u.lastName, 
-            u.mail, 
-            e.description, 
-            e.startDateTime, 
-            e.visioLink
-        FROM event e 
-        INNER JOIN users u ON e.userId = u.idUser
-        WHERE 
-            startDateTime >= DATE_ADD(:dateNow, INTERVAL 55 minute)
-            AND startDateTime <= DATE_ADD(:dateNow, INTERVAL 65 minute);');
+        SELECT u.firstName, u.lastName, u.mail, e.description, e.startDateTime, e.visioLink
+        FROM event e INNER JOIN users u ON e.userId = u.idUser
+        WHERE startDateTime >= DATE_ADD(:dateNow, INTERVAL 55 minute)
+        AND startDateTime <= DATE_ADD(:dateNow, INTERVAL 65 minute);');
 
         $req->bindValue(':dateNow', $dateNow, PDO::PARAM_STR);
         $req->execute();
@@ -199,7 +183,7 @@ class ModelEvent extends  ClassDatabase
         return $req->execute();
     }
 
-    public function setEventStatusRefused(string $idEvent, int $idUser, int $lessonPrice)
+    public function setEventStatusRefused(string $idEvent, int $idUser, int $lessonPrice): void
     {
         $req = $this->conn->prepare('
         UPDATE users SET wallet = wallet + :lessonPrice WHERE idUser = :idUser;
