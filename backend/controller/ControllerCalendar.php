@@ -243,7 +243,7 @@ class ControllerCalendar
             $price = $modelPrice->getPriceForAppointment($duration, $idLesson);
             $modelLesson = new ModelLesson();
             $lesson = $modelLesson->getLessonById($idLesson);
-            $_SESSION['wallet'] = $price;
+            $_SESSION['lesson_price'] = $price;
             $_SESSION['lesson_name'] = $lesson['title'];
             $_SESSION['event_id'] = $idEvent;
 

@@ -11,8 +11,8 @@ class ControllerOrder
 
         $userId = $_SESSION['idUser'] ?? null;
 
-        $wallet = new ModelEvent();
-        $wallet = $wallet->getWalletFromUser($userId);
+        $modelEvent = new ModelEvent();
+        $wallet = $modelEvent->getWalletFromUser($userId);
 
         if ($wallet === false) {
             $response = [
@@ -34,35 +34,57 @@ class ControllerOrder
         $controllerUser = new ControllerUser();
         $controllerUser->verifyConnectBack();
 
-        $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+        $idUser = $_SESSION['idUser'];
+        $lessonPrice = $_SESSION['lesson_price'];
+        $lessonName = $_SESSION['lesson_name'];
+        $eventId = $_SESSION['event_id'];
 
-        $amountInCents = intval(floatval($_SESSION['wallet']) * 100);
+        $modelEvent = new ModelEvent();
+        $userWallet = $modelEvent->getWalletFromUser($idUser);
+        $amountInCents = intval(floatval($userWallet - $lessonPrice) * 100);
 
-        try {
-            $checkout_session = $stripe->checkout->sessions->create([
-                'ui_mode' => 'embedded',
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'eur',
-                        'product_data' => [
-                            'name' => "Paiement d'une leçon de {$_SESSION['lesson_name']} ",
+        if ($amountInCents < 0) {
+            $amountToPay = abs($amountInCents);
+
+            $modelUser = new ModelUser();
+            $newWallet = $modelUser->updateWallet($idUser, 0);
+
+            $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+
+
+            try {
+                $checkout_session = $stripe->checkout->sessions->create([
+                    'ui_mode' => 'embedded',
+                    'line_items' => [[
+                        'price_data' => [
+                            'currency' => 'eur',
+                            'product_data' => [
+                                'name' => "Paiement d'une leçon de {$lessonName} ",
+                            ],
+                            'unit_amount' => $amountToPay,
                         ],
-                        'unit_amount' => $amountInCents,
-                    ],
-                    'quantity' => 1,
-                ]],
-                'mode' => 'payment',
-                'return_url' => URI_STRIPE . '/retour-paiement?session_id={CHECKOUT_SESSION_ID}',
-                'metadata' => [
-                    'event_id' => $_SESSION['event_id'] ?? null, // Si tu stockes l'ID du RDV
-                    'user_id' => $_SESSION['user_id'] ?? null,
-                    'lesson_name' => $_SESSION['lesson_name'] ?? null,
-                ]
+                        'quantity' => 1,
+                    ]],
+                    'mode' => 'payment',
+                    'return_url' => URI_STRIPE . '/retour-paiement?session_id={CHECKOUT_SESSION_ID}',
+                    'metadata' => [
+                        'event_id' => $eventId,
+                        'user_id' => $idUser,
+                        'lesson_name' => $lessonName,
+                    ]
+                ]);
+                echo json_encode(array('clientSecret' => $checkout_session->client_secret));
+            } catch (Error $e) {
+                http_response_code(500);
+                echo json_encode(['error' => $e->getMessage()]);
+            }
+        }
+        if ($amountInCents >= 0) {
+            $modelEvent->setEventStatusPaid($_SESSION['event_id'] ?? null);
+            echo json_encode([
+                'code' => 1,
+                'payment_method' => 'wallet'
             ]);
-            echo json_encode(array('clientSecret' => $checkout_session->client_secret));
-        } catch (Error $e) {
-            http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
         }
     }
 

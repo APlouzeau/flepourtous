@@ -134,4 +134,18 @@ extends ClassDatabase
             return false;
         }
     }
+
+    public function updateWallet(int $idUser, float $amount)
+    {
+        $query = "UPDATE users SET wallet = :amount WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":amount", $amount, PDO::PARAM_STR);
+        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        if ($req->execute()) {
+            return true;
+        } else {
+            error_log("Failed to update wallet for user ID: " . $idUser);
+            return false;
+        }
+    }
 }
