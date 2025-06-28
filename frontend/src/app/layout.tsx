@@ -18,7 +18,10 @@ const inter = Inter({
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="fr">
-            <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
+            <body
+                className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}
+                suppressHydrationWarning={true}
+            >
                 <Header />
                 <main className="">{children}</main>
                 <Footer />

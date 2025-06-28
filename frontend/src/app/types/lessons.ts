@@ -24,6 +24,9 @@ export type allLessons = Lesson[];
 export interface LessonWithPrice {
     idLesson: number;
     title: string;
+    shortDescription: string;
+    imagePath: string;
+    slug: string;
     price: [{ price: number; duration: number }];
 }
 export type lessonsWithPrices = LessonWithPrice[];

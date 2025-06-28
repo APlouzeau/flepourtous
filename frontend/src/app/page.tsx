@@ -5,8 +5,12 @@ import StatCard from "./components/front/StatCard";
 import TestimonialCard from "./components/front/TestimonialCard";
 import FAQItem from "./components/front/FAQItem";
 import Button from "./components/front/Button";
+import axios from "axios";
+import { LessonWithPrice } from "./types/lessons";
 
-export default function Home() {
+export default async function Home() {
+    const lessons = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`, {});
+    console.log(lessons.data);
     return (
         <div className="min-h-screen">
             {/* Section Hero */}
@@ -91,32 +95,17 @@ export default function Home() {
                         </p>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                        <FormulaCard
-                            image="/images/enfant.jpg"
-                            title="Carte titre"
-                            description="Lorem ipsum dolor sit amet consectetur adipiscing elit."
-                            price="35€"
-                            duration="par mois"
-                            link="/offre-de-cours/enfant"
-                        />
-                        <FormulaCard
-                            image="/images/ados.jpg"
-                            title="Carte titre"
-                            description="Lorem ipsum dolor sit amet consectetur adipiscing elit."
-                            price="45€"
-                            duration="par mois"
-                            link="/offre-de-cours/ados"
-                        />
-                        <div className="sm:col-span-2 lg:col-span-1">
+                        {lessons.data.slice(0, 3).map((lesson: LessonWithPrice, index: number) => (
                             <FormulaCard
-                                image="/images/enfant.jpg"
-                                title="Carte titre"
-                                description="Lorem ipsum dolor sit amet consectetur adipiscing elit."
-                                price="55€"
-                                duration="par mois"
-                                link="/offre-de-cours/adulte"
+                                key={index}
+                                image={lesson.imagePath || "/images/enfant.jpg"} // Fallback image
+                                title={lesson.title}
+                                description={lesson.shortDescription}
+                                price={lesson.price[0].price + "€"}
+                                duration={lesson.price[0].duration + "mn"}
+                                link={"/offre-de-cours" + `/${lesson.slug}`}
                             />
-                        </div>
+                        ))}
                     </div>
                 </div>
             </section>
