@@ -34,6 +34,8 @@ class ControllerOrder
         $controllerUser = new ControllerUser();
         $controllerUser->verifyConnectBack();
 
+        $modelUser = new ModelUser();
+
         $idUser = $_SESSION['idUser'];
         $lessonPrice = $_SESSION['lesson_price'];
         $lessonName = $_SESSION['lesson_name'];
@@ -41,16 +43,25 @@ class ControllerOrder
 
         $modelEvent = new ModelEvent();
         $userWallet = $modelEvent->getWalletFromUser($idUser);
-        $amountInCents = intval(floatval($userWallet - $lessonPrice) * 100);
 
-        if ($amountInCents < 0) {
-            $amountToPay = abs($amountInCents);
+        $amount = $userWallet - $lessonPrice;
 
-            $modelUser = new ModelUser();
-            $newWallet = $modelUser->updateWallet($idUser, 0);
+        if ($amount >= 0) {
+            $modelUser->updateWallet($idUser, $amount);
+            $modelEvent->setEventStatusPaid($eventId);
+            echo json_encode([
+                'code' => 1,
+                'payment_method' => 'wallet',
+                'message' => 'Le paiement a été effectué avec succès via votre portefeuille.',
+            ]);
+        }
+
+        if ($amount < 0) {
+            $amountToPay = abs($amount);
+
+            $modelUser->updateWallet($idUser, 0);
 
             $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
-
 
             try {
                 $checkout_session = $stripe->checkout->sessions->create([
@@ -61,7 +72,7 @@ class ControllerOrder
                             'product_data' => [
                                 'name' => "Paiement d'une leçon de {$lessonName} ",
                             ],
-                            'unit_amount' => $amountToPay,
+                            'unit_amount' => $amountToPay * 100,
                         ],
                         'quantity' => 1,
                     ]],
@@ -78,13 +89,6 @@ class ControllerOrder
                 http_response_code(500);
                 echo json_encode(['error' => $e->getMessage()]);
             }
-        }
-        if ($amountInCents >= 0) {
-            $modelEvent->setEventStatusPaid($_SESSION['event_id'] ?? null);
-            echo json_encode([
-                'code' => 1,
-                'payment_method' => 'wallet'
-            ]);
         }
     }
 
