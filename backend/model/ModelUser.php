@@ -42,29 +42,25 @@ extends ClassDatabase
         $req->execute();
 
         $data = $req->fetch(PDO::FETCH_ASSOC);
-        if ($data) {
-            if ($data['isVerified'] == 0) {
-                error_log("User not verified: " . $mail);
-                return false; // Utilisateur non vérifié
-            } else {
-                //if ($userVerify->getPassword() == $data['password']) {
-                if (password_verify($password, $data['password'])) {
-                    $user =
-                        [
-                            'idUser' => $data['idUser'],
-                            'nickName' => $data['nickName'],
-                            'firstName' => $data['firstName'],
-                            'lastName' => $data['lastName'],
-                            'mail' => $data['mail'],
-                            'role' => $data['role'],
-                        ];
-                    return $user;
-                } else {
-                    return false;
-                }
-            }
+        if (!$data || !password_verify($password, $data['password'])) {
+            return null;
+        }
+        if ($data['isVerified'] == 0) {
+            return ['isVerified' => false];
+        } else {
+            $user =
+                [
+                    'idUser' => $data['idUser'],
+                    'nickName' => $data['nickName'],
+                    'firstName' => $data['firstName'],
+                    'lastName' => $data['lastName'],
+                    'mail' => $data['mail'],
+                    'role' => $data['role'],
+                ];
+            return $user;
         }
     }
+
 
     public function getUser(EntitieUser $user)
     {
