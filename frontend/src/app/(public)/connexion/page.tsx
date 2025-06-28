@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import LoginForm from "./LoginForm";
-import Button from "../../components/front/Button";
 
 export default function ConnexionPage() {
     return (
@@ -27,7 +26,7 @@ export default function ConnexionPage() {
             
             <div className="mt-6 text-center">
                 <p className="text-gray-600">
-                    Vous n'avez pas de compte{" "}
+                    Vous n&apos;avez pas de compte{" "}
                     <Link href="/inscription" className="text-red-600 hover:text-red-700 font-medium">
                         Créer votre compte
                     </Link>

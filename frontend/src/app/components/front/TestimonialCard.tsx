@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface TestimonialCardProps {
     quote: string;
     author: string;
@@ -11,11 +13,11 @@ export default function TestimonialCard({ quote, author, role, bgColor, image }:
         <div className={`${bgColor} p-6 rounded-lg shadow-lg`}>
             <div className="flex items-start mb-4">
                 {image && (
-                    <div className="w-12 h-12 bg-gray-300 rounded-full mr-4 flex-shrink-0 overflow-hidden">
-                        <img src={image} alt={author} className="w-full h-full object-cover" />
+                    <div className="w-12 h-12 bg-gray-300 rounded-full mr-4 flex-shrink-0 overflow-hidden relative">
+                        <Image src={image} alt={author} fill className="object-cover" />
                     </div>
                 )}
-                <div className="text-2xl text-gray-600">"</div>
+                <div className="text-2xl text-gray-600">&quot;</div>
             </div>
             <p className="text-gray-800 mb-4 leading-relaxed">{quote}</p>
             <div className="border-t border-gray-300 pt-4">

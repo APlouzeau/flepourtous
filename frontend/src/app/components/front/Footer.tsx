@@ -10,15 +10,15 @@ export default function Footer() {
                         {/* Logo et nom */}
                         <div className="md:col-span-1">
                             <div className="flex items-center space-x-3 mb-4">
-                                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center p-1">
+                                
                                     <Image
                                         src="/images/logo.png"
                                         alt="Logo FLE Pour Tous"
-                                        width={24}
-                                        height={24}
+                                        width={72}
+                                        height={72}
                                         className="object-contain"
                                     />
-                                </div>
+                               
                                 <h3 className="text-xl font-bold text-white">FLE Pour Tous</h3>
                             </div>
                         </div>
@@ -40,12 +40,12 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/ressources" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link href="/" className="text-gray-300 hover:text-white transition-colors duration-200">
                                         Ressources utilisées
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/avis-eleves" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link href="/" className="text-gray-300 hover:text-white transition-colors duration-200">
                                         Avis élèves
                                     </Link>
                                 </li>
@@ -117,7 +117,7 @@ export default function Footer() {
                                     Politique de confidentialité
                                 </Link>
                                 <Link href="/conditions-utilisation" className="text-gray-400 hover:text-white text-sm transition-colors duration-200">
-                                    Conditions d'utilisation
+                                    Conditions d&apos;utilisation
                                 </Link>
                                 <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors duration-200">
                                     Paramètres des cookies
