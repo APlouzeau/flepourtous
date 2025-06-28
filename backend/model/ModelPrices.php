@@ -89,4 +89,21 @@ class ModelPrices extends  ClassDatabase
         }
         return null;
     }
+
+    public function getPriceByEventId(int $idEvent)
+    {
+        $req = $this->conn->prepare('
+            SELECT p.price
+            FROM prices p
+            INNER JOIN eventPrices ep ON p.idPrice = ep.id_price
+            WHERE ep.id_event = :idEvent
+        ');
+        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_INT);
+        $req->execute();
+        $data = $req->fetch();
+        if ($data) {
+            return $data['price'];
+        }
+        return null;
+    }
 }

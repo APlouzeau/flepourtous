@@ -11,8 +11,8 @@ class ControllerOrder
 
         $userId = $_SESSION['idUser'] ?? null;
 
-        $wallet = new ModelEvent();
-        $wallet = $wallet->getWalletFromUser($userId);
+        $modelUser = new ModelUser();
+        $wallet = $modelUser->getWalletFromUser($userId);
 
         if ($wallet === false) {
             $response = [
@@ -34,35 +34,60 @@ class ControllerOrder
         $controllerUser = new ControllerUser();
         $controllerUser->verifyConnectBack();
 
-        $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+        $modelUser = new ModelUser();
 
-        $amountInCents = intval(floatval($_SESSION['wallet']) * 100);
+        $idUser = $_SESSION['idUser'];
+        $lessonPrice = $_SESSION['lesson_price'];
+        $lessonName = $_SESSION['lesson_name'];
+        $eventId = $_SESSION['event_id'];
 
-        try {
-            $checkout_session = $stripe->checkout->sessions->create([
-                'ui_mode' => 'embedded',
-                'line_items' => [[
-                    'price_data' => [
-                        'currency' => 'eur',
-                        'product_data' => [
-                            'name' => "Paiement d'une leçon de {$_SESSION['lesson_name']} ",
-                        ],
-                        'unit_amount' => $amountInCents,
-                    ],
-                    'quantity' => 1,
-                ]],
-                'mode' => 'payment',
-                'return_url' => URI_STRIPE . '/retour-paiement?session_id={CHECKOUT_SESSION_ID}',
-                'metadata' => [
-                    'event_id' => $_SESSION['event_id'] ?? null, // Si tu stockes l'ID du RDV
-                    'user_id' => $_SESSION['user_id'] ?? null,
-                    'lesson_name' => $_SESSION['lesson_name'] ?? null,
-                ]
+        $userWallet = $modelUser->getWalletFromUser($idUser);
+
+        $amount = $userWallet - $lessonPrice;
+
+        if ($amount >= 0) {
+            $modelEvent = new ModelEvent();
+            $modelUser->updateWallet($idUser, $amount);
+            $modelEvent->setEventStatusPaid($eventId);
+            echo json_encode([
+                'code' => 1,
+                'payment_method' => 'wallet',
+                'message' => 'Le paiement a été effectué avec succès via votre portefeuille.',
             ]);
-            echo json_encode(array('clientSecret' => $checkout_session->client_secret));
-        } catch (Error $e) {
-            http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            return;
+        }
+
+        if ($amount < 0) {
+            $amountToPay = abs($amount);
+
+            $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+
+            try {
+                $checkout_session = $stripe->checkout->sessions->create([
+                    'ui_mode' => 'embedded',
+                    'line_items' => [[
+                        'price_data' => [
+                            'currency' => 'eur',
+                            'product_data' => [
+                                'name' => "Paiement d'une leçon de {$lessonName} ",
+                            ],
+                            'unit_amount' => $amountToPay * 100,
+                        ],
+                        'quantity' => 1,
+                    ]],
+                    'mode' => 'payment',
+                    'return_url' => URI_STRIPE . '/retour-paiement?session_id={CHECKOUT_SESSION_ID}',
+                    'metadata' => [
+                        'event_id' => $eventId,
+                        'user_id' => $idUser,
+                        'lesson_name' => $lessonName,
+                    ]
+                ]);
+                echo json_encode(array('clientSecret' => $checkout_session->client_secret));
+            } catch (Error $e) {
+                http_response_code(500);
+                echo json_encode(['error' => $e->getMessage()]);
+            }
         }
     }
 
@@ -79,8 +104,12 @@ class ControllerOrder
 
             if ($session->payment_status === 'paid') {
 
+                $idUser = $session->metadata->user_id;
                 $modelEvent = new ModelEvent();
                 $status = $modelEvent->setEventStatusPaid($session->metadata->event_id);
+                $modelUser = new ModelUser();
+
+                $modelUser->updateWallet($idUser, 0);
             }
 
             if (isset($status) && $status === true) {
@@ -101,43 +130,37 @@ class ControllerOrder
         }
     }
 
-    public function verifyPayment()
+    public function refuseAppointment()
     {
         $controllerUser = new ControllerUser();
         $controllerUser->verifyConnectBack();
 
         $input = json_decode(file_get_contents('php://input'), true);
-        $sessionId = $input['session_id'] ?? null;
+        $eventId = $input['event_id'];
+        $idUser = $input['id_user'];
 
-        try {
-            $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+        if ($eventId) {
+            $modelEvent = new ModelEvent();
+            $modelPrices = new ModelPrices();
+            $lessonPrice = $modelPrices->getPriceByEventId($eventId);
+            $status = $modelEvent->setEventStatusRefused($eventId, $idUser, $lessonPrice);
 
-            $session = $stripe->checkout->sessions->retrieve($sessionId);
-            if ($session->payment_status === 'paid') {
-                $modelEvent = new ModelEvent();
-                $status = $modelEvent->setEventStatusPaid($session->metadata->event_id);
-
-                if ($status == true) {
-                    echo json_encode([
-                        'success' => true,
-                        'message' => 'Paiement confirmé',
-                        'session' => [
-                            'id' => $session->id,
-                            'payment_status' => $session->payment_status,
-                            'amount_total' => $session->amount_total
-                        ]
-                    ]);
-                }
+            if ($status) {
+                echo json_encode([
+                    'code' => 1,
+                    'message' => 'Rendez-vous refusé avec succès.'
+                ]);
             } else {
                 echo json_encode([
-                    'success' => false,
-                    'message' => 'Paiement non confirmé',
-                    'payment_status' => $session->payment_status
+                    'code' => 0,
+                    'message' => 'Échec du refus du rendez-vous.'
                 ]);
             }
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        } else {
+            echo json_encode([
+                'code' => 0,
+                'message' => 'ID de l\'événement manquant.'
+            ]);
         }
     }
 }

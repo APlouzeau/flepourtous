@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 
 interface PaymentReturnProps {
-    sessionId: string;
+    sessionId?: string;
     cookie: string | null;
 }
 
@@ -13,8 +13,22 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
     const [message, setMessage] = useState<string>("");
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     useEffect(() => {
+        const paymentMethod = searchParams.get("method");
+        const paymentStatus = searchParams.get("status");
+
+        //  Gérer le cas du paiement par portefeuille
+        if (paymentStatus === "success" && paymentMethod === "wallet") {
+            setStatus("success");
+            setMessage("Paiement réussi avec votre portefeuille ! Votre rendez-vous est enregistré.");
+            setTimeout(() => {
+                router.push("/calendrier");
+            }, 3000);
+            return;
+        }
+
         const checkPaymentStatus = async () => {
             try {
                 const response = await axios.post(
@@ -56,7 +70,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
         if (sessionId) {
             checkPaymentStatus();
         }
-    }, [sessionId, router, cookie]);
+    }, [sessionId, router, cookie, searchParams]);
 
     return (
         <div className="p-4 md:p-8 text-center max-w-md mx-auto">

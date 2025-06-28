@@ -15,9 +15,8 @@ export default function Home() {
                     <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                         <div className="order-2 md:order-1">
                             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">
-                                Augmenter votre niveau en Français avec <span 
-                                    className="text-red-600 relative cursor-help group"
-                                >
+                                Augmenter votre niveau en Français avec{" "}
+                                <span className="text-red-600 relative cursor-help group">
                                     Guizmo-kun
                                     <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-sm text-white bg-gray-800 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-10">
                                         C&apos;est mon catamiaou 🐱
@@ -26,7 +25,8 @@ export default function Home() {
                                 </span>
                             </h1>
                             <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed">
-                                Développer vos FLE Pour Tous, votre partenaire de cours de français en ligne avec des méthodes efficaces et des cours personnalisés pour atteindre vos objectifs.
+                                Développer vos FLE Pour Tous, votre partenaire de cours de français en ligne avec des
+                                méthodes efficaces et des cours personnalisés pour atteindre vos objectifs.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 sm:gap-0">
                                 <Button variant="black" href="/inscription">
@@ -36,8 +36,6 @@ export default function Home() {
                         </div>
                         <div className="relative order-1 md:order-2">
                             <div className="relative h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden">
-                        <div className="relative">
-                            <div className="relative h-96 rounded-lg overflow-hidden">
                                 <Image
                                     src="/images/triomphe.jpg"
                                     alt="Apprentissage du français"
@@ -88,8 +86,8 @@ export default function Home() {
                             Présentation des différentes <span className="text-red-600">Formules</span>
                         </h2>
                         <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                            Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
-
+                            Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
                         </p>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -130,7 +128,6 @@ export default function Home() {
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
                             Les stats parlent d&apos;elles même
                         </h2>
-
                     </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                         <StatCard number="1500+" description="Élèves satisfaits" />
@@ -148,7 +145,6 @@ export default function Home() {
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             Hear it from my students
                         </h2>
-
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
                         <TestimonialCard
@@ -196,10 +192,7 @@ export default function Home() {
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             Votre feuille de route
                         </h2>
-                        <p className="text-base sm:text-lg md:text-xl text-gray-600">
-                            Questions fréquemment posées
-                        </p>
-
+                        <p className="text-base sm:text-lg md:text-xl text-gray-600">Questions fréquemment posées</p>
                     </div>
                     <div className="space-y-3 sm:space-y-4">
                         <FAQItem
@@ -237,8 +230,9 @@ export default function Home() {
                         Saisissez <span className="text-red-600">🎯</span> le Moment – Rejoignez FLE
                     </h2>
                     <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto">
-                        Chaque journée est une occasion de progresser. Investissez dans votre avenir dès aujourd&apos;hui avec FLE Pour Tous. L&apos;excellence en français n&apos;attend pas – elle se construit maintenant, un cours après l&apos;autre.
-
+                        Chaque journée est une occasion de progresser. Investissez dans votre avenir dès
+                        aujourd&apos;hui avec FLE Pour Tous. L&apos;excellence en français n&apos;attend pas – elle se
+                        construit maintenant, un cours après l&apos;autre.
                     </p>
                     <Button variant="white" href="/offre-de-cours">
                         Démarrer maintenant
