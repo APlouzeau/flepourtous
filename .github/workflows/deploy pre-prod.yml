@@ -8,12 +8,15 @@ on:
 
 jobs:
     deploy:
-        runs-on: [self-hosted, linux, X64, VPS]
+        runs-on: ubuntu-latest
         steps:
-            - name: Checkout repository
-              uses: actions/checkout@v2
-            - name: deploy
-              run: |
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
                   cd ~/projects/flepourtous
                   git restore .
                   git checkout preprod
