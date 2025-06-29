@@ -183,9 +183,10 @@ class ControllerGoogle
 
         try {
             $dtStart = new DateTime($startDateTimeISO);
-            $startDateTimeFormatted = $dtStart->format('Y-m-d H:i:s');
+            $dtStart->setTimezone(new DateTimeZone('UTC'));
+            $startDateTimeUtcFormatted = $dtStart->format('Y-m-d H:i:s');
         } catch (Exception $e) {
-
+            error_log("Erreur lors de la conversion de la date de début pour l'événement Google ID: " . $idEvent . " - " . $e->getMessage());
             return;
         }
 
@@ -194,7 +195,8 @@ class ControllerGoogle
 
             $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
         } catch (Exception $e) {
-            return; // Ne pas traiter si les dates pour la durée sont invalides
+            error_log("Erreur lors de la conversion de la date de fin pour l'événement Google ID: " . $idEvent . " - " . $e->getMessage());
+            return;
         }
 
         $description = $event->getSummary();
@@ -237,9 +239,7 @@ class ControllerGoogle
 
         //--------------------------------------------
 
-        $startDateTimeUtc = new DateTime($startDateTimeFormatted, new DateTimeZone('Europe/Paris'));
-        $startDateTimeUtc->setTimezone(new DateTimeZone('UTC'));
-        $startDateTimeUtcFormatted = $startDateTimeUtc->format('Y-m-d H:i:s');
+
 
         $controllerVisio = new ControllerVisio();
 
@@ -251,6 +251,7 @@ class ControllerGoogle
             $eventExist = $modelEvent->checkEvent($idEvent);
             if ($eventExist) {
                 $controllerVisio->deleteRoom($idEvent);
+                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
 
                 if (!$roomUrl) {
@@ -272,7 +273,7 @@ class ControllerGoogle
 
                 $modelEvent->updateEvent($eventDatabase);
             } else {
-                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
+                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
                 if (!$roomUrl) {
                     error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
                     return;
