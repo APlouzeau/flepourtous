@@ -366,7 +366,9 @@ class ControllerCalendar
         $interval = new DateInterval('PT15M'); // Intervalle de 15 minutes
         $occupiedTimeSlots = [];
 
-        foreach ($events as $event) {
+        // Vérifier si $events est un array avant de l'utiliser dans foreach
+        if (is_array($events) && !empty($events)) {
+            foreach ($events as $event) {
             $periodStart = $event->getStart();
             $periodEnd = $event->getEnd();
             $period = new DatePeriod(
@@ -377,7 +379,8 @@ class ControllerCalendar
             foreach ($period as $dt) {
                 $occupiedTimeSlots[] = $dt->setTimezone($utcTimeZone)->format('Y-m-d H:i:s');
             }
-        }
+        } // fin foreach $events
+    } // fin if is_array($events)
 
         $availableTimeSlots = [];
 
