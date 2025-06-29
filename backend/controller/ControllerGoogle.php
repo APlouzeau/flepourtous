@@ -175,13 +175,11 @@ class ControllerGoogle
         $eventStart = $event->getStart();
         $eventEnd = $event->getEnd();
 
-        // 1. Vérification unique et propre pour les événements 'toute la journée'
         if (!$eventStart || !$eventStart->getDateTime() || !$eventEnd || !$eventEnd->getDateTime()) {
             error_log("Événement Google ID: " . $idEvent . " est un événement 'toute la journée' ou invalide. Ignoré.");
             return;
         }
 
-        // Le reste du code ne s'exécute que si les dates sont valides
         $startDateTimeISO = $eventStart->getDateTime();
         $endDateTimeISO = $eventEnd->getDateTime();
 
@@ -199,8 +197,7 @@ class ControllerGoogle
 
         $description = $event->getSummary();
 
-        // 2. Logique de recherche d'utilisateur nettoyée
-        $modelUser = new ModelUser(); // Instancié une seule fois
+        $modelUser = new ModelUser();
         $userId = null;
 
         $emailsToCheck = [];
@@ -228,7 +225,6 @@ class ControllerGoogle
             return;
         }
 
-        // 3. Un seul log, clair et précis, une fois l'utilisateur trouvé
         error_log("Traitement de l'événement Google ID: " . $idEvent . " pour l'utilisateur ID: " . $userId);
 
         $controllerVisio = new ControllerVisio();
