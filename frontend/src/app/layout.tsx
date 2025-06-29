@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Header from "./components/front/Header";
-import Footer from "./components/front/Footer";
 import { cn } from "@/lib/utils";
+import { getSession } from "@/lib/session";
+import LayoutWrapper from "./LayoutWrapper";
 
 export const metadata: Metadata = {
     title: "FLE pour tous",
@@ -16,12 +16,14 @@ const inter = Inter({
 });
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
+    // Récupération de la session côté serveur
+    const session = await getSession();
+    const isLoggedIn = !!session.get("session")?.value;
+
     return (
         <html lang="fr">
             <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
-                <Header />
-                <main className="">{children}</main>
-                <Footer />
+                <LayoutWrapper isLoggedIn={isLoggedIn}>{children}</LayoutWrapper>
             </body>
         </html>
     );

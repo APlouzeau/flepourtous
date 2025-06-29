@@ -1,15 +1,32 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { getSession, logout } from "@/lib/session";
+import { useRouter } from "next/navigation";
 import Button from "./Button";
 import MobileMenuButton from "./MobileMenuButton";
 
-export default async function Header() {
-    const session = await getSession();
-    let isLog = false;
-    if (session.get("session")?.value) {
-        isLog = true;
-    }
+interface HeaderProps {
+    isLoggedIn: boolean;
+}
+
+export default function Header({ isLoggedIn }: HeaderProps) {
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            const response = await fetch("/api/auth/logout", {
+                method: "POST",
+            });
+            
+            if (response.ok) {
+                router.push("/");
+                router.refresh();
+            }
+        } catch (error) {
+            console.error("Erreur lors de la déconnexion:", error);
+        }
+    };
 
     return (
         <header className="bg-red-600 text-white sticky top-0 z-50">
@@ -60,7 +77,7 @@ export default async function Header() {
                         
                         {/* Boutons d'action Desktop */}
                         <div className="flex items-center space-x-2 ml-4 xl:ml-6">
-                            {isLog ? (
+                            {isLoggedIn ? (
                                 <div className="flex items-center space-x-2">
                                     <Button variant="white" href="/profil" className="text-xs xl:text-sm px-3 !py-1 xl:px-4">
                                         Profil
@@ -68,11 +85,9 @@ export default async function Header() {
                                     <Button variant="white" href="/calendrier" className="text-xs xl:text-sm px-3 !py-1 xl:px-4">
                                         Calendrier
                                     </Button>
-                                    <form action={logout} className="inline">
-                                        <Button variant="black" type="submit" className="text-xs xl:text-sm px-3 !py-1 xl:px-4">
-                                            Déconnexion
-                                        </Button>
-                                    </form>
+                                    <Button variant="black" onClick={handleLogout} className="text-xs xl:text-sm px-3 !py-1 xl:px-4">
+                                        Déconnexion
+                                    </Button>
                                 </div>
                             ) : (
                                 <>
@@ -89,7 +104,7 @@ export default async function Header() {
 
                     {/* Menu mobile */}
                     <div className="lg:hidden">
-                        <MobileMenuButton />
+                        <MobileMenuButton isLoggedIn={isLoggedIn} onLogout={handleLogout} />
                     </div>
                 </div>
             </div>
