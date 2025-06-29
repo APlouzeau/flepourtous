@@ -1,10 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import Button from "./Button";
 import MobileMenuButton from "./MobileMenuButton";
-import axios from "axios";
-import { getCookieBackend, logout } from "@/lib/session";
+import { logout } from "@/lib/session";
 
 interface HeaderProps {
     readonly isLoggedIn: boolean;

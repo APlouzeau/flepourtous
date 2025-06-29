@@ -141,7 +141,6 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
     const handleRepay = async (eventId: string) => {
         setIsRepaying(eventId);
         const response = await prepareRepaymentAction(eventId);
-        console.log("Response from prepareRepaymentAction:", response);
         if (response.code === 1) {
             router.push("/calendrier/nouveau-rendez-vous/paiement");
         } else {

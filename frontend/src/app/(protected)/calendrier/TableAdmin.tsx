@@ -15,7 +15,7 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
 
     useEffect(() => {
         setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-        
+
         // Mettre à jour l'heure actuelle toutes les minutes
         const interval = setInterval(() => {
             setCurrentTime(new Date());
@@ -59,39 +59,37 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
 
     const getVisioStatus = (startDateTime: string, duration: string) => {
         try {
-            const isoUtcString = startDateTime.includes("T")
-                ? startDateTime
-                : startDateTime.replace(" ", "T") + "Z";
+            const isoUtcString = startDateTime.includes("T") ? startDateTime : startDateTime.replace(" ", "T") + "Z";
             const appointmentStart = new Date(isoUtcString);
             const appointmentEnd = new Date(appointmentStart.getTime() + parseInt(duration) * 60000);
-            
+
             // Autoriser l'accès 15 minutes avant le début
             const accessTime = new Date(appointmentStart.getTime() - 15 * 60000);
-            
+
             const now = currentTime;
-            
+
             if (now >= accessTime && now <= appointmentEnd) {
-                return { 
-                    status: "Rejoignable", 
+                return {
+                    status: "Rejoignable",
                     className: "text-green-600 font-semibold",
                     isJoinable: true,
-                    tooltip: "Vous pouvez rejoindre la visio"
+                    tooltip: "Vous pouvez rejoindre la visio",
                 };
             } else {
-                return { 
-                    status: "Non rejoignable", 
+                return {
+                    status: "Non rejoignable",
                     className: "text-red-600",
                     isJoinable: false,
-                    tooltip: "Vous ne pouvez pas rejoindre cette visio"
+                    tooltip: "Vous ne pouvez pas rejoindre cette visio",
                 };
             }
         } catch (error) {
             console.error("Error calculating visio status:", error);
-            return { 
-                status: "Erreur", 
+            return {
+                status: "Erreur",
                 className: "text-gray-500",
                 isJoinable: false,
-                tooltip: "Erreur de calcul du statut"
+                tooltip: "Erreur de calcul du statut",
             };
         }
     };
@@ -104,7 +102,11 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
         if (statusLower.includes("payé") || statusLower.includes("paye")) {
             badgeColor = "bg-green-500";
             textColor = "text-green-700";
-        } else if (statusLower.includes("non payé") || statusLower.includes("non paye") || statusLower.includes("impayé")) {
+        } else if (
+            statusLower.includes("non payé") ||
+            statusLower.includes("non paye") ||
+            statusLower.includes("impayé")
+        ) {
             badgeColor = "bg-red-500";
             textColor = "text-red-700";
         } else if (statusLower.includes("en attente") || statusLower.includes("attente")) {
@@ -128,11 +130,10 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
 
     const handleRowClick = (item: showBasicAppointmentProps, isJoinable: boolean) => {
         if (isJoinable && item.visioLink) {
-            window.open(item.visioLink, '_blank', 'noopener,noreferrer');
+            window.open(item.visioLink, "_blank", "noopener,noreferrer");
         }
     };
 
-    console.log("TableAdmin", listAppointments);
     return (
         <>
             <Table>
@@ -153,10 +154,14 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
                         const { date: localDate, time: localTime } = formatDateInUserTimezone(item.startDateTime);
                         const visioStatus = getVisioStatus(item.startDateTime, item.duration);
                         return (
-                            <TableRow 
+                            <TableRow
                                 key={item.idEvent}
                                 className={`
-                                    ${visioStatus.isJoinable ? 'cursor-pointer hover:bg-green-50' : 'cursor-not-allowed hover:bg-red-50'}
+                                    ${
+                                        visioStatus.isJoinable
+                                            ? "cursor-pointer hover:bg-green-50"
+                                            : "cursor-not-allowed hover:bg-red-50"
+                                    }
                                     transition-colors duration-200
                                 `}
                                 title={visioStatus.tooltip}
@@ -168,14 +173,11 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
                                 <TableCell>{localTime}</TableCell>
                                 <TableCell>{item.duration}</TableCell>
                                 <TableCell>{getStatusBadge(item.status)}</TableCell>
-                                <TableCell className={visioStatus.className}>
-                                    {visioStatus.status}
-                                </TableCell>
+                                <TableCell className={visioStatus.className}>{visioStatus.status}</TableCell>
                                 <TableCell onClick={(e) => e.stopPropagation()}>
                                     <button
                                         onClick={async () => {
                                             try {
-                                                console.log(`Tentative d'annulation pour l'ID: ${item.idEvent}`);
                                                 await deleteAppointment(item.idEvent.toString());
                                                 alert(`Rendez-vous ${item.idEvent} annulé (ou tentative lancée).`);
                                             } catch (error) {
