@@ -20,7 +20,6 @@ class ControllerGoogle
     public function setupCalendarWatch()
     {
         try {
-            // On garde votre excellente vérification de sécurité
             $apiKey = $_SERVER['HTTP_API_KEY'] ?? null;
             if ($apiKey !== CRON_KEY) {
                 http_response_code(403);
@@ -56,7 +55,8 @@ class ControllerGoogle
 
             $watchResponse = $service->events->watch($calendarId, $channel);
 
-            $modelGoogle->updateChannel($watchResponse, $calendarId);
+            // ✅ Utiliser la nouvelle méthode plus simple et robuste
+            $modelGoogle->upsertChannel($watchResponse, $calendarId);
 
             echo "Canal de notification reconfiguré. Nouvel ID: " . $watchResponse->getId() . " Expire le: " . date('Y-m-d H:i:s', $watchResponse->getExpiration() / 1000);
         } catch (Exception $e) {
