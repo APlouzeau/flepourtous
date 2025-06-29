@@ -202,45 +202,42 @@ class ControllerGoogle
 
             $description = $event->getSummary();
 
-            // --- DÉBUT DU BLOC À REMPLACER ---
-            $modelUser = new ModelUser(); // Assurez-vous que c'est bien initialisé ici
+            $modelUser = new ModelUser();
             $userId = null;
 
-            // 1. Créer une liste de tous les e-mails potentiels à vérifier
             $emailsToCheck = [];
 
-            // Ajouter les invités (attendees)
             $attendees = $event->getAttendees();
             if (!empty($attendees)) {
                 foreach ($attendees as $attendee) {
                     if ($attendee && $attendee->getEmail()) {
                         $emailsToCheck[] = $attendee->getEmail();
+                        error_log("Utilisateur trouvé pour l'événement Google ID: " . $idEvent . " - Utilisateur ID: " . $userId);
                     }
                 }
             }
 
-            // Ajouter le créateur
             $creator = $event->getCreator();
             if ($creator && $creator->getEmail()) {
                 $emailsToCheck[] = $creator->getEmail();
+                error_log("Utilisateur trouvé pour l'événement Google ID: " . $idEvent . " - Utilisateur ID: " . $userId);
             }
 
-            // Ajouter l'organisateur
             $organizer = $event->getOrganizer();
             if ($organizer && $organizer->getEmail()) {
                 $emailsToCheck[] = $organizer->getEmail();
+                error_log("Utilisateur trouvé pour l'événement Google ID: " . $idEvent . " - Utilisateur ID: " . $userId);
             }
 
-            // 2. Parcourir la liste et s'arrêter au premier utilisateur trouvé
             foreach ($emailsToCheck as $email) {
                 $potentialUserId = $modelUser->checkMail($email);
                 if ($potentialUserId) {
                     $userId = $potentialUserId;
-                    break; // On a trouvé un utilisateur valide, on sort de la boucle
+                    error_log("Utilisateur trouvé pour l'événement Google ID: " . $idEvent . " - Utilisateur ID: " . $userId);
+                    break;
                 }
             }
 
-            // 3. Si après toutes les vérifications, aucun utilisateur n'est trouvé, on arrête.
             if ($userId === null) {
                 error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Ignoré.");
                 return;
