@@ -59,7 +59,7 @@ export async function prepareRepaymentAction(eventId: string) {
 export async function deleteAppointment(idEvent: string) {
     const cookie = await getCookieBackend();
     try {
-        const response = await axios.post(
+        await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/deleteEvent`,
             { idEvent },
             {
