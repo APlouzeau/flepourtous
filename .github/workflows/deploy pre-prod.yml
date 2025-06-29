@@ -41,7 +41,7 @@ jobs:
 
             - name: Build frontend
               working-directory: ./frontend
-              run: pnpm --filter frontend build
+              run: pnpm build
 
     deploy:
         name: Deploy to VPS
@@ -55,6 +55,7 @@ jobs:
                   username: ${{ secrets.SSH_USERNAME }}
                   key: ${{ secrets.SSH_KEY }}
                   script: |
+                      set -e # Arrête le script si une commande échoue
                       echo "--- Starting deployment on VPS ---"
                       cd ~/projects/flepourtous
                       echo "Restoring local changes and switching to preprod branch..."
@@ -68,10 +69,11 @@ jobs:
                       cd ..
                       echo "Installing frontend dependencies..."
                       cd frontend
-                      pnpm i
-                      echo "Restarting PM2 process..."
-                      pm2 stop flepourtous-preprod || true
+                      pnpm install --frozen-lockfile # Utiliser --frozen-lockfile est une bonne pratique ici aussi
+                      echo "Building frontend application..."
                       rm -rf .next
-                      pnpm run build
-                      pm2 start flepourtous-preprod
+                      pnpm build
+                      echo "Restarting PM2 process..."
+                      cd .. # Revenir à la racine du projet
+                      pm2 restart flepourtous-preprod || pm2 start ecosystem.config.js --env preprod # Utiliser un fichier de config est mieux
                       echo "--- Deployment finished ---"
