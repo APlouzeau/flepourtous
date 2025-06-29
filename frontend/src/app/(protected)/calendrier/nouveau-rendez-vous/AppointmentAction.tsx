@@ -12,8 +12,9 @@ export async function registerAppointment(formData: FormData) {
         startTime: formData.get("startTime"),
         duration: formData.get("duration"),
         userTimeZone: formData.get("userTimeZone"),
+        idLesson: formData.get("idLesson"),
     };
-
+    console.log("Data to be sent:", data);
     try {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/createEvent`, data, {
             headers: {
@@ -33,12 +34,38 @@ export async function registerAppointment(formData: FormData) {
     }
 }
 
-export async function deleteAppointment(eventId: string) {
+export async function prepareRepaymentAction(eventId: string) {
+    const cookie = await getCookieBackend();
+    console.log("Preparing repayment for eventId:", eventId);
+    try {
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/prepareRepayment`,
+            { eventId },
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${cookie}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            }
+        );
+        console.log("Response from prepareRepaymentAction:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error preparing repayment:", error);
+        if (axios.isAxiosError(error) && error.response && error.response.data) {
+            return error.response.data;
+        }
+        return { code: 0, message: "Une erreur s'est produite lors de la préparation du paiement." };
+    }
+}
+
+export async function deleteAppointment(idEvent: string) {
     const cookie = await getCookieBackend();
     try {
         const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/deleteEvent`,
-            { eventId },
+            { idEvent },
             {
                 headers: {
                     Cookie: `PHPSESSID=${cookie}`,
@@ -71,6 +98,27 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
         return response.data;
     } catch (error) {
         console.error("Error during fetching available time slots:", error);
+        return [];
+    }
+}
+
+export async function getAllLessonsWithPrices() {
+    const cookie = await getCookieBackend();
+    try {
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`,
+            {},
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${cookie}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching lessons information:", error);
         return [];
     }
 }

@@ -12,7 +12,7 @@ require_once APP_PATH . "config/config.php";
 
 spl_autoload_register(function ($class_name) {
     try {
-        preg_match("/^Class|Controller|Model|Entitie/", $class_name, $match);
+        preg_match("/^(Class|Controller|Model|Entitie)/", $class_name, $match);
         $dir = match ($match[0]) {
             'Class' => APP_PATH . "/class",
             'Controller' => APP_PATH . "/controller",

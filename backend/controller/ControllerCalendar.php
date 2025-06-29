@@ -32,13 +32,8 @@ class ControllerCalendar
         }
 
         $client = new \Google\Client();
-        // Utilise setAuthConfig avec le chemin du fichier de clé
         $client->setAuthConfig($keyFilePath);
-        // Ajoute le scope nécessaire pour accéder à Calendar
         $client->addScope(Google\Service\Calendar::CALENDAR);
-
-        // Pas besoin de setAccessToken, setRedirectUri, etc.
-        // Le compte de service s'authentifie avec la clé.
 
         return $client;
     }
@@ -60,7 +55,6 @@ class ControllerCalendar
             ];
         }
         echo json_encode($response);
-        return;
     }
 
     public function createEvent()
@@ -72,7 +66,7 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration'])) {
+        if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['idLesson'])) {
             http_response_code(400); // Bad Request
             $response = [
                 'code' => 0,
@@ -91,7 +85,7 @@ class ControllerCalendar
                 echo json_encode($response);
                 exit();
             }
-        };
+        }
 
         $startDateTime = $data['startDate'] . ' ' . $data['startTime'] . ':00';
         $userTimeZone = $data['userTimeZone'];
@@ -115,6 +109,7 @@ class ControllerCalendar
             exit();
         }
 
+        $idLesson = (int)$data['idLesson'];
         $userId = $_SESSION['idUser'];
         $description = $data['description'];
         $duration = $data['duration'];
@@ -227,9 +222,9 @@ class ControllerCalendar
             }
 
             //DATABASE
-            $eventId = $createdEvent->getId();
+            $idEvent = $createdEvent->getId();
             $eventDatabase = new EntitieEvent([
-                'eventId' => $eventId,
+                'idEvent' => $idEvent,
                 'userId' => $userId,
                 'description' => $description,
                 'duration' => $duration,
@@ -238,13 +233,24 @@ class ControllerCalendar
                 'updatedAt' => $updatedAt,
                 'status' => $status,
                 'visioLink' => $roomUrl,
+                'id_lesson' => $idLesson,
             ]);
+
             $modelEvent = new ModelEvent();
-            $registerEventSuccess = $modelEvent->createEvent($eventDatabase);
-            if (!$registerEventSuccess) {
+            $createdEvent = $modelEvent->createEvent($eventDatabase);
+            $modelPrice = new ModelPrices();
+            $price = $modelPrice->getPriceForAppointment($duration, $idLesson);
+            $modelLesson = new ModelLesson();
+            $lesson = $modelLesson->getLessonById($idLesson);
+            $_SESSION['lesson_price'] = $price;
+            $_SESSION['lesson_name'] = $lesson['title'];
+            $_SESSION['event_id'] = $idEvent;
+
+            if (!$createdEvent) {
                 $response = [
-                    'code' => 0,
+                    'code' => 10,
                     'message' => 'Erreur lors de l\'enregistrement de l\'événement en base de données',
+                    'data' => $eventDatabase
                 ];
                 echo json_encode($response);
                 return;
@@ -255,7 +261,7 @@ class ControllerCalendar
                 ];
             }
         } catch (Exception $e) {
-            echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage()]);
+            echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(), $eventDatabase]);
             return;
         };
         echo json_encode($response);
@@ -292,17 +298,17 @@ class ControllerCalendar
         echo json_encode("data");
         echo json_encode($data);
 
-        if (!$data || !isset($data['eventId'])) {
+        if (!$data || !isset($data['idEvent'])) {
             $response = [
                 'code' => 0,
-                'message' => 'Données manquantes pour supprimer l\'événement (eventId requis).'
+                'message' => 'Données manquantes pour supprimer l\'événement (idEvent requis).'
             ];
             echo json_encode($response);
             return;
         }
         $client = $this->getClient();
         $service = new Google\Service\Calendar($client);
-        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['eventId']);
+        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
 
         if (!$deletedEvent) {
             $response = [
@@ -314,7 +320,7 @@ class ControllerCalendar
         }
 
         $modelEvent = new ModelEvent();
-        $deleteEventSuccess = $modelEvent->deleteEvent($data['eventId']);
+        $deleteEventSuccess = $modelEvent->deleteEvent($data['idEvent']);
         if (!$deleteEventSuccess) {
             $response = [
                 'code' => 0,
@@ -359,18 +365,21 @@ class ControllerCalendar
         $interval = new DateInterval('PT15M'); // Intervalle de 15 minutes
         $occupiedTimeSlots = [];
 
-        foreach ($events as $event) {
-            $periodStart = $event->getStart();
-            $periodEnd = $event->getEnd();
-            $period = new DatePeriod(
-                new DateTime($periodStart, new DateTimeZone('UTC')),
-                $interval,
-                new DateTime($periodEnd, new DateTimeZone('UTC'))
-            );
-            foreach ($period as $dt) {
-                $occupiedTimeSlots[] = $dt->setTimezone($utcTimeZone)->format('Y-m-d H:i:s');
-            }
-        }
+        // Vérifier si $events est un array avant de l'utiliser dans foreach
+        if (is_array($events) && !empty($events)) {
+            foreach ($events as $event) {
+                $periodStart = $event->getStart();
+                $periodEnd = $event->getEnd();
+                $period = new DatePeriod(
+                    new DateTime($periodStart, new DateTimeZone('UTC')),
+                    $interval,
+                    new DateTime($periodEnd, new DateTimeZone('UTC'))
+                );
+                foreach ($period as $dt) {
+                    $occupiedTimeSlots[] = $dt->setTimezone($utcTimeZone)->format('Y-m-d H:i:s');
+                }
+            } // fin foreach $events
+        } // fin if is_array($events)
 
         $availableTimeSlots = [];
 
@@ -378,7 +387,7 @@ class ControllerCalendar
         $now = new DateTime('now', $utcTimeZone);
         $nextPossibleAppointment = (clone $now)->modify('+8 hours');
 
-        
+
         foreach ($day as $time) {
             $timeString = (clone $time)->format('Y-m-d H:i:s');
             if (!in_array($timeString, $occupiedTimeSlots) && $time >= $nextPossibleAppointment) {
@@ -388,16 +397,16 @@ class ControllerCalendar
         $lookupTimestamps = array_map(function ($element) {
             return $element->getTimestamp();
         }, $availableTimeSlots);
-        
+
         $finalAvailableTimeSlots = [];
         $occupiedTimeSlotsForAppointment = $data['selectedDuration'] / 15; // nombre de slots de 15 minutes nécessaires pour l'occupation
-        
+
         foreach ($availableTimeSlots as $potentialStartSlot) {
             $isSlotSuitable = true;
             for ($i = 1; $i < $occupiedTimeSlotsForAppointment; $i++) {
                 $nextBlockToCheckTime = (clone $potentialStartSlot)->modify('+' . (15 * $i) . ' minutes');
                 if (!in_array($nextBlockToCheckTime->getTimestamp(), $lookupTimestamps)) {
-                    $isSlotSuitable = false; 
+                    $isSlotSuitable = false;
                     break;
                 }
             }
@@ -423,12 +432,22 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
-    }   
-    
-    public function alertEvent()
-    {
+    }
 
-        $dateNow = new DateTime('now', new DateTimeZone('UTC'));
+    public function checkWaitingEvents()
+    {
         $modelEvent = new ModelEvent();
+        $userWithEventDelete = $modelEvent->deleteWaitingEvent();
+        if (!$userWithEventDelete) {
+            $controllerMail = new ControllerMail();
+            foreach ($userWithEventDelete as $user) {
+                $controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($user);
+            }
+            $response = [
+                'code' => 1,
+                'message' => 'Vérification des événements en attente effectuée avec succès',
+            ];
+            echo json_encode($response);
+        }
     }
 }
