@@ -165,14 +165,14 @@ class ControllerGoogle
         $idEvent = $event->getId();
 
         $eventStart = $event->getStart();
-        if (!$eventStart) {
+        if (!$eventStart || !$eventStart->getDateTime()) {
             error_log("Événement Google ID: " . $idEvent . " n'a pas de propriété 'start'. Skipping.");
             return;
         }
         $startDateTimeISO = $eventStart->getDateTime() ?: $eventStart->getDate();
 
         $eventEnd = $event->getEnd();
-        if (!$eventEnd) {
+        if (!$eventEnd || !$eventEnd->getDateTime()) {
             error_log("\nÉvénement Google ID: " . $idEvent . " n'a pas de propriété 'end'. Skipping.");
             return;
         }
