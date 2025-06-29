@@ -5,7 +5,6 @@ import axios from "axios";
 export default async function OfferPage() {
     const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/lessons`);
     const lessons: LessonProps[] = await response.data;
-    console.log(lessons);
 
     return (
         <>

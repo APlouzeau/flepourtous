@@ -40,7 +40,6 @@ export async function middleware(request: NextRequest) {
 
             // Vérifier si le token a besoin d'être rafraîchi
             if (currentTimeMs - issuedAtMs > REFRESH_IF_OLDER_THAN_MS) {
-                // console.log("Refreshing session token for:", currentPayload.role);
                 const { token: newJwt, expires: newExpires } = await generateRefreshedToken({
                     cookiePHP: currentPayload.cookiePHP,
                     role: currentPayload.role,
