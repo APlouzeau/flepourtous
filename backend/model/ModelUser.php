@@ -98,7 +98,7 @@ extends ClassDatabase
         $req->execute();
         $data = $req->fetch(PDO::FETCH_ASSOC);
         if ($data) {
-            $idUser = $req->fetch(PDO::FETCH_ASSOC)['idUser'];
+            $idUser = $data['idUser'];
             error_log("Mail already exists: " . $mail . " - ID: " . $idUser);
             return $idUser;
         } else {
