@@ -7,6 +7,7 @@ import FAQItem from "./components/front/FAQItem";
 import Button from "./components/front/Button";
 import axios from "axios";
 import { LessonWithPrice } from "./types/lessons";
+import Link from "next/link";
 
 export default async function Home() {
     const lessons = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`, {});
@@ -34,9 +35,9 @@ export default async function Home() {
                                 objectifs.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 sm:gap-0">
-                                <Button variant="black" href="/inscription">
-                                    Prendre rendez-vous
-                                </Button>
+                                <Link href="/calendrier/nouveau-rendez-vous">
+                                    <Button variant="black">Prendre rendez-vous</Button>
+                                </Link>
                             </div>
                         </div>
                         <div className="relative order-1 md:order-2">
@@ -120,9 +121,9 @@ export default async function Home() {
                         </h2>
                     </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
-                        <StatCard number="1500+" description="Élèves satisfaits" />
-                        <StatCard number="93%" description="Taux de réussite" />
-                        <StatCard number="200+" description="Heures dispensées" />
+                        <StatCard number="150+" description="Élèves satisfaits" />
+                        <StatCard number="8+" description="ans d'expérience" />
+                        <StatCard number="2000+" description="Heures dispensées" />
                         <StatCard number="100%" description="Satisfaction garantie" />
                     </div>
                 </div>
