@@ -18,10 +18,8 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
 
     const stripePromise = useMemo(() => {
         if (stripePublicKey) {
-            console.log("[PaymentForm] Appel de loadStripe CÔTÉ CLIENT avec la clé:", stripePublicKey);
             return loadStripe(stripePublicKey);
         }
-        console.log("[PaymentForm] Clé publique Stripe non fournie au client, loadStripe non appelé.");
         return null;
     }, [stripePublicKey]);
 

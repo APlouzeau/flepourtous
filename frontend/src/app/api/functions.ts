@@ -23,6 +23,5 @@ export function useVerifyConnect() {
         };
         checkLoginStatus();
     }, [setIsLoggedIn]);
-    console.log("setIsLoggedIn", isLoggedIn);
     return isLoggedIn;
 }
