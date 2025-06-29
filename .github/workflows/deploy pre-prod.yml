@@ -1,13 +1,51 @@
-name: Deploy Next on pre-prod
+name: Build, Test and Deploy to Pre-Prod
 
 on:
+    push:
+        branches:
+            - preprod
     pull_request:
         branches:
             - preprod
     workflow_dispatch:
 
 jobs:
+    build-and-test:
+        name: Build & Test PR
+        if: github.event_name == 'pull_request'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Install backend dependencies
+              run: |
+                  cd backend
+                  composer install --no-dev --optimize-autoloader
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10.12.4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "24.3"
+                  cache: "pnpm"
+                  cache-dependency-path: "frontend/pnpm-lock.yaml"
+
+            - name: Install frontend dependencies
+              working-directory: ./frontend
+              run: pnpm install --frozen-lockfile
+
+            - name: Build frontend
+              working-directory: ./frontend
+              run: pnpm build
+
     deploy:
+        name: Deploy to VPS
+        if: github.event_name == 'push' && github.ref == 'refs/heads/preprod'
         runs-on: ubuntu-latest
         steps:
             - name: Deploy to VPS
@@ -17,16 +55,25 @@ jobs:
                   username: ${{ secrets.SSH_USERNAME }}
                   key: ${{ secrets.SSH_KEY }}
                   script: |
+                      set -e # Arrête le script si une commande échoue
+                      echo "--- Starting deployment on VPS ---"
                       cd ~/projects/flepourtous
+                      echo "Restoring local changes and switching to preprod branch..."
                       git restore .
                       git checkout preprod
+                      echo "Pulling latest changes from origin/preprod..."
                       git pull origin preprod
+                      echo "Installing backend dependencies..."
                       cd backend
                       composer install --no-dev --optimize-autoloader
                       cd ..
+                      echo "Installing frontend dependencies..."
                       cd frontend
-                      pnpm i
-                      pm2 stop flepourtous-preprod
+                      pnpm install --frozen-lockfile # Utiliser --frozen-lockfile est une bonne pratique ici aussi
+                      echo "Building frontend application..."
                       rm -rf .next
-                      pnpm run build
-                      pm2 start flepourtous-preprod
+                      pnpm build
+                      echo "Restarting PM2 process..."
+                      cd .. # Revenir à la racine du projet
+                      pm2 restart flepourtous-preprod || pm2 start ecosystem.config.js --env preprod # Utiliser un fichier de config est mieux
+                      echo "--- Deployment finished ---"

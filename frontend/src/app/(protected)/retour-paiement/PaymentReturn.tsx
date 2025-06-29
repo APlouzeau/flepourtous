@@ -44,7 +44,6 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
                 );
 
                 const result = response.data;
-                console.log("Résultat du backend:", result);
 
                 if (result.payment_status === "paid") {
                     setStatus("success");

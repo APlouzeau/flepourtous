@@ -24,11 +24,10 @@ export default async function CalendarPage() {
         );
         if (response.data && Array.isArray(response.data.data)) {
             appointmentList = response.data.data;
-            // Tri chronologique : les plus récents en premier
             appointmentList.sort((a, b) => {
                 const dateA = new Date(a.startDateTime).getTime();
                 const dateB = new Date(b.startDateTime).getTime();
-                return dateB - dateA; // Ordre décroissant (plus récents en premier)
+                return dateB - dateA;
             });
         } else {
             console.warn("La réponse de l'API ne contient pas de tableau d'événements valide dans .data");
