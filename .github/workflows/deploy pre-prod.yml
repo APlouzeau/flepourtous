@@ -17,6 +17,7 @@ jobs:
                   username: ${{ secrets.SSH_USERNAME }}
                   key: ${{ secrets.SSH_KEY }}
                   script: |
+                      PM2_PATH=$(which pm2)                 
                       cd ~/projects/flepourtous
                       git restore .
                       git checkout preprod
@@ -26,7 +27,7 @@ jobs:
                       cd ..
                       cd frontend
                       pnpm i
-                      pm2 stop flepourtous-preprod
+                      $PM2_PATH stop flepourtous-preprod
                       rm -rf .next
                       pnpm run build
-                      pm2 start flepourtous-preprod
+                      $PM2_PATH start flepourtous-preprod
