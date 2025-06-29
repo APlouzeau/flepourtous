@@ -2,7 +2,6 @@
 
 import { showBasicAppointmentProps } from "@/app/types/appointments";
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Link from "next/link";
 import { deleteAppointment, prepareRepaymentAction } from "./nouveau-rendez-vous/AppointmentAction";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -156,36 +155,35 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
     }
 
     return (
-        <>
-            <Table>
-                <TableHeader>
-                    <TableRow className="hover:bg-transparent text-center">
-                        <TableHead>Cours</TableHead>
-                        <TableHead>Date (votre fuseau)</TableHead>
-                        <TableHead>Heure (votre fuseau)</TableHead>
-                        <TableHead>Durée</TableHead>
-                        {/* Étape 1 : On renomme les colonnes pour plus de clarté */}
-                        <TableHead>Statut Paiement</TableHead>
-                        <TableHead>Statut Visio</TableHead>
-                        <TableHead>Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {listAppointments.map((item) => {
-                        // --- Ta logique existante (parfaite, on n'y touche pas) ---
-                        const visioStatus = getVisioStatus(item.startDateTime, item.duration);
-                        const { date: localDate, time: localTime } = formatDateInUserTimezone(item.startDateTime);
-                        const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
-                        const today = new Date();
-                        const canCancel =
-                            appointmentDate > today && (item.status === "Confirmé" || item.status === "En attente");
-                        const canPay = appointmentDate > today && item.status === "En attente";
-                        // --- Fin de la logique ---
+        <Table>
+            <TableHeader>
+                <TableRow className="hover:bg-transparent text-center">
+                    <TableHead>Cours</TableHead>
+                    <TableHead>Date (votre fuseau)</TableHead>
+                    <TableHead>Heure (votre fuseau)</TableHead>
+                    <TableHead>Durée</TableHead>
+                    {/* Étape 1 : On renomme les colonnes pour plus de clarté */}
+                    <TableHead>Statut Paiement</TableHead>
+                    <TableHead>Statut Visio</TableHead>
+                    <TableHead>Actions</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {listAppointments.map((item) => {
+                    // --- Ta logique existante (parfaite, on n'y touche pas) ---
+                    const visioStatus = getVisioStatus(item.startDateTime, item.duration);
+                    const { date: localDate, time: localTime } = formatDateInUserTimezone(item.startDateTime);
+                    const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
+                    const today = new Date();
+                    const canCancel =
+                        appointmentDate > today && (item.status === "Confirmé" || item.status === "En attente");
+                    const canPay = appointmentDate > today && item.status === "En attente";
+                    // --- Fin de la logique ---
 
-                        return (
-                            <TableRow
-                                key={item.idEvent}
-                                className={`
+                    return (
+                        <TableRow
+                            key={item.idEvent}
+                            className={`
                                     ${
                                         visioStatus.isJoinable
                                             ? "cursor-pointer hover:bg-green-50"
@@ -193,74 +191,73 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                                     }
                                     transition-colors duration-200
                                 `}
-                                title={visioStatus.tooltip}
-                                onClick={() => handleRowClick(item, visioStatus.isJoinable)}
-                            >
-                                <TableCell className="font-medium">{item.title}</TableCell>
-                                <TableCell>{localDate}</TableCell>
-                                <TableCell>{localTime}</TableCell>
-                                <TableCell>{item.duration} mn</TableCell>
+                            title={visioStatus.tooltip}
+                            onClick={() => handleRowClick(item, visioStatus.isJoinable)}
+                        >
+                            <TableCell className="font-medium">{item.title}</TableCell>
+                            <TableCell>{localDate}</TableCell>
+                            <TableCell>{localTime}</TableCell>
+                            <TableCell>{item.duration} mn</TableCell>
 
-                                {/* Étape 2 : La colonne "Statut Paiement" fusionnée */}
-                                <TableCell>
-                                    {canPay ? (
-                                        <Button
-                                            onClick={(e) => {
-                                                e.stopPropagation(); // Empêche le clic sur la ligne
-                                                handleRepay(item.idEvent.toString());
-                                            }}
-                                            disabled={isRepaying === item.idEvent.toString()}
-                                            variant="destructive"
-                                            size="sm"
-                                        >
-                                            {isRepaying === item.idEvent.toString() ? "..." : "Payer"}
-                                        </Button>
-                                    ) : (
-                                        // Si on ne peut pas payer, on affiche le badge du collègue
-                                        getStatusBadge(item.status)
-                                    )}
-                                </TableCell>
+                            {/* Étape 2 : La colonne "Statut Paiement" fusionnée */}
+                            <TableCell>
+                                {canPay ? (
+                                    <Button
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Empêche le clic sur la ligne
+                                            handleRepay(item.idEvent.toString());
+                                        }}
+                                        disabled={isRepaying === item.idEvent.toString()}
+                                        variant="destructive"
+                                        size="sm"
+                                    >
+                                        {isRepaying === item.idEvent.toString() ? "..." : "Payer"}
+                                    </Button>
+                                ) : (
+                                    // Si on ne peut pas payer, on affiche le badge du collègue
+                                    getStatusBadge(item.status)
+                                )}
+                            </TableCell>
 
-                                {/* Étape 3 : On réintègre la colonne "Statut Visio" du collègue */}
-                                <TableCell className={visioStatus.className}>{visioStatus.status}</TableCell>
+                            {/* Étape 3 : On réintègre la colonne "Statut Visio" du collègue */}
+                            <TableCell className={visioStatus.className}>{visioStatus.status}</TableCell>
 
-                                {/* Étape 4 : La colonne "Actions" fusionnée */}
-                                <TableCell>
-                                    {canCancel ? (
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={async (e) => {
-                                                e.stopPropagation(); // Empêche le clic sur la ligne
-                                                if (confirm("Êtes-vous sûr de vouloir annuler ce rendez-vous ?")) {
-                                                    try {
-                                                        await deleteAppointment(item.idEvent.toString());
-                                                        alert(`Rendez-vous annulé.`);
-                                                        router.refresh();
-                                                    } catch (error) {
-                                                        console.error("Erreur lors de l'annulation:", error);
-                                                        alert("Erreur lors de l'annulation du rendez-vous.");
-                                                    }
+                            {/* Étape 4 : La colonne "Actions" fusionnée */}
+                            <TableCell>
+                                {canCancel ? (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={async (e) => {
+                                            e.stopPropagation(); // Empêche le clic sur la ligne
+                                            if (confirm("Êtes-vous sûr de vouloir annuler ce rendez-vous ?")) {
+                                                try {
+                                                    await deleteAppointment(item.idEvent.toString());
+                                                    alert(`Rendez-vous annulé.`);
+                                                    router.refresh();
+                                                } catch (error) {
+                                                    console.error("Erreur lors de l'annulation:", error);
+                                                    alert("Erreur lors de l'annulation du rendez-vous.");
                                                 }
-                                            }}
-                                        >
-                                            Annuler
-                                        </Button>
-                                    ) : (
-                                        // Si on ne peut pas annuler, on affiche un tiret
-                                        <span className="text-gray-400">-</span>
-                                    )}
-                                </TableCell>
-                            </TableRow>
-                        );
-                    })}
-                </TableBody>
-                <TableFooter className="bg-transparent">
-                    <TableRow className="hover:bg-transparent">
-                        <TableCell colSpan={7}></TableCell> {/* Ajuster le colSpan */}
-                    </TableRow>
-                </TableFooter>
-            </Table>
-        </>
+                                            }
+                                        }}
+                                    >
+                                        Annuler
+                                    </Button>
+                                ) : (
+                                    // Si on ne peut pas annuler, on affiche un tiret
+                                    <span className="text-gray-400">-</span>
+                                )}
+                            </TableCell>
+                        </TableRow>
+                    );
+                })}
+            </TableBody>
+            <TableFooter className="bg-transparent">
+                <TableRow className="hover:bg-transparent">
+                    <TableCell colSpan={7}></TableCell> {/* Ajuster le colSpan */}
+                </TableRow>
+            </TableFooter>
+        </Table>
     );
 }
