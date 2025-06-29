@@ -207,7 +207,6 @@ class ControllerGoogle
             $userEmail = $attendees[0]->getEmail();
             $userId = $modelUser->checkMail($userEmail);
             if ($userId === null || $userId === false) {
-
                 return;
             }
         } else {
