@@ -26,24 +26,20 @@ jobs:
             - name: Setup pnpm
               uses: pnpm/action-setup@v4
               with:
-                  version: 8 # ou la version que vous utilisez
+                  version: 8
 
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: "20" # ou la version que vous utilisez
+                  node-version: "20"
                   cache: "pnpm"
                   cache-dependency-path: "frontend/pnpm-lock.yaml"
 
-            - name: Install frontend dependencies
-              run: |
-                  cd frontend
-                  pnpm install --frozen-lockfile
+            - name: Install frontend dependencies (from workspace root)
+              run: pnpm install --frozen-lockfile
 
             - name: Build frontend
-              run: |
-                  cd frontend
-                  pnpm run build
+              run: pnpm --filter frontend build
 
     deploy:
         name: Deploy to VPS
