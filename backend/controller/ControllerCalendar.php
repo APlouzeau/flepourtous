@@ -55,7 +55,6 @@ class ControllerCalendar
             ];
         }
         echo json_encode($response);
-        return;
     }
 
     public function createEvent()
@@ -86,7 +85,7 @@ class ControllerCalendar
                 echo json_encode($response);
                 exit();
             }
-        };
+        }
 
         $startDateTime = $data['startDate'] . ' ' . $data['startTime'] . ':00';
         $userTimeZone = $data['userTimeZone'];
@@ -369,18 +368,18 @@ class ControllerCalendar
         // Vérifier si $events est un array avant de l'utiliser dans foreach
         if (is_array($events) && !empty($events)) {
             foreach ($events as $event) {
-            $periodStart = $event->getStart();
-            $periodEnd = $event->getEnd();
-            $period = new DatePeriod(
-                new DateTime($periodStart, new DateTimeZone('UTC')),
-                $interval,
-                new DateTime($periodEnd, new DateTimeZone('UTC'))
-            );
-            foreach ($period as $dt) {
-                $occupiedTimeSlots[] = $dt->setTimezone($utcTimeZone)->format('Y-m-d H:i:s');
-            }
-        } // fin foreach $events
-    } // fin if is_array($events)
+                $periodStart = $event->getStart();
+                $periodEnd = $event->getEnd();
+                $period = new DatePeriod(
+                    new DateTime($periodStart, new DateTimeZone('UTC')),
+                    $interval,
+                    new DateTime($periodEnd, new DateTimeZone('UTC'))
+                );
+                foreach ($period as $dt) {
+                    $occupiedTimeSlots[] = $dt->setTimezone($utcTimeZone)->format('Y-m-d H:i:s');
+                }
+            } // fin foreach $events
+        } // fin if is_array($events)
 
         $availableTimeSlots = [];
 
@@ -435,13 +434,6 @@ class ControllerCalendar
         }
     }
 
-    public function alertEvent()
-    {
-
-        $dateNow = new DateTime('now', new DateTimeZone('UTC'));
-        $modelEvent = new ModelEvent();
-    }
-
     public function checkWaitingEvents()
     {
         $modelEvent = new ModelEvent();
@@ -449,7 +441,7 @@ class ControllerCalendar
         if (!$userWithEventDelete) {
             $controllerMail = new ControllerMail();
             foreach ($userWithEventDelete as $user) {
-                $controllerMail->sendMailToAlertForNextAppointment($user);
+                $controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($user);
             }
             $response = [
                 'code' => 1,
