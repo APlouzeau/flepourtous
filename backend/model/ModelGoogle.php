@@ -15,10 +15,19 @@ class ModelGoogle extends  ClassDatabase
         $req->execute();
     }
 
-    public function checkIfChannelExists($canalId)
+
+    public function findChannelByChannelId($channelId)
     {
         $req = $this->conn->prepare('SELECT * FROM google WHERE canalId = :canalId');
-        $req->bindValue(':canalId', $canalId, PDO::PARAM_STR);
+        $req->bindValue(':canalId', $channelId, PDO::PARAM_STR);
+        $req->execute();
+        return $req->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function findChannelByCalendarId($calendarId)
+    {
+        $req = $this->conn->prepare('SELECT canalId, resourceId FROM google WHERE calendarId = :calendarId');
+        $req->bindValue(':calendarId', $calendarId, PDO::PARAM_STR);
         $req->execute();
         return $req->fetch(PDO::FETCH_ASSOC);
     }

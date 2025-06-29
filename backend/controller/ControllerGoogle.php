@@ -34,14 +34,14 @@ class ControllerGoogle
             $calendarId = GOOGLE_CALENDAR_ID;
             $modelGoogle = new ModelGoogle();
 
-            $oldChannelData = $modelGoogle->checkIfChannelExists($calendarId);
-            if ($oldChannelData && isset($oldChannelData['channel_id']) && isset($oldChannelData['resource_id'])) {
+            $oldChannelData = $modelGoogle->findChannelByCalendarId($calendarId);
+            if ($oldChannelData && isset($oldChannelData['canalId']) && isset($oldChannelData['resourceId'])) {
                 try {
                     $channelToStop = new Google\Service\Calendar\Channel();
-                    $channelToStop->setId($oldChannelData['channel_id']);
-                    $channelToStop->setResourceId($oldChannelData['resource_id']);
+                    $channelToStop->setId($oldChannelData['canalId']);
+                    $channelToStop->setResourceId($oldChannelData['resourceId']);
                     $service->channels->stop($channelToStop);
-                    error_log("[Cron Google] Ancien canal de notification arrêté avec succès : " .  $oldChannelData['channel_id']);
+                    error_log("[Cron Google] Ancien canal de notification arrêté avec succès : " .  $oldChannelData['canalId']);
                 } catch (Exception $e) {
                     error_log("[Cron Google] Avertissement lors de l'arrêt de l'ancien canal (ce n'est probablement pas une erreur grave) : " . $e->getMessage());
                 }
@@ -71,10 +71,11 @@ class ControllerGoogle
         $channelIdHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_ID'] ?? null;
         $resourceStateHeader = $_SERVER['HTTP_X_GOOG_RESOURCE_STATE'] ?? null;
         $messageNumberHeader = $_SERVER['HTTP_X_GOOG_MESSAGE_NUMBER'] ?? null;
-        $channelTokenHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_TOKEN'] ?? null; // Si tu as défini un toke
+        $channelTokenHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_TOKEN'] ?? null;
 
         $modelGoogle = new ModelGoogle();
-        $channel = $modelGoogle->checkIfChannelExists($channelIdHeader);
+        // ✅ UTILISER LA FONCTION RENOMMÉE ET CORRECTE
+        $channel = $modelGoogle->findChannelByChannelId($channelIdHeader);
 
         if ($channel) {
             if ($channelTokenHeader !== $channel['token']) {
