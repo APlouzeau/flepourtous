@@ -31,14 +31,16 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: "24.3.0"
+                  node-version: "24.3"
                   cache: "pnpm"
                   cache-dependency-path: "frontend/pnpm-lock.yaml"
 
-            - name: Install frontend dependencies (from workspace root)
+            - name: Install frontend dependencies
+              working-directory: ./frontend
               run: pnpm install --frozen-lockfile
 
             - name: Build frontend
+              working-directory: ./frontend
               run: pnpm --filter frontend build
 
     deploy:
