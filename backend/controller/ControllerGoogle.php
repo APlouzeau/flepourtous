@@ -33,6 +33,16 @@ class ControllerGoogle
             $calendarId = GOOGLE_CALENDAR_ID;
             $modelGoogle = new ModelGoogle();
 
+            // --- DÉBUT DE LA MODIFICATION ---
+
+            // 1. On supprime l'ancien syncToken pour forcer une resynchronisation complète.
+            // C'est la seule façon de garantir que le syncToken et le canal sont toujours alignés.
+            $modelGoogleSync = new ModelGoogleSync();
+            $modelGoogleSync->deleteSyncTokenForCalendar($calendarId);
+            error_log("[Cron Google] Ancien syncToken pour le calendrier " . $calendarId . " supprimé pour forcer la resynchronisation.");
+
+            // --- FIN DE LA MODIFICATION ---
+
             $oldChannelData = $modelGoogle->findChannelByCalendarId($calendarId);
             if ($oldChannelData && isset($oldChannelData['canalId']) && isset($oldChannelData['resourceId'])) {
                 try {
@@ -74,7 +84,6 @@ class ControllerGoogle
         $channelTokenHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_TOKEN'] ?? null;
 
         $modelGoogle = new ModelGoogle();
-        // ✅ UTILISER LA FONCTION RENOMMÉE ET CORRECTE
         $channel = $modelGoogle->findChannelByChannelId($channelIdHeader);
 
         if ($channel) {
@@ -160,139 +169,107 @@ class ControllerGoogle
 
     public function updateCalendar($event)
     {
-
-        $modelUser = new ModelUser();
         $modelEvent = new ModelEvent();
         $idEvent = $event->getId();
 
         $eventStart = $event->getStart();
         $eventEnd = $event->getEnd();
+
+        // 1. Vérification unique et propre pour les événements 'toute la journée'
         if (!$eventStart || !$eventStart->getDateTime() || !$eventEnd || !$eventEnd->getDateTime()) {
             error_log("Événement Google ID: " . $idEvent . " est un événement 'toute la journée' ou invalide. Ignoré.");
-            $eventEnd = $event->getEnd();
-            if (!$eventStart || !$eventStart->getDateTime() || !$eventEnd || !$eventEnd->getDateTime()) {
-                error_log("Événement Google ID: " . $idEvent . " est un événement 'toute la journée' ou invalide. Ignoré.");
-                return;
+            return;
+        }
+
+        // Le reste du code ne s'exécute que si les dates sont valides
+        $startDateTimeISO = $eventStart->getDateTime();
+        $endDateTimeISO = $eventEnd->getDateTime();
+
+        try {
+            $dtStart = new DateTime($startDateTimeISO);
+            $dtStart->setTimezone(new DateTimeZone('UTC'));
+            $startDateTimeUtcFormatted = $dtStart->format('Y-m-d H:i:s');
+
+            $dtEnd = new DateTime($endDateTimeISO);
+            $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
+        } catch (Exception $e) {
+            error_log("Erreur de conversion de date pour l'événement Google ID: " . $idEvent . " - " . $e->getMessage());
+            return;
+        }
+
+        $description = $event->getSummary();
+
+        // 2. Logique de recherche d'utilisateur nettoyée
+        $modelUser = new ModelUser(); // Instancié une seule fois
+        $userId = null;
+
+        $emailsToCheck = [];
+        $attendees = $event->getAttendees();
+        if (!empty($attendees)) {
+            foreach ($attendees as $attendee) {
+                if ($attendee && $attendee->getEmail()) $emailsToCheck[] = $attendee->getEmail();
             }
-            $startDateTimeISO = $eventStart->getDateTime() ?: $eventStart->getDate();
-            $endDateTimeISO = $eventEnd->getDateTime() ?: $eventEnd->getDate();
+        }
+        $creator = $event->getCreator();
+        if ($creator && $creator->getEmail()) $emailsToCheck[] = $creator->getEmail();
+        $organizer = $event->getOrganizer();
+        if ($organizer && $organizer->getEmail()) $emailsToCheck[] = $organizer->getEmail();
 
-            if (empty($startDateTimeISO) || empty($endDateTimeISO)) {
-                error_log("\nÉvénement Google ID: " . $idEvent . " a des dates de début/fin invalides après traitement. Skipping.");
-                return;
+        foreach (array_unique($emailsToCheck) as $email) { // array_unique pour éviter de vérifier deux fois le même email
+            $potentialUserId = $modelUser->checkMail($email);
+            if ($potentialUserId) {
+                $userId = $potentialUserId;
+                break;
             }
+        }
 
-            try {
-                $dtStart = new DateTime($startDateTimeISO);
-                $dtStart->setTimezone(new DateTimeZone('UTC'));
-                $startDateTimeUtcFormatted = $dtStart->format('Y-m-d H:i:s');
-            } catch (Exception $e) {
-                error_log("Erreur lors de la conversion de la date de début pour l'événement Google ID: " . $idEvent . " - " . $e->getMessage());
-                return;
-            }
+        if ($userId === null) {
+            error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Ignoré.");
+            return;
+        }
 
-            try {
-                $dtEnd = new DateTime($endDateTimeISO);
+        // 3. Un seul log, clair et précis, une fois l'utilisateur trouvé
+        error_log("Traitement de l'événement Google ID: " . $idEvent . " pour l'utilisateur ID: " . $userId);
 
-                $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
-            } catch (Exception $e) {
-                error_log("Erreur lors de la conversion de la date de fin pour l'événement Google ID: " . $idEvent . " - " . $e->getMessage());
-                return;
-            }
+        $controllerVisio = new ControllerVisio();
+        $status = $event->getStatus();
 
-            $description = $event->getSummary();
-
-            // --- DÉBUT DU BLOC À REMPLACER ---
-            $modelUser = new ModelUser(); // Assurez-vous que c'est bien initialisé ici
-            $userId = null;
-
-            // 1. Créer une liste de tous les e-mails potentiels à vérifier
-            $emailsToCheck = [];
-
-            // Ajouter les invités (attendees)
-            $attendees = $event->getAttendees();
-            if (!empty($attendees)) {
-                foreach ($attendees as $attendee) {
-                    if ($attendee && $attendee->getEmail()) {
-                        $emailsToCheck[] = $attendee->getEmail();
-                    }
-                }
-            }
-
-            // Ajouter le créateur
-            $creator = $event->getCreator();
-            if ($creator && $creator->getEmail()) {
-                $emailsToCheck[] = $creator->getEmail();
-            }
-
-            // Ajouter l'organisateur
-            $organizer = $event->getOrganizer();
-            if ($organizer && $organizer->getEmail()) {
-                $emailsToCheck[] = $organizer->getEmail();
-            }
-
-            // 2. Parcourir la liste et s'arrêter au premier utilisateur trouvé
-            foreach ($emailsToCheck as $email) {
-                $potentialUserId = $modelUser->checkMail($email);
-                if ($potentialUserId) {
-                    $userId = $potentialUserId;
-                    break; // On a trouvé un utilisateur valide, on sort de la boucle
-                }
-            }
-
-            // 3. Si après toutes les vérifications, aucun utilisateur n'est trouvé, on arrête.
-            if ($userId === null) {
-                error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Ignoré.");
-                return;
-            }
-            // --- FIN DU BLOC À REMPLACER ---
-
-            $controllerVisio = new ControllerVisio();
-
-            $status = $event->getStatus();
-            if ($status == 'cancelled') {
+        if ($status == 'cancelled') {
+            $controllerVisio->deleteRoom($idEvent);
+            $modelEvent->deleteEvent($idEvent);
+        } else {
+            $eventExist = $modelEvent->checkEvent($idEvent);
+            if ($eventExist) {
                 $controllerVisio->deleteRoom($idEvent);
-                $modelEvent->deleteEvent($idEvent);
-            } else {
-                $eventExist = $modelEvent->checkEvent($idEvent);
-                if ($eventExist) {
-                    $controllerVisio->deleteRoom($idEvent);
-                    // On ne crée la room qu'une seule fois
-                    $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
-
-                    // On ne vérifie qu'une seule fois
-                    if (!$roomUrl) {
-                        error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
-                        return;
-                    }
-
-                    $eventDatabase = new EntitieEvent([
-                        'idEvent' => $idEvent,
-                        'userId' => $userId,
-                        'description' => $description,
-                        'duration' => $duration,
-                        'startDateTime' => $startDateTimeUtcFormatted,
-                        'visioLink' => $roomUrl,
-                    ]);
-
-                    $modelEvent->updateEvent($eventDatabase);
-                } else {
-                    $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
-                    if (!$roomUrl) {
-                        // Message d'erreur légèrement différent pour savoir si c'est une création ou une mise à jour
-                        error_log("Erreur lors de la création de la room visio pour le nouvel événement ID: " . $idEvent);
-                        return;
-                    }
-                    $eventDatabase = new EntitieEvent([
-                        'idEvent' => $idEvent,
-                        'userId' => $userId,
-                        'description' => $description,
-                        'duration' => $duration,
-                        'startDateTime' => $startDateTimeUtcFormatted,
-                        'visioLink' => $roomUrl,
-                    ]);
-                    $modelEvent->createEvent($eventDatabase);
+                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
+                if (!$roomUrl) {
+                    error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
+                    return;
                 }
+                $eventDatabase = new EntitieEvent([
+                    'idEvent' => $idEvent,
+                    'userId' => $userId,
+                    'description' => $description,
+                    'duration' => $duration,
+                    'startDateTime' => $startDateTimeUtcFormatted,
+                    'visioLink' => $roomUrl,
+                ]);
+                $modelEvent->updateEvent($eventDatabase);
+            } else {
+                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
+                if (!$roomUrl) {
+                    error_log("Erreur lors de la création de la room visio pour le nouvel événement ID: " . $idEvent);
+                    return;
+                }
+                $eventDatabase = new EntitieEvent([
+                    'idEvent' => $idEvent,
+                    'userId' => $userId,
+                    'description' => $description,
+                    'duration' => $duration,
+                    'startDateTime' => $startDateTimeUtcFormatted,
+                    'visioLink' => $roomUrl,
+                ]);
+                $modelEvent->createEvent($eventDatabase);
             }
         }
     }
