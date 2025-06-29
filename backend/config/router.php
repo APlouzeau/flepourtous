@@ -44,3 +44,4 @@ $router->addRoute('POST', BASE_URL . "api/verify-payment", 'ControllerOrder', 'v
 
 //debug
 $router->addRoute('GET', BASE_URL . "api/debug", 'ControllerDebug', 'debug');
+$router->addRoute('GET', BASE_URL . "api/debugBdd", 'ControllerDebug', 'debugBdd');

@@ -446,12 +446,13 @@ class ControllerCalendar
         if (!$userWithEventDelete) {
             $controllerMail = new ControllerMail();
             foreach ($userWithEventDelete as $user) {
-                $controllerMail->sendMailToAlertForNextAppointment();
+                $controllerMail->sendMailToAlertForNextAppointment($user);
             }
             $response = [
                 'code' => 1,
                 'message' => 'Vérification des événements en attente effectuée avec succès',
             ];
-        echo json_encode($response);
+            echo json_encode($response);
+        }
     }
 }

@@ -205,12 +205,20 @@ class ModelEvent extends  ClassDatabase
         $datas = $selectReq->fetchAll();
 
         if (!empty($datas)) {
-            $deleteReq = $this->conn->prepare("DELETE FROM event {$condition}");
-            $deleteReq->execute();
+            $datasToAlert = [];
+            foreach ($datas as $data) {
+                $userId = $data['userId'];
+                $startDateTime = $data['startDateTime'];
+                $eventData = [
+                    'userId' => $userId,
+                    'startDateTime' => $startDateTime,
+                ];
+                $datasToAlert[] = $eventData;
+            }
         }
 
         $this->conn->commit();
 
-        return $datas;
+        return $datasToAlert;
     }
 }

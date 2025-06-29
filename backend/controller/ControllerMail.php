@@ -70,72 +70,106 @@ class ControllerMail
         if ($apiKey !== CRON_KEY) {
             error_log("Unauthorized attempt to access sendMailToAlertForNextAppointment. IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
             http_response_code(403); // Forbidden
-            return false; // Ou exit();
+            return false;
         }
 
-        $dateNow = new DateTime("now", new DateTimeZone('UTC'));;
+        $dateNow = new DateTime("now", new DateTimeZone('UTC'));
 
         $modelEvent = new ModelEvent();
         $eventsToAlert = $modelEvent->checkEventForNextHour($dateNow->format('Y-m-d H:i:s'));
         if (!$eventsToAlert) {
             error_log("No upcoming events found.");
-            return false; // No events found in the next hour
+            return false;
         }
-
 
         foreach ($eventsToAlert as $event) {
             try {
-                $appointmentDateTime = new DateTime($event['startDateTime'], new DateTimeZone('UTC'));
-                $appointmentHour = $appointmentDateTime->format('H:i');
-
-                $this->mailer->addAddress($event['mail']);
-                $this->mailer->addCC(TEACHER_MAIL);
-                $this->mailer->isHTML(true);
-                $this->mailer->Subject = "Appointment reminder on FlePourTous";
-
-                $emailBody = "Dear " . htmlspecialchars($event['firstName'] . " " . $event['lastName']) . ",<br><br>";
-                $emailBody .= "This is a reminder for your appointment at " . htmlspecialchars($appointmentHour) . " UTC.<br>";
-
-                if ($event['description'] != '') {
-                    $emailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
-                }
-
-                if ($event['visioLink'] != '') {
-                    $emailBody .= "VisioLink : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "click here at appointment time. </a><br>";
-                }
-                $emailBody .= "<br>Warm regards,<br>Flepourtous Team";
-                $this->mailer->Body = $emailBody;
-
-                $this->mailer->send();
-                $this->mailer->clearAddresses();
-
-                if (defined('TEACHER_MAIL') && TEACHER_MAIL != '') {
-                    $dateTimeUtc = new DateTime($event['startDateTime'], new DateTimeZone('UTC'));
-                    $dateTimeParis = $dateTimeUtc->setTimezone(new DateTimeZone('Europe/Paris'));
-                    $this->mailer->addAddress(TEACHER_MAIL);
-                    $this->mailer->Subject = "Rappel de rendez-vous pour " . htmlspecialchars($event['firstName'] . " " . $event['lastName']);
-                    $teacherEmailBody = "Un rappel a été envoyé à l'élève.<br><br>";
-                    $teacherEmailBody .= "Rendez-vous prévu à : " . htmlspecialchars($dateTimeParis->format('H:i')) . " UTC.<br>";
-                    if ($event['description'] != '') {
-                        $teacherEmailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
-                    }
-                    if ($event['visioLink'] != '') {
-                        $teacherEmailBody .= "Lien de visio : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "Cliquez ici à l'heure du rendez-vous</a><br>";
-                    }
-                    $teacherEmailBody .= "<br>Cordialement,<br>L'équipe Flepourtous<br><br><br><br>Alex quoi :D";
-                    $this->mailer->Body = $teacherEmailBody;
-                    $this->mailer->send();
-                }
+                $this->sendAppointmentReminderToUser($event);
+                $this->sendAppointmentReminderToTeacher($event);
             } catch (Exception $e) {
                 error_log("Mailer Error: " . $this->mailer->ErrorInfo);
             } finally {
                 if ($this->mailer) {
-                    $this->mailer->clearAddresses(); // Clear addresses after sending
-                    $this->mailer->clearAttachments(); // Clear attachments if any
+                    $this->mailer->clearAddresses();
+                    $this->mailer->clearAttachments();
                 }
             }
         }
     }
 
-    public function sendMailToAlertEventDeleteBecauseNotPaid() {}
+    private function sendAppointmentReminderToUser($event)
+    {
+        $appointmentDateTime = new DateTime($event['startDateTime'], new DateTimeZone('UTC'));
+        $appointmentHour = $appointmentDateTime->format('H:i');
+
+        $this->mailer->addAddress($event['mail']);
+        $this->mailer->addCC(TEACHER_MAIL);
+        $this->mailer->isHTML(true);
+        $this->mailer->Subject = "Appointment reminder on FlePourTous";
+
+        $emailBody = "Dear " . htmlspecialchars($event['firstName'] . " " . $event['lastName']) . ",<br><br>";
+        $emailBody .= "This is a reminder for your appointment at " . htmlspecialchars($appointmentHour) . " UTC.<br>";
+
+        if ($event['description'] != '') {
+            $emailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
+        }
+
+        if ($event['visioLink'] != '') {
+            $emailBody .= "VisioLink : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "click here at appointment time. </a><br>";
+        }
+        $emailBody .= "<br>Warm regards,<br>Flepourtous Team";
+        $this->mailer->Body = $emailBody;
+
+        $this->mailer->send();
+        $this->mailer->clearAddresses();
+    }
+
+    private function sendAppointmentReminderToTeacher($event)
+    {
+        if (!defined('TEACHER_MAIL') || TEACHER_MAIL == '') {
+            return;
+        }
+        $dateTimeUtc = new DateTime($event['startDateTime'], new DateTimeZone('UTC'));
+        $dateTimeParis = $dateTimeUtc->setTimezone(new DateTimeZone('Europe/Paris'));
+        $this->mailer->addAddress(TEACHER_MAIL);
+        $this->mailer->Subject = "Rappel de rendez-vous pour " . htmlspecialchars($event['firstName'] . " " . $event['lastName']);
+        $teacherEmailBody = "Un rappel a été envoyé à l'élève.<br><br>";
+        $teacherEmailBody .= "Rendez-vous prévu à : " . htmlspecialchars($dateTimeParis->format('H:i')) . " UTC.<br>";
+        if ($event['description'] != '') {
+            $teacherEmailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
+        }
+        if ($event['visioLink'] != '') {
+            $teacherEmailBody .= "Lien de visio : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "Cliquez ici à l'heure du rendez-vous</a><br>";
+        }
+        $teacherEmailBody .= "<br>Cordialement,<br>L'équipe Flepourtous<br><br><br><br>Alex quoi :D";
+        $this->mailer->Body = $teacherEmailBody;
+        $this->mailer->isHTML(true);
+        $this->mailer->send();
+        $this->mailer->clearAddresses();
+    }
+
+    public function sendMailToAlertEventDeleteBecauseNotPaid(array $user)
+    {
+        $userEntitie = new EntitieUser([
+            'idUser' => $user['idUser']
+        ]);
+        $startDateTime = $user['startDateTime'];
+        $appointmentDateTime = new DateTime($startDateTime, new DateTimeZone('UTC'));
+        $appointmentDate = $appointmentDateTime->format('d-m H:i:s');
+        $appointmentHour = $appointmentDateTime->format('H:i');
+
+        $modelUser = new ModelUser();
+        $userInformations = $modelUser->getUser($userEntitie);
+
+        $this->mailer->addAddress($userInformations['mail']);
+        $this->mailer->isHTML(true);
+        $this->mailer->Subject = "Annulation de rendez-vous sur FLEpourtous";
+        $emailBody = "Bonjour " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . ",<br><br>";
+        $emailBody .= "Nous vous informons que votre rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " a été annulé car vous n'avez pas réglé le montant de la leçon.<br>";
+        $emailBody .= "Nous vous invitons à prendre un nouveau rendez-vous.";
+        $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
+        $this->mailer->Body = $emailBody;
+        $this->mailer->send();
+        $this->mailer->clearAddresses();
+    }
 }
