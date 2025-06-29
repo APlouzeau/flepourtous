@@ -165,17 +165,12 @@ class ControllerGoogle
         $idEvent = $event->getId();
 
         $eventStart = $event->getStart();
-        if (!$eventStart || !$eventStart->getDateTime()) {
-            error_log("Événement Google ID: " . $idEvent . " n'a pas de propriété 'start'. Skipping.");
+        $eventEnd = $event->getEnd();
+        if (!$eventStart || !$eventStart->getDateTime() || !$eventEnd || !$eventEnd->getDateTime()) {
+            error_log("Événement Google ID: " . $idEvent . " est un événement 'toute la journée' ou invalide. Ignoré.");
             return;
         }
         $startDateTimeISO = $eventStart->getDateTime() ?: $eventStart->getDate();
-
-        $eventEnd = $event->getEnd();
-        if (!$eventEnd || !$eventEnd->getDateTime()) {
-            error_log("\nÉvénement Google ID: " . $idEvent . " n'a pas de propriété 'end'. Skipping.");
-            return;
-        }
         $endDateTimeISO = $eventEnd->getDateTime() ?: $eventEnd->getDate();
 
         if (empty($startDateTimeISO) || empty($endDateTimeISO)) {
@@ -255,6 +250,10 @@ class ControllerGoogle
                 $controllerVisio->deleteRoom($idEvent);
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
 
+                if (!$roomUrl) {
+                    error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
+                    return;
+                }
                 $eventDatabase = new EntitieEvent([
                     'idEvent' => $idEvent,
                     'userId' => $userId,
@@ -267,6 +266,10 @@ class ControllerGoogle
                 $modelEvent->updateEvent($eventDatabase);
             } else {
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
+                if (!$roomUrl) {
+                    error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
+                    return;
+                }
                 $eventDatabase = new EntitieEvent([
                     'idEvent' => $idEvent,
                     'userId' => $userId,
