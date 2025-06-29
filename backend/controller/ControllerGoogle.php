@@ -202,45 +202,50 @@ class ControllerGoogle
 
             $description = $event->getSummary();
 
-            $attendees = $event->getAttendees();
+            // --- DÉBUT DU BLOC À REMPLACER ---
+            $modelUser = new ModelUser(); // Assurez-vous que c'est bien initialisé ici
             $userId = null;
-            if (!empty($attendees) && isset($attendees[0]) && $attendees[0] instanceof \Google\Service\Calendar\EventAttendee && $attendees[0]->getEmail()) {
-                $userEmail = $attendees[0]->getEmail();
-                $userId = $modelUser->checkMail($userEmail);
-                if ($userId === null || $userId === false) {
-                    return;
-                }
-            } else {
-                // Tentative avec le créateur
-                $creator = $event->getCreator();
-                if ($creator && $creator->getEmail()) {
-                    $creatorEmail = $creator->getEmail();
-                    $userId = $modelUser->checkMail($creatorEmail);
-                    if ($userId === null || $userId === false) {
 
-                        return; // Ou autre logique
-                    }
-                } else {
-                    // Tentative avec l'organisateur si pas de créateur ou pas d'email créateur
-                    $organizer = $event->getOrganizer();
-                    if ($organizer && $organizer->getEmail()) {
-                        $organizerEmail = $organizer->getEmail();
-                        $userId = $modelUser->checkMail($organizerEmail);
-                        if ($userId === null || $userId === false) {
+            // 1. Créer une liste de tous les e-mails potentiels à vérifier
+            $emailsToCheck = [];
 
-                            return; // Ou autre logique
-                        }
-                    } else {
-
-                        return; // Ou autre logique si aucun utilisateur ne peut être déterminé
+            // Ajouter les invités (attendees)
+            $attendees = $event->getAttendees();
+            if (!empty($attendees)) {
+                foreach ($attendees as $attendee) {
+                    if ($attendee && $attendee->getEmail()) {
+                        $emailsToCheck[] = $attendee->getEmail();
                     }
                 }
             }
 
+            // Ajouter le créateur
+            $creator = $event->getCreator();
+            if ($creator && $creator->getEmail()) {
+                $emailsToCheck[] = $creator->getEmail();
+            }
 
-            //--------------------------------------------
+            // Ajouter l'organisateur
+            $organizer = $event->getOrganizer();
+            if ($organizer && $organizer->getEmail()) {
+                $emailsToCheck[] = $organizer->getEmail();
+            }
 
+            // 2. Parcourir la liste et s'arrêter au premier utilisateur trouvé
+            foreach ($emailsToCheck as $email) {
+                $potentialUserId = $modelUser->checkMail($email);
+                if ($potentialUserId) {
+                    $userId = $potentialUserId;
+                    break; // On a trouvé un utilisateur valide, on sort de la boucle
+                }
+            }
 
+            // 3. Si après toutes les vérifications, aucun utilisateur n'est trouvé, on arrête.
+            if ($userId === null) {
+                error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Ignoré.");
+                return;
+            }
+            // --- FIN DU BLOC À REMPLACER ---
 
             $controllerVisio = new ControllerVisio();
 
