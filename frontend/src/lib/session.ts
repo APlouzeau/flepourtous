@@ -128,3 +128,28 @@ export async function getCookieBackend() {
         return null;
     }
 }
+
+export async function getWallet() {
+    const session = await getCookieBackend();
+    if (!session) {
+        console.log("No session found in getWallet");
+        return null;
+    }
+    try {
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/getWallet`,
+            {},
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${session}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            }
+        );
+        return response.data.data || "0";
+    } catch (error) {
+        console.error("Error fetching wallet:", error);
+        return null;
+    }
+}

@@ -1,8 +1,9 @@
 <?php
 
-class ControllerVisio 
+class ControllerVisio
 {
-    public function createRoom($duration, $userStartDateTimeUTCToString){
+    public function createRoom($duration, $userStartDateTimeUTCToString)
+    {
         $visioApiKey = VISIO_API_KEY;
         $url = 'https://api.daily.co/v1/rooms/';
 
@@ -51,22 +52,23 @@ class ControllerVisio
         }
     }
 
-    public function deleteRoom ($eventId) {
+    public function deleteRoom($idEvent)
+    {
         $modelEvent = new ModelEvent();
-        $event = $modelEvent->getEventById($eventId);
+        $event = $modelEvent->getEventById($idEvent);
         $path = parse_url($event['visioLink'], PHP_URL_PATH);
         $roomNameOnly = $path ? ltrim($path, '/') : null;
         $visioApiKey = VISIO_API_KEY;
-        $apiUrl = 'https://api.daily.co/v1/rooms/' . $roomNameOnly; 
+        $apiUrl = 'https://api.daily.co/v1/rooms/' . $roomNameOnly;
 
         $options = [
             'http' => [
-                'header' => "Authorization: Bearer " . $visioApiKey, 
+                'header' => "Authorization: Bearer " . $visioApiKey,
                 'method' => 'DELETE',
-                'ignore_errors' => true 
+                'ignore_errors' => true
             ]
         ];
         $context = stream_context_create($options);
-        $result = file_get_contents($apiUrl,false, $context);
+        $result = file_get_contents($apiUrl, false, $context);
     }
 }

@@ -42,29 +42,25 @@ extends ClassDatabase
         $req->execute();
 
         $data = $req->fetch(PDO::FETCH_ASSOC);
-        if ($data) {
-            if ($data['isVerified'] == 0) {
-                error_log("User not verified: " . $mail);
-                return false; // Utilisateur non vérifié
-            } else {
-                //if ($userVerify->getPassword() == $data['password']) {
-                if (password_verify($password, $data['password'])) {
-                    $user =
-                        [
-                            'idUser' => $data['idUser'],
-                            'nickName' => $data['nickName'],
-                            'firstName' => $data['firstName'],
-                            'lastName' => $data['lastName'],
-                            'mail' => $data['mail'],
-                            'role' => $data['role'],
-                        ];
-                    return $user;
-                } else {
-                    return false;
-                }
-            }
+        if (!$data || !password_verify($password, $data['password'])) {
+            return null;
+        }
+        if ($data['isVerified'] == 0) {
+            return ['isVerified' => false];
+        } else {
+            $user =
+                [
+                    'idUser' => $data['idUser'],
+                    'nickName' => $data['nickName'],
+                    'firstName' => $data['firstName'],
+                    'lastName' => $data['lastName'],
+                    'mail' => $data['mail'],
+                    'role' => $data['role'],
+                ];
+            return $user;
         }
     }
+
 
     public function getUser(EntitieUser $user)
     {
@@ -131,6 +127,36 @@ extends ClassDatabase
             return true;
         } else {
             error_log("Email verification failed for link: " . $verifyToken);
+            return false;
+        }
+    }
+
+    public function updateWallet(int $idUser, float $amount)
+    {
+        $query = "UPDATE users SET wallet = :amount WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":amount", $amount, PDO::PARAM_STR);
+        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        if ($req->execute()) {
+            return true;
+        } else {
+            error_log("Failed to update wallet for user ID: " . $idUser);
+            return false;
+        }
+    }
+
+    public function getWalletFromUser(int $idUser)
+    {
+        $req = $this->conn->prepare('
+        SELECT wallet
+        FROM users
+        WHERE idUser = :idUser');
+        $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
+        $req->execute();
+        $data = $req->fetch();
+        if ($data && $data['wallet'] !== null) {
+            return $data['wallet'];
+        } else {
             return false;
         }
     }

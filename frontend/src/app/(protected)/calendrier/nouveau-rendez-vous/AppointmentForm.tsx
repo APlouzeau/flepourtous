@@ -1,21 +1,23 @@
 "use client";
 import { getAvailableTimeSlots, registerAppointment } from "./AppointmentAction";
-import { useEffect, useId, useMemo } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useState } from "react";
 import { SelectNative } from "@/components/ui/select-native";
-import { redirect } from "next/navigation";
+import { lessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
-
-export default function NewAppointmentForm() {
+export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
     const [timeSlots, setTimeSlots] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [userTimezone, setUserTimezone] = useState<string>("");
-    const [selectedDuration, setSelectedDuration] = useState<string>("30");
+    const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
+    const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);
+    const router = useRouter();
 
     useEffect(() => {
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -48,33 +50,66 @@ export default function NewAppointmentForm() {
 
     useEffect(() => {
         const searchAvailableTimeSlots = async () => {
-            if (date && userTimezone && selectedDuration) {
+            console.log("🔍 Recherche créneaux - Paramètres:", { 
+                date, 
+                userTimezone, 
+                selectedDuration
+            });
+            
+            // Vérifier que tous les paramètres requis sont présents
+            if (date && userTimezone && selectedDuration && selectedDuration !== "null" && selectedDuration !== null) {
+                console.log("✅ Conditions remplies, appel API...");
                 setLoading(true);
                 setError(null);
                 setTimeSlots([]);
                 try {
                     const availabledSlots = await getAvailableTimeSlots(date, userTimezone, selectedDuration);
+                    console.log("📞 Réponse API:", availabledSlots);
+                    
                     if (availabledSlots.code == 0) {
+                        console.log("❌ Code 0 - Aucun créneau");
                         setError(availabledSlots.message || "Aucun créneau disponible pour cette date.");
-                    } 
-                    if (availabledSlots.code == 1 && availabledSlots.data.length > 0) {
+                        setTimeSlots([]);
+                    } else if (availabledSlots.code == 1 && availabledSlots.data && availabledSlots.data.length > 0) {
+                        console.log("✅ Code 1 - Créneaux trouvés:", availabledSlots.data);
                         setError(null);
-                        setTimeout(() => {
-                        setTimeSlots(availabledSlots.data); }, 500);
+                        setTimeSlots(availabledSlots.data);
+                    } else if (availabledSlots.code == 1 && (!availabledSlots.data || availabledSlots.data.length === 0)) {
+                        console.log("⚠️ Code 1 mais données vides");
+                        setError("Aucun créneau disponible pour cette date.");
+                        setTimeSlots([]);
+                    } else {
+                        console.log("⚠️ Réponse API inattendue:", availabledSlots);
+                        setError("Erreur lors de la récupération des créneaux.");
+                        setTimeSlots([]);
                     }
                 } catch (error) {
-                    console.error("Error fetching available time slots:", error);
+                    console.error("💥 Erreur lors de la récupération des créneaux:", error);
+                    setError("Erreur de connexion lors de la récupération des créneaux.");
+                    setTimeSlots([]);
                 } finally {
                     setLoading(false);
                 }
             } else {
+                console.log("❌ Conditions non remplies pour charger les créneaux", {
+                    hasDate: !!date,
+                    hasTimezone: !!userTimezone,
+                    hasDuration: !!selectedDuration,
+                    durationValue: selectedDuration
+                });
                 setTimeSlots([]);
                 setError(null);
+                setLoading(false);
             }
         };
-        searchAvailableTimeSlots();
-    }, [date, userTimezone, selectedDuration]);
+        
+        // Debounce pour éviter trop d'appels API
+        const timeoutId = setTimeout(() => {
+            searchAvailableTimeSlots();
+        }, 300);
 
+        return () => clearTimeout(timeoutId);
+    }, [date, userTimezone, selectedDuration]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -83,36 +118,68 @@ export default function NewAppointmentForm() {
         setSuccess(null);
 
         const formData = new FormData(e.currentTarget);
+        if (selectedLesson && selectedLesson.idLesson != null) {
+            formData.append("idLesson", selectedLesson.idLesson.toString());
+        } else {
+            console.error("Aucun cours sélectionné pour envoyer l'idLesson");
+            setError("Veuillez sélectionner un cours.");
+            setLoading(false);
+            return;
+        }
         const response = await registerAppointment(formData);
         setLoading(false);
-        if (response.code === 1) {
+        if (response.code === 1 || response.code === 10) {
             setSuccess(response.message || "Rendez-vous enregistré avec succès !");
             setTimeout(() => {
-                redirect("/calendrier");
-            }, 2000); 
+                router.push("/calendrier/nouveau-rendez-vous/paiement");
+            }, 2000);
         } else {
             setError(response.message || "Une erreur s'est produite lors de l'enregistrement.");
-            console.log("Error response:", response.data);
         }
     };
 
     return (
-        <form onSubmit={handleSubmit} method="POST" className="max-w-md mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+        <form onSubmit={handleSubmit} method="POST" className="space-y-8">
+            {/* 1. Fuseau horaire */}
             {userTimezone && (
-                <div className="space-y-2 min-w-[300px]">
-                    <Label htmlFor={id}>Fuseau Horaire (native)</Label>
-                    <SelectNative id={id} name="userTimeZone" defaultValue={userTimezone}>
-                        {formattedTimezones.map(({ value, label }) => (
-                            <option key={value} value={value}>
-                                {label}
-                            </option>
-                        ))}
-                    </SelectNative>
+                <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <Label htmlFor={id} className="text-base font-semibold text-gray-900">
+                            Fuseau horaire
+                        </Label>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <SelectNative 
+                            id={id} 
+                            name="userTimeZone" 
+                            defaultValue={userTimezone}
+                            className="w-full bg-white border-gray-300 rounded-lg shadow-sm focus:border-gray-600 focus:ring-gray-600"
+                            style={{'--ring-color': '#1D1E1C', '--border-color': '#1D1E1C'} as React.CSSProperties}
+                        >
+                            {formattedTimezones.map(({ value, label }) => (
+                                <option key={value} value={value}>
+                                    {label}
+                                </option>
+                            ))}
+                        </SelectNative>
+                    </div>
                 </div>
             )}
-            <div className="mb-4">
-                <label htmlFor="startDate" className="block text-gray-700 font-bold mb-2">
-                    Date
+
+            {/* 2. Date */}
+            <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3a1 1 0 011-1h6a1 1 0 011 1v4h3a1 1 0 011 1v9a2 2 0 01-2 2H5a2 2 0 01-2-2V8a1 1 0 011-1h3z" />
+                    </svg>
+                    <label htmlFor="startDate" className="text-base font-semibold text-gray-900">
+                        Date du cours
+                    </label>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <input
                         type="date"
                         id="startDate"
@@ -120,72 +187,261 @@ export default function NewAppointmentForm() {
                         onChange={(e) => setDate(e.target.value)}
                         value={date}
                         required
-                        className="w-full p-2 border border-gray-300 rounded"
+                        className="w-full bg-white border-gray-300 rounded-lg shadow-sm p-3"
+                        style={{'--ring-color': '#1D1E1C', '--border-color': '#1D1E1C'} as React.CSSProperties}
+                        onFocus={(e) => {
+                            e.target.style.borderColor = '#1D1E1C';
+                            e.target.style.boxShadow = '0 0 0 1px #1D1E1C';
+                        }}
                     />
-                </label>
+                </div>
             </div>
-            <div className="mb-4">
-                <label htmlFor="startTime" className="block text-gray-700 font-bold mb-2">
-                    Horaire
-                    <select
-                        id="startTime"
-                        name="startTime"
-                        required
-                        className="w-full p-2 border border-gray-300 rounded"
-                    >
-                        {timeSlots.map((slot) => (
-                            <option key={slot} value={slot}>
-                                {slot}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-            </div>
-            <div className="mb-4">
-                <label htmlFor="duration" className="block text-gray-700 font-bold mb-2">
-                    Durée
+
+            {/* 3. Cours */}
+            <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <label className="text-base font-semibold text-gray-900">
+                        Matière
+                    </label>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <RadioGroup
-                        onValueChange={(value:string) => setSelectedDuration(value)}
-                        defaultValue="30"
-                        name="duration"
-                        className="[--primary:var(--color-indigo-500)] [--ring:var(--color-indigo-300)] in-[.dark]:[--primary:var(--color-indigo-500)] in-[.dark]:[--ring:var(--color-indigo-900)]"
+                        onValueChange={(value: string) => {
+                            const lesson = lessons.find((l) => l.title === value);
+                            if (lesson) {
+                                setSelectedLesson(lesson);
+                                setSelectedDuration(null);
+                                // Réinitialiser les créneaux quand on change de matière
+                                setTimeSlots([]);
+                                setError(null);
+                            }
+                        }}
+                        name="lesson"
+                        className="grid grid-cols-1 md:grid-cols-2 gap-3"
                     >
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="30" id="1" disabled={loading} />
-                            <Label htmlFor="1">30</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="45" id="2" disabled={loading} />
-                            <Label htmlFor="2">45</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <RadioGroupItem value="60" id="3" disabled={loading} />
-                            <Label htmlFor="3">60</Label>
-                        </div>
+                        {lessons &&
+                            lessons.length > 0 &&
+                            lessons.map((lesson) => (
+                                <div key={lesson.idLesson} className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-400 transition-colors">
+                                    <RadioGroupItem
+                                        value={lesson.title}
+                                        id={`lesson-${lesson.idLesson}`}
+                                        disabled={loading}
+                                        className="text-gray-700"
+                                        style={{'--primary': '#1D1E1C'} as React.CSSProperties}
+                                    />
+                                    <Label htmlFor={`lesson-${lesson.idLesson}`} className="font-medium text-gray-900 cursor-pointer flex-1">
+                                        {lesson.title}
+                                    </Label>
+                                </div>
+                            ))}
                     </RadioGroup>
-                </label>
+                </div>
             </div>
-            <div>
-                <label htmlFor="description" className="block text-gray-700 font-bold mb-2">
-                    Commentaire (optionnel)
+
+            {/* 4. Durée */}
+            {selectedLesson && (
+                <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <label className="text-base font-semibold text-gray-900">
+                            Durée et tarif
+                        </label>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <RadioGroup
+                            value={selectedDuration || ""}
+                            onValueChange={(value: string) => setSelectedDuration(value)}
+                            name="duration"
+                            className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                        >
+                            {selectedLesson.price?.map((durationPriceOption) => (
+                                <div key={durationPriceOption.duration} className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 transition-colors">
+                                    <div className="flex items-center space-x-3">
+                                        <RadioGroupItem
+                                            value={durationPriceOption.duration.toString()}
+                                            id={`duration-option-${selectedLesson.idLesson}-${durationPriceOption.duration}`}
+                                            disabled={loading}
+                                            className="text-gray-700"
+                                            style={{'--primary': '#1D1E1C'} as React.CSSProperties}
+                                        />
+                                        <Label
+                                            htmlFor={`duration-option-${selectedLesson.idLesson}-${durationPriceOption.duration}`}
+                                            className="cursor-pointer"
+                                        >
+                                            <div className="font-medium text-gray-900">
+                                                {durationPriceOption.duration} minutes
+                                            </div>
+                                        </Label>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-lg font-bold" style={{color: '#1D1E1C'}}>
+                                            {durationPriceOption.price}€
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </RadioGroup>
+                    </div>
+                </div>
+            )}
+
+            {/* 5. Heure */}
+            <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <label htmlFor="startTime" className="text-base font-semibold text-gray-900">
+                        Horaire
+                    </label>
+                    {/* Debug info */}
+                    <div className="text-xs text-gray-500">
+                        {!date && "📅 Date manquante"} 
+                        {!userTimezone && "🌍 Fuseau manquant"} 
+                        {!selectedDuration && "⏱️ Durée manquante"}
+                        {loading && "🔄 Chargement..."}
+                    </div>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    {loading && date && userTimezone && selectedDuration ? (
+                        <div className="flex items-center justify-center py-3">
+                            <svg className="animate-spin h-5 w-5 text-gray-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span className="text-gray-600">Recherche des créneaux disponibles...</span>
+                        </div>
+                    ) : (
+                        <select
+                            id="startTime"
+                            name="startTime"
+                            required
+                            disabled={timeSlots.length === 0}
+                            className="w-full bg-white border-gray-300 rounded-lg shadow-sm p-3 disabled:bg-gray-100 disabled:text-gray-400"
+                            style={{'--ring-color': '#1D1E1C', '--border-color': '#1D1E1C'} as React.CSSProperties}
+                            onFocus={(e) => {
+                                if (!e.target.disabled) {
+                                    e.target.style.borderColor = '#1D1E1C';
+                                    e.target.style.boxShadow = '0 0 0 1px #1D1E1C';
+                                }
+                            }}
+                        >
+                            <option value="">
+                                {!date || !userTimezone || !selectedDuration 
+                                    ? "Veuillez d'abord sélectionner une matière et une durée" 
+                                    : timeSlots.length === 0 
+                                        ? "Aucun créneau disponible pour cette configuration" 
+                                        : "Sélectionnez un horaire"
+                                }
+                            </option>
+                            {timeSlots.map((slot) => (
+                                <option key={slot} value={slot}>
+                                    {slot}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                </div>
+            </div>
+
+            {/* 6. Commentaire */}
+            <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <label htmlFor="description" className="text-base font-semibold text-gray-900">
+                        Commentaire <span className="text-sm font-normal text-gray-500">(optionnel)</span>
+                    </label>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <textarea
                         id="description"
                         name="description"
-                        className="w-full p-2 border border-gray-300 rounded"
+                        rows={4}
+                        placeholder="Ajoutez des détails ou des questions spécifiques pour votre cours..."
+                        className="w-full bg-white border-gray-300 rounded-lg shadow-sm p-3 resize-none"
                         disabled={loading}
-                    ></textarea>
-                </label>
+                        style={{'--ring-color': '#1D1E1C', '--border-color': '#1D1E1C'} as React.CSSProperties}
+                        onFocus={(e) => {
+                            e.target.style.borderColor = '#1D1E1C';
+                            e.target.style.boxShadow = '0 0 0 1px #1D1E1C';
+                        }}
+                    />
+                </div>
             </div>
-            {error && <p className="text-red-500 text-sm text-center my-2">{error}</p>}
-            {success && <p className="text-green-500 text-sm text-center my-2">{success}</p>}
 
-            <button
-                type="submit"
-                className="w-full bg-purple-600 text-white p-2 rounded hover:bg-purple-700 disabled:opacity-50"
-                disabled={loading || error !==null || timeSlots.length === 0}
-            >
-                {loading ? "Veuillez patienter..." : "Réserver"}
-            </button>
+            {/* Messages d'erreur et de succès */}
+            {error && (
+                <div className="rounded-lg bg-red-50 p-4 border border-red-200">
+                    <div className="flex">
+                        <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div className="ml-3">
+                            <p className="text-sm font-medium text-red-800">{error}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {success && (
+                <div className="rounded-lg bg-green-50 p-4 border border-green-200">
+                    <div className="flex">
+                        <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <div className="ml-3">
+                            <p className="text-sm font-medium text-green-800">{success}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Bouton de soumission */}
+            <div className="pt-6">
+                <Button
+                    type="submit"
+                    disabled={loading || error !== null || timeSlots.length === 0 || !selectedLesson || !selectedDuration}
+                    className="w-full inline-flex items-center justify-center px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-white shadow-lg hover:shadow-xl"
+                    style={{
+                        backgroundColor: loading ? '#9CA3AF' : '#1D1E1C'
+                    }}
+                    onMouseEnter={(e) => {
+                        if (!loading && !e.currentTarget.disabled) {
+                            e.currentTarget.style.backgroundColor = '#111111';
+                        }
+                    }}
+                    onMouseLeave={(e) => {
+                        if (!loading && !e.currentTarget.disabled) {
+                            e.currentTarget.style.backgroundColor = '#1D1E1C';
+                        }
+                    }}
+                >
+                    {loading ? (
+                        <div className="flex items-center justify-center">
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Réservation en cours...
+                        </div>
+                    ) : (
+                        <>
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Réserver mon cours
+                        </>
+                    )}
+                </Button>
+            </div>
         </form>
     );
 }

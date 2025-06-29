@@ -16,4 +16,11 @@ class ControllerLesson
         $lesson = $modelLesson->getLessonByName($slug);
         echo json_encode($lesson);
     }
+    public function getAllLessonsWithPrices()
+    {
+
+        $modelLesson = new ModelLesson();
+        $lessons = $modelLesson->getAllLessonsWithPrices();
+        echo json_encode(array_values($lessons));
+    }
 }

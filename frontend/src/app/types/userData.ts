@@ -5,4 +5,5 @@ export interface userDataProps {
     mail: string;
     lastName: string;
     role: string;
+    wallet: number;
 }
