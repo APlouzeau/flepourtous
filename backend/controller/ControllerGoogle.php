@@ -20,30 +20,49 @@ class ControllerGoogle
     public function setupCalendarWatch()
     {
         try {
+            // On garde votre excellente vérification de sécurité
             $apiKey = $_SERVER['HTTP_API_KEY'] ?? null;
-            error_log("Clé API reçue : " . $apiKey);
             if ($apiKey !== CRON_KEY) {
                 http_response_code(403);
                 echo "Clé API invalide.";
+                error_log("[Cron Google] Tentative d'accès avec une clé API invalide.");
                 return;
             }
+
             $client = $this->getClient();
             $service = new Google\Service\Calendar($client);
+            $calendarId = GOOGLE_CALENDAR_ID;
+            $modelGoogle = new ModelGoogle();
+
+            $oldChannelData = $modelGoogle->checkIfChannelExists($calendarId);
+            if ($oldChannelData && isset($oldChannelData['channel_id']) && isset($oldChannelData['resource_id'])) {
+                try {
+                    $channelToStop = new Google\Service\Calendar\Channel();
+                    $channelToStop->setId($oldChannelData['channel_id']);
+                    $channelToStop->setResourceId($oldChannelData['resource_id']);
+                    $service->channels->stop($channelToStop);
+                    error_log("[Cron Google] Ancien canal de notification arrêté avec succès : " .  $oldChannelData['channel_id']);
+                } catch (Exception $e) {
+                    error_log("[Cron Google] Avertissement lors de l'arrêt de l'ancien canal (ce n'est probablement pas une erreur grave) : " . $e->getMessage());
+                }
+            }
 
             $channel = new Google\Service\Calendar\Channel();
             $channel->setId(uniqid('flepourtous_channel_', false));
             $channel->setType('web_hook');
-            $channel->setAddress(URI . "api/handleGoogleNotification"); // L'URL du webhook
-            $channel->setParams(['ttl' => 7 * 24 * 3600]); // Durée de vie du canal en secondes
-            $channel->setToken(GOOGLE_TOKEN); // Un token pour vérifier l'authenticité de la notification
-            $watchResponse = $service->events->watch(GOOGLE_CALENDAR_ID, $channel);
+            $channel->setAddress(URI . "api/handleGoogleNotification");
+            $channel->setParams(['ttl' => 7 * 24 * 3600]);
+            $channel->setToken(GOOGLE_TOKEN);
 
-            $modelGoogle = new ModelGoogle();
-            $modelGoogle->checkChannel($watchResponse);
+            $watchResponse = $service->events->watch($calendarId, $channel);
 
-            echo "Canal de notification configuré. ID: " . $watchResponse->getId() . " Expire le: " . date('Y-m-d H:i:s', $watchResponse->getExpiration() / 1000);
+            $modelGoogle->updateChannel($watchResponse);
+
+            echo "Canal de notification reconfiguré. Nouvel ID: " . $watchResponse->getId() . " Expire le: " . date('Y-m-d H:i:s', $watchResponse->getExpiration() / 1000);
         } catch (Exception $e) {
-            echo 'Erreur lors de la création du canal : ' . $e->getMessage();
+            http_response_code(500);
+            error_log('Erreur critique lors de la création du canal : ' . $e->getMessage());
+            echo 'Erreur critique lors de la création du canal : ' . $e->getMessage();
         }
     }
 
@@ -145,7 +164,6 @@ class ControllerGoogle
         $modelEvent = new ModelEvent();
         $idEvent = $event->getId();
 
-        // --- Début des vérifications  ---
         $eventStart = $event->getStart();
         if (!$eventStart) {
             error_log("Événement Google ID: " . $idEvent . " n'a pas de propriété 'start'. Skipping.");
@@ -165,7 +183,6 @@ class ControllerGoogle
             return;
         }
 
-        // Conversion de la date de début au format YYYY-MM-DD HH:MM:SS
         try {
             $dtStart = new DateTime($startDateTimeISO);
             $startDateTimeFormatted = $dtStart->format('Y-m-d H:i:s');
@@ -173,7 +190,6 @@ class ControllerGoogle
 
             return;
         }
-
 
         try {
             $dtEnd = new DateTime($endDateTimeISO);
@@ -191,6 +207,7 @@ class ControllerGoogle
             $userEmail = $attendees[0]->getEmail();
             $userId = $modelUser->checkMail($userEmail);
             if ($userId === null || $userId === false) {
+
                 return;
             }
         } else {
@@ -200,6 +217,7 @@ class ControllerGoogle
                 $creatorEmail = $creator->getEmail();
                 $userId = $modelUser->checkMail($creatorEmail);
                 if ($userId === null || $userId === false) {
+
                     return; // Ou autre logique
                 }
             } else {
@@ -209,6 +227,7 @@ class ControllerGoogle
                     $organizerEmail = $organizer->getEmail();
                     $userId = $modelUser->checkMail($organizerEmail);
                     if ($userId === null || $userId === false) {
+
                         return; // Ou autre logique
                     }
                 } else {
