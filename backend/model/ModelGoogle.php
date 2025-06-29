@@ -32,18 +32,29 @@ class ModelGoogle extends  ClassDatabase
         if (!$existingChannel) {
             $this->saveWatchResponse($googleWatchResponse);
         } else {
-        $this->updateChannel($googleWatchResponse) ;
+            $this->updateChannel($googleWatchResponse, $existingChannel['calendarId']);
         }
     }
 
-    public function updateChannel($googleWatchResponse)
+    public function updateChannel($googleWatchResponse, $calendarId)
     {
-        $req = $this->conn->prepare('UPDATE google SET canalId = :canalId, resourceUri = :resourceUri, expiration = :expiration, token = :token WHERE resourceId = :resourceId');
+        $reqCheck = $this->conn->prepare('SELECT * FROM google WHERE calendarId = :calendarId');
+        $reqCheck->bindValue(':calendarId', $calendarId, PDO::PARAM_STR);
+        $reqCheck->execute();
+        $existingChannel = $reqCheck->fetch(PDO::FETCH_ASSOC);
+
+        if ($existingChannel) {
+            $req = $this->conn->prepare('UPDATE google SET canalId = :canalId, resourceId = :resourceId, resourceUri = :resourceUri, expiration = :expiration, token = :token WHERE calendarId = :calendarId');
+        } else {
+            $req = $this->conn->prepare('INSERT INTO google (canalId, resourceId, resourceUri, expiration, token, calendarId) VALUES (:canalId, :resourceId, :resourceUri, :expiration, :token, :calendarId)');
+        }
+
         $req->bindValue(':canalId', $googleWatchResponse->getId(), PDO::PARAM_STR);
         $req->bindValue(':resourceId', $googleWatchResponse->getResourceId(), PDO::PARAM_STR);
         $req->bindValue(':resourceUri', $googleWatchResponse->getResourceUri(), PDO::PARAM_STR);
         $req->bindValue(':expiration', $googleWatchResponse->getExpiration(), PDO::PARAM_STR);
         $req->bindValue(':token', GOOGLE_TOKEN, PDO::PARAM_STR);
-        return $req->execute();
+        $req->bindValue(':calendarId', $calendarId, PDO::PARAM_STR);
+        $req->execute();
     }
 }

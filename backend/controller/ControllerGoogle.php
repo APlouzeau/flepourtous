@@ -56,7 +56,7 @@ class ControllerGoogle
 
             $watchResponse = $service->events->watch($calendarId, $channel);
 
-            $modelGoogle->updateChannel($watchResponse);
+            $modelGoogle->updateChannel($watchResponse, $calendarId);
 
             echo "Canal de notification reconfiguré. Nouvel ID: " . $watchResponse->getId() . " Expire le: " . date('Y-m-d H:i:s', $watchResponse->getExpiration() / 1000);
         } catch (Exception $e) {
@@ -251,17 +251,15 @@ class ControllerGoogle
                 $eventExist = $modelEvent->checkEvent($idEvent);
                 if ($eventExist) {
                     $controllerVisio->deleteRoom($idEvent);
-                    $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
+                    // On ne crée la room qu'une seule fois
                     $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
 
+                    // On ne vérifie qu'une seule fois
                     if (!$roomUrl) {
                         error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
                         return;
                     }
-                    if (!$roomUrl) {
-                        error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
-                        return;
-                    }
+
                     $eventDatabase = new EntitieEvent([
                         'idEvent' => $idEvent,
                         'userId' => $userId,
@@ -275,7 +273,8 @@ class ControllerGoogle
                 } else {
                     $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
                     if (!$roomUrl) {
-                        error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
+                        // Message d'erreur légèrement différent pour savoir si c'est une création ou une mise à jour
+                        error_log("Erreur lors de la création de la room visio pour le nouvel événement ID: " . $idEvent);
                         return;
                     }
                     $eventDatabase = new EntitieEvent([
@@ -288,9 +287,6 @@ class ControllerGoogle
                     ]);
                     $modelEvent->createEvent($eventDatabase);
                 }
-            }
-            if (!$roomUrl) {
-                error_log("Erreur lors de la création de la room visio pour l'événement ID: " . $idEvent);
             }
         }
     }
