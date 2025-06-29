@@ -2,7 +2,7 @@
 
 class ControllerVisio
 {
-    public function createRoom($duration, $userStartDateTimeUTCToString)
+    public function createRoom($duration, $userStartDateTimeUTCToString, $eventId)
     {
         $visioApiKey = VISIO_API_KEY;
         $url = 'https://api.daily.co/v1/rooms/';
@@ -10,6 +10,7 @@ class ControllerVisio
         $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
         $durationInSeconds = $duration * 60; // Convertir la durée en secondes
         $visio = [
+            'name' => 'flepourtous-' . $eventId,
             'privacy' => 'public',
             'properties' => [
                 'nbf' => $startDateTimeUnix - 15 * 60,
