@@ -70,6 +70,7 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':id_lesson', $event->getId_lesson(), PDO::PARAM_INT);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
 
+
         return $req->execute();
     }
 
