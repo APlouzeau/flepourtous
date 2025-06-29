@@ -29,8 +29,9 @@ export default async function Home() {
                                 </span>
                             </h1>
                             <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed">
-                                Développer vos FLE Pour Tous, votre partenaire de cours de français en ligne avec des
-                                méthodes efficaces et des cours personnalisés pour atteindre vos objectifs.
+                                Développez vos connaissances avec FLE Pour Tous, votre partenaire de cours de français
+                                en ligne avec des méthodes efficaces et des cours personnalisés pour atteindre vos
+                                objectifs.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 sm:gap-0">
                                 <Button variant="black" href="/inscription">
