@@ -29,6 +29,43 @@ class ControllerOrder
         echo json_encode($response);
     }
 
+    /**
+     * Prépare la session pour le paiement d'un rendez-vous existant.
+     */
+    public function prepareRepayment()
+    {
+        $controllerUser = new ControllerUser();
+        $controllerUser->verifyConnectBack();
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $eventId = $input['eventId'] ?? null;
+
+        if (!$eventId) {
+            http_response_code(400);
+            echo json_encode(['code' => 0, 'message' => 'ID de l\'événement manquant.']);
+            return;
+        }
+
+        $modelPrices = new ModelPrices();
+        $lessonDetails = $modelPrices->getPriceByEventId($eventId);
+
+        if (!$lessonDetails) {
+            http_response_code(404);
+            echo json_encode(['code' => 0, 'message' => 'Détails de la leçon introuvables pour cet événement.']);
+            return;
+        }
+
+        // On met à jour la session, comme dans le tunnel de création
+        $_SESSION['event_id'] = $eventId;
+        $_SESSION['lesson_price'] = $lessonDetails['price'];
+        $_SESSION['lesson_name'] = $lessonDetails['title'];
+
+        echo json_encode([
+            'code' => 1,
+            'message' => 'Session prête pour le paiement.'
+        ]);
+    }
+
     public function checkout()
     {
         $controllerUser = new ControllerUser();
@@ -143,7 +180,7 @@ class ControllerOrder
             $modelEvent = new ModelEvent();
             $modelPrices = new ModelPrices();
             $lessonPrice = $modelPrices->getPriceByEventId($eventId);
-            $status = $modelEvent->setEventStatusRefused($eventId, $idUser, $lessonPrice);
+            $status = $modelEvent->setEventStatusRefused($eventId, $idUser, $lessonPrice['price']);
 
             if ($status) {
                 echo json_encode([

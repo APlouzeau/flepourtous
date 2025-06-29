@@ -3,7 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 
-export default function MobileMenuButton() {
+interface MobileMenuButtonProps {
+    isLoggedIn: boolean;
+    onLogout: () => Promise<void>;
+}
+
+export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuButtonProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const toggleMenu = () => {
@@ -91,20 +96,50 @@ export default function MobileMenuButton() {
 
                         {/* Boutons d'action */}
                         <div className="mt-8 pt-8 space-y-3">
-                            <Link 
-                                href="/inscription"
-                                className="block w-full bg-white text-black hover:bg-gray-100 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
-                                onClick={toggleMenu}
-                            >
-                                Inscription
-                            </Link>
-                            <Link 
-                                href="/connexion"
-                                className="block w-full bg-black text-white hover:bg-gray-800 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
-                                onClick={toggleMenu}
-                            >
-                                Connexion
-                            </Link>
+                            {isLoggedIn ? (
+                                <>
+                                    <Link 
+                                        href="/profil"
+                                        className="block w-full bg-white text-black hover:bg-gray-100 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
+                                        onClick={toggleMenu}
+                                    >
+                                        Profil
+                                    </Link>
+                                    <Link 
+                                        href="/calendrier"
+                                        className="block w-full bg-gray-700 text-white hover:bg-gray-600 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
+                                        onClick={toggleMenu}
+                                    >
+                                        Calendrier
+                                    </Link>
+                                    <button
+                                        onClick={async () => {
+                                            await onLogout();
+                                            toggleMenu();
+                                        }}
+                                        className="block w-full bg-black text-white hover:bg-gray-800 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
+                                    >
+                                        Déconnexion
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link 
+                                        href="/inscription"
+                                        className="block w-full bg-white text-black hover:bg-gray-100 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
+                                        onClick={toggleMenu}
+                                    >
+                                        Inscription
+                                    </Link>
+                                    <Link 
+                                        href="/connexion"
+                                        className="block w-full bg-black text-white hover:bg-gray-800 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
+                                        onClick={toggleMenu}
+                                    >
+                                        Connexion
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </nav>
                 </div>

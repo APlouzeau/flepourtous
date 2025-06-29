@@ -41,23 +41,23 @@ export default function RegisterPage() {
 
     return (
         <div className="w-full">
-            <div className="text-center mb-8">
-                <Link href="/" className="flex items-center justify-center space-x-3 mb-4 hover:opacity-80 transition-opacity">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center p-2">
+            <div className="text-center mb-6 sm:mb-8">
+                <Link href="/" className="flex items-center justify-center space-x-2 sm:space-x-3 mb-4 hover:opacity-80 transition-opacity group">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-full flex items-center justify-center p-2 group-hover:bg-gray-200 transition-colors">
                         <Image
                             src="/images/logo.png"
                             alt="Logo FLE Pour Tous"
                             width={32}
                             height={32}
-                            className="object-contain"
+                            className="object-contain w-6 h-6 sm:w-8 sm:h-8"
                         />
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-800">FLE pour tous</h3>
+                    <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800">FLE pour tous</h3>
                 </Link>
-                <h2 className="text-3xl font-bold text-gray-800">Créer votre compte</h2>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">Créer votre compte</h2>
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div>
                     <input
                         type="string"
@@ -65,7 +65,7 @@ export default function RegisterPage() {
                         value={nickName}
                         onChange={(e) => setNickName(e.target.value)}
                         required
-                        className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
+                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                     />
                 </div>
                 <div>
@@ -75,7 +75,7 @@ export default function RegisterPage() {
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         required
-                        className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
+                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                     />
                 </div>
                 <div>
@@ -85,7 +85,7 @@ export default function RegisterPage() {
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         required
-                        className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
+                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                     />
                 </div>
                 <div>
@@ -95,7 +95,7 @@ export default function RegisterPage() {
                         value={mail}
                         onChange={(e) => setMail(e.target.value)}
                         required
-                        className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
+                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                     />
                 </div>
                 <div>
@@ -105,7 +105,7 @@ export default function RegisterPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
+                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                     />
                 </div>
                 <div>
@@ -115,22 +115,22 @@ export default function RegisterPage() {
                         value={passwordConfirm}
                         onChange={(e) => setPasswordConfirm(e.target.value)}
                         required
-                        className="w-full p-4 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200"
+                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                     />
                 </div>
                 
-                {error && <p className="text-red-500 text-sm text-center bg-red-50 p-3 rounded-xl">{error}</p>}
-                {success && <p className="text-green-500 text-sm text-center bg-green-50 p-3 rounded-xl">{success}</p>}
+                {error && <p className="text-red-500 text-xs sm:text-sm text-center bg-red-50 p-3 rounded-xl border border-red-200">{error}</p>}
+                {success && <p className="text-green-500 text-xs sm:text-sm text-center bg-green-50 p-3 rounded-xl border border-green-200">{success}</p>}
                 
-                <Button variant="black" type="submit" className="w-full">
+                <Button variant="black" type="submit" className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold">
                     Inscription
                 </Button>
             </form>
             
-            <div className="mt-6 text-center">
-                <p className="text-gray-600">
+            <div className="mt-4 sm:mt-6 text-center">
+                <p className="text-xs sm:text-sm lg:text-base text-gray-600">
                     Vous avez déjà un compte ?{" "}
-                    <Link href="/connexion" className="text-red-600 hover:text-red-700 font-medium">
+                    <Link href="/connexion" className="text-red-600 hover:text-red-700 font-medium transition-colors underline decoration-red-600/30 hover:decoration-red-600">
                         Se connecter
                     </Link>
                 </p>
