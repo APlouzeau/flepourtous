@@ -43,11 +43,23 @@ class ControllerUser
             $password = $data['password'];
 
             $userModel = new ModelUser();
-
-
-
             $userVerify = $userModel->login($mail, $password);
-            if ($userVerify) {
+
+            if ($userVerify === null) {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Nom ou mot de passe incorrect.'
+                ];
+            }
+            if (isset($userVerify['isVerified']) && $userVerify['isVerified'] === false) {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Utilisateur non vérifié. Veuillez vérifier votre adresse e-mail.'
+                ];
+            }
+
+
+            if (isset($userVerify['idUser'])) {
                 $_SESSION['idUser'] = $userVerify['idUser'];
                 $_SESSION['nickName'] = $userVerify['nickName'];
                 $_SESSION['role'] = $userVerify['role'];
@@ -59,11 +71,6 @@ class ControllerUser
                     'code' => 1,
                     'message' => 'Connexion réussie.',
                     'data' => $_SESSION
-                ];
-            } else {
-                $response = [
-                    'code' => 0,
-                    'message' => 'Nom ou mot de passe incorrect.'
                 ];
             }
         } else {
@@ -104,8 +111,7 @@ class ControllerUser
 
         ];
 
-        $modelEvent = new ModelEvent();
-        $wallet = $modelEvent->getWalletFromUser($_SESSION['idUser']);
+        $wallet = $modelUser->getWalletFromUser($_SESSION['idUser']);
         if ($wallet !== false) {
             $response['data']['wallet'] = $wallet;
         } else {

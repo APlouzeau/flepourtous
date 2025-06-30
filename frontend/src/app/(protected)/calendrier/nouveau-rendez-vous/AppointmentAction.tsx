@@ -14,7 +14,6 @@ export async function registerAppointment(formData: FormData) {
         userTimeZone: formData.get("userTimeZone"),
         idLesson: formData.get("idLesson"),
     };
-    console.log("Data to be sent:", data);
     try {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/createEvent`, data, {
             headers: {
@@ -23,7 +22,6 @@ export async function registerAppointment(formData: FormData) {
             },
             withCredentials: true,
         });
-        console.log("Response from appointmentAction:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error during registration:", error);
@@ -34,10 +32,34 @@ export async function registerAppointment(formData: FormData) {
     }
 }
 
-export async function deleteAppointment(idEvent: string) {
+export async function prepareRepaymentAction(eventId: string) {
     const cookie = await getCookieBackend();
     try {
         const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_URL}/prepareRepayment`,
+            { eventId },
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${cookie}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error preparing repayment:", error);
+        if (axios.isAxiosError(error) && error.response && error.response.data) {
+            return error.response.data;
+        }
+        return { code: 0, message: "Une erreur s'est produite lors de la préparation du paiement." };
+    }
+}
+
+export async function deleteAppointment(idEvent: string) {
+    const cookie = await getCookieBackend();
+    try {
+        await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/deleteEvent`,
             { idEvent },
             {
@@ -48,7 +70,6 @@ export async function deleteAppointment(idEvent: string) {
                 withCredentials: true,
             }
         );
-        console.log("Response from delete:", response.data);
         revalidatePath("/calendrier");
     } catch (error) {
         console.error("Error during deletion:", error);

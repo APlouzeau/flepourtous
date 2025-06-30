@@ -32,7 +32,6 @@ export default function RegisterPage() {
                 } else {
                     setError(response.data.message);
                 }
-                console.log("test : ", response.data);
             })
             .catch((error) => {
                 console.error("Erreur lors de la connexion :", error);
@@ -42,7 +41,10 @@ export default function RegisterPage() {
     return (
         <div className="w-full">
             <div className="text-center mb-6 sm:mb-8">
-                <Link href="/" className="flex items-center justify-center space-x-2 sm:space-x-3 mb-4 hover:opacity-80 transition-opacity group">
+                <Link
+                    href="/"
+                    className="flex items-center justify-center space-x-2 sm:space-x-3 mb-4 hover:opacity-80 transition-opacity group"
+                >
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-100 rounded-full flex items-center justify-center p-2 group-hover:bg-gray-200 transition-colors">
                         <Image
                             src="/images/logo.png"
@@ -56,7 +58,7 @@ export default function RegisterPage() {
                 </Link>
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">Créer votre compte</h2>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 <div>
                     <input
@@ -118,19 +120,34 @@ export default function RegisterPage() {
                         className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                     />
                 </div>
-                
-                {error && <p className="text-red-500 text-xs sm:text-sm text-center bg-red-50 p-3 rounded-xl border border-red-200">{error}</p>}
-                {success && <p className="text-green-500 text-xs sm:text-sm text-center bg-green-50 p-3 rounded-xl border border-green-200">{success}</p>}
-                
-                <Button variant="black" type="submit" className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold">
+
+                {error && (
+                    <p className="text-red-500 text-xs sm:text-sm text-center bg-red-50 p-3 rounded-xl border border-red-200">
+                        {error}
+                    </p>
+                )}
+                {success && (
+                    <p className="text-green-500 text-xs sm:text-sm text-center bg-green-50 p-3 rounded-xl border border-green-200">
+                        {success}
+                    </p>
+                )}
+
+                <Button
+                    variant="black"
+                    type="submit"
+                    className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold"
+                >
                     Inscription
                 </Button>
             </form>
-            
+
             <div className="mt-4 sm:mt-6 text-center">
                 <p className="text-xs sm:text-sm lg:text-base text-gray-600">
                     Vous avez déjà un compte ?{" "}
-                    <Link href="/connexion" className="text-red-600 hover:text-red-700 font-medium transition-colors underline decoration-red-600/30 hover:decoration-red-600">
+                    <Link
+                        href="/connexion"
+                        className="text-red-600 hover:text-red-700 font-medium transition-colors underline decoration-red-600/30 hover:decoration-red-600"
+                    >
                         Se connecter
                     </Link>
                 </p>

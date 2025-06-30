@@ -10,6 +10,7 @@ class ControllerVisio
         $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
         $durationInSeconds = $duration * 60; // Convertir la durée en secondes
         $visio = [
+            'name' => 'flepourtous-' . $eventId,
             'privacy' => 'public',
             'properties' => [
                 'nbf' => $startDateTimeUnix - 15 * 60,

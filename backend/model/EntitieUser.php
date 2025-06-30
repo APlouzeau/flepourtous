@@ -14,6 +14,7 @@ class EntitieUser
     private string $dateInscription;
     private int $isVerified;
     private string $verifyToken;
+    private float $wallet;
 
     // Constructeur pour hydrater les données à partir d'un tableau
     public function __construct(array $data)
@@ -173,6 +174,26 @@ class EntitieUser
     public function setVerifyToken($verifyToken)
     {
         $this->verifyToken = $verifyToken;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of wallet
+     */
+    public function getWallet()
+    {
+        return $this->wallet;
+    }
+
+    /**
+     * Set the value of wallet
+     *
+     * @return  self
+     */
+    public function setWallet($wallet)
+    {
+        $this->wallet = $wallet;
 
         return $this;
     }

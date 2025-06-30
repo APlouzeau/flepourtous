@@ -42,7 +42,7 @@ class EntitieGoogle
     }
     public function getResourceUri(): string
     {
-        return $this->ressourceUri;
+        return $this->resourceUri;
     }
     public function setResourceUri(string $resourceUri): self
     {
@@ -58,6 +58,4 @@ class EntitieGoogle
         $this->expiration = $expiration;
         return $this;
     }
-
-    
 }

@@ -21,29 +21,58 @@ class ControllerGoogle
     {
         try {
             $apiKey = $_SERVER['HTTP_API_KEY'] ?? null;
-            error_log("Clé API reçue : " . $apiKey);
             if ($apiKey !== CRON_KEY) {
                 http_response_code(403);
                 echo "Clé API invalide.";
+                error_log("[Cron Google] Tentative d'accès avec une clé API invalide.");
                 return;
             }
+
             $client = $this->getClient();
             $service = new Google\Service\Calendar($client);
+            $calendarId = GOOGLE_CALENDAR_ID;
+            $modelGoogle = new ModelGoogle();
+
+            // --- DÉBUT DE LA MODIFICATION ---
+
+            // 1. On supprime l'ancien syncToken pour forcer une resynchronisation complète.
+            // C'est la seule façon de garantir que le syncToken et le canal sont toujours alignés.
+            $modelGoogleSync = new ModelGoogleSync();
+            $modelGoogleSync->deleteSyncTokenForCalendar($calendarId);
+            error_log("[Cron Google] Ancien syncToken pour le calendrier " . $calendarId . " supprimé pour forcer la resynchronisation.");
+
+            // --- FIN DE LA MODIFICATION ---
+
+            $oldChannelData = $modelGoogle->findChannelByCalendarId($calendarId);
+            if ($oldChannelData && isset($oldChannelData['canalId']) && isset($oldChannelData['resourceId'])) {
+                try {
+                    $channelToStop = new Google\Service\Calendar\Channel();
+                    $channelToStop->setId($oldChannelData['canalId']);
+                    $channelToStop->setResourceId($oldChannelData['resourceId']);
+                    $service->channels->stop($channelToStop);
+                    error_log("[Cron Google] Ancien canal de notification arrêté avec succès : " .  $oldChannelData['canalId']);
+                } catch (Exception $e) {
+                    error_log("[Cron Google] Avertissement lors de l'arrêt de l'ancien canal (ce n'est probablement pas une erreur grave) : " . $e->getMessage());
+                }
+            }
 
             $channel = new Google\Service\Calendar\Channel();
             $channel->setId(uniqid('flepourtous_channel_', false));
             $channel->setType('web_hook');
-            $channel->setAddress(URI . "api/handleGoogleNotification"); // L'URL du webhook
-            $channel->setParams(['ttl' => 7 * 24 * 3600]); // Durée de vie du canal en secondes
-            $channel->setToken(GOOGLE_TOKEN); // Un token pour vérifier l'authenticité de la notification
-            $watchResponse = $service->events->watch(GOOGLE_CALENDAR_ID, $channel);
+            $channel->setAddress(URI . "api/handleGoogleNotification");
+            $channel->setParams(['ttl' => 7 * 24 * 3600]);
+            $channel->setToken(GOOGLE_TOKEN);
 
-            $modelGoogle = new ModelGoogle();
-            $modelGoogle->checkChannel($watchResponse);
+            $watchResponse = $service->events->watch($calendarId, $channel);
 
-            echo "Canal de notification configuré. ID: " . $watchResponse->getId() . " Expire le: " . date('Y-m-d H:i:s', $watchResponse->getExpiration() / 1000);
+            // ✅ Utiliser la nouvelle méthode plus simple et robuste
+            $modelGoogle->upsertChannel($watchResponse, $calendarId);
+
+            echo "Canal de notification reconfiguré. Nouvel ID: " . $watchResponse->getId() . " Expire le: " . date('Y-m-d H:i:s', $watchResponse->getExpiration() / 1000);
         } catch (Exception $e) {
-            echo 'Erreur lors de la création du canal : ' . $e->getMessage();
+            http_response_code(500);
+            error_log('Erreur critique lors de la création du canal : ' . $e->getMessage());
+            echo 'Erreur critique lors de la création du canal : ' . $e->getMessage();
         }
     }
 
@@ -52,10 +81,10 @@ class ControllerGoogle
         $channelIdHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_ID'] ?? null;
         $resourceStateHeader = $_SERVER['HTTP_X_GOOG_RESOURCE_STATE'] ?? null;
         $messageNumberHeader = $_SERVER['HTTP_X_GOOG_MESSAGE_NUMBER'] ?? null;
-        $channelTokenHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_TOKEN'] ?? null; // Si tu as défini un toke
+        $channelTokenHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_TOKEN'] ?? null;
 
         $modelGoogle = new ModelGoogle();
-        $channel = $modelGoogle->checkIfChannelExists($channelIdHeader);
+        $channel = $modelGoogle->findChannelByChannelId($channelIdHeader);
 
         if ($channel) {
             if ($channelTokenHeader !== $channel['token']) {
@@ -140,94 +169,67 @@ class ControllerGoogle
 
     public function updateCalendar($event)
     {
-
-        $modelUser = new ModelUser();
         $modelEvent = new ModelEvent();
         $idEvent = $event->getId();
 
-        // --- Début des vérifications  ---
         $eventStart = $event->getStart();
-        if (!$eventStart) {
-            error_log("Événement Google ID: " . $idEvent . " n'a pas de propriété 'start'. Skipping.");
-            return;
-        }
-        $startDateTimeISO = $eventStart->getDateTime() ?: $eventStart->getDate();
-
         $eventEnd = $event->getEnd();
-        if (!$eventEnd) {
-            error_log("\nÉvénement Google ID: " . $idEvent . " n'a pas de propriété 'end'. Skipping.");
-            return;
-        }
-        $endDateTimeISO = $eventEnd->getDateTime() ?: $eventEnd->getDate();
 
-        if (empty($startDateTimeISO) || empty($endDateTimeISO)) {
-            error_log("\nÉvénement Google ID: " . $idEvent . " a des dates de début/fin invalides après traitement. Skipping.");
+        if (!$eventStart || !$eventStart->getDateTime() || !$eventEnd || !$eventEnd->getDateTime()) {
+            error_log("Événement Google ID: " . $idEvent . " est un événement 'toute la journée' ou invalide. Ignoré.");
             return;
         }
 
-        // Conversion de la date de début au format YYYY-MM-DD HH:MM:SS
+        $startDateTimeISO = $eventStart->getDateTime();
+        $endDateTimeISO = $eventEnd->getDateTime();
+
         try {
             $dtStart = new DateTime($startDateTimeISO);
-            $startDateTimeFormatted = $dtStart->format('Y-m-d H:i:s');
-        } catch (Exception $e) {
+            $dtStart->setTimezone(new DateTimeZone('UTC'));
+            $startDateTimeUtcFormatted = $dtStart->format('Y-m-d H:i:s');
 
-            return;
-        }
-
-
-        try {
             $dtEnd = new DateTime($endDateTimeISO);
-
             $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
         } catch (Exception $e) {
-            return; // Ne pas traiter si les dates pour la durée sont invalides
+            error_log("Erreur de conversion de date pour l'événement Google ID: " . $idEvent . " - " . $e->getMessage());
+            return;
         }
 
         $description = $event->getSummary();
 
-        $attendees = $event->getAttendees();
+        $modelUser = new ModelUser();
         $userId = null;
-        if (!empty($attendees) && isset($attendees[0]) && $attendees[0] instanceof \Google\Service\Calendar\EventAttendee && $attendees[0]->getEmail()) {
-            $userEmail = $attendees[0]->getEmail();
-            $userId = $modelUser->checkMail($userEmail);
-            if ($userId === null || $userId === false) {
-                return;
-            }
-        } else {
-            // Tentative avec le créateur
-            $creator = $event->getCreator();
-            if ($creator && $creator->getEmail()) {
-                $creatorEmail = $creator->getEmail();
-                $userId = $modelUser->checkMail($creatorEmail);
-                if ($userId === null || $userId === false) {
-                    return; // Ou autre logique
-                }
-            } else {
-                // Tentative avec l'organisateur si pas de créateur ou pas d'email créateur
-                $organizer = $event->getOrganizer();
-                if ($organizer && $organizer->getEmail()) {
-                    $organizerEmail = $organizer->getEmail();
-                    $userId = $modelUser->checkMail($organizerEmail);
-                    if ($userId === null || $userId === false) {
-                        return; // Ou autre logique
-                    }
-                } else {
 
-                    return; // Ou autre logique si aucun utilisateur ne peut être déterminé
-                }
+        $emailsToCheck = [];
+        $attendees = $event->getAttendees();
+        if (!empty($attendees)) {
+            foreach ($attendees as $attendee) {
+                if ($attendee && $attendee->getEmail()) $emailsToCheck[] = $attendee->getEmail();
+            }
+        }
+        $creator = $event->getCreator();
+        if ($creator && $creator->getEmail()) $emailsToCheck[] = $creator->getEmail();
+        $organizer = $event->getOrganizer();
+        if ($organizer && $organizer->getEmail()) $emailsToCheck[] = $organizer->getEmail();
+
+        foreach (array_unique($emailsToCheck) as $email) { // array_unique pour éviter de vérifier deux fois le même email
+            $potentialUserId = $modelUser->checkMail($email);
+            if ($potentialUserId) {
+                $userId = $potentialUserId;
+                break;
             }
         }
 
+        if ($userId === null) {
+            error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Ignoré.");
+            return;
+        }
 
-        //--------------------------------------------
-
-        $startDateTimeUtc = new DateTime($startDateTimeFormatted, new DateTimeZone('Europe/Paris'));
-        $startDateTimeUtc->setTimezone(new DateTimeZone('UTC'));
-        $startDateTimeUtcFormatted = $startDateTimeUtc->format('Y-m-d H:i:s');
+        error_log("Traitement de l'événement Google ID: " . $idEvent . " pour l'utilisateur ID: " . $userId);
 
         $controllerVisio = new ControllerVisio();
-
         $status = $event->getStatus();
+
         if ($status == 'cancelled') {
             $controllerVisio->deleteRoom($idEvent);
             $modelEvent->deleteEvent($idEvent);
@@ -235,8 +237,11 @@ class ControllerGoogle
             $eventExist = $modelEvent->checkEvent($idEvent);
             if ($eventExist) {
                 $controllerVisio->deleteRoom($idEvent);
-                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
-
+                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
+                if (!$roomUrl) {
+                    error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
+                    return;
+                }
                 $eventDatabase = new EntitieEvent([
                     'idEvent' => $idEvent,
                     'userId' => $userId,
@@ -245,10 +250,13 @@ class ControllerGoogle
                     'startDateTime' => $startDateTimeUtcFormatted,
                     'visioLink' => $roomUrl,
                 ]);
-
                 $modelEvent->updateEvent($eventDatabase);
             } else {
-                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted);
+                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
+                if (!$roomUrl) {
+                    error_log("Erreur lors de la création de la room visio pour le nouvel événement ID: " . $idEvent);
+                    return;
+                }
                 $eventDatabase = new EntitieEvent([
                     'idEvent' => $idEvent,
                     'userId' => $userId,
@@ -259,10 +267,6 @@ class ControllerGoogle
                 ]);
                 $modelEvent->createEvent($eventDatabase);
             }
-        }
-        if (!$roomUrl) {
-            error_log("Erreur lors de la création de la room visio pour l'événement ID: " . $idEvent);
-            return; // Ne pas continuer si la room visio n'a pas pu être créée
         }
     }
 

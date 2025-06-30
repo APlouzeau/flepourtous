@@ -64,23 +64,26 @@ export default function Home() {
                     <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                         <div className="order-2 md:order-1">
                             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">
-                                Augmenter votre niveau en Français avec <span 
-                                    className="text-red-600 relative cursor-help group"
-                                >
-                                    Guizmo-kun
+                                Augmenter votre niveau en Français avec{" "}
+                                <span className="text-red-600 relative cursor-help group">
+                                    Guizmo-kun{" "}
                                     <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-sm text-white bg-gray-800 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-10">
                                         C&apos;est mon catamiaou 🐱
-                                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></span>
+                                        <>
+                                            <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></span>
+                                        </>
                                     </span>
                                 </span>
                             </h1>
                             <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed">
-                                Développer vos FLE Pour Tous, votre partenaire de cours de français en ligne avec des méthodes efficaces et des cours personnalisés pour atteindre vos objectifs.
+                                Développez vos connaissances avec FLE Pour Tous, votre partenaire de cours de français
+                                en ligne avec des méthodes efficaces et des cours personnalisés pour atteindre vos
+                                objectifs.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 sm:gap-0">
-                                <Button variant="black" href="/inscription">
-                                    Prendre rendez-vous
-                                </Button>
+                                <Link href="/calendrier/nouveau-rendez-vous">
+                                    <Button variant="black">Prendre rendez-vous</Button>
+                                </Link>
                             </div>
                         </div>
                         <div className="relative order-1 md:order-2">
@@ -146,8 +149,8 @@ export default function Home() {
                             Présentation des différentes <span className="text-red-600">Formules</span>
                         </h2>
                         <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                            Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
-
+                            Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                            labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
                         </p>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -173,14 +176,15 @@ export default function Home() {
                         </div>
                         <div className={`sm:col-span-2 lg:col-span-1 scroll-animate-scale scroll-animate-delay-3 ${formulasSection.isVisible ? 'visible' : ''}`}>
                             <FormulaCard
-                                image="/images/enfant.jpg"
-                                title="Carte titre"
-                                description="Lorem ipsum dolor sit amet consectetur adipiscing elit."
-                                price="55€"
-                                duration="par mois"
-                                link="/offre-de-cours/adulte"
+                                key={index}
+                                image={lesson.imagePath || "/images/enfant.jpg"} // Fallback image
+                                title={lesson.title}
+                                description={lesson.shortDescription}
+                                price={lesson.price[0].price + "€"}
+                                duration={lesson.price[0].duration + "mn"}
+                                link={"/offre-de-cours" + `/${lesson.slug}`}
                             />
-                        </div>
+                        ))}
                     </div>
                 </div>
             </section>
@@ -195,7 +199,6 @@ export default function Home() {
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
                             Les stats parlent d&apos;elles même
                         </h2>
-
                     </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                         <div className={`scroll-animate scroll-animate-delay-1 ${statsSection.isVisible ? 'visible' : ''}`}>
@@ -242,10 +245,7 @@ export default function Home() {
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             Votre feuille de route
                         </h2>
-                        <p className="text-base sm:text-lg md:text-xl text-gray-600">
-                            Questions fréquemment posées
-                        </p>
-
+                        <p className="text-base sm:text-lg md:text-xl text-gray-600">Questions fréquemment posées</p>
                     </div>
                     <div className="space-y-3 sm:space-y-4">
                         <div className={`scroll-animate scroll-animate-delay-1 ${faqSection.isVisible ? 'visible' : ''}`}>

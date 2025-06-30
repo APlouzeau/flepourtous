@@ -4,7 +4,7 @@ import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import axios from "axios";
-
+import { useRouter } from "next/navigation";
 interface PaymentFormProps {
     stripePublicKey: string | null | undefined;
     cookie: string | null;
@@ -14,13 +14,12 @@ interface PaymentFormProps {
 export default function PaymentForm({ stripePublicKey, cookie, serverError }: PaymentFormProps) {
     const [stripeInstance, setStripeInstance] = useState<Stripe | null>(null);
     const [stripeUserError, setStripeUserError] = useState<string | null>(null);
+    const router = useRouter();
 
     const stripePromise = useMemo(() => {
         if (stripePublicKey) {
-            console.log("[PaymentForm] Appel de loadStripe CÔTÉ CLIENT avec la clé:", stripePublicKey);
             return loadStripe(stripePublicKey);
         }
-        console.log("[PaymentForm] Clé publique Stripe non fournie au client, loadStripe non appelé.");
         return null;
     }, [stripePublicKey]);
 
@@ -71,7 +70,9 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
                 }
             );
             const data = response.data;
-            console.log("réponse backend : ", data);
+            if (data.code == 1 && data.payment_method === "wallet") {
+                router.push("/retour-paiement?status=success&method=wallet");
+            }
             if (!response.data || response.data.error || !response.data.clientSecret) {
                 console.error("[PaymentForm] fetchClientSecret: Erreur backend ou clientSecret manquant:", data?.error);
                 return "";
@@ -81,7 +82,9 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
             console.error("[PaymentForm] fetchClientSecret: Erreur pendant l'appel Axios:", error);
             return "";
         }
-    }, [cookie]);
+        // Always return a string to satisfy the return type
+        return "";
+    }, [cookie, router]);
 
     if (serverError) {
         return (

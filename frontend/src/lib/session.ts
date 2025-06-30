@@ -17,7 +17,6 @@ export async function createSession(userRole: string) {
     const cookieStore = await cookies();
 
     if (!cookiePHP) {
-        console.log("No session found");
         return null;
     }
     cookieStore.set("session", jwt, {
@@ -33,7 +32,6 @@ export async function createSession(userRole: string) {
 export async function getRole() {
     const sessionCookie = (await cookies()).get("session");
     if (!sessionCookie) {
-        console.log("No session found");
         return null;
     }
     const session = sessionCookie.value;
@@ -72,7 +70,6 @@ export async function getCountry() {
         userIP = null;
     }
     if (!userIP) {
-        console.log("No IP address found");
         return null;
     }
     try {
@@ -80,7 +77,6 @@ export async function getCountry() {
         if (response.data) {
             return response.data;
         } else {
-            console.log("No country name found in the response");
             return null;
         }
     } catch (error) {
@@ -114,10 +110,8 @@ export async function logout() {
 }
 
 export async function getCookieBackend() {
-    console.log("Fetching cookie from backend");
     const jwtSessionCookie = (await cookies()).get("session");
     if (!jwtSessionCookie) {
-        console.log("No JWT session cookie found in getCookieBackend");
         return null;
     }
     try {
@@ -132,7 +126,6 @@ export async function getCookieBackend() {
 export async function getWallet() {
     const session = await getCookieBackend();
     if (!session) {
-        console.log("No session found in getWallet");
         return null;
     }
     try {
