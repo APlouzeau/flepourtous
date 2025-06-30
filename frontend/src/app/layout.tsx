@@ -22,7 +22,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
     return (
         <html lang="fr">
-            <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
+            <body
+                className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}
+                suppressHydrationWarning={true}
+            >
                 <LayoutWrapper isLoggedIn={isLoggedIn}>{children}</LayoutWrapper>
             </body>
         </html>

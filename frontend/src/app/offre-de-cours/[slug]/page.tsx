@@ -10,8 +10,6 @@ export default async function LessonPage(props: { params: tParams }) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offre-de-cours/${slug}`);
     const lesson: Lesson = await response.json();
     const { title, fullDescription, imagePath } = lesson;
-    const [{ duration, price }] = lesson.times;
-    console.log(lesson.times);
 
     return (
         <>
@@ -22,10 +20,10 @@ export default async function LessonPage(props: { params: tParams }) {
                 <p className="w-1/2">{fullDescription}</p>
             </div>
             {lesson.times.length > 0 &&
-                lesson.times.map((lessonTime, index) => (
-                    <div key={index} className="flex flex-col items-center mt-4">
-                        <p className="text-lg font-semibold">Durée : {duration} minutes</p>
-                        <p className="text-lg font-semibold">Prix : {price} €</p>
+                lesson.times.map((lessonTime) => (
+                    <div key={`${lessonTime.duration}-${lessonTime.price}`} className="flex flex-col items-center mt-4">
+                        <p className="text-lg font-semibold">Durée : {lessonTime.duration} minutes</p>
+                        <p className="text-lg font-semibold">Prix : {lessonTime.price} €</p>
                     </div>
                 ))}
             <Link

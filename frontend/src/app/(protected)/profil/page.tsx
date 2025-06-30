@@ -17,10 +17,8 @@ export default async function profilPage() {
         }
     );
     const userData = res.data.data;
-    console.log("User data:", userData);
     return (
         <div>
-           
             <Provider initialUser={userData}>
                 <DisplayUserprofil />
             </Provider>

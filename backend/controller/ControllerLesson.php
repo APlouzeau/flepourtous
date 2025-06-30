@@ -18,8 +18,7 @@ class ControllerLesson
     }
     public function getAllLessonsWithPrices()
     {
-        $userController = new ControllerUser();
-        $userController->verifyConnectBack();
+
         $modelLesson = new ModelLesson();
         $lessons = $modelLesson->getAllLessonsWithPrices();
         echo json_encode(array_values($lessons));

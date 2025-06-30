@@ -30,6 +30,9 @@ $router->addRoute('POST', BASE_URL . "api/listEvents", 'ControllerCalendar', 'li
 $router->addRoute('POST', BASE_URL . "api/deleteEvent", 'ControllerCalendar', 'deleteEvent');
 $router->addRoute('POST', BASE_URL . "api/getAvailableTimeSlots", 'ControllerCalendar', 'getAvailablesTimeSlots');
 $router->addRoute('POST', BASE_URL . "api/sendMailToAlertForNextAppointment", 'ControllerMail', 'sendMailToAlertForNextAppointment');
+$router->addRoute('POST', BASE_URL . "api/prepareRepayment", 'ControllerOrder', 'prepareRepayment');
+$router->addRoute('POST', BASE_URL . "api/deleteWaitingEvent", 'ControllerCalendar', 'checkWaitingEvents');
+$router->addRoute('GET', BASE_URL . "api/createInstantRoom", 'ControllerVisio', 'createInstantRoom');
 
 //Google
 $router->addRoute('POST', BASE_URL . "api/handleGoogleNotification", 'ControllerGoogle', 'handleGoogleNotification');
@@ -46,3 +49,4 @@ $router->addRoute('POST', BASE_URL . "api/verify-payment", 'ControllerOrder', 'v
 
 //debug
 $router->addRoute('GET', BASE_URL . "api/debug", 'ControllerDebug', 'debug');
+$router->addRoute('GET', BASE_URL . "api/debugBdd", 'ControllerDebug', 'debugBdd');

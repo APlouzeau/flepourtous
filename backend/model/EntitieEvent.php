@@ -10,8 +10,8 @@ class EntitieEvent
     private string $startDateTime;
     private string $updatedAt;
     private string $status;
-    private string $visioLink;
-    private int $id_lesson;
+    private ?string $visioLink = null;
+    private ?int $id_lesson = null;
 
     public function __construct(array $data)
     {

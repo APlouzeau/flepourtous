@@ -12,6 +12,5 @@ export default function MyComponent() {
             .then((response) => response.json())
             .then((data) => setData(data));
     }, []);
-    console.log(data);
     return <div>{data ? <p>{data[0].mail}</p> : <p>Loading...</p>}</div>;
 }

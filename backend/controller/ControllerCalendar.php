@@ -11,6 +11,7 @@ if (!class_exists('Google_Service_Calendar')) {
 }
 class ControllerCalendar
 {
+    private $frenchTimeZone = "Europe/Paris";
 
     public function listEvents()
     {
@@ -55,7 +56,6 @@ class ControllerCalendar
             ];
         }
         echo json_encode($response);
-        return;
     }
 
     public function createEvent()
@@ -86,7 +86,7 @@ class ControllerCalendar
                 echo json_encode($response);
                 exit();
             }
-        };
+        }
 
         $startDateTime = $data['startDate'] . ' ' . $data['startTime'] . ':00';
         $userTimeZone = $data['userTimeZone'];
@@ -122,12 +122,12 @@ class ControllerCalendar
         try {
             $utcDateTimeForGoogle = new DateTime($userStartDateTimeUTCToString, new DateTimeZone('UTC'));
 
-            $parisStartDateTime = (clone $utcDateTimeForGoogle)->setTimezone(new DateTimeZone('Europe/Paris'));
+            $parisStartDateTime = (clone $utcDateTimeForGoogle)->setTimezone(new DateTimeZone($this->frenchTimeZone));
             $googleStartDateTime = $parisStartDateTime->format(DateTime::RFC3339);
 
             $interval = new DateInterval('PT' . $duration . 'M');
             $utcEndDateTimeForGoogle = (clone $utcDateTimeForGoogle)->add($interval);
-            $parisEndDateTime = $utcEndDateTimeForGoogle->setTimezone(new DateTimeZone('Europe/Paris'));
+            $parisEndDateTime = $utcEndDateTimeForGoogle->setTimezone(new DateTimeZone($this->frenchTimeZone));
             $googleEndDateTime = $parisEndDateTime->format(DateTime::RFC3339);
 
             //GOOGLE INSTANCE
@@ -138,7 +138,7 @@ class ControllerCalendar
             $checkParams = [
                 'timeMin' => $googleStartDateTime,
                 'timeMax' => $googleEndDateTime,
-                'timeZone' => 'Europe/Paris',
+                'timeZone' => $this->frenchTimeZone,
                 'singleEvents' => true,
             ];
             $existingEvents = $service->events->listEvents(GOOGLE_CALENDAR_ID, $checkParams);
@@ -157,11 +157,11 @@ class ControllerCalendar
                 'description' => $description ?? '',
                 'start' => [
                     'dateTime' => $googleStartDateTime, // Format RFC3339 : '2025-05-03T10:00:00+02:00'
-                    'timeZone' => 'Europe/Paris',
+                    'timeZone' => $this->frenchTimeZone,
                 ],
                 'end' => [
                     'dateTime' => $googleEndDateTime, // Format RFC3339 : '2025-05-03T11:00:00+02:00'
-                    'timeZone' => 'Europe/Paris',
+                    'timeZone' => $this->frenchTimeZone,
                 ],
             ]);
 
@@ -210,7 +210,7 @@ class ControllerCalendar
             $context = stream_context_create($options);
             $result = file_get_contents($url, false, $context);
 
-            if ($result === FALSE) {
+            if ($result === false) {
                 $responseVisio = [
                     'code' => 0,
                     'message' => 'Erreur lors de la création de la room visio',
@@ -243,7 +243,7 @@ class ControllerCalendar
             $price = $modelPrice->getPriceForAppointment($duration, $idLesson);
             $modelLesson = new ModelLesson();
             $lesson = $modelLesson->getLessonById($idLesson);
-            $_SESSION['wallet'] = $price;
+            $_SESSION['lesson_price'] = $price;
             $_SESSION['lesson_name'] = $lesson['title'];
             $_SESSION['event_id'] = $idEvent;
 
@@ -264,7 +264,7 @@ class ControllerCalendar
         } catch (Exception $e) {
             echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(), $eventDatabase]);
             return;
-        };
+        }
         echo json_encode($response);
     }
 
@@ -346,7 +346,7 @@ class ControllerCalendar
         $data = json_decode($requestBody, true);
 
         $utcTimeZone = new DateTimeZone('UTC'); // La timezone de la base de données
-        $frenchTimeZone = new DateTimeZone('Europe/Paris');
+        $frenchTimeZone = new DateTimeZone($this->frenchTimeZone); // La timezone de Paris
 
         $userTimeZone = new DateTimeZone($data['userTimeZone']); // Timezone de l'utilisateur
 
@@ -366,21 +366,20 @@ class ControllerCalendar
         $interval = new DateInterval('PT15M'); // Intervalle de 15 minutes
         $occupiedTimeSlots = [];
 
-        // Vérifier si $events est un array avant de l'utiliser dans foreach
         if (is_array($events) && !empty($events)) {
             foreach ($events as $event) {
-            $periodStart = $event->getStart();
-            $periodEnd = $event->getEnd();
-            $period = new DatePeriod(
-                new DateTime($periodStart, new DateTimeZone('UTC')),
-                $interval,
-                new DateTime($periodEnd, new DateTimeZone('UTC'))
-            );
-            foreach ($period as $dt) {
-                $occupiedTimeSlots[] = $dt->setTimezone($utcTimeZone)->format('Y-m-d H:i:s');
+                $periodStart = $event->getStart();
+                $periodEnd = $event->getEnd();
+                $period = new DatePeriod(
+                    new DateTime($periodStart, new DateTimeZone('UTC')),
+                    $interval,
+                    new DateTime($periodEnd, new DateTimeZone('UTC'))
+                );
+                foreach ($period as $dt) {
+                    $occupiedTimeSlots[] = $dt->setTimezone($utcTimeZone)->format('Y-m-d H:i:s');
+                }
             }
-        } // fin foreach $events
-    } // fin if is_array($events)
+        }
 
         $availableTimeSlots = [];
 
@@ -416,7 +415,7 @@ class ControllerCalendar
                 $finalAvailableTimeSlots[] = $potentialStartSlot->setTimezone($userTimeZone)->format('H:i');
             }
         }
-        if (count($finalAvailableTimeSlots) == 0) {
+        if (empty($finalAvailableTimeSlots)) {
             $response = [
                 'code' => 0,
                 'message' => 'Aucun créneau disponible pour cette date.',
@@ -424,21 +423,30 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
-        if (count($finalAvailableTimeSlots) > 0) {
+        if (!empty($finalAvailableTimeSlots)) {
             $response = [
                 'code' => 1,
                 'message' => 'Créneaux disponibles récupérés avec succès',
                 'data' => $finalAvailableTimeSlots,
             ];
             echo json_encode($response);
-            return;
         }
     }
 
-    public function alertEvent()
+    public function checkWaitingEvents()
     {
-
-        $dateNow = new DateTime('now', new DateTimeZone('UTC'));
         $modelEvent = new ModelEvent();
+        $userWithEventDelete = $modelEvent->deleteWaitingEvent();
+        if (!$userWithEventDelete) {
+            $controllerMail = new ControllerMail();
+            foreach ($userWithEventDelete as $user) {
+                $controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($user);
+            }
+            $response = [
+                'code' => 1,
+                'message' => 'Vérification des événements en attente effectuée avec succès',
+            ];
+            echo json_encode($response);
+        }
     }
 }
