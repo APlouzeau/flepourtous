@@ -103,7 +103,6 @@ class ControllerMail
         $appointmentHour = $appointmentDateTime->format('H:i');
 
         $this->mailer->addAddress($event['mail']);
-        $this->mailer->addCC(TEACHER_MAIL);
         $this->mailer->isHTML(true);
         $this->mailer->Subject = "Appointment reminder on FlePourTous";
 
