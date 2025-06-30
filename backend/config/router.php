@@ -14,6 +14,7 @@ $router->addRoute('GET', BASE_URL . "home", 'ControllerUser', 'homePage');
 //Users
 $router->addRoute('GET', BASE_URL . "api/users", 'ControllerUser', 'listUsers');
 $router->addRoute('POST', BASE_URL . "api/userInformations", 'ControllerUser', 'getUserInformations');
+$router->addRoute('POST', BASE_URL . "api/updateUserProfile", 'ControllerUser', 'updateUserProfile');
 $router->addRoute('GET', BASE_URL . "api/verify-email/{token}", 'ControllerUser', 'verifyEmail');
 $router->addRoute('POST', BASE_URL . "api/getWallet", 'ControllerOrder', 'getWallet');
 
@@ -33,6 +34,9 @@ $router->addRoute('POST', BASE_URL . "api/sendMailToAlertForNextAppointment", 'C
 //Google
 $router->addRoute('POST', BASE_URL . "api/handleGoogleNotification", 'ControllerGoogle', 'handleGoogleNotification');
 $router->addRoute('POST', BASE_URL . "api/setupGoogleWatch", 'ControllerGoogle', 'setupCalendarWatch');
+
+//Visio
+$router->addRoute('POST', BASE_URL . "api/createInstantVisio", 'ControllerVisio', 'createInstantRoom');
 
 //Stripe
 $router->addRoute('POST', BASE_URL . "api/checkout-session", 'ControllerOrder', 'checkout');

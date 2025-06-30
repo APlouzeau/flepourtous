@@ -71,4 +71,83 @@ class ControllerVisio
         $context = stream_context_create($options);
         $result = file_get_contents($apiUrl, false, $context);
     }
+
+    public function createInstantRoom()
+    {
+        session_start();
+        
+        // Vérifier que l'utilisateur est connecté et admin
+        if (!isset($_SESSION['userId']) || $_SESSION['role'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Accès refusé : droits administrateur requis'
+            ]);
+            return;
+        }
+
+        // Récupérer les données POST
+        $input = json_decode(file_get_contents('php://input'), true);
+        
+        if (!isset($input['email']) || !isset($input['duration'])) {
+            http_response_code(400);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Email et durée requis'
+            ]);
+            return;
+        }
+
+        $email = $input['email'];
+        $duration = intval($input['duration']);
+
+        // Valider l'email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Adresse email invalide'
+            ]);
+            return;
+        }
+
+        // Valider la durée (entre 15 minutes et 180 minutes)
+        if ($duration < 15 || $duration > 180) {
+            http_response_code(400);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'La durée doit être entre 15 et 180 minutes'
+            ]);
+            return;
+        }
+
+        // Créer la room immédiatement (maintenant)
+        $currentDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $startDateTime = $currentDateTime->format('Y-m-d H:i:s');
+        
+        $roomUrl = $this->createRoom($duration, $startDateTime);
+        
+        if (!$roomUrl) {
+            http_response_code(500);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Erreur lors de la création du salon visio'
+            ]);
+            return;
+        }
+
+        // Ici vous pourriez envoyer un email à l'utilisateur avec le lien
+        // $this->sendVisioEmail($email, $roomUrl, $duration);
+
+        echo json_encode([
+            'code' => 1,
+            'message' => 'Salon visio créé avec succès',
+            'data' => [
+                'roomUrl' => $roomUrl,
+                'email' => $email,
+                'duration' => $duration,
+                'startTime' => $startDateTime
+            ]
+        ]);
+    }
 }

@@ -102,7 +102,7 @@ class EntitieUser
     }
     public function setPassword($password)
     {
-        $this->password = password_hash($password, PASSWORD_BCRYPT);
+        $this->password = $password;
 
         return $this;
     }
