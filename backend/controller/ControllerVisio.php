@@ -75,13 +75,14 @@ class ControllerVisio
         $result = file_get_contents($apiUrl, false, $context);
     }
 
+
     public function createInstantRoom()
     {
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
-
-        $endDateTime = new DateTime('now', new DateTimeZone('UTC'))->modify("+4H")->getTimestamp();
-
+        $date = new DateTime('now', new DateTimeZone('UTC'));
+        $date->modify("+10 minutes");
+        $endDateTime = $date->getTimestamp();
 
         $visio = [
             'privacy' => 'public',
@@ -110,18 +111,16 @@ class ControllerVisio
 
         $context = stream_context_create($options);
         $result = file_get_contents($this->url, false, $context);
-
-        if ($result === FALSE) {
+        if ($result === false) {
             $responseVisio = [
                 'code' => 0,
                 'message' => 'Erreur lors de la création de la room visio',
             ];
             echo json_encode($responseVisio);
-            return;
         } else {
             $responseVisio = json_decode($result, true);
             $roomUrl = $responseVisio['url'];
-            return $roomUrl;
+            echo json_encode($roomUrl);
         }
     }
 }

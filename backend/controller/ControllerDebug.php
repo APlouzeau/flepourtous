@@ -28,4 +28,9 @@ class ControllerDebug extends ClassDatabase
 
         var_dump($datasToAlert);
     }
+
+    public function debugRoute()
+    {
+        echo "Votre url fonctionne.";
+    }
 }
