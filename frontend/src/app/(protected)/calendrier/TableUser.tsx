@@ -15,13 +15,13 @@ interface AppointmentRowProps {
 export default function TableUser({ listAppointments }: AppointmentRowProps) {
     const [userTimezone, setUserTimezone] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState<Date>(new Date());
-    const [isLoading, setIsLoading] = useState(true);
+    //const [isLoading, setIsLoading] = useState(true);
     const [isRepaying, setIsRepaying] = useState<string | null>(null);
     const router = useRouter();
 
     useEffect(() => {
         setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-        setIsLoading(false);
+        //  setIsLoading(false);
 
         // Mettre à jour l'heure actuelle toutes les minutes
         const interval = setInterval(() => {

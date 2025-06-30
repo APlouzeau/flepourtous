@@ -4,11 +4,11 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SelectNative } from "@/components/ui/select-native";
-import { lessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
+import { LessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-export default function NewAppointmentForm({ lessons }: { lessons: lessonsWithPrices }) {
+export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
     const [timeSlots, setTimeSlots] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
