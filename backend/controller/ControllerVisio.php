@@ -4,7 +4,7 @@ class ControllerVisio
 {
     private $visioApiKey = VISIO_API_KEY;
     private $url = 'https://api.daily.co/v1/rooms/';
-    public function createRoom($duration, $userStartDateTimeUTCToString)
+    public function createRoom($duration, $userStartDateTimeUTCToString, $eventId)
     {
 
         $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);

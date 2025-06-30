@@ -1,3 +1,5 @@
+"use client"; // 1. On ajoute "use client" pour le déclarer comme composant client.
+
 import Link from "next/link";
 import Image from "next/image";
 import Button from "./Button";
@@ -8,9 +10,12 @@ interface HeaderProps {
     readonly isLoggedIn: boolean;
 }
 
-export default async function Header({ isLoggedIn }: HeaderProps) {
+// 2. On retire "async" de la signature de la fonction.
+export default function Header({ isLoggedIn }: HeaderProps) {
+    // 3. La fonction handleLogout reste ici, car c'est une action initiée par le client.
     const handleLogout = async () => {
         try {
+            // On appelle la Server Action 'logout'
             await logout();
         } catch (error) {
             console.error("Erreur lors de la déconnexion:", error);

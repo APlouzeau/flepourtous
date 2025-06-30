@@ -1,8 +1,7 @@
 "use client";
 
 import { showBasicAppointmentProps } from "@/app/types/appointments";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { deleteAppointment } from "./nouveau-rendez-vous/AppointmentAction";
+
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { deleteAppointment, prepareRepaymentAction } from "./nouveau-rendez-vous/AppointmentAction";
 import { useEffect, useState } from "react";

@@ -124,10 +124,10 @@ class ControllerUser
     public function updateUserProfile()
     {
         $this->verifyConnectBack();
-        
+
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
-        
+
         if ($_SERVER['REQUEST_METHOD'] != 'POST') {
             $response = [
                 'code' => 0,
@@ -136,7 +136,7 @@ class ControllerUser
             echo json_encode($response);
             return;
         }
-        
+
         if (!isset($data['firstName']) || !isset($data['lastName']) || !isset($data['mail'])) {
             $response = [
                 'code' => 0,
@@ -145,7 +145,7 @@ class ControllerUser
             echo json_encode($response);
             return;
         }
-        
+
         // Validation des données
         if (!filter_var($data['mail'], FILTER_VALIDATE_EMAIL)) {
             $response = [
@@ -155,7 +155,7 @@ class ControllerUser
             echo json_encode($response);
             return;
         }
-        
+
         if (strlen($data['firstName']) < 2) {
             $response = [
                 'code' => 0,
@@ -164,7 +164,7 @@ class ControllerUser
             echo json_encode($response);
             return;
         }
-        
+
         if (strlen($data['lastName']) < 2) {
             $response = [
                 'code' => 0,
@@ -173,9 +173,9 @@ class ControllerUser
             echo json_encode($response);
             return;
         }
-        
+
         $modelUser = new ModelUser();
-        
+
         // Vérifier si l'email n'est pas déjà utilisé par un autre utilisateur
         $existingUserId = $modelUser->checkMail($data['mail']);
         if ($existingUserId && $existingUserId != $_SESSION['idUser']) {
@@ -186,7 +186,7 @@ class ControllerUser
             echo json_encode($response);
             return;
         }
-        
+
         // Préparer les données pour la mise à jour
         $updateData = [
             'idUser' => $_SESSION['idUser'],
@@ -196,7 +196,7 @@ class ControllerUser
             'address' => isset($data['address']) ? $data['address'] : null,
             'country' => isset($data['country']) ? $data['country'] : null
         ];
-        
+
         // Si un nouveau mot de passe est fourni, l'ajouter
         if (isset($data['password']) && !empty($data['password'])) {
             if (strlen($data['password']) < 8) {
@@ -209,10 +209,10 @@ class ControllerUser
             }
             $updateData['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
         }
-        
+
         $user = new EntitieUser($updateData);
         $updateResult = $modelUser->updateUser($user);
-        
+
         if ($updateResult) {
             $response = [
                 'code' => 1,
@@ -224,7 +224,7 @@ class ControllerUser
                 'message' => 'Erreur lors de la mise à jour du profil',
             ];
         }
-        
+
         echo json_encode($response);
     }
 
@@ -281,25 +281,30 @@ class ControllerUser
                             'password' => $data['password'],
                             'verifyToken' => $verificationToken,
                         ]);
-                        $controllerMail = new ControllerMail();
-                        $sendMail = $controllerMail->sendMailToRegister($user, $verificationToken);
+
                         $register = $userModel->register($user);
 
-                        !$register  ?
-                            $response = [
-                                'code' => 0,
-                                'message' => 'Erreur lors de l\'enregistrement en base de données',
-                            ]
-                            :
+                        if ($register) {
+                            $controllerMail = new ControllerMail();
+                            $controllerMail->sendMailToRegister($user, $verificationToken);
+
                             $response = [
                                 'code' => 1,
                                 'message' => 'Inscription réussie, vous allez recevoir un e-mail de vérification.',
                             ];
+                        }
+
+                        if (!$register) {
+                            $response = [
+                                'code' => 0,
+                                'message' => 'Erreur lors de l\'enregistrement en base de données',
+                            ];
+                        }
                     }
                 }
             }
-            echo json_encode($response);
         }
+        echo json_encode($response);
     }
 
     public function verifyEmail($token = null)

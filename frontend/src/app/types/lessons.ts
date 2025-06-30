@@ -28,5 +28,17 @@ export interface LessonWithPrice {
     imagePath: string;
     slug: string;
     price: [{ price: number; duration: number }];
+    popular: false;
 }
-export type lessonsWithPrices = LessonWithPrice[];
+export type LessonsWithPrices = LessonWithPrice[];
+
+export interface DetailedOffer {
+    imagePath: string;
+    title: string;
+    description: string;
+    price: number;
+    duration: number;
+    slug: string;
+    popular: boolean;
+}
+export type detailedOffers = DetailedOffer[];
