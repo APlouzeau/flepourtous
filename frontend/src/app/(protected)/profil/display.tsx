@@ -70,9 +70,17 @@ export default function DisplayUserprofil() {
             } else {
                 setError(response.data.message || 'Erreur lors de la mise à jour');
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Erreur lors de la mise à jour:', error);
-            setError(error.response?.data?.message || 'Erreur lors de la mise à jour du profil');
+            const errorMessage = error instanceof Error && 'response' in error && 
+                                typeof error.response === 'object' && error.response !== null &&
+                                'data' in error.response && 
+                                typeof error.response.data === 'object' && error.response.data !== null &&
+                                'message' in error.response.data && 
+                                typeof error.response.data.message === 'string'
+                                ? error.response.data.message 
+                                : 'Erreur lors de la mise à jour du profil';
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }

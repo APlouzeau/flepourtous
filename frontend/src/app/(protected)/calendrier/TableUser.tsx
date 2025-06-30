@@ -1,7 +1,7 @@
 "use client";
 
 import { showBasicAppointmentProps } from "@/app/types/appointments";
-import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { deleteAppointment } from "./nouveau-rendez-vous/AppointmentAction";
 import { useEffect, useState } from "react";
 
@@ -171,7 +171,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                     </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun rendez-vous</h3>
-                <p className="text-gray-600">Vous n'avez aucun rendez-vous planifié pour le moment.</p>
+                <p className="text-gray-600">Vous n&apos;avez aucun rendez-vous planifié pour le moment.</p>
             </div>
         );
     }

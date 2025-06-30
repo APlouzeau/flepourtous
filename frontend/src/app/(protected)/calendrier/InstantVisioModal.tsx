@@ -48,9 +48,17 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
             } else {
                 setError(response.data.message || "Erreur lors de la création du salon");
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error creating instant visio:", error);
-            setError(error.response?.data?.message || "Erreur lors de la création du salon visio");
+            const errorMessage = error instanceof Error && 'response' in error && 
+                                typeof error.response === 'object' && error.response !== null &&
+                                'data' in error.response && 
+                                typeof error.response.data === 'object' && error.response.data !== null &&
+                                'message' in error.response.data && 
+                                typeof error.response.data.message === 'string'
+                                ? error.response.data.message 
+                                : "Erreur lors de la création du salon visio";
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -84,7 +92,7 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                            Adresse email de l'élève
+                            Adresse email de l&apos;élève
                         </label>
                         <input
                             type="email"
@@ -145,7 +153,7 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
                 <div className="mt-4 text-xs text-gray-500">
                     <p>• Le salon sera accessible 15 minutes avant sa création</p>
                     <p>• Il restera ouvert pendant la durée sélectionnée + 15 minutes</p>
-                    <p>• Le salon s'ouvrira automatiquement après création</p>
+                    <p>• Le salon s&apos;ouvrira automatiquement après création</p>
                 </div>
             </div>
         </div>
