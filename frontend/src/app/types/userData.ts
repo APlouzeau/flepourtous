@@ -6,4 +6,6 @@ export interface userDataProps {
     lastName: string;
     role: string;
     wallet: number;
+    address?: string;
+    country?: string;
 }

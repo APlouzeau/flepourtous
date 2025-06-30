@@ -121,6 +121,113 @@ class ControllerUser
         echo json_encode($response);
     }
 
+    public function updateUserProfile()
+    {
+        $this->verifyConnectBack();
+
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+
+        if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur de méthode',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if (!isset($data['firstName']) || !isset($data['lastName']) || !isset($data['mail'])) {
+            $response = [
+                'code' => 0,
+                'message' => 'Paramètres requis manquants (firstName, lastName, mail)',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        // Validation des données
+        if (!filter_var($data['mail'], FILTER_VALIDATE_EMAIL)) {
+            $response = [
+                'code' => 0,
+                'message' => 'Adresse e-mail invalide',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if (strlen($data['firstName']) < 2) {
+            $response = [
+                'code' => 0,
+                'message' => 'Le prénom doit contenir au moins 2 caractères',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if (strlen($data['lastName']) < 2) {
+            $response = [
+                'code' => 0,
+                'message' => 'Le nom doit contenir au moins 2 caractères',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $modelUser = new ModelUser();
+
+        // Vérifier si l'email n'est pas déjà utilisé par un autre utilisateur
+        $existingUserId = $modelUser->checkMail($data['mail']);
+        if ($existingUserId && $existingUserId != $_SESSION['idUser']) {
+            $response = [
+                'code' => 0,
+                'message' => 'Cette adresse e-mail est déjà utilisée par un autre utilisateur',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        // Préparer les données pour la mise à jour
+        $updateData = [
+            'idUser' => $_SESSION['idUser'],
+            'firstName' => $data['firstName'],
+            'lastName' => $data['lastName'],
+            'mail' => $data['mail'],
+            'address' => isset($data['address']) ? $data['address'] : null,
+            'country' => isset($data['country']) ? $data['country'] : null
+        ];
+
+        // Si un nouveau mot de passe est fourni, l'ajouter
+        if (isset($data['password']) && !empty($data['password'])) {
+            if (strlen($data['password']) < 8) {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Le mot de passe doit contenir au moins 8 caractères',
+                ];
+                echo json_encode($response);
+                return;
+            }
+            $updateData['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+        }
+
+        $user = new EntitieUser($updateData);
+        $updateResult = $modelUser->updateUser($user);
+
+        if ($updateResult) {
+            $response = [
+                'code' => 1,
+                'message' => 'Profil mis à jour avec succès',
+            ];
+        } else {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur lors de la mise à jour du profil',
+            ];
+        }
+
+        echo json_encode($response);
+    }
+
     public function register()
     {
         $requestBody = file_get_contents('php://input');
@@ -171,28 +278,33 @@ class ControllerUser
                             'firstName' => $data['firstName'],
                             'lastName' => $data['lastName'],
                             'mail' => $data['mail'],
-                            'password' => $data['password'],
+                            'password' => password_hash($data['password'], PASSWORD_BCRYPT),
                             'verifyToken' => $verificationToken,
                         ]);
-                        $controllerMail = new ControllerMail();
-                        $sendMail = $controllerMail->sendMailToRegister($user, $verificationToken);
+
                         $register = $userModel->register($user);
 
-                        !$register  ?
-                            $response = [
-                                'code' => 0,
-                                'message' => 'Erreur lors de l\'enregistrement en base de données',
-                            ]
-                            :
+                        if ($register) {
+                            $controllerMail = new ControllerMail();
+                            $controllerMail->sendMailToRegister($user, $verificationToken);
+
                             $response = [
                                 'code' => 1,
                                 'message' => 'Inscription réussie, vous allez recevoir un e-mail de vérification.',
                             ];
+                        }
+
+                        if (!$register) {
+                            $response = [
+                                'code' => 0,
+                                'message' => 'Erreur lors de l\'enregistrement en base de données',
+                            ];
+                        }
                     }
                 }
             }
-            echo json_encode($response);
         }
+        echo json_encode($response);
     }
 
     public function verifyEmail($token = null)

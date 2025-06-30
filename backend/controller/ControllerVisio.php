@@ -2,10 +2,8 @@
 
 class ControllerVisio
 {
-
     private $visioApiKey = VISIO_API_KEY;
     private $url = 'https://api.daily.co/v1/rooms/';
-
     public function createRoom($duration, $userStartDateTimeUTCToString, $eventId)
     {
 
@@ -41,13 +39,12 @@ class ControllerVisio
         $context = stream_context_create($options);
         $result = file_get_contents($this->url, false, $context);
 
-        if ($result === FALSE) {
+        if ($result === false) {
             $responseVisio = [
                 'code' => 0,
                 'message' => 'Erreur lors de la création de la room visio',
             ];
             echo json_encode($responseVisio);
-            return;
         } else {
             $responseVisio = json_decode($result, true);
             $roomUrl = $responseVisio['url'];
@@ -77,12 +74,49 @@ class ControllerVisio
 
     public function createInstantRoom()
     {
-        $userController = new ControllerUser();
-        $userController->verifyConnectBack();
-        echo "createInstantRoom";
-        $date = new DateTime('now', new DateTimeZone('UTC'));
-        $date->modify("+2 hour");
-        $endDateTime = $date->getTimestamp();
+        $controllerUser = new ControllerUser();
+        $controllerUser->verifyConnectBack();
+
+        // Récupérer les données POST
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($input['email']) || !isset($input['duration'])) {
+            http_response_code(400);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Email et durée requis'
+            ]);
+            return;
+        }
+
+        $email = $input['email'];
+        $duration = intval($input['duration']);
+
+        // Valider l'email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            http_response_code(400);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Adresse email invalide'
+            ]);
+            return;
+        }
+
+        // Valider la durée (entre 15 minutes et 180 minutes)
+        if ($duration < 15 || $duration > 180) {
+            http_response_code(400);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'La durée doit être entre 15 et 180 minutes'
+            ]);
+            return;
+        }
+
+        // Créer la room immédiatement (maintenant)
+        $currentDateTime = new DateTime('now', new DateTimeZone('UTC'));
+        $endDateTime = clone $currentDateTime->modify("+{$duration} minutes");
+        $startDateTime = $currentDateTime->getTimestamp();
+        $endDateTime = $endDateTime->getTimestamp();
 
         $visio = [
             'privacy' => 'public',
@@ -111,16 +145,30 @@ class ControllerVisio
 
         $context = stream_context_create($options);
         $result = file_get_contents($this->url, false, $context);
-        if ($result === false) {
-            $responseVisio = [
+
+        if (!$result) {
+            http_response_code(500);
+            echo json_encode([
                 'code' => 0,
-                'message' => 'Erreur lors de la création de la room visio',
-            ];
-            echo json_encode($responseVisio);
-        } else {
-            $responseVisio = json_decode($result, true);
-            $roomUrl = $responseVisio['url'];
-            echo json_encode($roomUrl);
+                'message' => 'Erreur lors de la création du salon visio'
+            ]);
+            return;
         }
+
+        // Ici vous pourriez envoyer un email à l'utilisateur avec le lien
+        // $this->sendVisioEmail($email, $roomUrl, $duration);
+        $responseVisio = json_decode($result, true);
+        $roomUrl = $responseVisio['url'];
+
+        echo json_encode([
+            'code' => 1,
+            'message' => 'Salon visio créé avec succès',
+            'data' => [
+                'roomUrl' => $roomUrl,
+                'email' => $email,
+                'duration' => $duration,
+                'startTime' => $startDateTime
+            ]
+        ]);
     }
 }
