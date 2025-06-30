@@ -34,4 +34,4 @@ export default async function LessonPage(props: { params: tParams }) {
             </Link>
         </>
     );
-}
+} 

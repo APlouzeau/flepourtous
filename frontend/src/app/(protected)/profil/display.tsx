@@ -3,24 +3,87 @@
 import { useContext, useState } from "react";
 import { Context } from "./profileContext";
 import Button from "../../components/front/Button";
+import axios from "axios";
 
 export default function DisplayUserprofil() {
     const { dataUser } = useContext(Context);
     const [activeTab, setActiveTab] = useState("informations");
     const [showEditModal, setShowEditModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
     const [editedUser, setEditedUser] = useState({
         firstName: dataUser?.firstName || "",
         lastName: dataUser?.lastName || "",
-        nickName: dataUser?.nickName || "",
         mail: dataUser?.mail || "",
+        address: dataUser?.address || "",
+        country: dataUser?.country || "",
+        password: "",
     });
     const [settings, setSettings] = useState({
         emailNotifications: true,
         courseReminders: true,
     });
 
-    const handleSaveChanges = () => {
-        setShowEditModal(false);
+    const handleSaveChanges = async () => {
+        setIsLoading(true);
+        setError("");
+
+        try {
+            // Préparer les données à envoyer
+            const updateData: {
+                firstName: string;
+                lastName: string;
+                mail: string;
+                address: string;
+                country: string;
+                password?: string;
+            } = {
+                firstName: editedUser.firstName,
+                lastName: editedUser.lastName,
+                mail: editedUser.mail,
+                address: editedUser.address,
+                country: editedUser.country,
+            };
+
+            // Ajouter le mot de passe seulement s'il a été saisi
+            if (editedUser.password.trim() !== "") {
+                updateData.password = editedUser.password;
+            }
+
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/updateUserProfile`, updateData, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            });
+
+            if (response.data.code === 1) {
+                alert("Profil mis à jour avec succès !");
+                setShowEditModal(false);
+                setEditedUser((prev) => ({ ...prev, password: "" })); // Réinitialiser le mot de passe
+                // Recharger la page pour afficher les nouvelles données
+                window.location.reload();
+            } else {
+                setError(response.data.message || "Erreur lors de la mise à jour");
+            }
+        } catch (error: unknown) {
+            console.error("Erreur lors de la mise à jour:", error);
+            const errorMessage =
+                error instanceof Error &&
+                "response" in error &&
+                typeof error.response === "object" &&
+                error.response !== null &&
+                "data" in error.response &&
+                typeof error.response.data === "object" &&
+                error.response.data !== null &&
+                "message" in error.response.data &&
+                typeof error.response.data.message === "string"
+                    ? error.response.data.message
+                    : "Erreur lors de la mise à jour du profil";
+            setError(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handleInputChange = (field: string, value: string) => {
@@ -28,6 +91,8 @@ export default function DisplayUserprofil() {
             ...prev,
             [field]: value,
         }));
+        // Effacer l'erreur quand l'utilisateur tape
+        if (error) setError("");
     };
 
     const toggleSetting = (setting: string) => {
@@ -35,6 +100,19 @@ export default function DisplayUserprofil() {
             ...prev,
             [setting]: !prev[setting as keyof typeof prev],
         }));
+    };
+
+    const handleCloseModal = () => {
+        setShowEditModal(false);
+        setError("");
+        setEditedUser({
+            firstName: dataUser?.firstName || "",
+            lastName: dataUser?.lastName || "",
+            mail: dataUser?.mail || "",
+            address: dataUser?.address || "",
+            country: dataUser?.country || "",
+            password: "",
+        });
     };
 
     return (
@@ -56,7 +134,6 @@ export default function DisplayUserprofil() {
                             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
                                 {dataUser?.firstName} {dataUser?.lastName}
                             </h1>
-                            <p className="text-gray-600 text-lg mb-2">@{dataUser?.nickName}</p>
                             <p className="text-gray-500 text-sm mb-4">{dataUser?.mail}</p>
 
                             {/* Wallet Info */}
@@ -133,34 +210,24 @@ export default function DisplayUserprofil() {
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Pseudo</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                         <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {dataUser?.nickName || "Non renseigné"}
+                                            {dataUser?.mail || "Non renseigné"}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
                                         <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {dataUser?.mail || "Non renseigné"}
+                                            {dataUser?.address || "Non renseigné"}
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Téléphone
-                                        </label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Pays</label>
                                         <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            Non renseigné
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Date d&apos;inscription
-                                        </label>
-                                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            Non disponible
+                                            {dataUser?.country || "Non renseigné"}
                                         </div>
                                     </div>
                                 </div>
@@ -306,14 +373,15 @@ export default function DisplayUserprofil() {
             {/* Modal de modification */}
             {showEditModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-xl font-semibold text-gray-900">Modifier mes informations</h2>
                                 <button
-                                    onClick={() => setShowEditModal(false)}
+                                    onClick={handleCloseModal}
                                     className="text-gray-400 hover:text-gray-600 transition-colors"
                                     aria-label="Fermer la popup"
+                                    disabled={isLoading}
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path
@@ -326,57 +394,103 @@ export default function DisplayUserprofil() {
                                 </button>
                             </div>
 
+                            {error && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <p className="text-red-600 text-sm">{error}</p>
+                                </div>
+                            )}
+
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-                                    <input
-                                        type="text"
-                                        value={editedUser.firstName}
-                                        onChange={(e) => handleInputChange("firstName", e.target.value)}
-                                        placeholder="Entrez votre prénom"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                    />
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
+                                        <input
+                                            type="text"
+                                            value={editedUser.firstName}
+                                            onChange={(e) => handleInputChange("firstName", e.target.value)}
+                                            placeholder="Entrez votre prénom"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
+                                        <input
+                                            type="text"
+                                            value={editedUser.lastName}
+                                            onChange={(e) => handleInputChange("lastName", e.target.value)}
+                                            placeholder="Entrez votre nom"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                                    <input
-                                        type="text"
-                                        value={editedUser.lastName}
-                                        onChange={(e) => handleInputChange("lastName", e.target.value)}
-                                        placeholder="Entrez votre nom"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Pseudo</label>
-                                    <input
-                                        type="text"
-                                        value={editedUser.nickName}
-                                        onChange={(e) => handleInputChange("nickName", e.target.value)}
-                                        placeholder="Entrez votre pseudo"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                                     <input
                                         type="email"
                                         value={editedUser.mail}
                                         onChange={(e) => handleInputChange("mail", e.target.value)}
                                         placeholder="Entrez votre email"
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
+                                        required
+                                        disabled={isLoading}
                                     />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                                    <input
+                                        type="text"
+                                        value={editedUser.address}
+                                        onChange={(e) => handleInputChange("address", e.target.value)}
+                                        placeholder="Entrez votre adresse"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
+                                        disabled={isLoading}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Pays</label>
+                                    <input
+                                        type="text"
+                                        value={editedUser.country}
+                                        onChange={(e) => handleInputChange("country", e.target.value)}
+                                        placeholder="Entrez votre pays"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
+                                        disabled={isLoading}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Nouveau mot de passe
+                                        <span className="text-gray-500">(laisser vide pour ne pas modifier)</span>
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={editedUser.password}
+                                        onChange={(e) => handleInputChange("password", e.target.value)}
+                                        placeholder="Entrez un nouveau mot de passe"
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
+                                        disabled={isLoading}
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Le mot de passe doit contenir au moins 8 caractères
+                                    </p>
                                 </div>
                             </div>
 
                             <div className="flex space-x-3 mt-6">
                                 <Button
-                                    onClick={() => setShowEditModal(false)}
+                                    onClick={handleCloseModal}
                                     variant="white"
                                     className="flex-1 text-sm py-3"
+                                    disabled={isLoading}
                                 >
                                     Annuler
                                 </Button>
@@ -384,8 +498,11 @@ export default function DisplayUserprofil() {
                                     onClick={handleSaveChanges}
                                     variant="black"
                                     className="flex-1 text-sm py-3 !bg-[#1D1E1C] hover:!bg-gray-800"
+                                    disabled={
+                                        isLoading || !editedUser.firstName || !editedUser.lastName || !editedUser.mail
+                                    }
                                 >
-                                    Sauvegarder
+                                    {isLoading ? "Sauvegarde..." : "Sauvegarder"}
                                 </Button>
                             </div>
                         </div>

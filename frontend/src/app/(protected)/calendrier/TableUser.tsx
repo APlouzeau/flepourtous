@@ -1,6 +1,7 @@
 "use client";
 
 import { showBasicAppointmentProps } from "@/app/types/appointments";
+
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { deleteAppointment, prepareRepaymentAction } from "./nouveau-rendez-vous/AppointmentAction";
 import { useEffect, useState } from "react";
@@ -14,11 +15,13 @@ interface AppointmentRowProps {
 export default function TableUser({ listAppointments }: AppointmentRowProps) {
     const [userTimezone, setUserTimezone] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState<Date>(new Date());
+    //const [isLoading, setIsLoading] = useState(true);
     const [isRepaying, setIsRepaying] = useState<string | null>(null);
     const router = useRouter();
 
     useEffect(() => {
         setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
+        //  setIsLoading(false);
 
         // Mettre à jour l'heure actuelle toutes les minutes
         const interval = setInterval(() => {
@@ -78,6 +81,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                     className: "text-green-600 font-semibold",
                     isJoinable: true,
                     tooltip: "Vous pouvez rejoindre la visio",
+                    badgeColor: "bg-green-500",
                 };
             } else {
                 return {
@@ -85,6 +89,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                     className: "text-red-600",
                     isJoinable: false,
                     tooltip: "Vous ne pouvez pas rejoindre cette visio",
+                    badgeColor: "bg-red-500",
                 };
             }
         } catch (error) {
@@ -94,6 +99,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                 className: "text-gray-500",
                 isJoinable: false,
                 tooltip: "Erreur de calcul du statut",
+                badgeColor: "bg-gray-500",
             };
         }
     };
@@ -102,10 +108,12 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
         const statusLower = status.toLowerCase();
         let badgeColor = "";
         let textColor = "";
+        let bgColor = "";
 
         if (statusLower.includes("payé") || statusLower.includes("paye")) {
             badgeColor = "bg-green-500";
             textColor = "text-green-700";
+            bgColor = "bg-green-50";
         } else if (
             statusLower.includes("non payé") ||
             statusLower.includes("non paye") ||
@@ -113,21 +121,25 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
         ) {
             badgeColor = "bg-red-500";
             textColor = "text-red-700";
+            bgColor = "bg-red-50";
         } else if (statusLower.includes("en attente") || statusLower.includes("attente")) {
             badgeColor = "bg-yellow-500";
             textColor = "text-yellow-700";
+            bgColor = "bg-yellow-50";
         } else if (statusLower.includes("à voir") || statusLower.includes("a voir")) {
             badgeColor = "bg-orange-500";
             textColor = "text-orange-700";
+            bgColor = "bg-orange-50";
         } else {
             badgeColor = "bg-gray-500";
             textColor = "text-gray-700";
+            bgColor = "bg-gray-50";
         }
 
         return (
-            <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${badgeColor}`}></div>
-                <span className={textColor}>{status}</span>
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${bgColor}`}>
+                <div className={`w-2 h-2 rounded-full ${badgeColor}`}></div>
+                <span className={`text-sm font-medium ${textColor}`}>{status}</span>
             </div>
         );
     };

@@ -18,8 +18,7 @@ extends ClassDatabase
         $req->bindValue(":password", $user->getPassword());
         $req->bindValue(":verifyToken", $user->getVerifyToken());
 
-        $req->execute();
-        return true;
+        return $req->execute();
     }
 
     public function getAllUsers()
@@ -159,5 +158,44 @@ extends ClassDatabase
         } else {
             return false;
         }
+    }
+
+    public function updateUser(EntitieUser $user)
+    {
+        $query = "UPDATE users SET firstName = :firstName, lastName = :lastName, mail = :mail";
+        $params = [
+            ':firstName' => $user->getFirstName(),
+            ':lastName' => $user->getLastName(),
+            ':mail' => $user->getMail(),
+            ':idUser' => $user->getIdUser()
+        ];
+
+        // Ajouter l'adresse si elle est fournie
+        if ($user->getAddress() !== null) {
+            $query .= ", address = :address";
+            $params[':address'] = $user->getAddress();
+        }
+
+        // Ajouter le pays si il est fourni
+        if ($user->getCountry() !== null) {
+            $query .= ", country = :country";
+            $params[':country'] = $user->getCountry();
+        }
+
+        // Ajouter le mot de passe si il est fourni
+        if ($user->getPassword() !== null) {
+            $query .= ", password = :password";
+            $params[':password'] = $user->getPassword();
+        }
+
+        $query .= " WHERE idUser = :idUser";
+
+        $req = $this->conn->prepare($query);
+
+        foreach ($params as $param => $value) {
+            $req->bindValue($param, $value);
+        }
+
+        return $req->execute();
     }
 }
