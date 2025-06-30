@@ -207,7 +207,7 @@ class ControllerUser
                 echo json_encode($response);
                 return;
             }
-            $updateData['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            $updateData['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
         }
 
         $user = new EntitieUser($updateData);
@@ -278,7 +278,7 @@ class ControllerUser
                             'firstName' => $data['firstName'],
                             'lastName' => $data['lastName'],
                             'mail' => $data['mail'],
-                            'password' => $data['password'],
+                            'password' => password_hash($data['password'], PASSWORD_BCRYPT),
                             'verifyToken' => $verificationToken,
                         ]);
 

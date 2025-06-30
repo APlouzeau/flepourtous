@@ -23,7 +23,7 @@ class ControllerMail
             $this->mailer->Password = MAIL_PASSWORD;
             $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             $this->mailer->Port = MAIL_PORT;
-            $this->mailer->SMTPDebug = SMTP::DEBUG_SERVER;
+            $this->mailer->SMTPDebug = SMTP::DEBUG_OFF;
 
             $this->mailer->CharSet = 'UTF-8';
 

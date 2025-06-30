@@ -18,8 +18,7 @@ extends ClassDatabase
         $req->bindValue(":password", $user->getPassword());
         $req->bindValue(":verifyToken", $user->getVerifyToken());
 
-        $req->execute();
-        return true;
+        return $req->execute();
     }
 
     public function getAllUsers()
