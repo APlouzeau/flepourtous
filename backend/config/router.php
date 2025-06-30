@@ -31,10 +31,12 @@ $router->addRoute('POST', BASE_URL . "api/getAvailableTimeSlots", 'ControllerCal
 $router->addRoute('POST', BASE_URL . "api/sendMailToAlertForNextAppointment", 'ControllerMail', 'sendMailToAlertForNextAppointment');
 $router->addRoute('POST', BASE_URL . "api/prepareRepayment", 'ControllerOrder', 'prepareRepayment');
 $router->addRoute('POST', BASE_URL . "api/deleteWaitingEvent", 'ControllerCalendar', 'checkWaitingEvents');
+$router->addRoute('POST', BASE_URL . "api/createInstantRoom", 'ControllerVisio', 'createInstantRoom');
 
 //Google
 $router->addRoute('POST', BASE_URL . "api/handleGoogleNotification", 'ControllerGoogle', 'handleGoogleNotification');
 $router->addRoute('POST', BASE_URL . "api/setupGoogleWatch", 'ControllerGoogle', 'setupCalendarWatch');
+
 
 //Stripe
 $router->addRoute('POST', BASE_URL . "api/checkout-session", 'ControllerOrder', 'checkout');

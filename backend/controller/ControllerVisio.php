@@ -2,10 +2,12 @@
 
 class ControllerVisio
 {
+
+    private $visioApiKey = VISIO_API_KEY;
+    private $url = 'https://api.daily.co/v1/rooms/';
+
     public function createRoom($duration, $userStartDateTimeUTCToString, $eventId)
     {
-        $visioApiKey = VISIO_API_KEY;
-        $url = 'https://api.daily.co/v1/rooms/';
 
         $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
         $durationInSeconds = $duration * 60; // Convertir la durée en secondes
@@ -30,14 +32,14 @@ class ControllerVisio
 
         $options = [
             'http' => [
-                'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $visioApiKey,
+                'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $this->visioApiKey,
                 'method' => 'POST',
                 'content' => json_encode($visio)
             ]
         ];
 
         $context = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
+        $result = file_get_contents($this->url, false, $context);
 
         if ($result === FALSE) {
             $responseVisio = [
@@ -71,5 +73,55 @@ class ControllerVisio
         ];
         $context = stream_context_create($options);
         $result = file_get_contents($apiUrl, false, $context);
+    }
+
+    public function createInstantRoom()
+    {
+        $userController = new ControllerUser();
+        $userController->verifyConnectBack();
+
+        $endDateTime = new DateTime('now', new DateTimeZone('UTC'))->modify("+4H")->getTimestamp();
+
+
+        $visio = [
+            'privacy' => 'public',
+            'properties' => [
+                'exp' => $endDateTime,
+                'start_audio_off' => false,
+                'start_video_off' => false,
+                'enable_pip_ui' => true,
+                'enable_people_ui' => true,
+                'enable_emoji_reactions' => true,
+                'enable_screenshare' => true,
+                'enable_video_processing_ui' => true,
+                'enable_chat' => true,
+                'enable_advanced_chat' => true,
+                'enable_recording' => 'local',
+            ]
+        ];
+
+        $options = [
+            'http' => [
+                'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $this->visioApiKey,
+                'method' => 'POST',
+                'content' => json_encode($visio)
+            ]
+        ];
+
+        $context = stream_context_create($options);
+        $result = file_get_contents($this->url, false, $context);
+
+        if ($result === FALSE) {
+            $responseVisio = [
+                'code' => 0,
+                'message' => 'Erreur lors de la création de la room visio',
+            ];
+            echo json_encode($responseVisio);
+            return;
+        } else {
+            $responseVisio = json_decode($result, true);
+            $roomUrl = $responseVisio['url'];
+            return $roomUrl;
+        }
     }
 }
