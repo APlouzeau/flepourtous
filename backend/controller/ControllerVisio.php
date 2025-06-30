@@ -2,10 +2,10 @@
 
 class ControllerVisio
 {
+    private $visioApiKey = VISIO_API_KEY;
+    private $url = 'https://api.daily.co/v1/rooms/';
     public function createRoom($duration, $userStartDateTimeUTCToString)
     {
-        $visioApiKey = VISIO_API_KEY;
-        $url = 'https://api.daily.co/v1/rooms/';
 
         $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
         $durationInSeconds = $duration * 60; // Convertir la durée en secondes
@@ -29,22 +29,21 @@ class ControllerVisio
 
         $options = [
             'http' => [
-                'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $visioApiKey,
+                'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $this->visioApiKey,
                 'method' => 'POST',
                 'content' => json_encode($visio)
             ]
         ];
 
         $context = stream_context_create($options);
-        $result = file_get_contents($url, false, $context);
+        $result = file_get_contents($this->url, false, $context);
 
-        if ($result === FALSE) {
+        if ($result === false) {
             $responseVisio = [
                 'code' => 0,
                 'message' => 'Erreur lors de la création de la room visio',
             ];
             echo json_encode($responseVisio);
-            return;
         } else {
             $responseVisio = json_decode($result, true);
             $roomUrl = $responseVisio['url'];
@@ -74,21 +73,12 @@ class ControllerVisio
 
     public function createInstantRoom()
     {
-        session_start();
-        
-        // Vérifier que l'utilisateur est connecté et admin
-        if (!isset($_SESSION['userId']) || $_SESSION['role'] !== 'admin') {
-            http_response_code(403);
-            echo json_encode([
-                'code' => 0,
-                'message' => 'Accès refusé : droits administrateur requis'
-            ]);
-            return;
-        }
+        $controllerUser = new ControllerUser();
+        $controllerUser->verifyConnectBack();
 
         // Récupérer les données POST
         $input = json_decode(file_get_contents('php://input'), true);
-        
+
         if (!isset($input['email']) || !isset($input['duration'])) {
             http_response_code(400);
             echo json_encode([
@@ -123,11 +113,39 @@ class ControllerVisio
 
         // Créer la room immédiatement (maintenant)
         $currentDateTime = new DateTime('now', new DateTimeZone('UTC'));
-        $startDateTime = $currentDateTime->format('Y-m-d H:i:s');
-        
-        $roomUrl = $this->createRoom($duration, $startDateTime);
-        
-        if (!$roomUrl) {
+        $endDateTime = clone $currentDateTime->modify("+{$duration} minutes");
+        $startDateTime = $currentDateTime->getTimestamp();
+        $endDateTime = $endDateTime->getTimestamp();
+
+        $visio = [
+            'privacy' => 'public',
+            'properties' => [
+                'exp' => $endDateTime,
+                'start_audio_off' => false,
+                'start_video_off' => false,
+                'enable_pip_ui' => true,
+                'enable_people_ui' => true,
+                'enable_emoji_reactions' => true,
+                'enable_screenshare' => true,
+                'enable_video_processing_ui' => true,
+                'enable_chat' => true,
+                'enable_advanced_chat' => true,
+                'enable_recording' => 'local',
+            ]
+        ];
+
+        $options = [
+            'http' => [
+                'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $this->visioApiKey,
+                'method' => 'POST',
+                'content' => json_encode($visio)
+            ]
+        ];
+
+        $context = stream_context_create($options);
+        $result = file_get_contents($this->url, false, $context);
+
+        if (!$result) {
             http_response_code(500);
             echo json_encode([
                 'code' => 0,
@@ -138,6 +156,8 @@ class ControllerVisio
 
         // Ici vous pourriez envoyer un email à l'utilisateur avec le lien
         // $this->sendVisioEmail($email, $roomUrl, $duration);
+        $responseVisio = json_decode($result, true);
+        $roomUrl = $responseVisio['url'];
 
         echo json_encode([
             'code' => 1,

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 interface InstantVisioModalProps {
     isOpen: boolean;
@@ -21,11 +22,12 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
         setError("");
 
         try {
+            console.log("Creating instant visio with:", { email, duration });
             const response = await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/createInstantVisio`,
                 {
                     email: email,
-                    duration: duration
+                    duration: duration,
                 },
                 {
                     headers: {
@@ -37,27 +39,32 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
 
             if (response.data.code === 1) {
                 // Ouvrir le salon visio directement
-                window.open(response.data.data.roomUrl, '_blank', 'noopener,noreferrer');
-                
+                window.open(response.data.data.roomUrl, "_blank", "noopener,noreferrer");
+
                 // Fermer le modal et réinitialiser
                 setEmail("");
                 setDuration(60);
                 onClose();
-                
+
                 alert(`Salon visio créé avec succès ! Durée : ${duration} minutes`);
             } else {
                 setError(response.data.message || "Erreur lors de la création du salon");
             }
+            console.log(response.data);
         } catch (error: unknown) {
             console.error("Error creating instant visio:", error);
-            const errorMessage = error instanceof Error && 'response' in error && 
-                                typeof error.response === 'object' && error.response !== null &&
-                                'data' in error.response && 
-                                typeof error.response.data === 'object' && error.response.data !== null &&
-                                'message' in error.response.data && 
-                                typeof error.response.data.message === 'string'
-                                ? error.response.data.message 
-                                : "Erreur lors de la création du salon visio";
+            const errorMessage =
+                error instanceof Error &&
+                "response" in error &&
+                typeof error.response === "object" &&
+                error.response !== null &&
+                "data" in error.response &&
+                typeof error.response.data === "object" &&
+                error.response.data !== null &&
+                "message" in error.response.data &&
+                typeof error.response.data.message === "string"
+                    ? error.response.data.message
+                    : "Erreur lors de la création du salon visio";
             setError(errorMessage);
         } finally {
             setIsLoading(false);
@@ -125,11 +132,7 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
                         </select>
                     </div>
 
-                    {error && ( 
-                        <div className="text-red-600 text-sm bg-red-50 p-2 rounded">
-                            {error}
-                        </div>
-                    )}
+                    {error && <div className="text-red-600 text-sm bg-red-50 p-2 rounded">{error}</div>}
 
                     <div className="flex justify-end space-x-3 pt-4">
                         <Button
@@ -158,4 +161,4 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
             </div>
         </div>
     );
-} 
+}
