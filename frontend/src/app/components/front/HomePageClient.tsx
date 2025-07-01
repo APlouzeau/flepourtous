@@ -116,7 +116,9 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             <FeatureCard
                                 icon="📅"
                                 title="Emploi du temps flexible"
-                                description="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation."
+                                subtitle="Apprenez à votre rythme, où que vous soyez."
+                                description="
+ Je propose des horaires adaptables selon votre fuseau horaire, vos disponibilités et votre rythme d’apprentissage. Cours du matin, du soir ou le samedi : c’est vous qui choisissez ! En cas d’imprévu, vous pouvez reporter le cours facilement si vous me prévenez à l’avance."
                             />
                         </div>
                         <div
@@ -127,7 +129,8 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             <FeatureCard
                                 icon="💰"
                                 title="Prix transparent"
-                                description="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation."
+                                subtitle="Pas de frais cachés, juste des tarifs simples et accessibles."
+                                description="Vous connaissez le prix dès le départ : que vous preniez un cours à l’unité ou un forfait, tout est clairement indiqué. Le rapport qualité-prix est pensé pour que chacun puisse progresser à son rythme, sans se ruiner."
                             />
                         </div>
                         <div
@@ -138,7 +141,8 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             <FeatureCard
                                 icon="👨‍🏫"
                                 title="Un super professeur"
-                                description="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation."
+                                subtitle="Des cours adaptés à vos besoins, vos envies et votre niveau."
+                                description="Chaque leçon est conçue en fonction de votre niveau, de vos objectifs (voyage, travail, examen…) et de vos centres d’intérêt. J’écoute vos besoins et j’adapte le contenu pour que l’apprentissage soit vivant, efficace et motivant."
                             />
                         </div>
                     </div>
