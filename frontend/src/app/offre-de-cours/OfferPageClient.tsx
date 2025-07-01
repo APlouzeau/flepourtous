@@ -82,7 +82,8 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                             Choisissez votre <span className="text-red-600">Formule</span>
                         </h2>
                         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                            Trois formules de cours individuels adaptées aux besoins spécifiques de chaque âge
+                            Différentes formules de cours individuels adaptées à vos besoins spécifiques et à vos
+                            objectifs.
                         </p>
                     </div>
 
@@ -197,7 +198,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                                     <div>
                                         <h3 className="font-semibold text-gray-900 mb-2">Méthode éprouvée</h3>
                                         <p className="text-gray-600">
-                                            8 années d&apos;expérience avec plus de 1500 élèves satisfaits
+                                            8 années d&apos;expérience avec plus de 150 élèves satisfaits
                                         </p>
                                     </div>
                                 </div>
@@ -243,8 +244,8 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                                         </svg>
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 mb-2">Garantie de résultats</h3>
-                                        <p className="text-gray-600">100% de satisfaction garantie ou remboursement</p>
+                                        <h3 className="font-semibold text-gray-900 mb-2">Garantie de satisfaction</h3>
+                                        <p className="text-gray-600">99% de satisfaction garantie</p>
                                     </div>
                                 </div>
                             </div>
