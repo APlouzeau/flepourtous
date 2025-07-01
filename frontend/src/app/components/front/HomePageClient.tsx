@@ -101,7 +101,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                     whyChooseSection.isVisible ? "visible" : ""
                 }`}
             >
-                <div className="max-w-6xl mx-auto">
+                <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-8 sm:mb-12">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             Why Choose <span className="text-red-600">FLE</span>?
