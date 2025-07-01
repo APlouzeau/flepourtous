@@ -196,28 +196,28 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                                 statsSection.isVisible ? "visible" : ""
                             }`}
                         >
-                            <StatCard number="1500+" description="Élèves satisfaits" />
+                            <StatCard number="2000+" description="Cours" />
                         </div>
                         <div
                             className={`scroll-animate scroll-animate-delay-2 ${
                                 statsSection.isVisible ? "visible" : ""
                             }`}
                         >
-                            <StatCard number="8" description="Années d'expériences" />
+                            <StatCard number="99%" description="De satisfaction" />
                         </div>
                         <div
                             className={`scroll-animate scroll-animate-delay-3 ${
                                 statsSection.isVisible ? "visible" : ""
                             }`}
                         >
-                            <StatCard number="200+" description="Heures dispensées" />
+                            <StatCard number="200+" description="D'heureux élèves" />
                         </div>
                         <div
                             className={`scroll-animate scroll-animate-delay-4 ${
                                 statsSection.isVisible ? "visible" : ""
                             }`}
                         >
-                            <StatCard number="100%" description="Satisfaction garantie" />
+                            <StatCard number="100%" description="Pédagogiques" />
                         </div>
                     </div>
                 </div>
@@ -257,7 +257,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             className={`scroll-animate scroll-animate-delay-1 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Qui êtes-vous Sarah et Que faites-vous Compétences ?"
+                                question="Qu'est-ce que FLE (Français Langue Étrangère) ?"
                                 answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                             />
                         </div>
@@ -265,7 +265,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             className={`scroll-animate scroll-animate-delay-2 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Comment savez-vous si votre méthode va marcher ?"
+                                question="Ai-je besoin de connaissances en français pour commencer ?"
                                 answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                             />
                         </div>
@@ -273,7 +273,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             className={`scroll-animate scroll-animate-delay-3 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Où se déroulent vos séances ?"
+                                question="Comment savoir quel est mon niveau de français ?"
                                 answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                             />
                         </div>
@@ -281,7 +281,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             className={`scroll-animate scroll-animate-delay-4 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Les cours individuels ? Ou se déroulent-ils exactement dans le TCF pour CHELF ?"
+                                question="Les cours préparent-ils aux examens officiels comme le DELF ou le DALF ?"
                                 answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                             />
                         </div>
@@ -289,7 +289,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             className={`scroll-animate scroll-animate-delay-5 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Où se déroule votre mise place lors des cours. Merci ?"
+                                question="Quel est le format des cours (en ligne, en présentiel, intensifs) ?"
                                 answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                             />
                         </div>
@@ -297,7 +297,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             className={`scroll-animate scroll-animate-delay-6 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Puis-je annuler un certificat qui ne me plaire ?"
+                                question="Puis-je obtenir un certificat à la fin du cours ?"
                                 answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
                             />
                         </div>
