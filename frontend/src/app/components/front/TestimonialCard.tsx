@@ -1,14 +1,12 @@
-import Image from "next/image";
-
 interface TestimonialCardProps {
     quote: string;
     author: string;
     nationality: string;
     bgColor: string;
-    image?: string;
+    //image?: string;
 }
 
-export default function TestimonialCard({ quote, author, nationality, bgColor, image }: TestimonialCardProps) {
+export default function TestimonialCard({ quote, author, nationality, bgColor /* image */ }: TestimonialCardProps) {
     return (
         <div className={`${bgColor} p-6 rounded-lg shadow-lg`}>
             {/*             <div className="flex items-start mb-4">
