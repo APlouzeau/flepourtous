@@ -82,8 +82,8 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                             Choisissez votre <span className="text-red-600">Formule</span>
                         </h2>
                         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                            Différentes formules de cours individuels adaptées à vos besoins spécifiques et à vos
-                            objectifs.
+                            Choisissez le cours qui convient le mieux suivant vos objectifs et la durée que vous
+                            préférez.
                         </p>
                     </div>
 
