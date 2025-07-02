@@ -101,7 +101,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                     whyChooseSection.isVisible ? "visible" : ""
                 }`}
             >
-                <div className="max-w-6xl mx-auto">
+                <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-8 sm:mb-12">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             Why Choose <span className="text-red-600">FLE</span>?
@@ -140,7 +140,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                         >
                             <FeatureCard
                                 icon="👨‍🏫"
-                                title="Un super professeur"
+                                title="Approche personnalisée et humaine"
                                 subtitle="Des cours adaptés à vos besoins, vos envies et votre niveau."
                                 description="Chaque leçon est conçue en fonction de votre niveau, de vos objectifs (voyage, travail, examen…) et de vos centres d’intérêt. J’écoute vos besoins et j’adapte le contenu pour que l’apprentissage soit vivant, efficace et motivant."
                             />
@@ -160,8 +160,8 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             Présentation des différentes <span className="text-red-600">Formules</span>
                         </h2>
                         <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                            Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                            labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.
+                            Choisissez le cours qui convient le mieux suivant vos objectifs et la durée que vous
+                            préférez.
                         </p>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -191,7 +191,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-8 sm:mb-12">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
-                            Les stats parlent d&apos;elles même
+                            Les stats parlent d&apos;elles-mêmes
                         </h2>
                     </div>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
@@ -261,48 +261,56 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                             className={`scroll-animate scroll-animate-delay-1 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Qu'est-ce que FLE (Français Langue Étrangère) ?"
-                                answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                                question="Qui êtes-vous ?"
+                                answer="Je m'appelle Ludivine et je suis française. Diplômée d'un master de FLE, j'ai vécu au Japon plusieurs années où j'ai enseigné le français. J'ai un master de didactique et une maîtrise de japonais. J'ai enseigné en France à des publics très variés, principalement en français, mais aussi en anglais et j'ai aussi enseigné le japonais à des débutants."
                             />
                         </div>
                         <div
                             className={`scroll-animate scroll-animate-delay-2 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Ai-je besoin de connaissances en français pour commencer ?"
-                                answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                                question="À qui s’adressent vos cours ?"
+                                answer="Les cours s’adressent aux apprenants de français à partir de 10 ans. Que vous habitiez en France ou à l’étranger, totalement débutant ou avancé, vous êtes le bienvenu !"
                             />
                         </div>
                         <div
                             className={`scroll-animate scroll-animate-delay-3 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Comment savoir quel est mon niveau de français ?"
-                                answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                                question="Puis-je choisir les sujets des cours ?"
+                                answer="Les cours sont “à la carte”, c’est-à-dire qu’ils sont complètement adaptés à vos besoins. Ensemble, nous déciderons non seulement de la méthode, mais aussi des sujets à aborder."
                             />
                         </div>
                         <div
                             className={`scroll-animate scroll-animate-delay-4 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Les cours préparent-ils aux examens officiels comme le DELF ou le DALF ?"
-                                answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                                question="Quelle est la fréquence recommandée pour les cours ?"
+                                answer="Cela dépend de vos objectifs. Pour pratiquer son français, une séance par semaine est tout à fait raisonnable. Cependant, si vous préparez un examen ou que vous voulez suivre des cours de manière intensive, il est recommandé de faire 2 à 3 séances par semaine, afin de se concentrer un maximum sur la langue."
                             />
                         </div>
                         <div
                             className={`scroll-animate scroll-animate-delay-5 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Quel est le format des cours (en ligne, en présentiel, intensifs) ?"
-                                answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                                question="De quoi ai-je besoin pour suivre un cours ?"
+                                answer="Il vous faut une bonne connexion. Vous pouvez suivre le cours sur ordinateur, tablette ou téléphone (l’ordinateur est recommandé pour la visibilité du cours). Vous n’avez pas besoin de télécharger de logiciel ou d’application, vous pouvez vous connecter à l’outil de visio directement ! "
                             />
                         </div>
                         <div
                             className={`scroll-animate scroll-animate-delay-6 ${faqSection.isVisible ? "visible" : ""}`}
                         >
                             <FAQItem
-                                question="Puis-je obtenir un certificat à la fin du cours ?"
-                                answer="Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                                question="Que se passe-t-il si j’arrive en retard ?"
+                                answer="Si vous arrivez en retard, le temps est perdu, vous ne pourrez pas récupérer ce temps, l’heure du cours finira à l’heure prévue. Pour plus d’informations, veuillez lire les conditions de vente."
+                            />
+                        </div>
+                        <div
+                            className={`scroll-animate scroll-animate-delay-6 ${faqSection.isVisible ? "visible" : ""}`}
+                        >
+                            <FAQItem
+                                question="Puis-je annuler ou reporter un cours ?"
+                                answer="Vous pouvez reporter ou annuler un cours jusqu’à 24h avant le cours. Si vous voulez annuler ou reporter dans les 24h avant le cours, le cours sera considéré comme dû et ne sera pas remboursé. Pour plus d’informations, veuillez lire les conditions de vente."
                             />
                         </div>
                     </div>
