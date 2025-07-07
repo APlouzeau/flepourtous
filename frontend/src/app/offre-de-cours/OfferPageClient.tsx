@@ -13,7 +13,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
     // Hooks pour les animations
     const offersSection = useScrollAnimation();
     const detailsSection = useScrollAnimation();
-    console.log("Offres reçues dans le composant client :", lessons);
+
     // Données détaillées des formules
     /*  const detailedOffers = [
         {

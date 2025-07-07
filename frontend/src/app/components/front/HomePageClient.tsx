@@ -104,7 +104,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-8 sm:mb-12">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                            Why Choose <span className="text-red-600">FLE</span>?
+                            Pourquoi choisir FLE pour tous ?
                         </h2>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
