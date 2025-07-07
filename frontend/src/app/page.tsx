@@ -1,11 +1,11 @@
-import axios from "axios";
+import apiClient from "@/lib/axios";
 import { LessonWithPrice } from "./types/lessons";
 import HomePageClient from "./components/front/HomePageClient"; // Importer le nouveau composant
 
 // Fonction pour récupérer les données. On peut la laisser ici ou la mettre dans un fichier lib.
 async function getLessons(): Promise<LessonWithPrice[]> {
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`, {});
+        const response = await apiClient.post(`${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`, {});
         // S'assurer de retourner les données ou un tableau vide en cas d'erreur
         console.log("Leçons récupérées côté serveur :", response.data);
         return response.data || [];

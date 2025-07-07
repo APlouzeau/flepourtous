@@ -14,6 +14,7 @@ class ControllerUser
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             return true;
         } else {
+            http_response_code(401);
             $response = $this->userNotConnected;
             echo json_encode($response);
             exit();

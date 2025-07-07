@@ -3,7 +3,7 @@
 import { useContext, useState } from "react";
 import { Context } from "./profileContext";
 import Button from "../../components/front/Button";
-import axios from "axios";
+import apiClient from "@/lib/axios";
 
 export default function DisplayUserprofil() {
     const { dataUser } = useContext(Context);
@@ -50,7 +50,7 @@ export default function DisplayUserprofil() {
                 updateData.password = editedUser.password;
             }
 
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/updateUserProfile`, updateData, {
+            const response = await apiClient.post(`${process.env.NEXT_PUBLIC_API_URL}/updateUserProfile`, updateData, {
                 headers: {
                     "Content-Type": "application/json",
                 },

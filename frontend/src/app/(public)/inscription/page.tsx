@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import axios from "axios";
+import apiClient from "@/lib/axios";
 import Link from "next/link";
 import Image from "next/image";
 import Button from "../../components/front/Button";

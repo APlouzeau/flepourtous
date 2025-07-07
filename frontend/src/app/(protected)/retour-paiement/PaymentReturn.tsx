@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import axios from "axios";
+import apiClient from "@/lib/axios";
 
 interface PaymentReturnProps {
     sessionId?: string;
@@ -31,7 +31,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
 
         const checkPaymentStatus = async () => {
             try {
-                const response = await axios.post(
+                const response = await apiClient.post(
                     `${process.env.NEXT_PUBLIC_API_URL}/payment-status`,
                     { session_id: sessionId },
                     {
