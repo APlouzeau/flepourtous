@@ -92,14 +92,6 @@ export default function TestimonialsSlider({ testimonials, isVisible }: Testimon
                         <TestimonialCard {...testimonials[2]} />
                     </div>
                 </div>
-                <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 max-w-4xl mx-auto">
-                    <div className={`scroll-animate-right scroll-animate-delay-4 ${isVisible ? "visible" : ""}`}>
-                        <TestimonialCard {...testimonials[3]} />
-                    </div>
-                    <div className={`scroll-animate-right scroll-animate-delay-5 ${isVisible ? "visible" : ""}`}>
-                        <TestimonialCard {...testimonials[4]} />
-                    </div>
-                </div>
             </div>
 
             {/* Mobile Slider Layout */}
