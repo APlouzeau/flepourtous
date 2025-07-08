@@ -3,7 +3,7 @@
 import { useContext, useState } from "react";
 import { Context } from "./profileContext";
 import Button from "../../components/front/Button";
-import apiClient from "@/lib/axios";
+import { changeUserProfile } from "./profileAction";
 
 export default function DisplayUserprofil() {
     const { dataUser } = useContext(Context);
@@ -12,77 +12,33 @@ export default function DisplayUserprofil() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [editedUser, setEditedUser] = useState({
+        nickName: dataUser?.nickName || "",
         firstName: dataUser?.firstName || "",
         lastName: dataUser?.lastName || "",
         mail: dataUser?.mail || "",
         address: dataUser?.address || "",
         country: dataUser?.country || "",
-        password: "",
+        password: dataUser?.password || "",
     });
     const [settings, setSettings] = useState({
         emailNotifications: true,
         courseReminders: true,
     });
+    const [modalError, setModalError] = useState("");
 
     const handleSaveChanges = async () => {
+        const response = await changeUserProfile(editedUser);
         setIsLoading(true);
         setError("");
-
-        try {
-            // Préparer les données à envoyer
-            const updateData: {
-                firstName: string;
-                lastName: string;
-                mail: string;
-                address: string;
-                country: string;
-                password?: string;
-            } = {
-                firstName: editedUser.firstName,
-                lastName: editedUser.lastName,
-                mail: editedUser.mail,
-                address: editedUser.address,
-                country: editedUser.country,
-            };
-
-            // Ajouter le mot de passe seulement s'il a été saisi
-            if (editedUser.password.trim() !== "") {
-                updateData.password = editedUser.password;
-            }
-
-            const response = await apiClient.post(`${process.env.NEXT_PUBLIC_API_URL}/updateUserProfile`, updateData, {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            });
-
-            if (response.data.code === 1) {
-                alert("Profil mis à jour avec succès !");
-                setShowEditModal(false);
-                setEditedUser((prev) => ({ ...prev, password: "" })); // Réinitialiser le mot de passe
-                // Recharger la page pour afficher les nouvelles données
-                window.location.reload();
-            } else {
-                setError(response.data.message || "Erreur lors de la mise à jour");
-            }
-        } catch (error: unknown) {
-            console.error("Erreur lors de la mise à jour:", error);
-            const errorMessage =
-                error instanceof Error &&
-                "response" in error &&
-                typeof error.response === "object" &&
-                error.response !== null &&
-                "data" in error.response &&
-                typeof error.response.data === "object" &&
-                error.response.data !== null &&
-                "message" in error.response.data &&
-                typeof error.response.data.message === "string"
-                    ? error.response.data.message
-                    : "Erreur lors de la mise à jour du profil";
-            setError(errorMessage);
-        } finally {
+        if (response.code === 1) {
             setIsLoading(false);
+            setShowEditModal(false); // Fermer le modal après la mise à jour
+            alert(response.message || "Profil mis à jour avec succès !");
+            window.location.reload();
+        }
+        if (response.code === 0) {
+            setIsLoading(false);
+            setModalError(response.message || "Erreur lors de la mise à jour du profil");
         }
     };
 
@@ -106,12 +62,13 @@ export default function DisplayUserprofil() {
         setShowEditModal(false);
         setError("");
         setEditedUser({
+            nickName: dataUser?.nickName || "",
             firstName: dataUser?.firstName || "",
             lastName: dataUser?.lastName || "",
             mail: dataUser?.mail || "",
             address: dataUser?.address || "",
             country: dataUser?.country || "",
-            password: "",
+            password: dataUser?.country || "",
         });
     };
 
@@ -403,6 +360,19 @@ export default function DisplayUserprofil() {
                             <div className="space-y-4">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Surnom *</label>
+                                        <input
+                                            type="text"
+                                            value={editedUser.nickName}
+                                            onChange={(e) => handleInputChange("nickName", e.target.value)}
+                                            placeholder="Entrez votre surnom"
+                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+
+                                    <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
                                         <input
                                             type="text"
@@ -479,11 +449,14 @@ export default function DisplayUserprofil() {
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
                                         disabled={isLoading}
                                     />
-                                    <p className="text-xs text-gray-500 mt-1">
-                                        Le mot de passe doit contenir au moins 8 caractères
-                                    </p>
                                 </div>
                             </div>
+
+                            {modalError && (
+                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                    <p className="text-red-600 text-sm">{modalError}</p>
+                                </div>
+                            )}
 
                             <div className="flex space-x-3 mt-6">
                                 <Button

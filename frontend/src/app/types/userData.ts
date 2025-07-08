@@ -1,4 +1,4 @@
-export interface userDataProps {
+export interface UserDataProps {
     idUser: number;
     nickName: string;
     firstName: string;
@@ -8,4 +8,5 @@ export interface userDataProps {
     wallet: number;
     address?: string;
     country?: string;
+    password?: string; // Le mot de passe est optionnel
 }

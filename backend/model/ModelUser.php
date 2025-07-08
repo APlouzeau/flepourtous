@@ -63,7 +63,7 @@ extends ClassDatabase
 
     public function getUser(EntitieUser $user)
     {
-        $req = $this->conn->prepare('SELECT idUser, nickName, firstName, lastName, mail FROM users WHERE idUser = :idUser');
+        $req = $this->conn->prepare('SELECT idUser, nickName, firstName, lastName, mail, address, country FROM users WHERE idUser = :idUser');
         $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
@@ -75,6 +75,8 @@ extends ClassDatabase
                     'firstName' => $data['firstName'],
                     'lastName' => $data['lastName'],
                     'mail' => $data['mail'],
+                    'address' => $data['address'] ?? null,
+                    'country' => $data['country'] ?? null,
                 ];
         } else {
             return null; // Utilisateur non trouvé
@@ -170,6 +172,12 @@ extends ClassDatabase
             ':idUser' => $user->getIdUser()
         ];
 
+        // Ajouter le surnom si il est fourni
+        if ($user->getNickName() !== null) {
+            $query .= ", nickName = :nickName";
+            $params[':nickName'] = $user->getNickName();
+        }
+
         // Ajouter l'adresse si elle est fournie
         if ($user->getAddress() !== null) {
             $query .= ", address = :address";
@@ -180,12 +188,6 @@ extends ClassDatabase
         if ($user->getCountry() !== null) {
             $query .= ", country = :country";
             $params[':country'] = $user->getCountry();
-        }
-
-        // Ajouter le mot de passe si il est fourni
-        if ($user->getPassword() !== null) {
-            $query .= ", password = :password";
-            $params[':password'] = $user->getPassword();
         }
 
         $query .= " WHERE idUser = :idUser";

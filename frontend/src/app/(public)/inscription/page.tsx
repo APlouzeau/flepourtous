@@ -14,10 +14,13 @@ export default function RegisterPage() {
     const [passwordConfirm, setPasswordConfirm] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        axios
+        setError("");
+        setIsLoading(true);
+        apiClient
             .post(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
                 nickName,
                 firstName,
@@ -60,88 +63,89 @@ export default function RegisterPage() {
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">Créer votre compte</h2>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-                <div>
-                    <input
-                        type="string"
-                        placeholder="Pseudo"
-                        value={nickName}
-                        onChange={(e) => setNickName(e.target.value)}
-                        required
-                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
-                    />
-                </div>
-                <div>
-                    <input
-                        type="string"
-                        placeholder="Prénom"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        required
-                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
-                    />
-                </div>
-                <div>
-                    <input
-                        type="string"
-                        placeholder="Nom de famille"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        required
-                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
-                    />
-                </div>
-                <div>
-                    <input
-                        type="email"
-                        placeholder="Adresse email"
-                        value={mail}
-                        onChange={(e) => setMail(e.target.value)}
-                        required
-                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
-                    />
-                </div>
-                <div>
-                    <input
-                        type="password"
-                        placeholder="Mot de passe"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
-                    />
-                </div>
-                <div>
-                    <input
-                        type="password"
-                        placeholder="Confirmer le mot de passe"
-                        value={passwordConfirm}
-                        onChange={(e) => setPasswordConfirm(e.target.value)}
-                        required
-                        className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
-                    />
-                </div>
+            {!success && (
+                <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+                    <div>
+                        <input
+                            type="string"
+                            placeholder="Pseudo"
+                            value={nickName}
+                            onChange={(e) => setNickName(e.target.value)}
+                            required
+                            className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="string"
+                            placeholder="Prénom"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            required
+                            className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="string"
+                            placeholder="Nom de famille"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            required
+                            className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="email"
+                            placeholder="Adresse email"
+                            value={mail}
+                            onChange={(e) => setMail(e.target.value)}
+                            required
+                            className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="password"
+                            placeholder="Mot de passe"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="password"
+                            placeholder="Confirmer le mot de passe"
+                            value={passwordConfirm}
+                            onChange={(e) => setPasswordConfirm(e.target.value)}
+                            required
+                            className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                        />
+                    </div>
 
-                {error && (
-                    <p className="text-red-500 text-xs sm:text-sm text-center bg-red-50 p-3 rounded-xl border border-red-200">
-                        {error}
-                    </p>
-                )}
-                {success && (
-                    <p className="text-green-500 text-xs sm:text-sm text-center bg-green-50 p-3 rounded-xl border border-green-200">
-                        {success}
-                    </p>
-                )}
+                    {error && (
+                        <p className="text-red-500 text-xs sm:text-sm text-center bg-red-50 p-3 rounded-xl border border-red-200">
+                            {error}
+                        </p>
+                    )}
 
-                <Button
-                    variant="black"
-                    type="submit"
-                    className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold"
-                >
-                    Inscription
-                </Button>
-            </form>
-
+                    <Button
+                        variant="black"
+                        type="submit"
+                        className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold"
+                    >
+                        Inscription
+                    </Button>
+                </form>
+            )}
+            {success && (
+                <p className="text-green-500 text-xs sm:text-sm text-center bg-green-50 p-3 rounded-xl border border-green-200">
+                    {success}
+                </p>
+            )}
             <div className="mt-4 sm:mt-6 text-center">
                 <p className="text-xs sm:text-sm lg:text-base text-gray-600">
                     Vous avez déjà un compte ?{" "}

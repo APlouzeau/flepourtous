@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useScrollAnimation } from "@/lib/useScrollAnimation";
-import { LessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
+import { LessonWithPrice } from "@/app/types/lessons";
 import FeatureCard from "./FeatureCard";
 import FormulaCard from "./FormulaCard";
 import StatCard from "./StatCard";
@@ -11,11 +11,9 @@ import TestimonialsSlider from "./TestimonialsSlider";
 import FAQItem from "./FAQItem";
 import Button from "./Button";
 
-interface HomePageClientProps {
-    lessons: Readonly<LessonsWithPrices>;
-}
-
-export default function HomePageClient({ lessons }: Readonly<HomePageClientProps>) {
+export default function HomePageClient({ lessons }: { lessons: LessonWithPrice[] }) {
+    // 1. On récupère les données côté serveur
+    // const lessons: Lesson[] = await getLessons();
     const heroSection = useScrollAnimation();
     const whyChooseSection = useScrollAnimation();
     const formulasSection = useScrollAnimation();

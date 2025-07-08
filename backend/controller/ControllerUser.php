@@ -108,8 +108,6 @@ class ControllerUser
             'message' => 'Utilisateur trouvé',
             'data' =>
             $modelUser->getUser($user)
-
-
         ];
 
         $wallet = $modelUser->getWalletFromUser($_SESSION['idUser']);
@@ -147,86 +145,55 @@ class ControllerUser
             return;
         }
 
-        // Validation des données
-        if (!filter_var($data['mail'], FILTER_VALIDATE_EMAIL)) {
+        $verification = $this->controlUserInformations($data);
+        if ($verification['code'] == 0) {
             $response = [
                 'code' => 0,
-                'message' => 'Adresse e-mail invalide',
+                'message' => $verification['message'],
             ];
             echo json_encode($response);
             return;
         }
+        if ($verification['code'] == 1) {
+            $modelUser = new ModelUser();
 
-        if (strlen($data['firstName']) < 2) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le prénom doit contenir au moins 2 caractères',
-            ];
-            echo json_encode($response);
-            return;
-        }
-
-        if (strlen($data['lastName']) < 2) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le nom doit contenir au moins 2 caractères',
-            ];
-            echo json_encode($response);
-            return;
-        }
-
-        $modelUser = new ModelUser();
-
-        // Vérifier si l'email n'est pas déjà utilisé par un autre utilisateur
-        $existingUserId = $modelUser->checkMail($data['mail']);
-        if ($existingUserId && $existingUserId != $_SESSION['idUser']) {
-            $response = [
-                'code' => 0,
-                'message' => 'Cette adresse e-mail est déjà utilisée par un autre utilisateur',
-            ];
-            echo json_encode($response);
-            return;
-        }
-
-        // Préparer les données pour la mise à jour
-        $updateData = [
-            'idUser' => $_SESSION['idUser'],
-            'firstName' => $data['firstName'],
-            'lastName' => $data['lastName'],
-            'mail' => $data['mail'],
-            'address' => isset($data['address']) ? $data['address'] : null,
-            'country' => isset($data['country']) ? $data['country'] : null
-        ];
-
-        // Si un nouveau mot de passe est fourni, l'ajouter
-        if (isset($data['password']) && !empty($data['password'])) {
-            if (strlen($data['password']) < 8) {
+            $existingUserId = $modelUser->checkMail($data['mail']);
+            if ($existingUserId && $existingUserId != $_SESSION['idUser']) {
                 $response = [
                     'code' => 0,
-                    'message' => 'Le mot de passe doit contenir au moins 8 caractères',
+                    'message' => 'Cette adresse e-mail est déjà utilisée par un autre utilisateur',
                 ];
                 echo json_encode($response);
                 return;
             }
-            $updateData['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
-        }
 
-        $user = new EntitieUser($updateData);
-        $updateResult = $modelUser->updateUser($user);
-
-        if ($updateResult) {
-            $response = [
-                'code' => 1,
-                'message' => 'Profil mis à jour avec succès',
+            // Préparer les données pour la mise à jour
+            $updateData = [
+                'idUser' => $_SESSION['idUser'],
+                'nickName' => isset($data['nickName']) ? $data['nickName'] : null,
+                'firstName' => $data['firstName'],
+                'lastName' => $data['lastName'],
+                'mail' => $data['mail'],
+                'address' => isset($data['address']) ? $data['address'] : null,
+                'country' => isset($data['country']) ? $data['country'] : null,
             ];
-        } else {
-            $response = [
-                'code' => 0,
-                'message' => 'Erreur lors de la mise à jour du profil',
-            ];
-        }
 
-        echo json_encode($response);
+            $user = new EntitieUser($updateData);
+            $updateResult = $modelUser->updateUser($user);
+
+            if ($updateResult) {
+                $response = [
+                    'code' => 1,
+                    'message' => 'Profil mis à jour avec succès',
+                ];
+            } else {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de la mise à jour du profil',
+                ];
+            }
+            echo json_encode($response);
+        }
     }
 
     public function register()
@@ -338,10 +305,6 @@ class ControllerUser
 
     public function listUsers()
     {
-        // Ajouter les headers CORS pour permettre la communication entre domaines
-
-
-
         $modelUser = new ModelUser();
         $users = $modelUser->getAllUsers();
         $result = [];
@@ -406,6 +369,21 @@ class ControllerUser
             $response = [
                 'code' => 0,
                 'message' => 'Le nom doit contenir au moins 2 caractères',
+            ];
+        } elseif (strlen($data['nickName']) > 20) {
+            $response = [
+                'code' => 0,
+                'message' => 'Le pseudo doit contenir au maximum 20 caractères',
+            ];
+        } elseif (strlen($data['firstName']) > 20) {
+            $response = [
+                'code' => 0,
+                'message' => 'Le prénom doit contenir au maximum 20 caractères',
+            ];
+        } elseif (strlen($data['lastName']) > 20) {
+            $response = [
+                'code' => 0,
+                'message' => 'Le nom doit contenir au maximum 20 caractères',
             ];
         } else {
             $response = [

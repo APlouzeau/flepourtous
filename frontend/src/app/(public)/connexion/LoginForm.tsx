@@ -13,7 +13,7 @@ export default function LoginForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await axios
+        await apiClient
             .post(
                 `${process.env.NEXT_PUBLIC_API_URL}/login`,
                 {
