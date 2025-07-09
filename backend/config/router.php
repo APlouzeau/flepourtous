@@ -18,6 +18,7 @@ $router->addRoute('POST', BASE_URL . "api/updateUserProfile", 'ControllerUser', 
 $router->addRoute('GET', BASE_URL . "api/verify-email/{token}", 'ControllerUser', 'verifyEmail');
 $router->addRoute('POST', BASE_URL . "api/getWallet", 'ControllerOrder', 'getWallet');
 $router->addRoute('POST', BASE_URL . "api/updateUserProfile", 'ControllerUser', 'updateUserProfile');
+$router->addRoute('POST', BASE_URL . "api/updateUserPassword", 'ControllerUser', 'updateUserPassword');
 
 //Lessons
 $router->addRoute('GET', BASE_URL . "api/lessons", 'ControllerLesson', 'getAllLessons');

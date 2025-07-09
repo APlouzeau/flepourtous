@@ -3,22 +3,30 @@
 import { useContext, useState } from "react";
 import { Context } from "./profileContext";
 import Button from "../../components/front/Button";
-import { changeUserProfile } from "./profileAction";
+import { InformationTab } from "./InformationTab";
+import { PasswordModify } from "./PasswordModify";
 
 export default function DisplayUserprofil() {
     const { dataUser } = useContext(Context);
     const [activeTab, setActiveTab] = useState("informations");
-    const [showEditModal, setShowEditModal] = useState(false);
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [editedUser, setEditedUser] = useState({
+        idUser: typeof dataUser?.idUser === "number" ? dataUser.idUser : 0,
         nickName: dataUser?.nickName || "",
         firstName: dataUser?.firstName || "",
         lastName: dataUser?.lastName || "",
+        role: dataUser?.role || "",
+        wallet: typeof dataUser?.wallet === "number" ? dataUser.wallet : 0,
         mail: dataUser?.mail || "",
         address: dataUser?.address || "",
+        address2: dataUser?.address2 || "",
+        address3: dataUser?.address3 || "",
+        zip: dataUser?.zip || "",
+        city: dataUser?.city || "",
         country: dataUser?.country || "",
-        password: dataUser?.password || "",
+        password: "",
     });
     const [settings, setSettings] = useState({
         emailNotifications: true,
@@ -26,28 +34,11 @@ export default function DisplayUserprofil() {
     });
     const [modalError, setModalError] = useState("");
 
-    const handleSaveChanges = async () => {
-        const response = await changeUserProfile(editedUser);
-        setIsLoading(true);
-        setError("");
-        if (response.code === 1) {
-            setIsLoading(false);
-            setShowEditModal(false); // Fermer le modal après la mise à jour
-            alert(response.message || "Profil mis à jour avec succès !");
-            window.location.reload();
-        }
-        if (response.code === 0) {
-            setIsLoading(false);
-            setModalError(response.message || "Erreur lors de la mise à jour du profil");
-        }
-    };
-
     const handleInputChange = (field: string, value: string) => {
         setEditedUser((prev) => ({
             ...prev,
             [field]: value,
         }));
-        // Effacer l'erreur quand l'utilisateur tape
         if (error) setError("");
     };
 
@@ -56,20 +47,6 @@ export default function DisplayUserprofil() {
             ...prev,
             [setting]: !prev[setting as keyof typeof prev],
         }));
-    };
-
-    const handleCloseModal = () => {
-        setShowEditModal(false);
-        setError("");
-        setEditedUser({
-            nickName: dataUser?.nickName || "",
-            firstName: dataUser?.firstName || "",
-            lastName: dataUser?.lastName || "",
-            mail: dataUser?.mail || "",
-            address: dataUser?.address || "",
-            country: dataUser?.country || "",
-            password: dataUser?.country || "",
-        });
     };
 
     return (
@@ -106,17 +83,6 @@ export default function DisplayUserprofil() {
                                 {dataUser?.wallet != null ? dataUser.wallet : 0} €
                             </div>
                         </div>
-
-                        {/* Actions */}
-                        <div className="flex space-x-3">
-                            <Button
-                                onClick={() => setShowEditModal(true)}
-                                variant="black"
-                                className="text-sm px-4 py-2 !bg-[#1D1E1C] hover:!bg-gray-800"
-                            >
-                                Modifier
-                            </Button>
-                        </div>
                     </div>
                 </div>
 
@@ -125,7 +91,7 @@ export default function DisplayUserprofil() {
                     <nav className="flex space-x-0 overflow-x-auto">
                         {[
                             { id: "informations", label: "Informations", icon: "👤" },
-                            { id: "cours", label: "Mes Cours", icon: "📚" },
+                            { id: "Mot de passe", label: "Mot de passe", icon: "📚" },
                             { id: "planning", label: "Planning", icon: "📅" },
                             { id: "paiements", label: "Paiements", icon: "💳" },
                             { id: "parametres", label: "Paramètres", icon: "⚙️" },
@@ -148,66 +114,9 @@ export default function DisplayUserprofil() {
 
                 {/* Content Area */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    {activeTab === "informations" && (
-                        <div className="space-y-6">
-                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations personnelles</h2>
+                    {activeTab === "informations" && dataUser && <InformationTab dataUser={dataUser} />}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
-                                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {dataUser?.firstName || "Non renseigné"}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {dataUser?.lastName || "Non renseigné"}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {dataUser?.mail || "Non renseigné"}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {dataUser?.address || "Non renseigné"}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Pays</label>
-                                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                            {dataUser?.country || "Non renseigné"}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === "cours" && (
-                        <div className="space-y-6">
-                            <h2 className="text-xl font-semibold text-gray-900 mb-4">Mes cours</h2>
-                            <div className="text-center py-12">
-                                <div className="text-4xl mb-4">📚</div>
-                                <p className="text-gray-500 text-lg mb-4">Aucun cours pour le moment</p>
-                                <Button
-                                    href="/offre-de-cours"
-                                    variant="black"
-                                    className="text-sm px-6 py-3 !bg-[#1D1E1C] hover:!bg-gray-800"
-                                >
-                                    Découvrir nos cours
-                                </Button>
-                            </div>
-                        </div>
-                    )}
+                    {activeTab === "Mot de passe" && <PasswordModify />}
 
                     {activeTab === "planning" && (
                         <div className="space-y-6">
@@ -326,162 +235,6 @@ export default function DisplayUserprofil() {
                     )}
                 </div>
             </div>
-
-            {/* Modal de modification */}
-            {showEditModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-                        <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-semibold text-gray-900">Modifier mes informations</h2>
-                                <button
-                                    onClick={handleCloseModal}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                                    aria-label="Fermer la popup"
-                                    disabled={isLoading}
-                                >
-                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M6 18L18 6M6 6l12 12"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {error && (
-                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                    <p className="text-red-600 text-sm">{error}</p>
-                                </div>
-                            )}
-
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Surnom *</label>
-                                        <input
-                                            type="text"
-                                            value={editedUser.nickName}
-                                            onChange={(e) => handleInputChange("nickName", e.target.value)}
-                                            placeholder="Entrez votre surnom"
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                            required
-                                            disabled={isLoading}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-                                        <input
-                                            type="text"
-                                            value={editedUser.firstName}
-                                            onChange={(e) => handleInputChange("firstName", e.target.value)}
-                                            placeholder="Entrez votre prénom"
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                            required
-                                            disabled={isLoading}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                                        <input
-                                            type="text"
-                                            value={editedUser.lastName}
-                                            onChange={(e) => handleInputChange("lastName", e.target.value)}
-                                            placeholder="Entrez votre nom"
-                                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                            required
-                                            disabled={isLoading}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <input
-                                        type="email"
-                                        value={editedUser.mail}
-                                        onChange={(e) => handleInputChange("mail", e.target.value)}
-                                        placeholder="Entrez votre email"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                        required
-                                        disabled={isLoading}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                                    <input
-                                        type="text"
-                                        value={editedUser.address}
-                                        onChange={(e) => handleInputChange("address", e.target.value)}
-                                        placeholder="Entrez votre adresse"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                        disabled={isLoading}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Pays</label>
-                                    <input
-                                        type="text"
-                                        value={editedUser.country}
-                                        onChange={(e) => handleInputChange("country", e.target.value)}
-                                        placeholder="Entrez votre pays"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                        disabled={isLoading}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Nouveau mot de passe
-                                        <span className="text-gray-500">(laisser vide pour ne pas modifier)</span>
-                                    </label>
-                                    <input
-                                        type="password"
-                                        value={editedUser.password}
-                                        onChange={(e) => handleInputChange("password", e.target.value)}
-                                        placeholder="Entrez un nouveau mot de passe"
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
-                                        disabled={isLoading}
-                                    />
-                                </div>
-                            </div>
-
-                            {modalError && (
-                                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                    <p className="text-red-600 text-sm">{modalError}</p>
-                                </div>
-                            )}
-
-                            <div className="flex space-x-3 mt-6">
-                                <Button
-                                    onClick={handleCloseModal}
-                                    variant="white"
-                                    className="flex-1 text-sm py-3"
-                                    disabled={isLoading}
-                                >
-                                    Annuler
-                                </Button>
-                                <Button
-                                    onClick={handleSaveChanges}
-                                    variant="black"
-                                    className="flex-1 text-sm py-3 !bg-[#1D1E1C] hover:!bg-gray-800"
-                                    disabled={
-                                        isLoading || !editedUser.firstName || !editedUser.lastName || !editedUser.mail
-                                    }
-                                >
-                                    {isLoading ? "Sauvegarde..." : "Sauvegarder"}
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

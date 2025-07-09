@@ -175,6 +175,10 @@ class ControllerUser
                 'lastName' => $data['lastName'],
                 'mail' => $data['mail'],
                 'address' => isset($data['address']) ? $data['address'] : null,
+                'address2' => isset($data['address2']) ? $data['address2'] : null,
+                'address3' => isset($data['address3']) ? $data['address3'] : null,
+                'zip' => isset($data['zip']) ? $data['zip'] : null,
+                'city' => isset($data['city']) ? $data['city'] : null,
                 'country' => isset($data['country']) ? $data['country'] : null,
             ];
 
@@ -417,5 +421,76 @@ class ControllerUser
             'code' => 1,
             'message' => 'Mot de passe valide',
         ];
+    }
+
+    public function updateUserPassword()
+    {
+        $this->verifyConnectBack();
+
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+
+        if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur de méthode',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if (!isset($data['oldPassword']) || !isset($data['newPassword']) || !isset($data['confirmNewPassword'])) {
+            $response = [
+                'code' => 0,
+                'message' => 'Paramètres requis manquants (oldPassword, newPassword, confirmNewPassword)',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $modelUser = new ModelUser();
+        $passwordsOk = $modelUser->checkPassword($_SESSION['idUser'], $data['oldPassword']);
+        if (!$passwordsOk) {
+            $response = [
+                'code' => 0,
+                'message' => 'Ancien mot de passe incorrect',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $passwords = [
+            'password' => $data['newPassword'],
+            'passwordConfirm' => $data['confirmNewPassword']
+        ];
+        $validation = $this->controlUserPasswordFormat($passwords);
+        if ($validation['code'] == 0) {
+            $response = [
+                'code' => 0,
+                'message' => $validation['message'],
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $user = new EntitieUser([
+            'idUser' => $_SESSION['idUser'],
+            'password' => password_hash($data['newPassword'], PASSWORD_BCRYPT),
+        ]);
+
+        $updateResult = $modelUser->updateUserPassword($user);
+
+        if ($updateResult) {
+            $response = [
+                'code' => 1,
+                'message' => 'Mot de passe mis à jour avec succès',
+            ];
+        } else {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur lors de la mise à jour du mot de passe',
+            ];
+        }
+        echo json_encode($response);
     }
 }
