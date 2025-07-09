@@ -10,9 +10,12 @@ export default function LoginForm() {
     const [mail, setMail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const isValidForm = mail && password;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsLoading(true);
         await apiClient
             .post(
                 `${process.env.NEXT_PUBLIC_API_URL}/login`,
@@ -33,6 +36,7 @@ export default function LoginForm() {
                     redirect("/profil");
                 } else {
                     setError(response.data.message);
+                    setIsLoading(false);
                 }
             });
     };
@@ -81,7 +85,12 @@ export default function LoginForm() {
                 </p>
             )}
 
-            <Button variant="black" type="submit" className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold">
+            <Button
+                variant="black"
+                type="submit"
+                className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold"
+                disabled={isLoading || !isValidForm}
+            >
                 Connexion
             </Button>
         </form>
