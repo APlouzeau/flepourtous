@@ -350,68 +350,72 @@ class ControllerUser
 
     public function controlUserInformations(array $data)
     {
+        // 1. Validation de l'adresse e-mail (filter_var est la meilleure méthode)
         if (!filter_var($data['mail'], FILTER_VALIDATE_EMAIL)) {
-            $response = [
+            return [
                 'code' => 0,
                 'message' => 'Adresse e-mail invalide',
             ];
-        } elseif (strlen($data['nickName']) < 2) {
-            $response = [
+        }
+
+        // 2. Validation du pseudo
+        if (strlen($data['nickName']) < 2 || strlen($data['nickName']) > 25) {
+            return [
                 'code' => 0,
-                'message' => 'Le pseudo doit contenir au moins 2 caractères',
-            ];
-        } elseif (strlen($data['firstName']) < 2) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le prénom doit contenir au moins 2 caractères',
-            ];
-        } elseif (strlen($data['lastName']) < 2) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le nom doit contenir au moins 2 caractères',
-            ];
-        } elseif (strlen($data['nickName']) > 20) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le pseudo doit contenir au maximum 20 caractères',
-            ];
-        } elseif (strlen($data['firstName']) > 20) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le prénom doit contenir au maximum 20 caractères',
-            ];
-        } elseif (strlen($data['lastName']) > 20) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le nom doit contenir au maximum 20 caractères',
-            ];
-        } else {
-            $response = [
-                'code' => 1,
-                'message' => 'Informations valides',
+                'message' => 'Le pseudo doit contenir entre 2 et 25 caractères',
             ];
         }
-        return $response;
+        // Regex pour autoriser lettres, chiffres et underscore pour le pseudo
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $data['nickName'])) {
+            return [
+                'code' => 0,
+                'message' => 'Le pseudo ne peut contenir que des lettres (sans accent), des chiffres et des underscores (_).',
+            ];
+        }
+
+        // 3. Validation du prénom
+        if (strlen($data['firstName']) < 2 || strlen($data['firstName']) > 25) {
+            return [
+                'code' => 0,
+                'message' => 'Le prénom doit contenir entre 2 et 25 caractères',
+            ];
+        }
+
+        // 4. Validation du nom
+        if (strlen($data['lastName']) < 2 || strlen($data['lastName']) > 25) {
+            return [
+                'code' => 0,
+                'message' => 'Le nom doit contenir entre 2 et 25 caractères',
+            ];
+        }
+
+        // Si toutes les vérifications ci-dessus sont passées, les informations sont valides.
+        return [
+            'code' => 1,
+            'message' => 'Informations valides',
+        ];
     }
 
     public function controlUserPasswordFormat(array $data)
     {
-        if (strlen($data['password']) < 12) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le mot de passe doit contenir au moins 12 caractères',
-            ];
-        } elseif ($data['password'] != $data['passwordConfirm']) {
-            $response = [
+        if ($data['password'] != $data['passwordConfirm']) {
+            return [
                 'code' => 0,
                 'message' => 'Les mots de passe ne correspondent pas',
             ];
-        } else {
-            $response = [
-                'code' => 1,
-                'message' => 'Mot de passe valide',
+        }
+
+        $regex = "/((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,60})/";
+        if (!preg_match($regex, $data['password'])) {
+            return [
+                'code' => 0,
+                'message' => 'Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.',
             ];
         }
-        return $response;
+
+        return [
+            'code' => 1,
+            'message' => 'Mot de passe valide',
+        ];
     }
 }
