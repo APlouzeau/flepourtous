@@ -129,7 +129,7 @@ extends ClassDatabase
             $req = $this->conn->prepare($query);
             $req->bindValue(":verifyToken", $verifyToken);
             $req->execute();
-            return true;
+            return $data['idUser'];
         } else {
             error_log("Email verification failed for link: " . $verifyToken);
             return false;
@@ -243,6 +243,24 @@ extends ClassDatabase
         $req = $this->conn->prepare($query);
         $req->bindValue(":password", $user->getPassword(), PDO::PARAM_STR);
         $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
+        return $req->execute();
+    }
+
+    public function setNewToken(int $idUser, string $token)
+    {
+        $query = "UPDATE users SET verifyToken = :verifyToken WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":verifyToken", $token, PDO::PARAM_STR);
+        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        return $req->execute();
+    }
+
+    public function updatePassword(int $idUser, string $password)
+    {
+        $query = "UPDATE users SET password = :password WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        $req->bindValue(":password", $password,  PDO::PARAM_STR);
         return $req->execute();
     }
 }

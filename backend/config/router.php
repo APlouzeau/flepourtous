@@ -19,6 +19,10 @@ $router->addRoute('GET', BASE_URL . "api/verify-email/{token}", 'ControllerUser'
 $router->addRoute('POST', BASE_URL . "api/getWallet", 'ControllerOrder', 'getWallet');
 $router->addRoute('POST', BASE_URL . "api/updateUserProfile", 'ControllerUser', 'updateUserProfile');
 $router->addRoute('POST', BASE_URL . "api/updateUserPassword", 'ControllerUser', 'updateUserPassword');
+$router->addRoute('POST', BASE_URL . "api/forgetedPassword", 'ControllerUser', 'forgetedPassword');
+$router->addRoute('GET', BASE_URL . "api/reset-password/{token}", 'ControllerUser', 'resetPasswordLink');
+$router->addRoute('POST', BASE_URL . "api/resetPassword", 'ControllerUser', 'resetPassword');
+
 
 //Lessons
 $router->addRoute('GET', BASE_URL . "api/lessons", 'ControllerLesson', 'getAllLessons');
