@@ -7,10 +7,15 @@ class EntitieUser
     private string $lastName;
     private string $role;
     private string $mail;
-    private string $nickName;
+    private ?string $nickName;
     private string $password;
-    private string $address;
-    private string $country;
+    private ?string $address;
+    private ?string $address2;
+    private ?string $address3;
+    private ?int $zip;
+    private ?string $city;
+
+    private ?string $country;
     private string $dateInscription;
     private int $isVerified;
     private string $verifyToken;
@@ -115,6 +120,45 @@ class EntitieUser
     {
         $this->address = $address;
 
+        return $this;
+    }
+    public function getAddress2()
+    {
+        return $this->address2;
+    }
+    public function setAddress2($address2)
+    {
+        $this->address2 = $address2;
+
+        return $this;
+    }
+    public function getAddress3()
+    {
+        return $this->address3;
+    }
+    public function setAddress3($address3)
+    {
+        $this->address3 = $address3;
+
+        return $this;
+    }
+
+    public function getZip()
+    {
+        return $this->zip;
+    }
+    public function setZip($zip)
+    {
+        $this->zip = $zip;
+        return $this;
+    }
+    public function getCity()
+    {
+        return $this->city;
+    }
+    public function setCity($city)
+    {
+        $this->city = $city;
         return $this;
     }
     public function getCountry()

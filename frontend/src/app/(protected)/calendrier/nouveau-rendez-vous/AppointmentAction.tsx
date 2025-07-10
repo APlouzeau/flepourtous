@@ -1,7 +1,7 @@
 "use server";
 
 import { getCookieBackend } from "@/lib/session";
-import axios from "axios";
+import apiClient from "@/lib/axios";
 import { revalidatePath } from "next/cache";
 
 export async function registerAppointment(formData: FormData) {
@@ -15,7 +15,7 @@ export async function registerAppointment(formData: FormData) {
         idLesson: formData.get("idLesson"),
     };
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/createEvent`, data, {
+        const response = await apiClient.post(`${process.env.NEXT_PUBLIC_API_URL}/createEvent`, data, {
             headers: {
                 Cookie: `PHPSESSID=${cookie}`,
                 "Content-Type": "application/json",
@@ -35,7 +35,7 @@ export async function registerAppointment(formData: FormData) {
 export async function prepareRepaymentAction(eventId: string) {
     const cookie = await getCookieBackend();
     try {
-        const response = await axios.post(
+        const response = await apiClient.post(
             `${process.env.NEXT_PUBLIC_API_URL}/prepareRepayment`,
             { eventId },
             {
@@ -59,7 +59,7 @@ export async function prepareRepaymentAction(eventId: string) {
 export async function deleteAppointment(idEvent: string) {
     const cookie = await getCookieBackend();
     try {
-        await axios.post(
+        await apiClient.post(
             `${process.env.NEXT_PUBLIC_API_URL}/deleteEvent`,
             { idEvent },
             {
@@ -79,7 +79,7 @@ export async function deleteAppointment(idEvent: string) {
 export async function getAvailableTimeSlots(date: string, userTimeZone: string, selectedDuration: string) {
     const cookie = await getCookieBackend();
     try {
-        const response = await axios.post(
+        const response = await apiClient.post(
             `${process.env.NEXT_PUBLIC_API_URL}/getAvailableTimeSlots`,
             { date, userTimeZone, selectedDuration },
             {
@@ -100,7 +100,7 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
 export async function getAllLessonsWithPrices() {
     const cookie = await getCookieBackend();
     try {
-        const response = await axios.post(
+        const response = await apiClient.post(
             `${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`,
             {},
             {

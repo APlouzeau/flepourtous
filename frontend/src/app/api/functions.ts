@@ -1,6 +1,6 @@
 "use client";
 
-import axios from "axios";
+import apiClient from "@/lib/axios";
 import { useEffect } from "react";
 import { useLoginStore } from "@/store/auth";
 
@@ -10,7 +10,7 @@ export function useVerifyConnect() {
     useEffect(() => {
         const checkLoginStatus = async () => {
             try {
-                const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`);
+                const response = await apiClient.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`);
                 if (response.data.message === "Utilisateur connecté") {
                     setIsLoggedIn(true);
                 } else {
