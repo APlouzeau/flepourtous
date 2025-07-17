@@ -1,0 +1,52 @@
+# BASE
+FROM php:8.4-apache AS base
+
+WORKDIR /var/www/html
+
+RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/*.conf
+
+RUN apt-get update && apt-get install -y \
+    zlib1g-dev \
+    libzip-dev \
+    unzip \
+    && docker-php-ext-install zip \
+    && rm -rf /var/lib/apt/lists/*
+RUN docker-php-ext-install zip
+# INSTALL AND UPDATE COMPOSER
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+RUN composer self-update
+
+# DEV DEPENDENCIES
+FROM base AS dev-dependencies
+
+COPY composer.json composer.lock ./
+
+RUN composer install
+
+# PROD DEPENDENCIES
+FROM base AS prod-dependencies
+
+COPY composer.json composer.lock ./
+
+RUN composer install --no-dev
+
+
+# BUILD
+FROM base AS dev
+
+COPY composer.json ./composer.json
+COPY --from=dev-dependencies /var/www/html/vendor ./vendor
+
+COPY . .
+
+EXPOSE 80
+
+# PROD
+FROM base AS prod
+
+COPY composer.json ./composer.json
+COPY --from=prod-dependencies /var/www/html/vendor ./vendor
+
+COPY . . 
+
+EXPOSE 80
