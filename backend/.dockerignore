@@ -1,0 +1,12 @@
+# Ne jamais copier le dossier vendor local, il est géré par Composer dans le Dockerfile.
+vendor/
+
+# Ne pas copier les dépendances Node si tu en avais
+node_modules/
+
+# Ne pas copier les fichiers d'environnement locaux
+.env
+
+# Fichiers de configuration Git
+.git
+.gitignore
