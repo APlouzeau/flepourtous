@@ -2,13 +2,10 @@
 
 session_start();
 
-// --- CHARGEMENT DES VARIABLES D'ENVIRONNEMENT ---
 require_once __DIR__ . '/../vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
-// --- FIN DU CHARGEMENT ---
 
-// --- GESTION DES CORS ---
 header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
