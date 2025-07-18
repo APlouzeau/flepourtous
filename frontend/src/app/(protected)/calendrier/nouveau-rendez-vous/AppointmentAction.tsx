@@ -3,6 +3,7 @@
 import { getCookieBackend } from "@/lib/session";
 import apiClient from "@/lib/axios";
 import { revalidatePath } from "next/cache";
+import axios from "axios";
 
 export async function registerAppointment(formData: FormData) {
     const cookie = await getCookieBackend();
@@ -15,7 +16,7 @@ export async function registerAppointment(formData: FormData) {
         idLesson: formData.get("idLesson"),
     };
     try {
-        const response = await apiClient.post(`${process.env.NEXT_PUBLIC_API_URL}/createEvent`, data, {
+        const response = await apiClient.post("/api/createEvent", data, {
             headers: {
                 Cookie: `PHPSESSID=${cookie}`,
                 "Content-Type": "application/json",
@@ -36,7 +37,7 @@ export async function prepareRepaymentAction(eventId: string) {
     const cookie = await getCookieBackend();
     try {
         const response = await apiClient.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/prepareRepayment`,
+            "/api/prepareRepayment",
             { eventId },
             {
                 headers: {
@@ -60,7 +61,7 @@ export async function deleteAppointment(idEvent: string) {
     const cookie = await getCookieBackend();
     try {
         await apiClient.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/deleteEvent`,
+            "/api/deleteEvent",
             { idEvent },
             {
                 headers: {
@@ -80,7 +81,7 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
     const cookie = await getCookieBackend();
     try {
         const response = await apiClient.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/getAvailableTimeSlots`,
+            "/api/getAvailableTimeSlots",
             { date, userTimeZone, selectedDuration },
             {
                 headers: {
@@ -101,7 +102,7 @@ export async function getAllLessonsWithPrices() {
     const cookie = await getCookieBackend();
     try {
         const response = await apiClient.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`,
+            "/api/getAllLessonsWithPrices",
             {},
             {
                 headers: {

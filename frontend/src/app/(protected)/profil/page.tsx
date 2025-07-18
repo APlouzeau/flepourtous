@@ -6,7 +6,7 @@ import { getCookieBackend } from "@/lib/session";
 export default async function profilPage() {
     const cookie = await getCookieBackend();
     const res = await apiClient.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/userInformations`,
+        "api/userInformations",
         {},
         {
             headers: {

@@ -10,7 +10,7 @@ export function useVerifyConnect() {
     useEffect(() => {
         const checkLoginStatus = async () => {
             try {
-                const response = await apiClient.post(`${process.env.NEXT_PUBLIC_API_URL}/verifyConnect`);
+                const response = await apiClient.post("/api/verifyConnect`);
                 if (response.data.message === "Utilisateur connecté") {
                     setIsLoggedIn(true);
                 } else {

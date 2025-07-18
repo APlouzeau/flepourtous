@@ -3,35 +3,53 @@ services:
         container_name: backend
         build:
             context: ./backend
-            # On vise la cible 'dev' du Dockerfile, qui contient les dépendances de développement
             target: dev
         ports:
             - "8000:80"
-        env_file:
-            - ./backend/.env
-        # --- La magie du développement ---
-        # On crée un "miroir" entre le dossier ./backend de votre Mac et /var/www/html dans le conteneur.
-        # Chaque modification de fichier est instantanée dans le conteneur.
         volumes:
             - ./backend:/var/www/html
+        depends_on:
+            - db
 
-    # --- SERVICE FRONTEND (NEXT.JS) ---
     app:
         container_name: frontend
         build:
             context: ./frontend
             dockerfile: Dockerfile
-            # On vise la cible 'dev', qui a les dépendances de dev et le code source.
             target: dev
         ports:
             - "3000:3000"
-        # --- La magie du Hot-Reload ---
         volumes:
-            # On lie notre code local au dossier /app du conteneur.
             - ./frontend:/app
-            # Astuce importante : on dit à Docker de ne PAS écraser le node_modules du conteneur
-            # avec celui de notre machine (qui pourrait ne pas exister ou être pour un autre OS).
-            # Le conteneur utilisera bien le node_modules qu'il a lui-même installé.
             - /app/node_modules
-        # On remplace la commande par défaut du Dockerfile par la commande de développement.
         command: pnpm run dev
+        depends_on:
+            - api
+
+    db:
+        image: mariadb:10.6
+        container_name: database
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: flepourtous
+            MYSQL_USER: flepourtous
+            MYSQL_PASSWORD: 1234
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./db_data:/var/lib/mysql
+            - ./db:/docker-entrypoint-initdb.d
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: phpmyadmin
+        environment:
+            PMA_HOST: db
+            PMA_PORT: 3306
+        ports:
+            - "8081:80"
+        depends_on:
+            - db
+volumes:
+    db_data:

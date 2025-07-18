@@ -32,7 +32,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
         const checkPaymentStatus = async () => {
             try {
                 const response = await apiClient.post(
-                    `${process.env.NEXT_PUBLIC_API_URL}/payment-status`,
+                    "/api/payment-status",
                     { session_id: sessionId },
                     {
                         headers: {

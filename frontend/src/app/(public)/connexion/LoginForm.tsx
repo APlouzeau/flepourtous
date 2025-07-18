@@ -18,7 +18,7 @@ export default function LoginForm() {
         setIsLoading(true);
         await apiClient
             .post(
-                `${process.env.NEXT_PUBLIC_API_URL}/login`,
+                "/api/login",
                 {
                     mail,
                     password,

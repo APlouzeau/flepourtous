@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export async function forgetedPassword(mail: string) {
     const response = await apiClient.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/forgetedPassword`,
+        "/api/forgetedPassword",
         { mail },
         {
             headers: {

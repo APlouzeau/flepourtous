@@ -1,3 +1,13 @@
 RewriteEngine On
-RewriteBase /api/
-RewriteRule ^([a-zA-Z0-9\-\_\/]*)$ index.php
+
+# On s'assure que la base est la racine du dossier où se trouve ce .htaccess
+RewriteBase /
+
+# Condition 1 : Si la ressource demandée n'est PAS un fichier qui existe
+RewriteCond %{REQUEST_FILENAME} !-f
+# Condition 2 : Et si la ressource demandée n'est PAS un dossier qui existe
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Alors, on redirige la requête vers index.php
+# Et on lui passe l'URL d'origine dans le paramètre 'url'
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]

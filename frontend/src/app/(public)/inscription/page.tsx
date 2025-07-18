@@ -22,7 +22,7 @@ export default function RegisterPage() {
         setError("");
         setIsLoading(true);
         apiClient
-            .post(`${process.env.NEXT_PUBLIC_API_URL}/register`, {
+            .post("/api/register", {
                 nickName,
                 firstName,
                 lastName,

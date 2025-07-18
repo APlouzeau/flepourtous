@@ -11,6 +11,7 @@
 !.yarn/releases
 !.yarn/versions
 package-lock.json
+/vendor
 
 # testing
 **/coverage
@@ -25,6 +26,7 @@ package-lock.json
 # misc
 .DS_Store
 *.pem
+Thumbs.db
 
 # debug
 npm-debug.log*
@@ -33,7 +35,11 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # vercel
 .vercel
@@ -67,3 +73,6 @@ renew_google_watch.sh
 sendAlertMail.sh
 switchDevFlepourtous.sh
 switchStartFlepourtous.sh
+
+#docker
+db_data

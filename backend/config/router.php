@@ -1,58 +1,58 @@
 <?php
 
 // Connexion
-$router->addRoute('GET', BASE_URL, 'ControllerUser', 'loginPage');
-$router->addRoute('GET', BASE_URL . 'login', 'ControllerUser', 'loginPage');
-$router->addRoute('POST', BASE_URL . 'api/login', 'ControllerUser', 'login');
-$router->addRoute('POST', BASE_URL . 'api/logout', 'ControllerUser', 'logout');
-$router->addRoute('POST', BASE_URL . 'api/register', 'ControllerUser', 'register');
-$router->addRoute('POST', BASE_URL . 'api/verifyConnect', 'ControllerUser', 'verifyConnect');
+$router->addRoute("GET", BASE_URL, "ControllerUser", "loginPage");
+$router->addRoute("GET", "/login", "ControllerUser", "loginPage");
+$router->addRoute("POST", "/api/login", "ControllerUser", "login");
+$router->addRoute("POST", "/api/logout", "ControllerUser", "logout");
+$router->addRoute("POST", "/api/register", "ControllerUser", "register");
+$router->addRoute("POST", "/api/verifyConnect", "ControllerUser", "verifyConnect");
 
 // Navigation
-$router->addRoute('GET', BASE_URL . "home", 'ControllerUser', 'homePage');
+$router->addRoute("GET", "/home", "ControllerUser", "homePage");
 
 //Users
-$router->addRoute('GET', BASE_URL . "api/users", 'ControllerUser', 'listUsers');
-$router->addRoute('POST', BASE_URL . "api/userInformations", 'ControllerUser', 'getUserInformations');
-$router->addRoute('POST', BASE_URL . "api/updateUserProfile", 'ControllerUser', 'updateUserProfile');
-$router->addRoute('GET', BASE_URL . "api/verify-email/{token}", 'ControllerUser', 'verifyEmail');
-$router->addRoute('POST', BASE_URL . "api/getWallet", 'ControllerOrder', 'getWallet');
-$router->addRoute('POST', BASE_URL . "api/updateUserProfile", 'ControllerUser', 'updateUserProfile');
-$router->addRoute('POST', BASE_URL . "api/updateUserPassword", 'ControllerUser', 'updateUserPassword');
-$router->addRoute('POST', BASE_URL . "api/forgetedPassword", 'ControllerUser', 'forgetedPassword');
-$router->addRoute('GET', BASE_URL . "api/reset-password/{token}", 'ControllerUser', 'resetPasswordLink');
-$router->addRoute('POST', BASE_URL . "api/resetPassword", 'ControllerUser', 'resetPassword');
+$router->addRoute("GET", "/api/users", "ControllerUser", "listUsers");
+$router->addRoute("POST", "/api/userInformations", "ControllerUser", "getUserInformations");
+$router->addRoute("POST", "/api/updateUserProfile", "ControllerUser", "updateUserProfile");
+$router->addRoute("GET", "/api/verify-email/{token}", "ControllerUser", "verifyEmail");
+$router->addRoute("POST", "/api/getWallet", "ControllerOrder", "getWallet");
+$router->addRoute("POST", "/api/updateUserProfile", "ControllerUser", "updateUserProfile");
+$router->addRoute("POST", "/api/updateUserPassword", "ControllerUser", "updateUserPassword");
+$router->addRoute("POST", "/api/forgetedPassword", "ControllerUser", "forgetedPassword");
+$router->addRoute("GET", "/api/reset-password/{token}", "ControllerUser", "resetPasswordLink");
+$router->addRoute("POST", "/api/resetPassword", "ControllerUser", "resetPassword");
 
 
 //Lessons
-$router->addRoute('GET', BASE_URL . "api/lessons", 'ControllerLesson', 'getAllLessons');
-$router->addRoute('GET', BASE_URL . "api/offre-de-cours/{slug}", 'ControllerLesson', 'getLessonByName');
-$router->addRoute('POST', BASE_URL . "api/getAllLessonsWithPrices", 'ControllerLesson', 'getAllLessonsWithPrices');
+$router->addRoute("GET", "/api/lessons", "ControllerLesson", "getAllLessons");
+$router->addRoute("GET", "/api/offre-de-cours/{slug}", "ControllerLesson", "getLessonByName");
+$router->addRoute("POST", "/api/getAllLessonsWithPrices", "ControllerLesson", "getAllLessonsWithPrices");
 
 //Events
-$router->addRoute('GET', BASE_URL . "api/listEvents", 'ControllerCalendar', 'listEvents');
-$router->addRoute('POST', BASE_URL . "api/createEvent", 'ControllerCalendar', 'createEvent');
-$router->addRoute('POST', BASE_URL . "api/listEvents", 'ControllerCalendar', 'listEvents');
-$router->addRoute('POST', BASE_URL . "api/deleteEvent", 'ControllerCalendar', 'deleteEvent');
-$router->addRoute('POST', BASE_URL . "api/getAvailableTimeSlots", 'ControllerCalendar', 'getAvailablesTimeSlots');
-$router->addRoute('POST', BASE_URL . "api/sendMailToAlertForNextAppointment", 'ControllerMail', 'sendMailToAlertForNextAppointment');
-$router->addRoute('POST', BASE_URL . "api/prepareRepayment", 'ControllerOrder', 'prepareRepayment');
-$router->addRoute('POST', BASE_URL . "api/deleteWaitingEvent", 'ControllerCalendar', 'checkWaitingEvents');
-$router->addRoute('GET', BASE_URL . "api/createInstantRoom", 'ControllerVisio', 'createInstantRoom');
+$router->addRoute("GET", "/api/listEvents", "ControllerCalendar", "listEvents");
+$router->addRoute("POST", "/api/createEvent", "ControllerCalendar", "createEvent");
+$router->addRoute("POST", "/api/listEvents", "ControllerCalendar", "listEvents");
+$router->addRoute("POST", "/api/deleteEvent", "ControllerCalendar", "deleteEvent");
+$router->addRoute("POST", "/api/getAvailableTimeSlots", "ControllerCalendar", "getAvailablesTimeSlots");
+$router->addRoute("POST", "/api/sendMailToAlertForNextAppointment", "ControllerMail", "sendMailToAlertForNextAppointment");
+$router->addRoute("POST", "/api/prepareRepayment", "ControllerOrder", "prepareRepayment");
+$router->addRoute("POST", "/api/deleteWaitingEvent", "ControllerCalendar", "checkWaitingEvents");
+$router->addRoute("GET", "/api/createInstantRoom", "ControllerVisio", "createInstantRoom");
 
 //Google
-$router->addRoute('POST', BASE_URL . "api/handleGoogleNotification", 'ControllerGoogle', 'handleGoogleNotification');
-$router->addRoute('POST', BASE_URL . "api/setupGoogleWatch", 'ControllerGoogle', 'setupCalendarWatch');
+$router->addRoute("POST", "/api/handleGoogleNotification", "ControllerGoogle", "handleGoogleNotification");
+$router->addRoute("POST", "/api/setupGoogleWatch", "ControllerGoogle", "setupCalendarWatch");
 
 //Visio
-$router->addRoute('POST', BASE_URL . "api/createInstantVisio", 'ControllerVisio', 'createInstantRoom');
+$router->addRoute("POST", "/api/createInstantVisio", "ControllerVisio", "createInstantRoom");
 
 //Stripe
-$router->addRoute('POST', BASE_URL . "api/checkout-session", 'ControllerOrder', 'checkout');
-$router->addRoute('POST', BASE_URL . "api/payment-status", 'ControllerOrder', 'status');
-$router->addRoute('POST', BASE_URL . "api/verify-payment", 'ControllerOrder', 'verifyPayment');
+$router->addRoute("POST", "/api/checkout-session", "ControllerOrder", "checkout");
+$router->addRoute("POST", "/api/payment-status", "ControllerOrder", "status");
+$router->addRoute("POST", "/api/verify-payment", "ControllerOrder", "verifyPayment");
 
 
 //debug
-$router->addRoute('GET', BASE_URL . "api/debug", 'ControllerDebug', 'debug');
-$router->addRoute('GET', BASE_URL . "api/debugBdd", 'ControllerDebug', 'debugBdd');
+$router->addRoute("GET", "/api/debug", "ControllerDebug", "debug");
+$router->addRoute("GET", "/api/debugBdd", "ControllerDebug", "debugBdd");
