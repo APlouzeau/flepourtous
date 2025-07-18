@@ -25,7 +25,7 @@ Follow these steps to set up your development environment.
 Open a terminal and clone this repository to your local machine:
 
 ```bash
-git clone https://github.com/your-username/flepourtous.git
+git clone https://github.com/APlouzeau/flepourtous.git
 cd flepourtous
 ```
 
