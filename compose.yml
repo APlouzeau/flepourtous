@@ -8,6 +8,7 @@ services:
             - "8000:80"
         volumes:
             - ./backend:/var/www/html
+        command: bash -c "composer install && apache2-foreground"
         env_file:
             - ./backend/.env
         depends_on:
