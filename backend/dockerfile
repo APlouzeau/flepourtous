@@ -33,22 +33,20 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev
 
 
-# BUILD
+# DEV
 FROM base AS dev
 
-COPY composer.json ./composer.json
+COPY . .
 COPY --from=dev-dependencies /var/www/html/vendor ./vendor
 
-COPY . .
 
 EXPOSE 80
 
 # PROD
 FROM base AS prod
 
-COPY composer.json ./composer.json
+COPY . . 
 COPY --from=prod-dependencies /var/www/html/vendor ./vendor
 
-COPY . . 
 
 EXPOSE 80
