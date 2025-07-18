@@ -34,13 +34,13 @@ RUN composer install --no-dev
 
 
 # DEV
-# DEV
 FROM base AS dev
 
 COPY composer.json composer.lock ./
 
 COPY --from=dev-dependencies /var/www/html/vendor ./vendor
 
+COPY . .
 
 EXPOSE 80
 
