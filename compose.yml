@@ -8,7 +8,7 @@ services:
             - "8000:80"
         volumes:
             - ./backend:/var/www/html
-        command: bash -c "composer install && apache2-foreground"
+        command: sh -c "composer install && apache2-foreground"
         env_file:
             - ./backend/.env
         depends_on:
@@ -24,8 +24,7 @@ services:
             - "3000:3000"
         volumes:
             - ./frontend:/app
-            - node_modules_cache:/app/node_modules
-        command: pnpm run dev
+        command: sh -c "pnpm install && pnpm run dev"
         depends_on:
             - api
 
@@ -56,4 +55,3 @@ services:
             - db
 volumes:
     db_data:
-    node_modules_cache:
