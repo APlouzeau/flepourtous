@@ -26,10 +26,13 @@ RUN pnpm install --production
 # --- BUILDER
 # A target that'll build the Next.js application using dev-dependencies and source code
 # This target will be rebuild on each change in the source code
-FROM base AS dev
+FROM dev-dependencies AS dev
 
-COPY --from=dev-dependencies /app/node_modules ./node_modules
 COPY . .
+
+EXPOSE 3000
+
+CMD ["pnpm", "run", "dev"]
 
 FROM base AS runner
 

@@ -58,7 +58,7 @@ export default function ForgetedPasswordForm() {
                 name="mail"
                 value={mail}
                 onChange={(e) => setMail(e.target.value)}
-                pattern="^[^\.]([a-zA-Z0-9-._]+[^.]@[a-zA-Z0-9]+\.[.a-zA-Z0-9]+)\w+"
+                pattern="^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?@[a-zA-Z0-9]+([.-][a-zA-Z0-9]+)*\.[a-zA-Z]{2,}$"
                 required
                 className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
             />

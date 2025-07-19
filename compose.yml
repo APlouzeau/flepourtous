@@ -18,13 +18,13 @@ services:
         container_name: frontend
         build:
             context: ./frontend
-            dockerfile: Dockerfile
+            dockerfile: dockerfile
             target: dev
         ports:
             - "3000:3000"
         volumes:
             - ./frontend:/app
-            - /app/node_modules
+            - node_modules_cache:/app/node_modules
         command: pnpm run dev
         depends_on:
             - api
@@ -56,3 +56,4 @@ services:
             - db
 volumes:
     db_data:
+    node_modules_cache:
