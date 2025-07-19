@@ -49,10 +49,10 @@ logs: ## Affiche les logs de tous les services
 	docker compose -f $(COMPOSE_FILE) logs -f
 
 logs-backend: ## Logs du backend uniquement
-	docker compose -f $(COMPOSE_FILE) logs -f backend
+	docker compose -f $(COMPOSE_FILE) logs -f api
 
 logs-frontend: ## Logs du frontend uniquement
-	docker compose -f $(COMPOSE_FILE) logs -f frontend
+	docker compose -f $(COMPOSE_FILE) logs -f app
 
 # Nettoyage
 clean: ## Nettoie les containers et volumes

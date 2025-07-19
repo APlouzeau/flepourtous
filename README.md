@@ -17,6 +17,87 @@ Before you begin, ensure you have the following tools installed on your machine:
 
 > **Note**: You do **not** need to install PHP, Composer, Node.js, or PNPM on your host machine. Everything is managed inside the Docker containers.
 
+## Windows Users: WSL2 Setup (Highly Recommended)
+
+For Windows users, we **strongly recommend** using WSL2 for significantly better performance and a smoother development experience.
+
+### Why WSL2?
+
+Docker on Windows native can be **5-10x slower** than WSL2, especially for:
+
+-   Build times (minutes vs seconds)
+-   File system operations
+-   Hot reload responsiveness
+-   Overall development workflow
+
+### Complete WSL2 Setup Guide
+
+#### 1. Install WSL2 + Ubuntu
+
+1. **Open Microsoft Store**
+2. **Search "Ubuntu"** and install **"Ubuntu 22.04 LTS"** (or latest version)
+3. **Launch Ubuntu** from Start Menu
+4. **Create a user account** when prompted (username + password)
+
+#### 2. Install Docker Desktop with WSL2
+
+1. **Download Docker Desktop** for Windows from [docker.com](https://www.docker.com/products/docker-desktop/)
+2. **During installation**: Make sure "Use WSL 2 based engine" is checked
+3. **After installation**: Open Docker Desktop Settings
+    - Go to **Settings > Resources > WSL Integration**
+    - ✅ Enable "Enable integration with my default WSL distro"
+    - ✅ Enable "Ubuntu-22.04" (or your installed distro)
+    - Click **"Apply & Restart"**
+
+#### 3. Setup VS Code for WSL
+
+1. **Install VS Code** on Windows
+2. **Install the "WSL" extension** by Microsoft
+3. **Connect to WSL**:
+    - Click the **blue button** in bottom-left corner of VS Code
+    - Select **"Connect to WSL"**
+    - OR open Ubuntu terminal and run: `code .`
+
+#### 4. Clone and Run the Project in WSL
+
+```bash
+# In your WSL Ubuntu terminal:
+git clone https://github.com/APlouzeau/flepourtous.git
+cd flepourtous
+
+# Configure environment (see Configuration section below)
+cp backend/.env.example backend/.env
+# Edit backend/.env with your values
+
+# One command to rule them all!
+make first-install
+```
+
+#### 5. Access Your Application
+
+-   **Frontend**: [http://localhost:3000](http://localhost:3000)
+-   **Backend**: [http://localhost:8000](http://localhost:8000)
+-   **PhpMyAdmin**: [http://localhost:8081](http://localhost:8081)
+
+### WSL2 Performance Benefits
+
+**Typical build times:**
+
+| Operation        | Windows Native | WSL2        |
+| ---------------- | -------------- | ----------- |
+| First `make dev` | 5-8 minutes    | 1-2 minutes |
+| `make restart`   | 2-3 minutes    | 30 seconds  |
+| Hot reload       | 10-30 seconds  | 1-3 seconds |
+
+### WSL2 Tips
+
+-   **File location**: Keep your project files in WSL filesystem (`/home/username/`) for best performance
+-   **RAM usage**: WSL2 uses RAM more efficiently than Docker Desktop alone
+-   **Git credentials**: May need to set up Git credentials in WSL separately
+-   **VS Code**: Use "Open Folder in WSL" for full integration
+
+---
+
 ## Quick Start
 
 ### Option 1: Using Make (Recommended)
@@ -64,7 +145,7 @@ cp backend/.env.example backend/.env
 
 **Important**: Edit `backend/.env` and fill in the required values, especially:
 
--   `MAIL_USERNAME` and `MAIL_PASSWORD` for email functionality
+-   `MAIL_USERNAME` and `MAIL_PASSWORD` for email functionality (remember to quote passwords with spaces: `MAIL_PASSWORD="your password"`)
 -   `STRIPE_SECRET_KEY` for payment processing
 -   `GOOGLE_CALENDAR_ID` and `GOOGLE_TOKEN` for calendar integration
 -   Database credentials (defaults should work for development)
@@ -210,6 +291,14 @@ make restart
 docker compose down && docker compose up -d
 ```
 
+### .env File Parsing Errors
+
+If you see parsing errors like "Failed to parse dotenv file", check your `.env` file for:
+
+-   **Passwords with spaces**: Must be quoted (`MAIL_PASSWORD="your password"`)
+-   **Special characters**: May need quoting or escaping
+-   **No empty lines**: Between variable definitions
+
 ### Missing Google Service Files
 
 If you see errors related to Google Calendar or authentication:
@@ -228,7 +317,13 @@ ports:
     - "8001:80" # Change 8000 to 8001 for backend
 ```
 
-### Performance Issues
+### Performance Issues (Windows)
+
+If you're experiencing slow performance:
+
+1. **Use WSL2** (see WSL2 setup section above) - this usually solves 90% of performance issues
+2. **Check Docker Desktop settings**: Ensure adequate RAM/CPU allocation
+3. **Clean Docker cache**: Run `make clean-all` periodically
 
 Our optimized setup installs dependencies during image build for faster startup:
 
