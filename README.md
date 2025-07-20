@@ -15,7 +15,7 @@ Before you begin, ensure you have the following tools installed on your machine:
 -   [Git](https://git-scm.com/)
 -   [Make](https://www.gnu.org/software/make/) (optional, for convenience commands - usually pre-installed on Linux, macOS, and WSL)
 
-> **Note**: You do **not** need to install PHP, Composer, Node.js, or PNPM on your host machine. Everything is managed inside the Docker containers.
+> **Note**: You do **not** need to install PHP, Composer, Node.js, or npm on your host machine. Everything is managed inside the Docker containers.
 
 ## Windows Users: WSL2 Setup (Highly Recommended)
 
@@ -78,6 +78,7 @@ make first-install
 -   **Frontend**: [http://localhost:3000](http://localhost:3000)
 -   **Backend**: [http://localhost:8000](http://localhost:8000)
 -   **PhpMyAdmin**: [http://localhost:8081](http://localhost:8081)
+-   **Database**: `localhost:3307`
 
 ### WSL2 Performance Benefits
 
@@ -114,6 +115,9 @@ cp backend/.env.example backend/.env
 
 # One-command setup for new developers
 make first-install
+
+# Launch the app
+make dev
 ```
 
 ### Option 2: Manual Setup
@@ -179,7 +183,7 @@ cp frontend/.env.example frontend/.env
 
 ```bash
 # Install dependencies locally for IDE support
-cd frontend && pnpm install && cd ..
+cd frontend && npm install && cd ..
 cd backend && composer install && cd ..
 
 # Start the Docker environment
@@ -207,7 +211,8 @@ Your development environment is now accessible:
 -   **Frontend (Next.js)**: [http://localhost:3000](http://localhost:3000)
 -   **Backend (PHP API)**: [http://localhost:8000](http://localhost:8000)
 -   **DB Management (PhpMyAdmin)**: [http://localhost:8081](http://localhost:8081)
-    -   Server: `db`
+-   **Database (Direct Connection)**: `localhost:3307`
+    -   Server: `db` (from containers) or `localhost:3307` (from host)
     -   Username: `flepourtous`
     -   Password: `1234`
 
@@ -260,7 +265,7 @@ docker compose up --build -d
 
 For optimal development experience with IntelliSense and linting:
 
-1. **Frontend**: Run `make dependencies` or manually `cd frontend && pnpm install`
+1. **Frontend**: Run `make dependencies` or manually `cd frontend && npm install`
 2. **Backend**: Run `make dependencies` or manually `cd backend && composer install`
 
 This installs dependencies locally for your IDE while Docker uses its own optimized dependencies.
@@ -315,7 +320,11 @@ If ports are already in use, modify the port mappings in `compose.yml`:
 ports:
     - "3001:3000" # Change 3000 to 3001 for frontend
     - "8001:80" # Change 8000 to 8001 for backend
+    - "8082:80" # Change 8081 to 8082 for phpMyAdmin
+    - "3308:3306" # Change 3307 to 3308 for database
 ```
+
+**Note**: The database already uses port `3307` instead of `3306` to avoid conflicts with local MySQL installations (especially on macOS).
 
 ### Performance Issues (Windows)
 

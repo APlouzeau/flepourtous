@@ -13,15 +13,22 @@ help: ## Affiche cette aide
 # Setup initial pour nouveaux développeurs
 first-install: ## Installation complète pour nouveau projet
 	@echo "🚀 Setup initial du projet..."
-	@echo "📦 Installation des dépendances frontend..."
-	cd $(FRONTEND_DIR) && pnpm install
+	@echo "📦 Installation des dépendances frontend (npm pour simplicité)..."
+	cd $(FRONTEND_DIR) && npm install
 	@echo "📦 Installation des dépendances backend..."
 	cd $(BACKEND_DIR) && composer install
 	@echo "✅ Setup terminé ! Vous pouvez maintenant faire 'make dev'"
+	@echo "ℹ️  Note: Docker utilise pnpm pour de meilleures performances"
+	make dev
 
 # Développement
 dependencies: ## Installe les dépendances localement (pour IDE)
 	@echo "📦 Installation des dépendances pour l'IDE..."
+	cd $(FRONTEND_DIR) && npm install
+	cd $(BACKEND_DIR) && composer install
+
+dependencies-pnpm: ## Installe avec pnpm (plus rapide, optionnel)
+	@echo "📦 Installation des dépendances avec pnpm..."
 	cd $(FRONTEND_DIR) && pnpm install
 	cd $(BACKEND_DIR) && composer install
 
@@ -35,6 +42,7 @@ dev: build ## Lance l'environnement de développement
 	@echo "📱 Frontend: http://localhost:3000"
 	@echo "🔧 Backend: http://localhost:8000"
 	@echo "🗃️  PhpMyAdmin: http://localhost:8081"
+	@echo "🗄️  Database: localhost:3307 (pour connexions externes)"
 
 up: ## Démarre les services (sans rebuild)
 	docker compose -f $(COMPOSE_FILE) up -d
@@ -86,7 +94,8 @@ status: ## Vérifie l'état des services
 	@echo "Frontend: http://localhost:3000"
 	@echo "Backend: http://localhost:8000" 
 	@echo "PhpMyAdmin: http://localhost:8081"
+	@echo "Database: localhost:3307 (pour connexions externes)"
 
 update: ## Met à jour les dépendances
-	cd $(FRONTEND_DIR) && pnpm update
+	cd $(FRONTEND_DIR) && npm update
 	cd $(BACKEND_DIR) && composer update

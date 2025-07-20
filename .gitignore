@@ -57,7 +57,13 @@ next-env.d.ts
 #githubaction
 githubaction.yml
 
-#google
+# Google API credentials (keep .example files for reference)
+/**/credentials.json
+/**/service-account*.json
+!/**/*.example
+/**/*:Zone.Identifier
+
+# Legacy specific paths (keeping for compatibility)
 /backend/config/credentials.json
 /backend/config/service-account-key.json
 /backend/vendor/
