@@ -37,6 +37,7 @@ yarn-error.log*
 # env files
 .env
 .env.local
+/**/*:Zone.Identifier
 # Ajoute cette ligne pour le backend
 /backend/.env
 
@@ -78,3 +79,6 @@ switchStartFlepourtous.sh
 
 #docker
 db_data
+
+flepourtous.zip
+Flepourtous.zip
