@@ -93,7 +93,7 @@ export async function logout() {
     const session = await getCookieBackend();
     if (session) {
         await apiClient.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/logout`,
+            "/api/logout",
             {},
             {
                 headers: {
@@ -130,7 +130,7 @@ export async function getWallet() {
     }
     try {
         const response = await apiClient.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/getWallet`,
+            "/api/getWallet",
             {},
             {
                 headers: {

@@ -59,7 +59,7 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
         }
         try {
             const response = await apiClient.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/checkout-session`,
+                "/api/checkout-session",
                 {},
                 {
                     headers: {

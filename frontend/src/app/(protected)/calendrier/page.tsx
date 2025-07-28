@@ -13,7 +13,7 @@ export default async function CalendarPage() {
     let appointmentList: showBasicAppointmentProps[] = [];
     try {
         const response = await apiClient.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/listEvents`,
+            "/api/listEvents",
             {},
             {
                 headers: {

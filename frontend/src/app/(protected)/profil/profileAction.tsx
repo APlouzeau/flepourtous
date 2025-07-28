@@ -30,7 +30,7 @@ export async function changeUserProfile(editedUser: UserDataProps) {
         password: editedUser?.password || "",
     };
 
-    const response = await apiClient.post(`${process.env.NEXT_PUBLIC_API_URL}/updateUserProfile`, updateData, {
+    const response = await apiClient.post("/api/updateUserProfile", updateData, {
         headers: {
             "Content-Type": "application/json",
         },
@@ -50,7 +50,7 @@ export async function changeUserPassword(oldPassword: string, newPassword: strin
         confirmNewPassword: confirmNewPassword,
     };
 
-    const response = await apiClient.post(`${process.env.NEXT_PUBLIC_API_URL}/updateUserPassword`, updateData, {
+    const response = await apiClient.post("/api/updateUserPassword", updateData, {
         headers: {
             "Content-Type": "application/json",
         },

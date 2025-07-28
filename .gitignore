@@ -11,6 +11,7 @@
 !.yarn/releases
 !.yarn/versions
 package-lock.json
+/vendor
 
 # testing
 **/coverage
@@ -25,6 +26,7 @@ package-lock.json
 # misc
 .DS_Store
 *.pem
+Thumbs.db
 
 # debug
 npm-debug.log*
@@ -32,18 +34,19 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
+# env files
+.env
+.env.local
+/**/*:Zone.Identifier
+# Ajoute cette ligne pour le backend
+/backend/.env
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
-# env
-config.php
+# Retire cette ligne, config.php est maintenant sûr
+# config.php
 
 #livrables
 /livrables
@@ -55,7 +58,13 @@ config.php
 #githubaction
 githubaction.yml
 
-#google
+# Google API credentials (keep .example files for reference)
+/**/credentials.json
+/**/service-account*.json
+!/**/*.example
+/**/*:Zone.Identifier
+
+# Legacy specific paths (keeping for compatibility)
 /backend/config/credentials.json
 /backend/config/service-account-key.json
 /backend/vendor/
@@ -67,3 +76,9 @@ renew_google_watch.sh
 sendAlertMail.sh
 switchDevFlepourtous.sh
 switchStartFlepourtous.sh
+
+#docker
+db_data
+
+flepourtous.zip
+Flepourtous.zip

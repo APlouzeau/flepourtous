@@ -3,7 +3,7 @@ import ResetPasswordForm from "./ResetPasswordForm";
 
 export async function resetPassword(newPassword: string, confirmNewPassword: string) {
     const response = await apiClient.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/resetPassword`,
+        "/api/resetPassword",
         { newPassword, confirmNewPassword },
         {
             headers: {
