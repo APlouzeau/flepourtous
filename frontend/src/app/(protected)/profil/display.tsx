@@ -9,10 +9,10 @@ import { PasswordModify } from "./PasswordModify";
 export default function DisplayUserprofil() {
     const { dataUser } = useContext(Context);
     const [activeTab, setActiveTab] = useState("informations");
+    //const [error, setError] = useState("");
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [editedUser, setEditedUser] = useState({
+    //const [isLoading, setIsLoading] = useState(false);
+    /*     const [editedUser, setEditedUser] = useState({
         idUser: typeof dataUser?.idUser === "number" ? dataUser.idUser : 0,
         nickName: dataUser?.nickName || "",
         firstName: dataUser?.firstName || "",
@@ -27,20 +27,20 @@ export default function DisplayUserprofil() {
         city: dataUser?.city || "",
         country: dataUser?.country || "",
         password: "",
-    });
+    }); */
     const [settings, setSettings] = useState({
         emailNotifications: true,
         courseReminders: true,
     });
-    const [modalError, setModalError] = useState("");
+    //const [modalError, setModalError] = useState("");
 
-    const handleInputChange = (field: string, value: string) => {
+    /*     const handleInputChange = (field: string, value: string) => {
         setEditedUser((prev) => ({
             ...prev,
             [field]: value,
         }));
         if (error) setError("");
-    };
+    }; */
 
     const toggleSetting = (setting: string) => {
         setSettings((prev) => ({

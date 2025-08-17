@@ -1,6 +1,5 @@
 import { Lesson } from "@/app/types/lessons";
 import { getLessons } from "@/lib/lessons";
-import { get } from "http";
 import Image from "next/image";
 import Link from "next/link";
 
