@@ -1,6 +1,6 @@
 "use server";
 import { cookies, headers } from "next/headers";
-import axios from "axios";
+import apiClient from "@/lib/axios";
 import { redirect } from "next/navigation";
 import { SignJWT, jwtVerify } from "jose";
 
@@ -73,7 +73,7 @@ export async function getCountry() {
         return null;
     }
     try {
-        const response = await axios.get(`https://ipapi.co/${userIP}/country/`);
+        const response = await apiClient.get(`https://ipapi.co/${userIP}/country/`);
         if (response.data) {
             return response.data;
         } else {
@@ -92,8 +92,8 @@ export async function getSession() {
 export async function logout() {
     const session = await getCookieBackend();
     if (session) {
-        await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/logout`,
+        await apiClient.post(
+            "/api/logout",
             {},
             {
                 headers: {
@@ -129,8 +129,8 @@ export async function getWallet() {
         return null;
     }
     try {
-        const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_API_URL}/getWallet`,
+        const response = await apiClient.post(
+            "/api/getWallet",
             {},
             {
                 headers: {

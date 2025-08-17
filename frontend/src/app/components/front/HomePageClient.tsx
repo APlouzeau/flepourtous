@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useScrollAnimation } from "@/lib/useScrollAnimation";
-import { LessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
+import { LessonWithPrice } from "@/app/types/lessons";
 import FeatureCard from "./FeatureCard";
 import FormulaCard from "./FormulaCard";
 import StatCard from "./StatCard";
@@ -11,11 +11,9 @@ import TestimonialsSlider from "./TestimonialsSlider";
 import FAQItem from "./FAQItem";
 import Button from "./Button";
 
-interface HomePageClientProps {
-    lessons: Readonly<LessonsWithPrices>;
-}
-
-export default function HomePageClient({ lessons }: Readonly<HomePageClientProps>) {
+export default function HomePageClient({ lessons }: { lessons: LessonWithPrice[] }) {
+    // 1. On récupère les données côté serveur
+    // const lessons: Lesson[] = await getLessonsWithPrices();
     const heroSection = useScrollAnimation();
     const whyChooseSection = useScrollAnimation();
     const formulasSection = useScrollAnimation();
@@ -63,9 +61,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                                     Guizmo-kun{" "}
                                     <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 text-sm text-white bg-gray-800 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-10">
                                         C&apos;est mon catamiaou 🐱
-                                        <>
-                                            <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></span>
-                                        </>
+                                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-800"></span>
                                     </span>
                                 </span>
                             </h1>
@@ -104,7 +100,7 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-8 sm:mb-12">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                            Why Choose <span className="text-red-600">FLE</span>?
+                            Pourquoi choisir FLE pour tous ?
                         </h2>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -165,7 +161,6 @@ export default function HomePageClient({ lessons }: Readonly<HomePageClientProps
                         </p>
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                        {/* Maintenant, "lessons" est bien un tableau et .slice() fonctionne */}
                         {lessons.slice(0, 3).map((lesson: LessonWithPrice) => (
                             <FormulaCard
                                 key={lesson.slug}

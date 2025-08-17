@@ -1,0 +1,50 @@
+# --- BASE
+# A clean image target for Next.js applications
+FROM node:lts-alpine3.22 AS base
+
+WORKDIR /app
+
+# Installation de pnpm
+RUN npm install -g pnpm
+
+# --- DEV-DEPENDENCIES
+# A target that'll have dev-dependencies installed
+FROM base AS dev-dependencies
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install
+
+# --- PROD-DEPENDENCIES
+# A target that'll have only production dependencies installed
+FROM base AS prod-dependencies
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --production
+
+# --- BUILDER
+# A target that'll build the Next.js application using dev-dependencies and source code
+# This target will be rebuild on each change in the source code
+FROM base AS dev
+
+COPY package.json pnpm-lock.yaml ./
+COPY --from=dev-dependencies /app/node_modules ./node_modules
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["pnpm", "run", "dev"]
+
+FROM base AS runner
+
+COPY --from=prod-dependencies /app/package.json ./package.json
+COPY --from=prod-dependencies /app/node_modules ./node_modules
+
+COPY --from=dev /app/public ./public
+COPY --from=dev /app/.next ./.next
+
+EXPOSE 3000
+
+CMD ["pnpm", "start"]

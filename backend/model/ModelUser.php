@@ -63,7 +63,7 @@ extends ClassDatabase
 
     public function getUser(EntitieUser $user)
     {
-        $req = $this->conn->prepare('SELECT idUser, nickName, firstName, lastName, mail FROM users WHERE idUser = :idUser');
+        $req = $this->conn->prepare('SELECT idUser, nickName, firstName, lastName, mail, address, address_2, address_3, zip, city, country FROM users WHERE idUser = :idUser');
         $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
@@ -75,6 +75,12 @@ extends ClassDatabase
                     'firstName' => $data['firstName'],
                     'lastName' => $data['lastName'],
                     'mail' => $data['mail'],
+                    'address' => $data['address'] ?? null,
+                    'address2' => $data['address_2'] ?? null,
+                    'address3' => $data['address_3'] ?? null,
+                    'zip' => $data['zip'] ?? null,
+                    'city' => $data['city'] ?? null,
+                    'country' => $data['country'] ?? null,
                 ];
         } else {
             return null; // Utilisateur non trouvé
@@ -123,7 +129,7 @@ extends ClassDatabase
             $req = $this->conn->prepare($query);
             $req->bindValue(":verifyToken", $verifyToken);
             $req->execute();
-            return true;
+            return $data['idUser'];
         } else {
             error_log("Email verification failed for link: " . $verifyToken);
             return false;
@@ -170,22 +176,44 @@ extends ClassDatabase
             ':idUser' => $user->getIdUser()
         ];
 
+        // Ajouter le surnom si il est fourni
+        if ($user->getNickName() !== null) {
+            $query .= ", nickName = :nickName";
+            $params[':nickName'] = $user->getNickName();
+        }
+
         // Ajouter l'adresse si elle est fournie
         if ($user->getAddress() !== null) {
             $query .= ", address = :address";
             $params[':address'] = $user->getAddress();
+        }
+        // Ajouter l'adresse 2 si elle est fournie
+        if ($user->getAddress2() !== null) {
+            $query .= ", address_2 = :address2";
+            $params[':address2'] = $user->getAddress2();
+        }
+        // Ajouter l'adresse 3 si elle est fournie
+        if ($user->getAddress3() !== null) {
+            $query .= ", address_3 = :address3";
+            $params[':address3'] = $user->getAddress3();
+        }
+
+        // Ajouter le code postal si il est fourni
+        if ($user->getZip() !== null) {
+            $query .= ", zip = :zip";
+            $params[':zip'] = $user->getZip();
+        }
+
+        // Ajouter la ville si elle est fournie
+        if ($user->getCity() !== null) {
+            $query .= ", city = :city";
+            $params[':city'] = $user->getCity();
         }
 
         // Ajouter le pays si il est fourni
         if ($user->getCountry() !== null) {
             $query .= ", country = :country";
             $params[':country'] = $user->getCountry();
-        }
-
-        // Ajouter le mot de passe si il est fourni
-        if ($user->getPassword() !== null) {
-            $query .= ", password = :password";
-            $params[':password'] = $user->getPassword();
         }
 
         $query .= " WHERE idUser = :idUser";
@@ -196,6 +224,43 @@ extends ClassDatabase
             $req->bindValue($param, $value);
         }
 
+        return $req->execute();
+    }
+
+    public function checkPassword(int $idUser, string $password)
+    {
+        $query = "SELECT password FROM users WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        $req->execute();
+        $data = $req->fetch(PDO::FETCH_ASSOC);
+        return $data && password_verify($password, $data['password']) ? true : false;
+    }
+
+    public function updateUserPassword(EntitieUser $user)
+    {
+        $query = "UPDATE users SET password = :password WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":password", $user->getPassword(), PDO::PARAM_STR);
+        $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
+        return $req->execute();
+    }
+
+    public function setNewToken(int $idUser, string $token)
+    {
+        $query = "UPDATE users SET verifyToken = :verifyToken WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":verifyToken", $token, PDO::PARAM_STR);
+        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        return $req->execute();
+    }
+
+    public function updatePassword(int $idUser, string $password)
+    {
+        $query = "UPDATE users SET password = :password WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        $req->bindValue(":password", $password,  PDO::PARAM_STR);
         return $req->execute();
     }
 }

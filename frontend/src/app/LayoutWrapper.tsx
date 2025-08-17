@@ -11,10 +11,13 @@ interface LayoutWrapperProps {
 
 export default function LayoutWrapper({ children, isLoggedIn }: LayoutWrapperProps) {
     const pathname = usePathname();
-    
+
     // Routes publiques où on ne veut pas afficher le Header et Footer
-    const isPublicRoute = pathname?.startsWith("/connexion") || pathname?.startsWith("/inscription");
-    
+    const isPublicRoute =
+        pathname?.startsWith("/connexion") ||
+        pathname?.startsWith("/inscription") ||
+        pathname?.startsWith("/mot-de-passe-oublie");
+
     return (
         <>
             {!isPublicRoute && <Header isLoggedIn={isLoggedIn} />}
@@ -22,4 +25,4 @@ export default function LayoutWrapper({ children, isLoggedIn }: LayoutWrapperPro
             {!isPublicRoute && <Footer />}
         </>
     );
-} 
+}

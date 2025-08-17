@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
+import apiClient from "@/lib/axios";
 
 interface InstantVisioModalProps {
     isOpen: boolean;
@@ -22,8 +22,8 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
 
         try {
             console.log("Creating instant visio with:", { email, duration });
-            const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/createInstantVisio`,
+            const response = await apiClient.post(
+                "/api/createInstantVisio",
                 {
                     email: email,
                     duration: duration,

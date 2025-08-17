@@ -1,9 +1,19 @@
-import axios from "axios";
+import apiClient from "@/lib/axios";
 
-export async function getLessons() {
+export async function getLessonsWithPrices() {
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/getAllLessonsWithPrices`, {});
-        // On extrait le tableau de données de la réponse de l'API
+        const response = await apiClient.post("/api/getAllLessonsWithPrices", {});
+        console.log("Fetched lessons with prices:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch lessons:", error);
+        return [];
+    }
+}
+
+export async function getLessons(slug: string) {
+    try {
+        const response = await apiClient.get(`/api/offre-de-cours/${slug}`, {});
         return response.data;
     } catch (error) {
         console.error("Failed to fetch lessons:", error);

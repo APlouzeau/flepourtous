@@ -13,7 +13,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
     // Hooks pour les animations
     const offersSection = useScrollAnimation();
     const detailsSection = useScrollAnimation();
-    console.log("Offres reçues dans le composant client :", lessons);
+
     // Données détaillées des formules
     /*  const detailedOffers = [
         {
@@ -130,27 +130,6 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                                                 min
                                             </div>
                                         </div>
-
-                                        <ul className="space-y-3 mb-6">
-                                            {/* {offer.features.map((feature, idx) => (
-                                                <li key={idx} className="flex items-center text-gray-700">
-                                                    <svg
-                                                        className="w-5 h-5 text-green-500 mr-3 flex-shrink-0"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M5 13l4 4L19 7"
-                                                        />
-                                                    </svg>
-                                                    {feature}
-                                                </li>
-                                            ))} */}
-                                        </ul>
 
                                         <Button
                                             variant={offer.popular ? "black" : "white"}

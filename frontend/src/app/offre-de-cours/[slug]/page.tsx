@@ -1,4 +1,5 @@
 import { Lesson } from "@/app/types/lessons";
+import { getLessons } from "@/lib/lessons";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -7,8 +8,8 @@ type tParams = Promise<{ slug: string }>;
 export default async function LessonPage(props: { params: tParams }) {
     const { slug } = await props.params;
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/offre-de-cours/${slug}`);
-    const lesson: Lesson = await response.json();
+    const lesson: Lesson = await getLessons(slug);
+    console.log("Fetched lesson:", lesson);
     const { title, fullDescription, imagePath } = lesson;
 
     return (
@@ -34,4 +35,4 @@ export default async function LessonPage(props: { params: tParams }) {
             </Link>
         </>
     );
-} 
+}

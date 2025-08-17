@@ -3,7 +3,7 @@
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import axios from "axios";
+import apiClient from "@/lib/axios";
 import { useRouter } from "next/navigation";
 interface PaymentFormProps {
     stripePublicKey: string | null | undefined;
@@ -58,8 +58,8 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
             return "";
         }
         try {
-            const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/checkout-session`,
+            const response = await apiClient.post(
+                "/api/checkout-session",
                 {},
                 {
                     headers: {

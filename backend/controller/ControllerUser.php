@@ -14,6 +14,7 @@ class ControllerUser
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {
             return true;
         } else {
+            http_response_code(401);
             $response = $this->userNotConnected;
             echo json_encode($response);
             exit();
@@ -107,8 +108,6 @@ class ControllerUser
             'message' => 'Utilisateur trouvé',
             'data' =>
             $modelUser->getUser($user)
-
-
         ];
 
         $wallet = $modelUser->getWalletFromUser($_SESSION['idUser']);
@@ -146,86 +145,59 @@ class ControllerUser
             return;
         }
 
-        // Validation des données
-        if (!filter_var($data['mail'], FILTER_VALIDATE_EMAIL)) {
+        $verification = $this->controlUserInformations($data);
+        if ($verification['code'] == 0) {
             $response = [
                 'code' => 0,
-                'message' => 'Adresse e-mail invalide',
+                'message' => $verification['message'],
             ];
             echo json_encode($response);
             return;
         }
+        if ($verification['code'] == 1) {
+            $modelUser = new ModelUser();
 
-        if (strlen($data['firstName']) < 2) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le prénom doit contenir au moins 2 caractères',
-            ];
-            echo json_encode($response);
-            return;
-        }
-
-        if (strlen($data['lastName']) < 2) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le nom doit contenir au moins 2 caractères',
-            ];
-            echo json_encode($response);
-            return;
-        }
-
-        $modelUser = new ModelUser();
-
-        // Vérifier si l'email n'est pas déjà utilisé par un autre utilisateur
-        $existingUserId = $modelUser->checkMail($data['mail']);
-        if ($existingUserId && $existingUserId != $_SESSION['idUser']) {
-            $response = [
-                'code' => 0,
-                'message' => 'Cette adresse e-mail est déjà utilisée par un autre utilisateur',
-            ];
-            echo json_encode($response);
-            return;
-        }
-
-        // Préparer les données pour la mise à jour
-        $updateData = [
-            'idUser' => $_SESSION['idUser'],
-            'firstName' => $data['firstName'],
-            'lastName' => $data['lastName'],
-            'mail' => $data['mail'],
-            'address' => isset($data['address']) ? $data['address'] : null,
-            'country' => isset($data['country']) ? $data['country'] : null
-        ];
-
-        // Si un nouveau mot de passe est fourni, l'ajouter
-        if (isset($data['password']) && !empty($data['password'])) {
-            if (strlen($data['password']) < 8) {
+            $existingUserId = $modelUser->checkMail($data['mail']);
+            if ($existingUserId && $existingUserId != $_SESSION['idUser']) {
                 $response = [
                     'code' => 0,
-                    'message' => 'Le mot de passe doit contenir au moins 8 caractères',
+                    'message' => 'Cette adresse e-mail est déjà utilisée par un autre utilisateur',
                 ];
                 echo json_encode($response);
                 return;
             }
-            $updateData['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
-        }
 
-        $user = new EntitieUser($updateData);
-        $updateResult = $modelUser->updateUser($user);
-
-        if ($updateResult) {
-            $response = [
-                'code' => 1,
-                'message' => 'Profil mis à jour avec succès',
+            // Préparer les données pour la mise à jour
+            $updateData = [
+                'idUser' => $_SESSION['idUser'],
+                'nickName' => isset($data['nickName']) ? $data['nickName'] : null,
+                'firstName' => $data['firstName'],
+                'lastName' => $data['lastName'],
+                'mail' => $data['mail'],
+                'address' => isset($data['address']) ? $data['address'] : null,
+                'address2' => isset($data['address2']) ? $data['address2'] : null,
+                'address3' => isset($data['address3']) ? $data['address3'] : null,
+                'zip' => isset($data['zip']) ? $data['zip'] : null,
+                'city' => isset($data['city']) ? $data['city'] : null,
+                'country' => isset($data['country']) ? $data['country'] : null,
             ];
-        } else {
-            $response = [
-                'code' => 0,
-                'message' => 'Erreur lors de la mise à jour du profil',
-            ];
-        }
 
-        echo json_encode($response);
+            $user = new EntitieUser($updateData);
+            $updateResult = $modelUser->updateUser($user);
+
+            if ($updateResult) {
+                $response = [
+                    'code' => 1,
+                    'message' => 'Profil mis à jour avec succès',
+                ];
+            } else {
+                $response = [
+                    'code' => 0,
+                    'message' => 'Erreur lors de la mise à jour du profil',
+                ];
+            }
+            echo json_encode($response);
+        }
     }
 
     public function register()
@@ -314,7 +286,7 @@ class ControllerUser
                 'code' => 0,
                 'message' => 'Token manquant',
             ];
-            header('Location: ' . URI . 'echec?raison=token_manquant');
+            header('Location: ' . URI_FRONT . 'echec?raison=token_manquant');
         } else {
             $modelUser = new ModelUser();
             $user = $modelUser->verifyEmail($token);
@@ -323,13 +295,13 @@ class ControllerUser
                     'code' => 1,
                     'message' => 'Adresse e-mail vérifiée avec succès',
                 ];
-                header('Location: ' . URI . 'success');
+                header('Location: ' . URI_FRONT . 'success');
             } else {
                 $response = [
                     'code' => 0,
                     'message' => 'Erreur lors de la vérification de l\'adresse e-mail',
                 ];
-                header('Location: ' . URI . 'echec?raison=token_invalide');
+                header('Location: ' . URI_FRONT . 'echec?raison=token_invalide');
             }
         }
         echo json_encode($response);
@@ -337,10 +309,6 @@ class ControllerUser
 
     public function listUsers()
     {
-        // Ajouter les headers CORS pour permettre la communication entre domaines
-
-
-
         $modelUser = new ModelUser();
         $users = $modelUser->getAllUsers();
         $result = [];
@@ -386,53 +354,265 @@ class ControllerUser
 
     public function controlUserInformations(array $data)
     {
+        // 1. Validation de l'adresse e-mail (filter_var est la meilleure méthode)
         if (!filter_var($data['mail'], FILTER_VALIDATE_EMAIL)) {
-            $response = [
+            return [
                 'code' => 0,
                 'message' => 'Adresse e-mail invalide',
             ];
-        } elseif (strlen($data['nickName']) < 2) {
-            $response = [
+        }
+
+        // 2. Validation du pseudo
+        if (strlen($data['nickName']) < 2 || strlen($data['nickName']) > 25) {
+            return [
                 'code' => 0,
-                'message' => 'Le pseudo doit contenir au moins 2 caractères',
-            ];
-        } elseif (strlen($data['firstName']) < 2) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le prénom doit contenir au moins 2 caractères',
-            ];
-        } elseif (strlen($data['lastName']) < 2) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le nom doit contenir au moins 2 caractères',
-            ];
-        } else {
-            $response = [
-                'code' => 1,
-                'message' => 'Informations valides',
+                'message' => 'Le pseudo doit contenir entre 2 et 25 caractères',
             ];
         }
-        return $response;
+        // Regex pour autoriser lettres, chiffres et underscore pour le pseudo
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $data['nickName'])) {
+            return [
+                'code' => 0,
+                'message' => 'Le pseudo ne peut contenir que des lettres (sans accent), des chiffres et des underscores (_).',
+            ];
+        }
+
+        // 3. Validation du prénom
+        if (strlen($data['firstName']) < 2 || strlen($data['firstName']) > 25) {
+            return [
+                'code' => 0,
+                'message' => 'Le prénom doit contenir entre 2 et 25 caractères',
+            ];
+        }
+
+        // 4. Validation du nom
+        if (strlen($data['lastName']) < 2 || strlen($data['lastName']) > 25) {
+            return [
+                'code' => 0,
+                'message' => 'Le nom doit contenir entre 2 et 25 caractères',
+            ];
+        }
+
+        // Si toutes les vérifications ci-dessus sont passées, les informations sont valides.
+        return [
+            'code' => 1,
+            'message' => 'Informations valides',
+        ];
     }
 
     public function controlUserPasswordFormat(array $data)
     {
-        if (strlen($data['password']) < 12) {
-            $response = [
-                'code' => 0,
-                'message' => 'Le mot de passe doit contenir au moins 12 caractères',
-            ];
-        } elseif ($data['password'] != $data['passwordConfirm']) {
-            $response = [
+        if ($data['password'] != $data['passwordConfirm']) {
+            return [
                 'code' => 0,
                 'message' => 'Les mots de passe ne correspondent pas',
             ];
-        } else {
-            $response = [
-                'code' => 1,
-                'message' => 'Mot de passe valide',
+        }
+
+        $regex = "/((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,60})/";
+        if (!preg_match($regex, $data['password'])) {
+            return [
+                'code' => 0,
+                'message' => 'Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.',
             ];
         }
-        return $response;
+
+        return [
+            'code' => 1,
+            'message' => 'Mot de passe valide',
+        ];
+    }
+
+    public function updateUserPassword()
+    {
+        $this->verifyConnectBack();
+
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+
+        if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur de méthode',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if (!isset($data['oldPassword']) || !isset($data['newPassword']) || !isset($data['confirmNewPassword'])) {
+            $response = [
+                'code' => 0,
+                'message' => 'Paramètres requis manquants (oldPassword, newPassword, confirmNewPassword)',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $modelUser = new ModelUser();
+        $passwordsOk = $modelUser->checkPassword($_SESSION['idUser'], $data['oldPassword']);
+        if (!$passwordsOk) {
+            $response = [
+                'code' => 0,
+                'message' => 'Ancien mot de passe incorrect',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $passwords = [
+            'password' => $data['newPassword'],
+            'passwordConfirm' => $data['confirmNewPassword']
+        ];
+        $validation = $this->controlUserPasswordFormat($passwords);
+        if ($validation['code'] == 0) {
+            $response = [
+                'code' => 0,
+                'message' => $validation['message'],
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $user = new EntitieUser([
+            'idUser' => $_SESSION['idUser'],
+            'password' => password_hash($data['newPassword'], PASSWORD_BCRYPT),
+        ]);
+
+        $updateResult = $modelUser->updateUserPassword($user);
+
+        if ($updateResult) {
+            $response = [
+                'code' => 1,
+                'message' => 'Mot de passe mis à jour avec succès',
+            ];
+        } else {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur lors de la mise à jour du mot de passe',
+            ];
+        }
+        echo json_encode($response);
+    }
+
+    public function forgetedPassword()
+    {
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+
+        if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Erreur de méthode',
+            ]);
+            return;
+        }
+        if (!isset($data['mail'])) {
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Paramètre manquant (mail)',
+            ]);
+            return;
+        }
+        $mail = $data['mail'];
+        $modelUser = new ModelUser();
+        $userId = $modelUser->checkMail($mail);
+        if ($userId) {
+            $verificationToken = hash('sha256', $data['mail'] . CRON_KEY);
+            $modelUser->setNewToken($userId, $verificationToken);
+
+            $controllerMail = new ControllerMail();
+            $controllerMail->sendMailToForgetedPassword($mail, $verificationToken);
+
+            echo json_encode([
+                'code' => 1,
+                'message' => 'Un e-mail de réinitialisation du mot de passe a été envoyé.',
+            ]);
+            return;
+        } else {
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Aucun utilisateur trouvé avec cette adresse e-mail.',
+            ]);
+            return;
+        }
+    }
+
+    public function resetPasswordLink($token = null)
+    {
+        if (!$token) {
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Token manquant',
+            ]);
+            header('Location: ' . URI_FRONT . 'echec-reinitialisation-du-mot-de-passe?raison=token_manquant');
+            return;
+        }
+
+        $modelUser = new ModelUser();
+        $userId = $modelUser->verifyEmail($token);
+        if (!$userId) {
+            header('Location: ' . URI_FRONT . 'echec?raison=token_invalide');
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Token invalide ou expiré',
+            ]);
+            return;
+        }
+
+        if ($userId) {
+            $_SESSION['idUser'] = $userId;
+            header('Location: ' . URI_FRONT . 'reset-password');
+        }
+    }
+
+    public function resetPassword()
+    {
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+
+        if ($_SERVER['REQUEST_METHOD'] != 'POST') {
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Erreur de méthode',
+            ]);
+            return;
+        }
+        if (!isset($data['newPassword']) || !isset($data['confirmNewPassword'])) {
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Paramètres manquants (newPassword, confirmNewPassword)',
+            ]);
+            return;
+        }
+        $passwords = [
+            'password' => $data['newPassword'],
+            'passwordConfirm' => $data['confirmNewPassword']
+        ];
+        $validation = $this->controlUserPasswordFormat($passwords);
+        if ($validation['code'] == 0) {
+            echo json_encode([
+                'code' => 0,
+                'message' => $validation['message'],
+            ]);
+            return;
+        }
+        $password = password_hash($data['newPassword'], PASSWORD_BCRYPT);
+        $modelUser = new ModelUser();
+        $updatePassword = $modelUser->updatePassword($_SESSION['idUser'], $password);
+        if (!$updatePassword) {
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Erreur lors de la mise à jour du mot de passe',
+            ]);
+            return;
+        }
+        session_unset();
+        session_destroy();
+        setcookie(session_name(), "", time() - 3600, "/");
+        echo json_encode([
+            'code' => 1,
+            'message' => 'Mot de passe réinitialisé avec succès',
+        ]);
+        return;
     }
 }

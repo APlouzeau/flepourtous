@@ -171,4 +171,32 @@ class ControllerMail
         $this->mailer->send();
         $this->mailer->clearAddresses();
     }
+
+    public function sendMailToForgetedPassword($mail, $token)
+    {
+        error_log("Sending password reset email to: " . $mail);
+        try {
+            $this->mailer->addAddress($mail);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = "Réinitialisation de votre mot de passe sur FlePourTous";
+
+            $emailBody = "Bonjour " . ",<br><br>";
+            $emailBody .= "Nous avons reçu une demande de réinitialisation de votre mot de passe. Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe :<br>";
+            $emailBody .= "<a href=\"" . htmlspecialchars(URI . "api/reset-password/" . $token) . "\">" . "Lien de réinitialisation</a><br><br>";
+            $emailBody .= "Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.<br><br>";
+            $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
+            $this->mailer->Body = $emailBody;
+
+            $this->mailer->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Mailer Error: " . $this->mailer->ErrorInfo);
+            return false;
+        } finally {
+            if ($this->mailer) {
+                $this->mailer->clearAddresses(); // Clear addresses after sending
+                $this->mailer->clearAttachments(); // Clear attachments if any
+            }
+        }
+    }
 }

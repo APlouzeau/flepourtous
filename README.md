@@ -1,103 +1,373 @@
-# minimal-forum
+# FlePourTous - Online French Course Platform
 
-## Getting started
+Welcome to the FlePourTous project! This document will guide you through installing and running the project in a local development environment.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## About
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+FlePourTous is a web application that allows users to book online French as a Foreign Language (FLE) courses, manage their schedules, and pay through a secure platform.
 
-## Add your files
+## Prerequisites
 
--   [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
--   [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+Before you begin, ensure you have the following tools installed on your machine:
 
+-   [Docker](https://www.docker.com/products/docker-desktop/)
+-   [Docker Compose](https://docs.docker.com/compose/install/) (usually included with Docker Desktop)
+-   [Git](https://git-scm.com/)
+-   [Make](https://www.gnu.org/software/make/) (optional, for convenience commands - usually pre-installed on Linux, macOS, and WSL)
+
+> **Note**: You do **not** need to install PHP, Composer, Node.js, or npm on your host machine. Everything is managed inside the Docker containers.
+
+## Windows Users: WSL2 Setup (Highly Recommended)
+
+For Windows users, we **strongly recommend** using WSL2 for significantly better performance and a smoother development experience.
+
+### Why WSL2?
+
+Docker on Windows native can be **5-10x slower** than WSL2, especially for:
+
+-   Build times (minutes vs seconds)
+-   File system operations
+-   Hot reload responsiveness
+-   Overall development workflow
+
+### Complete WSL2 Setup Guide
+
+#### 1. Install WSL2 + Ubuntu
+
+1. **Open Microsoft Store**
+2. **Search "Ubuntu"** and install **"Ubuntu 22.04 LTS"** (or latest version)
+3. **Launch Ubuntu** from Start Menu
+4. **Create a user account** when prompted (username + password)
+
+#### 2. Install Docker Desktop with WSL2
+
+1. **Download Docker Desktop** for Windows from [docker.com](https://www.docker.com/products/docker-desktop/)
+2. **During installation**: Make sure "Use WSL 2 based engine" is checked
+3. **After installation**: Open Docker Desktop Settings
+    - Go to **Settings > Resources > WSL Integration**
+    - ✅ Enable "Enable integration with my default WSL distro"
+    - ✅ Enable "Ubuntu-22.04" (or your installed distro)
+    - Click **"Apply & Restart"**
+
+#### 3. Setup VS Code for WSL
+
+1. **Install VS Code** on Windows
+2. **Install the "WSL" extension** by Microsoft
+3. **Connect to WSL**:
+    - Click the **blue button** in bottom-left corner of VS Code
+    - Select **"Connect to WSL"**
+    - OR open Ubuntu terminal and run: `code .`
+
+#### 4. Clone and Run the Project in WSL
+
+```bash
+# In your WSL Ubuntu terminal:
+git clone https://github.com/APlouzeau/flepourtous.git
+cd flepourtous
+
+# Configure environment (see Configuration section below)
+cp backend/.env.example backend/.env
+# Edit backend/.env with your values
+
+# One command to rule them all!
+make first-install
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/ana4194138/minimal-forum.git
-git branch -M main
-git push -uf origin main
-```
 
-## Integrate with your tools
+#### 5. Access Your Application
 
--   [ ] [Set up project integrations](https://gitlab.com/ana4194138/minimal-forum/-/settings/integrations)
+-   **Frontend**: [http://localhost:3000](http://localhost:3000)
+-   **Backend**: [http://localhost:8000](http://localhost:8000)
+-   **PhpMyAdmin**: [http://localhost:8081](http://localhost:8081)
+-   **Database**: `localhost:3307`
 
-## Collaborate with your team
+### WSL2 Performance Benefits
 
--   [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
--   [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
--   [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
--   [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
--   [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+**Typical build times:**
 
-## Test and Deploy
+| Operation        | Windows Native | WSL2        |
+| ---------------- | -------------- | ----------- |
+| First `make dev` | 5-8 minutes    | 1-2 minutes |
+| `make restart`   | 2-3 minutes    | 30 seconds  |
+| Hot reload       | 10-30 seconds  | 1-3 seconds |
 
-Use the built-in continuous integration in GitLab.
+### WSL2 Tips
 
--   [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
--   [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
--   [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
--   [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
--   [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+-   **File location**: Keep your project files in WSL filesystem (`/home/username/`) for best performance
+-   **RAM usage**: WSL2 uses RAM more efficiently than Docker Desktop alone
+-   **Git credentials**: May need to set up Git credentials in WSL separately
+-   **VS Code**: Use "Open Folder in WSL" for full integration
 
 ---
 
-# Editing this README
+## Quick Start
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Option 1: Using Make (Recommended)
 
-## Suggestions for a good README
+```bash
+# Clone the repository
+git clone https://github.com/APlouzeau/flepourtous.git
+cd flepourtous
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# Configure environment files (see Configuration section below)
+cp backend/.env.example backend/.env
+# Edit backend/.env with your values
+# Add Google service account files (see Configuration section)
 
-## Name
+# One-command setup for new developers
+make first-install
 
-Choose a self-explaining name for your project.
+# Launch the app
+make dev
+```
 
-## Description
+### Option 2: Manual Setup
 
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Follow the detailed steps below if you prefer manual installation or don't have Make installed.
 
-## Badges
+## Installation and Setup
 
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### 1. Clone the Repository
 
-## Visuals
+Open a terminal and clone this repository to your local machine:
 
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```bash
+git clone https://github.com/APlouzeau/flepourtous.git
+cd flepourtous
+```
 
-## Installation
+### 2. Configure Environment Variables and Service Files
 
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+The project uses `.env` files and Google service account files to manage secrets and configurations.
 
-## Usage
+#### Backend Configuration (Required)
 
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Create `backend/.env` based on `backend/.env.example`:
 
-## Support
+```bash
+cp backend/.env.example backend/.env
+```
 
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**Important**: Edit `backend/.env` and fill in the required values, especially:
 
-## Roadmap
+-   `MAIL_USERNAME` and `MAIL_PASSWORD` for email functionality (remember to quote passwords with spaces: `MAIL_PASSWORD="your password"`)
+-   `STRIPE_SECRET_KEY` for payment processing
+-   `GOOGLE_CALENDAR_ID` and `GOOGLE_TOKEN` for calendar integration
+-   Database credentials (defaults should work for development)
 
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+#### Google Service Account Files (Required for Calendar Features)
 
-## Contributing
+Add the following files to `backend/config/`:
 
-State if you are open to contributions and what your requirements are for accepting them.
+-   `service-account-key.json` - Google service account credentials for calendar API
+-   `credentials.json` - Google OAuth credentials
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+These files are required for the Google Calendar integration features.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+#### Frontend Configuration (Recommended)
 
-## Authors and acknowledgment
+Create `frontend/.env` or `frontend/.env.local`:
 
-Show your appreciation to those who have contributed to the project.
+```bash
+cp frontend/.env.example frontend/.env
+```
 
-## License
+**Important**: Edit `frontend/.env` and configure:
 
-For open source projects, say how it is licensed.
+-   `NEXT_PUBLIC_API_URL` - Backend API URL (default: http://localhost:8000)
+-   `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` - Stripe public key for payments
+-   `JWT_SECRET` - JWT secret for authentication (should match backend)
 
-## Project status
+### 3. Launch the Environment
 
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+#### For New Developers (First Time)
+
+```bash
+# Install dependencies locally for IDE support
+cd frontend && npm install && cd ..
+cd backend && composer install && cd ..
+
+# Start the Docker environment
+docker compose up --build -d
+```
+
+#### For Daily Development
+
+```bash
+# Start containers (dependencies already installed in images)
+docker compose up -d
+
+# Or rebuild if you changed Dockerfiles
+docker compose up --build -d
+```
+
+The first time you run this, it may take a few minutes to download the base images and install dependencies.
+
+> **Database Note**: On the first launch, Docker will automatically import the database structure and initial data from the `db/flepourtous.sql` file. You don't need to do anything!
+
+### 4. You're All Set!
+
+Your development environment is now accessible:
+
+-   **Frontend (Next.js)**: [http://localhost:3000](http://localhost:3000)
+-   **Backend (PHP API)**: [http://localhost:8000](http://localhost:8000)
+-   **DB Management (PhpMyAdmin)**: [http://localhost:8081](http://localhost:8081)
+-   **Database (Direct Connection)**: `localhost:3307`
+    -   Server: `db` (from containers) or `localhost:3307` (from host)
+    -   Username: `flepourtous`
+    -   Password: `1234`
+
+## Development Workflow
+
+### Using Make Commands (Recommended)
+
+```bash
+make help             # Show all available commands
+make first-install    # Complete setup for new developers
+make dependencies     # Install dependencies locally for IDE
+make dev              # Start development environment
+make logs             # View all service logs
+make logs-frontend    # View frontend logs only
+make logs-backend     # View backend logs only
+make status           # Check service status and URLs
+make restart          # Restart all services
+make down             # Stop all services
+make clean            # Clean containers and volumes
+make clean-all        # Complete cleanup (images, cache, etc.)
+make update           # Update dependencies
+```
+
+### Manual Docker Commands
+
+```bash
+# Start services
+docker compose up -d
+
+# Stop services
+docker compose down
+
+# View logs
+docker compose logs -f
+docker compose logs -f frontend
+docker compose logs -f backend
+
+# Check service status
+docker compose ps
+
+# Access container shell
+docker compose exec backend bash
+docker compose exec frontend sh
+
+# Rebuild after code changes
+docker compose up --build -d
+```
+
+### IDE Setup
+
+For optimal development experience with IntelliSense and linting:
+
+1. **Frontend**: Run `make dependencies` or manually `cd frontend && npm install`
+2. **Backend**: Run `make dependencies` or manually `cd backend && composer install`
+
+This installs dependencies locally for your IDE while Docker uses its own optimized dependencies.
+
+## Configuration Files Checklist
+
+Before running the project, ensure you have:
+
+✅ **Backend**:
+
+-   `backend/.env` (from `.env.example`)
+-   `backend/config/service-account-key.json`
+-   `backend/config/credentials.json`
+
+✅ **Frontend**:
+
+-   `frontend/.env` (from `.env.example`) - recommended for full functionality
+
+## Troubleshooting
+
+### Environment Variables Not Loading
+
+If you modify `backend/.env` after starting containers, you need to restart them:
+
+```bash
+make restart
+# or manually:
+docker compose down && docker compose up -d
+```
+
+### .env File Parsing Errors
+
+If you see parsing errors like "Failed to parse dotenv file", check your `.env` file for:
+
+-   **Passwords with spaces**: Must be quoted (`MAIL_PASSWORD="your password"`)
+-   **Special characters**: May need quoting or escaping
+-   **No empty lines**: Between variable definitions
+
+### Missing Google Service Files
+
+If you see errors related to Google Calendar or authentication:
+
+1. Ensure `service-account-key.json` and `credentials.json` are in `backend/config/`
+2. Verify the Google service account has proper permissions
+3. Check that `GOOGLE_CALENDAR_ID` and `GOOGLE_TOKEN` are set in `backend/.env`
+
+### Port Conflicts
+
+If ports are already in use, modify the port mappings in `compose.yml`:
+
+```yaml
+ports:
+    - "3001:3000" # Change 3000 to 3001 for frontend
+    - "8001:80" # Change 8000 to 8001 for backend
+    - "8082:80" # Change 8081 to 8082 for phpMyAdmin
+    - "3308:3306" # Change 3307 to 3308 for database
+```
+
+**Note**: The database already uses port `3307` instead of `3306` to avoid conflicts with local MySQL installations (especially on macOS).
+
+### Performance Issues (Windows)
+
+If you're experiencing slow performance:
+
+1. **Use WSL2** (see WSL2 setup section above) - this usually solves 90% of performance issues
+2. **Check Docker Desktop settings**: Ensure adequate RAM/CPU allocation
+3. **Clean Docker cache**: Run `make clean-all` periodically
+
+Our optimized setup installs dependencies during image build for faster startup:
+
+-   Dependencies are pre-installed in Docker images
+-   Local dependencies are only for IDE support
+-   Hot reload works seamlessly
+
+### Clean Start
+
+If you encounter persistent issues:
+
+```bash
+make clean-all        # Complete cleanup
+make first-install    # Fresh installation
+```
+
+## Architecture
+
+### Services
+
+-   **Frontend**: Next.js application with TypeScript and Tailwind CSS
+-   **Backend**: PHP 8.4 with Apache, using Composer for dependencies
+-   **Database**: MariaDB 10.6 with automatic schema import
+-   **PhpMyAdmin**: Web interface for database management
+
+### Optimization Features
+
+-   ✅ **Fast Startup**: Dependencies pre-installed in Docker images
+-   ✅ **Hot Reload**: Code changes reflected immediately
+-   ✅ **IDE Support**: Local dependencies for IntelliSense
+-   ✅ **Volume Protection**: Dependencies isolated from host filesystem
+-   ✅ **Multi-stage Builds**: Optimized Docker images for dev/prod
+
+Happy coding! 🚀
+
+---
+
+**Need Help?** Check the troubleshooting section above or review the Docker logs with `make logs`.
