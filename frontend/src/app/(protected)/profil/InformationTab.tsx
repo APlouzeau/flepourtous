@@ -5,9 +5,9 @@ import { EditUserModal } from "./EditUserModal";
 
 export function InformationTab({ dataUser }: { dataUser: UserDataProps }) {
     const [showEditModal, setShowEditModal] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [editedUser, setEditedUser] = useState({
+    //const [isLoading, setIsLoading] = useState(false);
+    //const [error, setError] = useState("");
+    /*     const [editedUser, setEditedUser] = useState({
         idUser: typeof dataUser?.idUser === "number" ? dataUser.idUser : 0,
         nickName: dataUser?.nickName || "",
         firstName: dataUser?.firstName || "",
@@ -22,7 +22,7 @@ export function InformationTab({ dataUser }: { dataUser: UserDataProps }) {
         city: dataUser?.city || "",
         country: dataUser?.country || "",
         password: "",
-    });
+    }); */
 
     return (
         <div className="space-y-6">

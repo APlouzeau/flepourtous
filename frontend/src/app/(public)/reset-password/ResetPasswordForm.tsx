@@ -38,8 +38,9 @@ export default function ResetPasswordForm() {
             } else {
                 setError(response.message);
             }
-        } catch (err: any) {
+        } catch (err) {
             setError("Une erreur est survenue");
+            console.error("Error resetting password:", err);
         } finally {
             setIsLoading(false);
         }
