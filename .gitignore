@@ -35,8 +35,8 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files
-.env
-.env.local
+/**/.env
+/**/.env.local
 # Ajoute cette ligne pour le backend
 /backend/.env
 
