@@ -156,7 +156,6 @@ class ControllerOrder
                     'payment_status' => $session->payment_status, // 'paid', 'unpaid', 'no_payment_required'
                     'customer_email' => $session->customer_details ? $session->customer_details->email : null
                 ]);
-                http_response_code(200);
             }
         } catch (\Stripe\Exception\ApiErrorException $e) {
             http_response_code(500);

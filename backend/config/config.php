@@ -16,6 +16,7 @@ define("VISIO_API_KEY", getenv('VISIO_API_KEY'));
 define("URI", getenv('URI'));
 define("URI_FRONT", getenv('URI_FRONT'));
 define('URI_STRIPE', getenv('URI_STRIPE'));
+define("COOKIE_DOMAIN", getenv('COOKIE_DOMAIN'));
 
 define("CRON_KEY", getenv('CRON_KEY'));
 define("JWT_KEY", getenv('JWT_KEY'));

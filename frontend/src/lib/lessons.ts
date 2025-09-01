@@ -3,7 +3,7 @@ import apiClient from "@/lib/axios";
 export async function getLessonsWithPrices() {
     try {
         const response = await apiClient.post("/api/getAllLessonsWithPrices", {});
-        console.log("Fetched lessons with prices:", response.data);
+        //console.log("Fetched lessons with prices:", response.data);
         return response.data;
     } catch (error) {
         console.error("Failed to fetch lessons:", error);

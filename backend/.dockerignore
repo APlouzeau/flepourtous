@@ -5,7 +5,7 @@ vendor/
 node_modules/
 
 # Ne pas copier les fichiers d'environnement locaux
-.env
+#.env
 
 # Fichiers de configuration Git
 .git

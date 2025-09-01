@@ -1,8 +1,8 @@
 "use client";
 import Button from "@/app/components/front/Button";
+import { resetPassword } from "@/lib/password";
 import Link from "next/link";
 import { useState } from "react";
-import { resetPassword } from "./page";
 
 export default function ResetPasswordForm() {
     const [error, setError] = useState("");

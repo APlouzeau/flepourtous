@@ -1,18 +1,5 @@
-import apiClient from "@/lib/axios";
 import ResetPasswordForm from "./ResetPasswordForm";
 
-export async function resetPassword(newPassword: string, confirmNewPassword: string) {
-    const response = await apiClient.post(
-        "/api/resetPassword",
-        { newPassword, confirmNewPassword },
-        {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        }
-    );
-    return response.data;
-}
 
 export default function ResetPasswordPage() {
     return (

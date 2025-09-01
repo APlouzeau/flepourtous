@@ -6,6 +6,7 @@ class ModelLesson extends  ClassDatabase
 {
     public function getAllLessons()
     {
+        file_put_contents('/tmp/model_lesson.log', 'Début appel getAllLessonsWithPrices\n', FILE_APPEND);
         $req = $this->conn->query('SELECT * FROM lesson');
         $datas = $req->fetchAll();
         $lessons = [];
@@ -20,6 +21,7 @@ class ModelLesson extends  ClassDatabase
                 ];
             $lessons[] = $lesson;
         }
+        var_dump($result); die;
         return $lessons;
     }
 

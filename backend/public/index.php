@@ -1,23 +1,52 @@
 <?php
 
-session_start();
 
-require_once __DIR__ . '/../vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
-$dotenv->load();
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = [
+    'https://flepourtous.plouzor.fr',
+];
 
-header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Credentials: true");
+
+if ($origin && in_array($origin, $allowedOrigins, true)) {
+    header("Access-Control-Allow-Origin: $origin");
+    header("Vary: Origin"); 
+    header("Access-Control-Allow-Credentials: true");
+}
+
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+require_once __DIR__ . '/../vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..', null, true); // 'true' enables overload mode
+$dotenv->load();
+
 define("APP_PATH", __DIR__ . "/../");
 define("BASE_URL", "/");
 
 require_once APP_PATH . "config/config.php";
 
+session_set_cookie_params([
+    'lifetime' => 0,
+    'path' => '/',
+    'domain' => COOKIE_DOMAIN,
+    'secure' => true, // Force secure cookies since we're behind Traefik HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+session_start();
+
+
+
 spl_autoload_register(function ($class_name) {
     try {
-        preg_match("/^(Class|Controller|Model|Entitie)/", $class_name, $match);
+        if (!preg_match("/^(Class|Controller|Model|Entitie)/", $class_name, $match)) {
+            return;
+        }
         $dir = match ($match[0]) {
             'Class' => APP_PATH . "/class",
             'Controller' => APP_PATH . "/controller",
@@ -28,7 +57,7 @@ spl_autoload_register(function ($class_name) {
             require_once $dir . '/' . $class_name . '.php';
         } else {
             throw new Exception("Class not found => " . $class_name, 1);
-        };
+        }
     } catch (\Throwable $th) {
         var_dump($th, $class_name);
     }
