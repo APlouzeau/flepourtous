@@ -11,7 +11,9 @@ class ClassDatabase
         //var_dump(DB_HOST, DB_NAME, DB_USER, DB_PSW);
         try {
             $this->conn = new PDO(
-                'mysql:host=135.125.106.184;dbname=flepourtous-preprod', 'flepourtous-preprod','BWG_Char6x9/@t5['
+                'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';dbname=' . DB_NAME,
+                DB_USER,
+                DB_PSW
             );
         } catch (PDOException $e) {
             echo $e->getMessage();

@@ -1,7 +1,8 @@
 .PHONY: help install build up down clean logs restart setup dev prod
 
 # Variables
-COMPOSE_FILE = compose.yml
+COMPOSE_FILE = docker-compose.yml
+COMPOSE_DEV_FILE = docker-compose.dev.yml
 FRONTEND_DIR = frontend
 BACKEND_DIR = backend
 
@@ -37,7 +38,7 @@ build: ## Build les images Docker
 
 dev: build ## Lance l'environnement de développement
 	@echo "🔥 Démarrage de l'environnement de développement..."
-	docker compose -f $(COMPOSE_FILE) up -d
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev up -d
 	@echo "✅ Environnement prêt !"
 	@echo "📱 Frontend: http://localhost:3000"
 	@echo "🔧 Backend: http://localhost:8000"

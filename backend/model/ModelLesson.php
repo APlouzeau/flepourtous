@@ -21,7 +21,6 @@ class ModelLesson extends  ClassDatabase
                 ];
             $lessons[] = $lesson;
         }
-        var_dump($result); die;
         return $lessons;
     }
 

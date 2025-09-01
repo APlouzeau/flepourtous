@@ -3,13 +3,13 @@
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
-    'https://flepourtous.plouzor.fr',
+    'http://localhost:3000',
 ];
 
 
 if ($origin && in_array($origin, $allowedOrigins, true)) {
     header("Access-Control-Allow-Origin: $origin");
-    header("Vary: Origin"); 
+    header("Vary: Origin");
     header("Access-Control-Allow-Credentials: true");
 }
 
@@ -34,7 +34,7 @@ session_set_cookie_params([
     'lifetime' => 0,
     'path' => '/',
     'domain' => COOKIE_DOMAIN,
-    'secure' => true, // Force secure cookies since we're behind Traefik HTTPS
+    'secure' => false, // Set to false for development (HTTP), true for production (HTTPS)
     'httponly' => true,
     'samesite' => 'Lax'
 ]);
