@@ -16,6 +16,10 @@ Ensure you have the following tools installed:
 -   [Git](https://git-scm.com/)
 -   [Make](https://www.gnu.org/software/make/) (optional but recommended)
 
+> **Windows Users**: We **strongly recommend** using [WSL2 for significantly better performance](#-windows-users-wsl2-setup-recommended) (5-10x faster builds and development experience).
+>
+> _Alternative: Windows users without WSL2 can use the [manual installation steps](#-manual-installation-alternative) instead of `make` commands._
+
 > **Note**: You do **not** need PHP, Composer, Node.js, or npm locally. Everything runs in Docker containers.
 
 ### Installation
