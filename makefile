@@ -18,7 +18,8 @@ first-install: ## Installation complète pour nouveau projet
 	cd $(FRONTEND_DIR) && npm install
 	@echo "📦 Installation des dépendances backend..."
 	cd $(BACKEND_DIR) && composer install
-	@echo "✅ Setup terminé ! Vous pouvez maintenant faire 'make dev'"
+	make network
+	@echo "✅ Setup terminé ! Vous pouvez  faire 'make dev' au prochain lancement"
 	@echo "ℹ️  Note: Docker utilise pnpm pour de meilleures performances"
 	make dev
 
@@ -36,7 +37,10 @@ dependencies-pnpm: ## Installe avec pnpm (plus rapide, optionnel)
 build: ## Build les images Docker
 	docker compose -f $(COMPOSE_FILE) build
 
-dev: build ## Lance l'environnement de développement
+network: ## Crée le réseau web s'il n'existe pas
+	@docker network inspect web >/dev/null 2>&1 || docker network create web
+
+dev: network build ## Lance l'environnement de développement
 	@echo "🔥 Démarrage de l'environnement de développement..."
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev up -d
 	@echo "✅ Environnement prêt !"
@@ -49,7 +53,7 @@ up: ## Démarre les services (sans rebuild)
 	docker compose -f $(COMPOSE_FILE) up -d
 
 down: ## Arrête tous les services
-	docker compose -f $(COMPOSE_FILE) down
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev down
 
 restart: down dev ## Redémarre complètement l'environnement
 
@@ -65,11 +69,11 @@ logs-frontend: ## Logs du frontend uniquement
 
 # Nettoyage
 clean: ## Nettoie les containers et volumes
-	docker compose -f $(COMPOSE_FILE) down -v
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev down -v
 	docker system prune -f
 
 clean-all: ## Nettoyage complet (images, volumes, cache)
-	docker compose -f $(COMPOSE_FILE) down -v
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev down -v
 	docker system prune -a -f --volumes
 	docker builder prune -a -f
 
