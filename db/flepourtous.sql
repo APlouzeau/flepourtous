@@ -1,10 +1,4 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
 CREATE DATABASE IF NOT EXISTS `flepourtous` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `flepourtous`;
 
@@ -30,14 +24,15 @@ CREATE TABLE IF NOT EXISTS `event` (
   `status` varchar(50) NOT NULL DEFAULT 'En attente',
   `visioLink` varchar(255) DEFAULT NULL,
   `id_lesson` int(11) NOT NULL,
+  `is_invoiced` int(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`idEvent`),
   KEY `id_lesson` (`id_lesson`),
   KEY `userId` (`userId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `event` (`idEvent`, `userId`, `description`, `duration`, `createdAt`, `startDateTime`, `updatedAt`, `status`, `visioLink`, `id_lesson`) VALUES
-('71i5dmogdsp590a2h6ureuk3mc', 1, '', 60, '2025-09-01 20:39:18', '2025-09-02 07:30:00', '2025-09-01 20:39:53', 'Payé', 'https://flepourtous.daily.co/VHOWVMDVbF61qeGOxwJY', 1),
-('986iitl9q24t0k0r50vrt1s5s4', 1, '', 30, '2025-09-01 20:10:42', '2025-09-03 06:00:00', '2025-09-01 20:11:15', 'Payé', 'https://flepourtous.daily.co/73Ya6FigOwuZGbPhsxfn', 1);
+INSERT INTO `event` (`idEvent`, `userId`, `description`, `duration`, `createdAt`, `startDateTime`, `updatedAt`, `status`, `visioLink`, `id_lesson`, `is_invoiced`) VALUES
+('71i5dmogdsp590a2h6ureuk3mc', 1, '', 60, '2025-09-01 20:39:18', '2025-09-02 07:30:00', '2025-09-01 20:39:53', 'Payé', 'https://flepourtous.daily.co/VHOWVMDVbF61qeGOxwJY', 1, 0),
+('986iitl9q24t0k0r50vrt1s5s4', 1, '', 30, '2025-09-01 20:10:42', '2025-09-03 06:00:00', '2025-09-01 20:11:15', 'Payé', 'https://flepourtous.daily.co/73Ya6FigOwuZGbPhsxfn', 1, 0);
 
 CREATE TABLE IF NOT EXISTS `google` (
   `canalId` varchar(250) NOT NULL,
@@ -160,7 +155,3 @@ ALTER TABLE `lessonPrices`
   ADD CONSTRAINT `lessonPrices_ibfk_1` FOREIGN KEY (`id_lesson`) REFERENCES `lesson` (`idLesson`),
   ADD CONSTRAINT `lessonPrices_ibfk_2` FOREIGN KEY (`id_price`) REFERENCES `prices` (`idPrice`),
   ADD CONSTRAINT `lessonPrices_ibfk_3` FOREIGN KEY (`id_duration`) REFERENCES `duration` (`idDuration`);
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
