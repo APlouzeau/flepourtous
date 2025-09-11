@@ -8,6 +8,7 @@ class EntitieEvent
     private int $duration;
     private string $createdAt;
     private string $startDateTime;
+    public string $timezone;
     private string $updatedAt;
     private string $status;
     private ?string $visioLink = null;
@@ -107,6 +108,26 @@ class EntitieEvent
     public function setStartDateTime($startDateTime)
     {
         $this->startDateTime = $startDateTime;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of timezone
+     */
+    public function getTimezone()
+    {
+        return $this->timezone;
+    }
+
+    /**
+     * Set the value of timezone
+     *
+     * @return  self
+     */
+    public function setTimezone($timezone)
+    {
+        $this->timezone = $timezone;
 
         return $this;
     }

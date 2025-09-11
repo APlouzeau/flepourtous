@@ -231,6 +231,7 @@ class ControllerCalendar
                 'duration' => $duration,
                 'createdAt' => $createdAt,
                 'startDateTime' => $userStartDateTimeUTCToString,
+                'timezone' => $userTimeZone,
                 'updatedAt' => $updatedAt,
                 'status' => $status,
                 'visioLink' => $roomUrl,

@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS `event` (
   `duration` tinyint(4) NOT NULL,
   `createdAt` datetime NOT NULL DEFAULT current_timestamp(),
   `startDateTime` datetime NOT NULL,
+  `timezone` varchar(50) NOT NULL DEFAULT 'UTC',
   `updatedAt` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `status` varchar(50) NOT NULL DEFAULT 'En attente',
   `visioLink` varchar(255) DEFAULT NULL,
@@ -30,9 +31,9 @@ CREATE TABLE IF NOT EXISTS `event` (
   KEY `userId` (`userId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `event` (`idEvent`, `userId`, `description`, `duration`, `createdAt`, `startDateTime`, `updatedAt`, `status`, `visioLink`, `id_lesson`, `is_invoiced`) VALUES
-('71i5dmogdsp590a2h6ureuk3mc', 1, '', 60, '2025-09-01 20:39:18', '2025-09-02 07:30:00', '2025-09-01 20:39:53', 'Payé', 'https://flepourtous.daily.co/VHOWVMDVbF61qeGOxwJY', 1, 0),
-('986iitl9q24t0k0r50vrt1s5s4', 1, '', 30, '2025-09-01 20:10:42', '2025-09-03 06:00:00', '2025-09-01 20:11:15', 'Payé', 'https://flepourtous.daily.co/73Ya6FigOwuZGbPhsxfn', 1, 0);
+INSERT INTO `event` (`idEvent`, `userId`, `description`, `duration`, `createdAt`, `startDateTime`, `timezone`, `updatedAt`, `status`, `visioLink`, `id_lesson`, `is_invoiced`) VALUES
+('71i5dmogdsp590a2h6ureuk3mc', 1, '', 60, '2025-09-01 20:39:18', '2025-09-02 07:30:00', 'UTC', '2025-09-01 20:39:53', 'Payé', 'https://flepourtous.daily.co/VHOWVMDVbF61qeGOxwJY', 1, 0),
+('986iitl9q24t0k0r50vrt1s5s4', 1, '', 30, '2025-09-01 20:10:42', '2025-09-03 06:00:00', 'UTC', '2025-09-01 20:11:15', 'Payé', 'https://flepourtous.daily.co/73Ya6FigOwuZGbPhsxfn', 1, 0);
 
 CREATE TABLE IF NOT EXISTS `google` (
   `canalId` varchar(250) NOT NULL,

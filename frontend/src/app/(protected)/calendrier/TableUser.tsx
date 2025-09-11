@@ -170,10 +170,10 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
             <TableHeader>
                 <TableRow className="hover:bg-transparent text-center">
                     <TableHead>Cours</TableHead>
-                    <TableHead>Date (votre fuseau)</TableHead>
-                    <TableHead>Heure (votre fuseau)</TableHead>
+                    <TableHead>Fuseau</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Heure</TableHead>
                     <TableHead>Durée</TableHead>
-                    {/* Étape 1 : On renomme les colonnes pour plus de clarté */}
                     <TableHead>Statut Paiement</TableHead>
                     <TableHead>Statut Visio</TableHead>
                     <TableHead>Actions</TableHead>
@@ -181,7 +181,6 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
             </TableHeader>
             <TableBody>
                 {listAppointments.map((item) => {
-                    // --- Ta logique existante (parfaite, on n'y touche pas) ---
                     const visioStatus = getVisioStatus(item.startDateTime, item.duration);
                     const { date: localDate, time: localTime } = formatDateInUserTimezone(item.startDateTime);
                     const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
@@ -189,7 +188,6 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                     const canCancel =
                         appointmentDate > today && (item.status === "Confirmé" || item.status === "En attente");
                     const canPay = appointmentDate > today && item.status === "En attente";
-                    // --- Fin de la logique ---
 
                     return (
                         <TableRow
@@ -206,6 +204,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                             onClick={() => handleRowClick(item, visioStatus.isJoinable)}
                         >
                             <TableCell className="font-medium">{item.title}</TableCell>
+                            <TableCell>{userTimezone}</TableCell>
                             <TableCell>{localDate}</TableCell>
                             <TableCell>{localTime}</TableCell>
                             <TableCell>{item.duration} mn</TableCell>

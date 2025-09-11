@@ -32,7 +32,7 @@ class ModelEvent extends  ClassDatabase
     public function getEventsUser(int $idUser)
     {
         $req = $this->conn->prepare('
-        SELECT idEvent, userId, description, duration, createdAt, updatedAt, status, visioLink, startDateTime, title FROM event INNER JOIN lesson l ON event.id_lesson = l.idLesson
+        SELECT idEvent, userId, description, duration, createdAt, updatedAt, status, visioLink, startDateTime, timezone, title FROM event INNER JOIN lesson l ON event.id_lesson = l.idLesson
         WHERE userId = :idUser');
         $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
         $req->execute();
@@ -51,6 +51,7 @@ class ModelEvent extends  ClassDatabase
                     'status' => $data['status'],
                     'visioLink' => $data['visioLink'],
                     'startDateTime' => $data['startDateTime'],
+                    'timezone' => $data['timezone'],
                     'title' => $data['title'],
                 ];
             }
@@ -61,12 +62,13 @@ class ModelEvent extends  ClassDatabase
 
     public function createEvent(EntitieEvent $event)
     {
-        $req = $this->conn->prepare('INSERT INTO event (idEvent, userId, description, duration, startDateTime, visioLink, id_lesson) VALUES (:idEvent, :userId, :description, :duration, :startDateTime, :visioLink, :id_lesson)');
+        $req = $this->conn->prepare('INSERT INTO event (idEvent, userId, description, duration, startDateTime, timezone, visioLink, id_lesson) VALUES (:idEvent, :userId, :description, :duration, :startDateTime, :timezone, :visioLink, :id_lesson)');
         $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
         $req->bindValue(':userId', $event->getUserId(), PDO::PARAM_INT);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
+        $req->bindValue(':timezone', $event->getTimeZone(), PDO::PARAM_STR);
         $req->bindValue(':id_lesson', $event->getId_lesson(), PDO::PARAM_INT);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
 
@@ -76,12 +78,13 @@ class ModelEvent extends  ClassDatabase
 
     public function updateEvent(EntitieEvent $event)
     {
-        $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, visioLink = :visioLink WHERE idEvent = :idEvent');
+        $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink WHERE idEvent = :idEvent');
         $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
+        $req->bindValue(':timezone', $event->getTimeZone(), PDO::PARAM_STR);
         return $req->execute();
     }
 
@@ -139,6 +142,7 @@ class ModelEvent extends  ClassDatabase
                 'description' => $data['description'],
                 'duration' => $data['duration'],
                 'startDateTime' => $data['startDateTime'],
+                'timezone' => $data['timezone'],
                 'visioLink' => $data['visioLink'],
             ];
         } else {
