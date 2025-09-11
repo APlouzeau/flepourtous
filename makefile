@@ -8,30 +8,39 @@ BACKEND_DIR = backend
 
 # Aide par défaut
 help: ## Affiche cette aide
-	@echo "Commands disponibles :"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+    @echo "Commands disponibles :"
+    @grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+# Vérification et installation automatique de pnpm
+check-pnpm:
+	@echo "🔍 Vérification de pnpm..."
+	@if ! command -v pnpm >/dev/null 2>&1; then \
+	    echo "📦 Installation de pnpm via npm..."; \
+	    npm install -g pnpm; \
+	    echo "✅ pnpm installé avec succès !"; \
+	else \
+	    echo "✅ pnpm disponible"; \
+	fi
 
 # Setup initial pour nouveaux développeurs
-first-install: ## Installation complète pour nouveau projet
+first-install: check-pnpm network ## Installation complète pour nouveau projet
 	@echo "🚀 Setup initial du projet..."
-	@echo "📦 Installation des dépendances frontend (npm pour simplicité)..."
-	cd $(FRONTEND_DIR) && npm install
+	@echo "📦 Installation des dépendances frontend avec pnpm..."
+	cd $(FRONTEND_DIR) && pnpm install
 	@echo "📦 Installation des dépendances backend..."
 	cd $(BACKEND_DIR) && composer install
-	make network
-	@echo "✅ Setup terminé ! Vous pouvez  faire 'make dev' au prochain lancement"
-	@echo "ℹ️  Note: Docker utilise pnpm pour de meilleures performances"
 	make dev
 
 # Développement
-dependencies: ## Installe les dépendances localement (pour IDE)
-	@echo "📦 Installation des dépendances pour l'IDE..."
-	cd $(FRONTEND_DIR) && npm install
+dependencies: check-pnpm ## Installe les dépendances localement (pour IDE)
+	@echo "📦 Installation des dépendances pour l'IDE avec pnpm..."
+	cd $(FRONTEND_DIR) && pnpm install
 	cd $(BACKEND_DIR) && composer install
 
-dependencies-pnpm: ## Installe avec pnpm (plus rapide, optionnel)
-	@echo "📦 Installation des dépendances avec pnpm..."
-	cd $(FRONTEND_DIR) && pnpm install
+# Garder le fallback npm au cas où
+dependencies-npm: ## Fallback : installe avec npm si problème pnpm
+	@echo "📦 Installation des dépendances avec npm (fallback)..."
+	cd $(FRONTEND_DIR) && npm install --legacy-peer-deps
 	cd $(BACKEND_DIR) && composer install
 
 build: ## Build les images Docker
@@ -66,6 +75,9 @@ logs-backend: ## Logs du backend uniquement
 
 logs-frontend: ## Logs du frontend uniquement
 	docker compose -f $(COMPOSE_FILE) logs -f app
+
+logs-db: ## Logs de la base de données uniquement
+	docker compose -f $(COMPOSE_FILE) logs -f db
 
 # Nettoyage
 clean: ## Nettoie les containers et volumes
@@ -104,3 +116,31 @@ status: ## Vérifie l'état des services
 update: ## Met à jour les dépendances
 	cd $(FRONTEND_DIR) && npm update
 	cd $(BACKEND_DIR) && composer update
+
+db-debug: ## Debug l'initialisation de la base
+	@echo "🔍 Debug base de données..."
+	@echo "📁 Contenu du dossier db/ :"
+	@ls -la db/
+	@echo "\n🐳 État du container db :"
+	@docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) ps db
+	@echo "\n📋 Tables actuelles dans la base :"
+	@docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) exec db mysql -u flepourtous -p1234 flepourtous -e "SHOW TABLES;" 2>/dev/null || echo "❌ Impossible de se connecter à la base"
+
+db-import: ## Importe le schéma flepourtous.sql
+	@echo "📥 Import du schéma flepourtous.sql..."
+	@docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) exec -T db mysql -u flepourtous -p1234 flepourtous < db/flepourtous.sql
+	@echo "✅ Schéma importé !"
+	@echo "📋 Vérification - tables créées :"
+	@docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) exec db mysql -u flepourtous -p1234 flepourtous -e "SHOW TABLES;"
+
+db-reset: ## Recrée la base complètement avec le schéma
+	@echo "🗑️  Reset complet de la base..."
+	@docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev down
+	@sudo rm -rf db_data/
+	@docker volume rm flepourtous_db_data 2>/dev/null || true
+
+
+db-drop-recreate: ## Drop et recréation des tables
+	@echo "🗑️  Suppression et recréation des tables..."
+	@docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) exec db mysql -u flepourtous -p1234 flepourtous -e "DROP DATABASE IF EXISTS flepourtous; CREATE DATABASE flepourtous;"
+	@$(MAKE) db-import
