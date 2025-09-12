@@ -1,12 +1,11 @@
 "use client";
 
-import { UserDataProps } from "@/app/types/userData";
 import { createContext, Dispatch, SetStateAction } from "react";
 
 // Context
 export type ContextType = {
-    dataUser: UserDataProps | null;
-    setDataUser: Dispatch<SetStateAction<UserDataProps | null>>;
+    isOpen: boolean;
+    setIsOpen: Dispatch<SetStateAction<boolean>>;
 };
 
 export const Context = createContext<ContextType>({} as ContextType);
