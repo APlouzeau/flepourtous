@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import TestimonialCard from "./TestimonialCard";
+import ScrollDiv from "../scrollSectionDiv";
 
 interface Testimonial {
     quote: string;
@@ -12,10 +13,11 @@ interface Testimonial {
 
 interface TestimonialsSliderProps {
     testimonials: Testimonial[];
-    isVisible: boolean;
 }
 
-export default function TestimonialsSlider({ testimonials, isVisible }: TestimonialsSliderProps) {
+export default function TestimonialsSlider({
+    testimonials,
+}: TestimonialsSliderProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
     const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -26,7 +28,9 @@ export default function TestimonialsSlider({ testimonials, isVisible }: Testimon
         if (!isAutoPlaying) return;
 
         const interval = setInterval(() => {
-            setCurrentIndex((prevIndex) => (prevIndex + 1) % testimonials.length);
+            setCurrentIndex(
+                (prevIndex) => (prevIndex + 1) % testimonials.length
+            );
         }, 4000); // Change slide every 4 seconds
 
         return () => clearInterval(interval);
@@ -40,7 +44,8 @@ export default function TestimonialsSlider({ testimonials, isVisible }: Testimon
     };
 
     const goToPrevious = () => {
-        const newIndex = currentIndex === 0 ? testimonials.length - 1 : currentIndex - 1;
+        const newIndex =
+            currentIndex === 0 ? testimonials.length - 1 : currentIndex - 1;
         goToSlide(newIndex);
     };
 
@@ -78,19 +83,15 @@ export default function TestimonialsSlider({ testimonials, isVisible }: Testimon
             {/* Desktop Grid Layout - Hidden on Mobile */}
             <div className="hidden md:block">
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
-                    <div className={`scroll-animate-right scroll-animate-delay-1 ${isVisible ? "visible" : ""}`}>
+                    <ScrollDiv className="scroll-animate-right scroll-animate-delay-1">
                         <TestimonialCard {...testimonials[0]} />
-                    </div>
-                    <div className={`scroll-animate-right scroll-animate-delay-2 ${isVisible ? "visible" : ""}`}>
+                    </ScrollDiv>
+                    <ScrollDiv className="scroll-animate-right scroll-animate-delay-2">
                         <TestimonialCard {...testimonials[1]} />
-                    </div>
-                    <div
-                        className={`sm:col-span-2 lg:col-span-1 scroll-animate-right scroll-animate-delay-3 ${
-                            isVisible ? "visible" : ""
-                        }`}
-                    >
+                    </ScrollDiv>
+                    <ScrollDiv className="sm:col-span-2 lg:col-span-1 scroll-animate-right scroll-animate-delay-3">
                         <TestimonialCard {...testimonials[2]} />
-                    </div>
+                    </ScrollDiv>
                 </div>
             </div>
 
@@ -105,13 +106,18 @@ export default function TestimonialsSlider({ testimonials, isVisible }: Testimon
                 >
                     <div
                         className="flex transition-transform duration-500 ease-in-out"
-                        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+                        style={{
+                            transform: `translateX(-${currentIndex * 100}%)`,
+                        }}
                     >
                         {testimonials.map((testimonial, index) => (
-                            <div key={index} className="w-full flex-shrink-0 px-2">
-                                <div className={`scroll-animate-scale ${isVisible ? "visible" : ""}`}>
+                            <div
+                                key={index}
+                                className="w-full flex-shrink-0 px-2"
+                            >
+                                <ScrollDiv className="scroll-animate-scale">
                                     <TestimonialCard {...testimonial} />
-                                </div>
+                                </ScrollDiv>
                             </div>
                         ))}
                     </div>
@@ -124,7 +130,9 @@ export default function TestimonialsSlider({ testimonials, isVisible }: Testimon
                             key={index}
                             onClick={() => goToSlide(index)}
                             className={`w-3 h-3 rounded-full nav-dot ${
-                                index === currentIndex ? "bg-red-600 scale-125 active" : "bg-gray-300 hover:bg-gray-400"
+                                index === currentIndex
+                                    ? "bg-red-600 scale-125 active"
+                                    : "bg-gray-300 hover:bg-gray-400"
                             }`}
                             aria-label={`Aller au témoignage ${index + 1}`}
                         />
@@ -136,7 +144,9 @@ export default function TestimonialsSlider({ testimonials, isVisible }: Testimon
                     <div
                         className="bg-red-600 h-1 rounded-full transition-all duration-100 ease-linear"
                         style={{
-                            width: `${((currentIndex + 1) / testimonials.length) * 100}%`,
+                            width: `${
+                                ((currentIndex + 1) / testimonials.length) * 100
+                            }%`,
                         }}
                     />
                 </div>

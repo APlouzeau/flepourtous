@@ -8,8 +8,8 @@ export default function PricesSection({
     lessons: LessonWithPrice[];
 }) {
     
-    // Ce composant ne nécessite pas d'être client car il n'utilise aucun hook client
-    // Ce composant serveur est parent de <ScrollSection> qui est client
+    // Ce composant serveur ne nécessite pas d'être client car il n'utilise aucun hook client
+    // Ce composant est parent de <ScrollSection> qui est client
     
     // C'est un composant serveur qui rend un composant client qui "wrap" le contenu serveur : la magie de Next.js
 

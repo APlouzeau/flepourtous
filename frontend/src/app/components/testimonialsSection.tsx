@@ -1,7 +1,5 @@
-"use client";
-
 import TestimonialsSlider from "./front/TestimonialsSlider";
-import { useScrollAnimation } from "@/lib/useScrollAnimation";
+import ScrollSection from "./scrollSection";
 
 const testimonials = [
     {
@@ -25,26 +23,16 @@ const testimonials = [
 ];
 
 export default function TestimonialsSection() {
-    const testimonialsSection = useScrollAnimation();
-
     return (
-        <section
-            ref={testimonialsSection.elementRef}
-            className={`bg-gray-50 py-12 sm:py-16 px-4 scroll-animate ${
-                testimonialsSection.isVisible ? "visible" : ""
-            }`}
-        >
+        <ScrollSection className="bg-gray-50 py-12 sm:py-16 px-4 scroll-animate">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-8 sm:mb-12">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                         Hear it from my students
                     </h2>
                 </div>
-                <TestimonialsSlider
-                    testimonials={testimonials}
-                    isVisible={testimonialsSection.isVisible}
-                />
+                <TestimonialsSlider testimonials={testimonials} />
             </div>
-        </section>
+        </ScrollSection>
     );
 }
