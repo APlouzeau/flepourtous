@@ -1,18 +1,9 @@
-"use client";
-
-import { useScrollAnimation } from "@/lib/useScrollAnimation";
 import Button from "./front/Button";
+import ScrollSection from "./scrollSection";
 
 export default function CtaSection() {
-    const ctaSection = useScrollAnimation();
-
     return (
-        <section
-            ref={ctaSection.elementRef}
-            className={`bg-white py-12 sm:py-16 px-4 scroll-animate-scale ${
-                ctaSection.isVisible ? "visible" : ""
-            }`}
-        >
+        <ScrollSection className="bg-white py-12 sm:py-16 px-4 scroll-animate-scale">
             <div className="max-w-4xl mx-auto text-center">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
                     Saisissez <span className="text-red-600">🎯</span> le Moment
@@ -28,6 +19,6 @@ export default function CtaSection() {
                     Démarrer maintenant
                 </Button>
             </div>
-        </section>
+        </ScrollSection>
     );
-};
+}

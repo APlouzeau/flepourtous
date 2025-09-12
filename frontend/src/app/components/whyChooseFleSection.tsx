@@ -2,6 +2,7 @@
 
 import { useScrollAnimation } from "@/lib/useScrollAnimation";
 import FeatureCard from "./front/FeatureCard";
+import { cn } from "@/lib/utils";
 
 export default function WhyChooseFleSection() {
     const whyChooseSection = useScrollAnimation();
@@ -21,22 +22,23 @@ export default function WhyChooseFleSection() {
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                     <div
-                        className={`scroll-animate scroll-animate-delay-1 ${
-                            whyChooseSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-1",
+                            whyChooseSection.isVisible && "visible"
+                        )}
                     >
                         <FeatureCard
                             icon="📅"
                             title="Emploi du temps flexible"
                             subtitle="Apprenez à votre rythme, où que vous soyez."
-                            description="
- Je propose des horaires adaptables selon votre fuseau horaire, vos disponibilités et votre rythme d’apprentissage. Cours du matin, du soir ou le samedi : c’est vous qui choisissez ! En cas d’imprévu, vous pouvez reporter le cours facilement si vous me prévenez à l’avance."
+                            description="Je propose des horaires adaptables selon votre fuseau horaire, vos disponibilités et votre rythme d’apprentissage. Cours du matin, du soir ou le samedi : c’est vous qui choisissez ! En cas d’imprévu, vous pouvez reporter le cours facilement si vous me prévenez à l’avance."
                         />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-2 ${
-                            whyChooseSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-2",
+                            whyChooseSection.isVisible && "visible"
+                        )}
                     >
                         <FeatureCard
                             icon="💰"
@@ -46,9 +48,10 @@ export default function WhyChooseFleSection() {
                         />
                     </div>
                     <div
-                        className={`sm:col-span-2 lg:col-span-1 scroll-animate scroll-animate-delay-3 ${
+                        className={cn(
+                            "sm:col-span-2 lg:col-span-1 scroll-animate scroll-animate-delay-3",
                             whyChooseSection.isVisible ? "visible" : ""
-                        }`}
+                        )}
                     >
                         <FeatureCard
                             icon="👨‍🏫"

@@ -1,21 +1,20 @@
-"use client";
-
-import { useScrollAnimation } from "@/lib/useScrollAnimation";
 import { LessonWithPrice } from "../types/lessons";
 import FormulaCard from "./front/FormulaCard";
+import ScrollSection from "./scrollSection";
 
-export default function PricesSection ({ lessons }: { lessons: LessonWithPrice[] }) {
-    // Ce composant nécessite d'être client car la <section> utilise un hook useRef (client)
-    // Les informations `lessons` sont hydratées côté serveur (SSR) et passées en props.
-    const formulasSection = useScrollAnimation();
+export default function PricesSection({
+    lessons,
+}: {
+    lessons: LessonWithPrice[];
+}) {
+    
+    // Ce composant ne nécessite pas d'être client car il n'utilise aucun hook client
+    // Ce composant serveur est parent de <ScrollSection> qui est client
+    
+    // C'est un composant serveur qui rend un composant client qui "wrap" le contenu serveur : la magie de Next.js
 
     return (
-        <section
-            ref={formulasSection.elementRef}
-            className={`bg-white py-12 sm:py-16 px-4 scroll-animate ${
-                formulasSection.isVisible ? "visible" : ""
-            }`}
-        >
+        <ScrollSection className="bg-white py-12 sm:py-16 px-4 scroll-animate">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-8 sm:mb-12">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -41,6 +40,6 @@ export default function PricesSection ({ lessons }: { lessons: LessonWithPrice[]
                     ))}
                 </div>
             </div>
-        </section>
+        </ScrollSection>
     );
-};
+}

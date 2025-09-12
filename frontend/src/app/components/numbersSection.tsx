@@ -2,6 +2,7 @@
 
 import { useScrollAnimation } from "@/lib/useScrollAnimation";
 import StatCard from "./front/StatCard";
+import { cn } from "@/lib/utils";
 
 export default function NumbersSection() {
     const statsSection = useScrollAnimation();
@@ -9,9 +10,10 @@ export default function NumbersSection() {
     return (
         <section
             ref={statsSection.elementRef}
-            className={`bg-[#1D1E1C] py-16 sm:py-24 md:py-32 lg:py-36 px-4 scroll-animate ${
-                statsSection.isVisible ? "visible" : ""
-            }`}
+            className={cn(
+                "bg-[#1D1E1C] py-16 sm:py-24 md:py-32 lg:py-36 px-4 scroll-animate",
+                statsSection.isVisible && "visible"
+            )}
         >
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-8 sm:mb-12">
@@ -21,23 +23,26 @@ export default function NumbersSection() {
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
                     <div
-                        className={`scroll-animate scroll-animate-delay-1 ${
-                            statsSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-1",
+                            statsSection.isVisible && "visible"
+                        )}
                     >
                         <StatCard number="2000+" description="Cours" />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-2 ${
-                            statsSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-2",
+                            statsSection.isVisible && "visible"
+                        )}
                     >
                         <StatCard number="99%" description="De satisfaction" />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-3 ${
-                            statsSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-3",
+                            statsSection.isVisible && "visible"
+                        )}
                     >
                         <StatCard
                             number="200+"
@@ -45,9 +50,10 @@ export default function NumbersSection() {
                         />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-4 ${
-                            statsSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-4",
+                            statsSection.isVisible && "visible"
+                        )}
                     >
                         <StatCard number="100%" description="Pédagogiques" />
                     </div>
@@ -55,4 +61,4 @@ export default function NumbersSection() {
             </div>
         </section>
     );
-};
+}

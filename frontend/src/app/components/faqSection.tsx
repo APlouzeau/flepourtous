@@ -2,6 +2,7 @@
 
 import { useScrollAnimation } from "@/lib/useScrollAnimation";
 import FAQItem from "./front/FAQItem";
+import { cn } from "@/lib/utils";
 
 export default function FaqSection() {
     const faqSection = useScrollAnimation();
@@ -24,9 +25,10 @@ export default function FaqSection() {
                 </div>
                 <div className="space-y-3 sm:space-y-4">
                     <div
-                        className={`scroll-animate scroll-animate-delay-1 ${
-                            faqSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-1",
+                            faqSection.isVisible && "visible"
+                        )}
                     >
                         <FAQItem
                             question="Qui êtes-vous ?"
@@ -34,9 +36,10 @@ export default function FaqSection() {
                         />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-2 ${
-                            faqSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-2",
+                            faqSection.isVisible && "visible"
+                        )}
                     >
                         <FAQItem
                             question="À qui s’adressent vos cours ?"
@@ -44,9 +47,10 @@ export default function FaqSection() {
                         />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-3 ${
-                            faqSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-3",
+                            faqSection.isVisible && "visible"
+                        )}
                     >
                         <FAQItem
                             question="Puis-je choisir les sujets des cours ?"
@@ -54,9 +58,10 @@ export default function FaqSection() {
                         />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-4 ${
-                            faqSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-4",
+                            faqSection.isVisible && "visible"
+                        )}
                     >
                         <FAQItem
                             question="Quelle est la fréquence recommandée pour les cours ?"
@@ -64,9 +69,10 @@ export default function FaqSection() {
                         />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-5 ${
-                            faqSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-5",
+                            faqSection.isVisible && "visible"
+                        )}
                     >
                         <FAQItem
                             question="De quoi ai-je besoin pour suivre un cours ?"
@@ -74,9 +80,10 @@ export default function FaqSection() {
                         />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-6 ${
-                            faqSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-6",
+                            faqSection.isVisible && "visible"
+                        )}
                     >
                         <FAQItem
                             question="Que se passe-t-il si j’arrive en retard ?"
@@ -84,9 +91,10 @@ export default function FaqSection() {
                         />
                     </div>
                     <div
-                        className={`scroll-animate scroll-animate-delay-6 ${
-                            faqSection.isVisible ? "visible" : ""
-                        }`}
+                        className={cn(
+                            "scroll-animate scroll-animate-delay-6",
+                            faqSection.isVisible && "visible"
+                        )}
                     >
                         <FAQItem
                             question="Puis-je annuler ou reporter un cours ?"
@@ -97,4 +105,4 @@ export default function FaqSection() {
             </div>
         </section>
     );
-};
+}
