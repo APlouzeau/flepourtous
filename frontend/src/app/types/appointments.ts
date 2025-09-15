@@ -7,4 +7,5 @@ export interface showBasicAppointmentProps {
     status: string;
     visioLink: string;
     startDateTime: string;
+    timezone: string;
 }

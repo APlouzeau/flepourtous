@@ -4,7 +4,7 @@ import { showBasicAppointmentProps } from "@/app/types/appointments";
 
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { deleteAppointment, prepareRepaymentAction } from "./nouveau-rendez-vous/AppointmentAction";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -13,54 +13,40 @@ interface AppointmentRowProps {
 }
 
 export default function TableUser({ listAppointments }: AppointmentRowProps) {
-    const [userTimezone, setUserTimezone] = useState<string | null>(null);
-    const [currentTime, setCurrentTime] = useState<Date>(new Date());
-    //const [isLoading, setIsLoading] = useState(true);
+    const [currentTime] = useState<Date>(new Date());
     const [isRepaying, setIsRepaying] = useState<string | null>(null);
     const router = useRouter();
 
-    useEffect(() => {
-        setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-        //  setIsLoading(false);
-
-        // Mettre à jour l'heure actuelle toutes les minutes
-        const interval = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 60000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    const formatDateInUserTimezone = (utcDateTimeString: string | undefined) => {
-        if (!utcDateTimeString || !userTimezone) {
-            return { date: "Chargement...", time: "" };
-        }
+    // Fonction pour formater la date et l'heure selon le fuseau de l'événement
+    const formatDateTime = (dateTimeString: string, timezone: string) => {
         try {
-            const isoUtcString = utcDateTimeString.includes("T")
-                ? utcDateTimeString
-                : utcDateTimeString.replace(" ", "T") + "Z";
-            const dateObj = new Date(isoUtcString);
+            // Convertir la string en objet Date (UTC)
+            const dateObj = new Date(dateTimeString.replace(" ", "T") + "Z");
 
             if (isNaN(dateObj.getTime())) {
-                return { date: "Date invalide", time: "" };
+                return { date: "Date invalide", time: "Heure invalide" };
             }
 
-            const formattedDate = dateObj.toLocaleDateString(undefined, {
-                timeZone: userTimezone,
-                year: "numeric",
-                month: "2-digit",
+            // Formater la date selon le fuseau de l'événement
+            const formattedDate = dateObj.toLocaleDateString("fr-FR", {
                 day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                timeZone: timezone, // ← AJOUT : utilise le fuseau de l'événement
             });
-            const formattedTime = dateObj.toLocaleTimeString(undefined, {
-                timeZone: userTimezone,
+
+            // Formater l'heure selon le fuseau de l'événement
+            const formattedTime = dateObj.toLocaleTimeString("fr-FR", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: false,
+                timeZone: timezone, // ← AJOUT : utilise le fuseau de l'événement
             });
+
             return { date: formattedDate, time: formattedTime };
         } catch (error) {
             console.error("Error formatting date:", error);
-            return { date: "Erreur", time: "" };
+            return { date: "Erreur", time: "Erreur" };
         }
     };
 
@@ -161,19 +147,15 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
         }
     };
 
-    if (!userTimezone) {
-        return <p>Chargement du fuseau horaire de l&apos;utilisateur...</p>;
-    }
-
     return (
         <Table>
             <TableHeader>
                 <TableRow className="hover:bg-transparent text-center">
                     <TableHead>Cours</TableHead>
-                    <TableHead>Date (votre fuseau)</TableHead>
-                    <TableHead>Heure (votre fuseau)</TableHead>
+                    <TableHead>Fuseau</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Heure</TableHead>
                     <TableHead>Durée</TableHead>
-                    {/* Étape 1 : On renomme les colonnes pour plus de clarté */}
                     <TableHead>Statut Paiement</TableHead>
                     <TableHead>Statut Visio</TableHead>
                     <TableHead>Actions</TableHead>
@@ -181,36 +163,36 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
             </TableHeader>
             <TableBody>
                 {listAppointments.map((item) => {
-                    // --- Ta logique existante (parfaite, on n'y touche pas) ---
                     const visioStatus = getVisioStatus(item.startDateTime, item.duration);
-                    const { date: localDate, time: localTime } = formatDateInUserTimezone(item.startDateTime);
+                    const { date: formattedDate, time: formattedTime } = formatDateTime(
+                        item.startDateTime,
+                        item.timezone
+                    ); // ← AJOUT ICI
                     const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
                     const today = new Date();
                     const canCancel =
                         appointmentDate > today && (item.status === "Confirmé" || item.status === "En attente");
                     const canPay = appointmentDate > today && item.status === "En attente";
-                    // --- Fin de la logique ---
 
                     return (
                         <TableRow
                             key={item.idEvent}
                             className={`
-                                    ${
-                                        visioStatus.isJoinable
-                                            ? "cursor-pointer hover:bg-green-50"
-                                            : "cursor-not-allowed hover:bg-red-50"
-                                    }
-                                    transition-colors duration-200
-                                `}
+                                ${
+                                    visioStatus.isJoinable
+                                        ? "cursor-pointer hover:bg-green-50"
+                                        : "cursor-not-allowed hover:bg-red-50"
+                                }
+                                transition-colors duration-200
+                            `}
                             title={visioStatus.tooltip}
                             onClick={() => handleRowClick(item, visioStatus.isJoinable)}
                         >
                             <TableCell className="font-medium">{item.title}</TableCell>
-                            <TableCell>{localDate}</TableCell>
-                            <TableCell>{localTime}</TableCell>
+                            <TableCell>{item.timezone}</TableCell>
+                            <TableCell className="font-mono">{formattedDate}</TableCell> {/* ← MODIFIÉ */}
+                            <TableCell className="font-mono">{formattedTime}</TableCell> {/* ← MODIFIÉ */}
                             <TableCell>{item.duration} mn</TableCell>
-
-                            {/* Étape 2 : La colonne "Statut Paiement" fusionnée */}
                             <TableCell>
                                 {canPay ? (
                                     <Button
@@ -229,11 +211,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                                     getStatusBadge(item.status)
                                 )}
                             </TableCell>
-
-                            {/* Étape 3 : On réintègre la colonne "Statut Visio" du collègue */}
                             <TableCell className={visioStatus.className}>{visioStatus.status}</TableCell>
-
-                            {/* Étape 4 : La colonne "Actions" fusionnée */}
                             <TableCell>
                                 {canCancel ? (
                                     <Button
@@ -266,7 +244,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
             </TableBody>
             <TableFooter className="bg-transparent">
                 <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={7}></TableCell> {/* Ajuster le colSpan */}
+                    <TableCell colSpan={7}></TableCell>
                 </TableRow>
             </TableFooter>
         </Table>

@@ -142,11 +142,15 @@ class ControllerOrder
             if ($session->payment_status === 'paid') {
 
                 $idUser = $session->metadata->user_id;
+
                 $modelEvent = new ModelEvent();
                 $status = $modelEvent->setEventStatusPaid($session->metadata->event_id);
-                $modelUser = new ModelUser();
 
+                $modelUser = new ModelUser();
                 $modelUser->updateWallet($idUser, 0);
+
+                $controllerEmail = new ControllerMail();
+                $controllerEmail->sendMailForPaymentSuccess($_SESSION['idUser'], $_SESSION['event_id']);
             }
 
             if (isset($status) && $status === true) {
