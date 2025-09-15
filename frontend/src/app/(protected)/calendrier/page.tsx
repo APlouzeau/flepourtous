@@ -25,6 +25,7 @@ export default async function CalendarPage() {
         );
         if (response.data && Array.isArray(response.data.data)) {
             appointmentList = response.data.data;
+            console.log("Fetched appointments:", appointmentList);
             appointmentList.sort((a, b) => {
                 const dateA = new Date(a.startDateTime).getTime();
                 const dateB = new Date(b.startDateTime).getTime();
