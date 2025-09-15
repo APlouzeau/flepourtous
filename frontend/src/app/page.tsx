@@ -1,10 +1,27 @@
-import HomePageClient from "./components/front/HomePageClient"; // Importer le nouveau composant
 import { getLessonsWithPrices } from "@/lib/lessons";
+import HeroSection from "./components/heroSection";
+import WhyChooseFleSection from "./components/whyChooseFleSection";
+import PricesSection from "./components/pricesSection";
+import NumbersSection from "./components/numbersSection";
+import TestimonialsSection from "./components/testimonialsSection";
+import FaqSection from "./components/faqSection";
+import CtaSection from "./components/ctaSection";
 
-// La page est maintenant un Composant Serveur, simple et efficace.
 export default async function Home() {
-    // 1. On récupère les données côté serveur
+    
+    // Cette page doit toujours rester server pour récupérer les données server side et hydrater les sous-composants qui peuvent être client. C'est le Server Side Rendering (SSR).
+
     const lessons = await getLessonsWithPrices();
-    // 2. On passe les données au composant client qui gère l'affichage et l'interactivité
-    return <HomePageClient lessons={lessons} />;
+
+    return (
+        <div className="min-h-screen">
+            <HeroSection />
+            <WhyChooseFleSection />
+            <PricesSection lessons={lessons} /> {/* PricesSection est pré-rendu côté serveur (SSR) */}
+            <NumbersSection />
+            <TestimonialsSection />
+            <FaqSection />
+            <CtaSection />
+        </div>
+    );
 }

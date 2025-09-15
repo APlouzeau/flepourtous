@@ -1,14 +1,7 @@
 "use client";
 
-import { createContext, Dispatch, SetStateAction, ReactNode, useState } from "react";
-
-// Context
-export type ContextType = {
-    isOpen: boolean;
-    setIsOpen: Dispatch<SetStateAction<boolean>>;
-};
-
-export const Context = createContext<ContextType>({} as ContextType);
+import { ReactNode, useState } from "react";
+import { Context } from "./context";
 
 // Provider
 type ProviderProps = {

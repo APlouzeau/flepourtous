@@ -1,4 +1,4 @@
-import Provider from "./profileContext";
+import Provider from "./profileProvider";
 import DisplayUserprofil from "./display";
 import apiClient from "@/lib/axios";
 import { getCookieBackend } from "@/lib/session";
