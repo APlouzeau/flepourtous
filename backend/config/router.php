@@ -33,7 +33,7 @@ $router->addRoute("POST", "/api/getAllLessonsWithPrices", "ControllerLesson", "g
 $router->addRoute("GET", "/api/listEvents", "ControllerCalendar", "listEvents");
 $router->addRoute("POST", "/api/createEvent", "ControllerCalendar", "createEvent");
 $router->addRoute("POST", "/api/listEvents", "ControllerCalendar", "listEvents");
-$router->addRoute("POST", "/api/deleteEvent", "ControllerCalendar", "deleteEvent");
+$router->addRoute("POST", "/api/deleteEvent", "ControllerCalendar", "checkDeleteEvent");
 $router->addRoute("POST", "/api/getAvailableTimeSlots", "ControllerCalendar", "getAvailablesTimeSlots");
 $router->addRoute("POST", "/api/sendMailToAlertForNextAppointment", "ControllerMail", "sendMailToAlertForNextAppointment");
 $router->addRoute("POST", "/api/prepareRepayment", "ControllerOrder", "prepareRepayment");

@@ -291,14 +291,41 @@ class ControllerCalendar
         echo json_encode($response);
     }
 
+    public function checkDeleteEvent()
+    {
+        $userController = new ControllerUser();
+        $userController->verifyConnectBack();
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+
+        $modelEvent = new ModelEvent();
+
+        $event = $modelEvent->getEventById($data['idEvent']);
+        if (!$event) {
+            $response = [
+                'code' => 0,
+                'message' => 'Événement non trouvé en base de données',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $timeRemaining = (new DateTime($event['startDateTime']))->getTimestamp() - (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
+        if ($timeRemaining < 24 * 3600) {
+            $response = [
+                'code' => 2,
+                'message' => "L'annulation d'un rendez-vous moins de 24 heures avant le début entraîne le paiement de la totalité de la séance. Confirmez- vous l'annulation ?",
+            ];
+        }
+        echo json_encode($response);
+    }
+
     public function deleteEvent()
     {
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
-        echo json_encode("data");
-        echo json_encode($data);
 
         if (!$data || !isset($data['idEvent'])) {
             $response = [
@@ -320,6 +347,8 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
+
+
 
         $modelEvent = new ModelEvent();
         $deleteEventSuccess = $modelEvent->deleteEvent($data['idEvent']);
