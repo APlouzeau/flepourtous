@@ -4,13 +4,17 @@ class ControllerVisio
 {
     private $visioApiKey = VISIO_API_KEY;
     private $url = 'https://api.daily.co/v1/rooms/';
+
     public function createRoom($duration, $userStartDateTimeUTCToString, $eventId)
     {
-
         $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
         $durationInSeconds = $duration * 60; // Convertir la durée en secondes
+        
+        // Créer un nom de room unique en combinant eventId et timestamp
+        $uniqueRoomName = 'flepourtous-' . $eventId . '-' . time();
+        
         $visio = [
-            'name' => 'flepourtous-' . $eventId,
+            'name' => $uniqueRoomName,
             'privacy' => 'public',
             'properties' => [
                 'nbf' => $startDateTimeUnix - 15 * 60,
@@ -32,7 +36,8 @@ class ControllerVisio
             'http' => [
                 'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $this->visioApiKey,
                 'method' => 'POST',
-                'content' => json_encode($visio)
+                'content' => json_encode($visio),
+                'ignore_errors' => true
             ]
         ];
 
@@ -40,16 +45,58 @@ class ControllerVisio
         $result = file_get_contents($this->url, false, $context);
 
         if ($result === false) {
-            $responseVisio = [
-                'code' => 0,
-                'message' => 'Erreur lors de la création de la room visio',
-            ];
-            echo json_encode($responseVisio);
-        } else {
-            $responseVisio = json_decode($result, true);
-            $roomUrl = $responseVisio['url'];
-            return $roomUrl;
+            $error = error_get_last();
+            error_log("Erreur lors de l'appel API Daily.co: " . ($error['message'] ?? 'Erreur inconnue'));
+            return null;
         }
+
+        $responseVisio = json_decode($result, true);
+        
+        if ($responseVisio === null) {
+            error_log("Erreur de décodage JSON de la réponse Daily.co: " . $result);
+            return null;
+        }
+
+        if (isset($responseVisio['error'])) {
+            // Si la room existe déjà, essayer avec un nom encore plus unique
+            if ($responseVisio['error'] === 'invalid-request-error' && 
+                strpos($responseVisio['info'], 'already exists') !== false) {
+                
+                error_log("Room existante détectée, tentative avec un nom différent...");
+                
+                // Générer un nom encore plus unique avec microtime
+                $uniqueRoomName = 'flepourtous-' . $eventId . '-' . time() . '-' . substr(microtime(), 2, 6);
+                $visio['name'] = $uniqueRoomName;
+                
+                $options['http']['content'] = json_encode($visio);
+                $context = stream_context_create($options);
+                $result = file_get_contents($this->url, false, $context);
+                
+                if ($result === false) {
+                    error_log("Erreur lors du second appel API Daily.co");
+                    return null;
+                }
+                
+                $responseVisio = json_decode($result, true);
+                
+                if (isset($responseVisio['error'])) {
+                    error_log("Erreur API Daily.co (second essai): " . json_encode($responseVisio));
+                    return null;
+                }
+            } else {
+                error_log("Erreur API Daily.co: " . json_encode($responseVisio));
+                return null;
+            }
+        }
+
+        if (!isset($responseVisio['url'])) {
+            error_log("URL de la room manquante dans la réponse Daily.co: " . json_encode($responseVisio));
+            return null;
+        }
+
+        $roomUrl = $responseVisio['url'];
+        error_log("Room visio créée avec succès: " . $roomUrl);
+        return $roomUrl;
     }
 
     public function deleteRoom($idEvent)
@@ -156,7 +203,7 @@ class ControllerVisio
         }
 
         // Ici vous pourriez envoyer un email à l'utilisateur avec le lien
-        // $this->sendVisioEmail($email, $roomUrl, $duration);
+        $this->sendVisioEmail($email, $roomUrl, $duration);
         $responseVisio = json_decode($result, true);
         $roomUrl = $responseVisio['url'];
 

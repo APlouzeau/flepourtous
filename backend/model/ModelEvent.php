@@ -61,15 +61,22 @@ class ModelEvent extends  ClassDatabase
 
     public function createEvent(EntitieEvent $event)
     {
-        $req = $this->conn->prepare('INSERT INTO event (idEvent, userId, description, duration, startDateTime, visioLink, id_lesson) VALUES (:idEvent, :userId, :description, :duration, :startDateTime, :visioLink, :id_lesson)');
+        $idLesson = $event->getId_lesson();
+        if ($idLesson !== null) {
+            $req = $this->conn->prepare('INSERT INTO event (idEvent, userId, description, duration, startDateTime, visioLink, id_lesson) VALUES (:idEvent, :userId, :description, :duration, :startDateTime, :visioLink, :id_lesson)');
+            $req->bindValue(':id_lesson', $idLesson, PDO::PARAM_INT);
+        } else {
+            $req = $this->conn->prepare('INSERT INTO event (idEvent, userId, description, duration, startDateTime, visioLink) VALUES (:idEvent, :userId, :description, :duration, :startDateTime, :visioLink)');
+        }
+        
+        error_log("requete: " . $req->queryString);
+        // Paramètres communs
         $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
         $req->bindValue(':userId', $event->getUserId(), PDO::PARAM_INT);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
-        $req->bindValue(':id_lesson', $event->getId_lesson(), PDO::PARAM_INT);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
-
 
         return $req->execute();
     }
