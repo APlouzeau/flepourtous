@@ -221,7 +221,7 @@ class ControllerCalendar
                 $responseVisio = json_decode($result, true);
                 $roomUrl = $responseVisio['url'];
             }
-
+            error_log("enregistrement en base de données.");
             //DATABASE
             $idEvent = $createdEvent->getId();
             $eventDatabase = new EntitieEvent([

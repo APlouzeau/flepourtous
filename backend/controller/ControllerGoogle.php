@@ -190,6 +190,13 @@ class ControllerGoogle
 
             $dtEnd = new DateTime($endDateTimeISO);
             $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
+            
+            // Vérifier si l'événement est dans le passé (plus de 1 heure)
+            $now = new DateTime('now', new DateTimeZone('UTC'));
+            if ($dtEnd->getTimestamp() < ($now->getTimestamp() - 3600)) {
+                error_log("Événement Google ID: " . $idEvent . " est dans le passé (fin: " . $dtEnd->format('Y-m-d H:i:s') . "). Ignoré.");
+                return;
+            }
         } catch (Exception $e) {
             error_log("Erreur de conversion de date pour l'événement Google ID: " . $idEvent . " - " . $e->getMessage());
             return;
@@ -204,9 +211,12 @@ class ControllerGoogle
         $attendees = $event->getAttendees();
         if (!empty($attendees)) {
             foreach ($attendees as $attendee) {
-                if ($attendee && $attendee->getEmail()) $emailsToCheck[] = $attendee->getEmail();
+                if ($attendee && !empty($attendee->getEmail())) {
+                    $emailsToCheck[] = $attendee->getEmail();
+                }
             }
         }
+
         $creator = $event->getCreator();
         if ($creator && $creator->getEmail()) $emailsToCheck[] = $creator->getEmail();
         $organizer = $event->getOrganizer();
@@ -221,8 +231,16 @@ class ControllerGoogle
         }
 
         if ($userId === null) {
-            error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Ignoré.");
-            return;
+            // Aucun utilisateur trouvé parmi les participants, utiliser l'admin par défaut
+            error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Utilisation de l'admin par défaut.");
+            $adminUserId = $modelUser->checkMail(TEACHER_MAIL);
+            if ($adminUserId) {
+                $userId = $adminUserId;
+                error_log("Admin trouvé avec l'ID: " . $userId . " pour l'événement: " . $idEvent);
+            } else {
+                error_log("ERREUR CRITIQUE: Admin non trouvé avec l'email: " . TEACHER_MAIL . " pour l'événement: " . $idEvent);
+                return; // Impossible de continuer sans utilisateur valide
+            }
         }
 
         error_log("Traitement de l'événement Google ID: " . $idEvent . " pour l'utilisateur ID: " . $userId);
@@ -252,6 +270,7 @@ class ControllerGoogle
                 ]);
                 $modelEvent->updateEvent($eventDatabase);
             } else {
+                
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
                 if (!$roomUrl) {
                     error_log("Erreur lors de la création de la room visio pour le nouvel événement ID: " . $idEvent);
@@ -265,7 +284,10 @@ class ControllerGoogle
                     'startDateTime' => $startDateTimeUtcFormatted,
                     'visioLink' => $roomUrl,
                 ]);
+
+                error_log("DEBUG: EntitieEvent créée, maintenant appel à createEvent()");
                 $modelEvent->createEvent($eventDatabase);
+                error_log("DEBUG: createEvent() terminé");
             }
         }
     }
