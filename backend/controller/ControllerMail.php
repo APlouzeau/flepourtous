@@ -199,4 +199,32 @@ class ControllerMail
             }
         }
     }
+
+    public function sendVisioEmail($email, $roomUrl, $duration)
+    {
+        error_log("Sending visio email to: " . $email);
+        try {
+            $this->mailer->addAddress($email);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = "Votre salle de visio Flepourtous";
+
+            $emailBody = "Bonjour,<br><br>";
+            $emailBody .= "Votre salle de visio a été créée. Vous pouvez rejoindre la salle en cliquant sur le lien ci-dessous :<br>";
+            $emailBody .= "<a href=\"" . htmlspecialchars($roomUrl) . "\">" . "Rejoindre la salle de visio</a><br><br>";
+            $emailBody .= "La salle sera disponible pendant les prochaines " . htmlspecialchars($duration) . " minutes.<br><br>";
+            $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
+            $this->mailer->Body = $emailBody;
+
+            $this->mailer->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Mailer Error: " . $this->mailer->ErrorInfo);
+            return false;
+        } finally {
+            if ($this->mailer) {
+                $this->mailer->clearAddresses(); // Clear addresses after sending
+                $this->mailer->clearAttachments(); // Clear attachments if any
+            }
+        }
+    }
 }
