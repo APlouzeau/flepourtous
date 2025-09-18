@@ -202,10 +202,10 @@ class ControllerVisio
             return;
         }
 
-        // Ici vous pourriez envoyer un email à l'utilisateur avec le lien
-        $this->sendVisioEmail($email, $roomUrl, $duration);
         $responseVisio = json_decode($result, true);
         $roomUrl = $responseVisio['url'];
+        $controllerMail = new ControllerMail();
+        $controllerMail->sendVisioEmail($email, $roomUrl, $duration);
 
         echo json_encode([
             'code' => 1,
