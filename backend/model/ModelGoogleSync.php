@@ -30,7 +30,7 @@ class ModelGoogleSync extends ClassDatabase
     public function getNextSyncToken($calendarId)
     {
         $req = $this->conn->prepare('SELECT nextSyncToken FROM googleSync WHERE idCalendar = :calendarId');
-        $req->bindValue(':idCalendar', $calendarId, PDO::PARAM_STR);
+        $req->bindValue(':calendarId', $calendarId, PDO::PARAM_STR);
         $req->execute();
         $data = $req->fetch(PDO::FETCH_ASSOC);
         return $data ? $data['nextSyncToken'] : null;
