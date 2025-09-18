@@ -64,10 +64,10 @@ class ModelEvent extends  ClassDatabase
     {
         $idLesson = $event->getId_lesson();
         if ($idLesson !== null) {
-            $req = $this->conn->prepare('INSERT INTO event (idEvent, userId, description, duration, startDateTime, visioLink, id_lesson) VALUES (:idEvent, :userId, :description, :duration, :startDateTime, :visioLink, :id_lesson)');
+            $req = $this->conn->prepare('INSERT INTO event (idEvent, userId, description, duration, startDateTime, visioLink, id_lesson, timezone) VALUES (:idEvent, :userId, :description, :duration, :startDateTime, :visioLink, :id_lesson, :timezone)');
             $req->bindValue(':id_lesson', $idLesson, PDO::PARAM_INT);
         } else {
-            $req = $this->conn->prepare('INSERT INTO event (idEvent, userId, description, duration, startDateTime, visioLink) VALUES (:idEvent, :userId, :description, :duration, :startDateTime, :visioLink)');
+            $req = $this->conn->prepare('INSERT INTO event (idEvent, userId, description, duration, startDateTime, visioLink, timezone) VALUES (:idEvent, :userId, :description, :duration, :startDateTime, :visioLink, :timezone)');
         }
 
         error_log("requete: " . $req->queryString);
