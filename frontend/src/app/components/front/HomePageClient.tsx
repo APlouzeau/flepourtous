@@ -80,7 +80,7 @@ export default function HomePageClient({ lessons }: { lessons: LessonWithPrice[]
                             <div className="relative h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden">
                                 <Image
                                     src="/images/triomphe.jpg"
-                                    alt="Apprentissage du français"
+                                    alt="Arc de triomphe Paris"
                                     fill
                                     className="object-cover"
                                 />
