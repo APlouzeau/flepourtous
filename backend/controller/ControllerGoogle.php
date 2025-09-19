@@ -191,10 +191,11 @@ class ControllerGoogle
             $dtEnd = new DateTime($endDateTimeISO);
             $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
             
-            // Vérifier si l'événement est dans le passé (plus de 1 heure)
+            // Ignorer seulement les événements très anciens (plus de 24 heures dans le passé)
+            // ACCEPTER TOUS LES ÉVÉNEMENTS FUTURS
             $now = new DateTime('now', new DateTimeZone('UTC'));
-            if ($dtEnd->getTimestamp() < ($now->getTimestamp() - 3600)) {
-                error_log("Événement Google ID: " . $idEvent . " est dans le passé (fin: " . $dtEnd->format('Y-m-d H:i:s') . "). Ignoré.");
+            if ($dtEnd->getTimestamp() < ($now->getTimestamp() - 86400)) { // 24 heures = 86400 secondes
+                error_log("Événement Google ID: " . $idEvent . " est trop ancien (fin: " . $dtEnd->format('Y-m-d H:i:s') . "). Ignoré.");
                 return;
             }
         } catch (Exception $e) {
@@ -257,8 +258,8 @@ class ControllerGoogle
                 $controllerVisio->deleteRoom($idEvent);
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
                 if (!$roomUrl) {
-                    error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent);
-                    return;
+                    error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent . ". L'événement sera mis à jour sans lien de visio.");
+                    $roomUrl = ''; // On continue avec une URL vide
                 }
                 $eventDatabase = new EntitieEvent([
                     'idEvent' => $idEvent,
@@ -273,8 +274,8 @@ class ControllerGoogle
                 
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
                 if (!$roomUrl) {
-                    error_log("Erreur lors de la création de la room visio pour le nouvel événement ID: " . $idEvent);
-                    return;
+                    error_log("Erreur lors de la création de la room visio pour le nouvel événement ID: " . $idEvent . ". L'événement sera créé sans lien de visio.");
+                    $roomUrl = ''; // On continue avec une URL vide
                 }
                 $eventDatabase = new EntitieEvent([
                     'idEvent' => $idEvent,
