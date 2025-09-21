@@ -138,7 +138,7 @@ extends ClassDatabase
 
     public function updateWallet(int $idUser, float $amount)
     {
-        $query = "UPDATE users SET wallet = wallet + :amount WHERE idUser = :idUser";
+        $query = "UPDATE users SET wallet = :amount WHERE idUser = :idUser";
         $req = $this->conn->prepare($query);
         $req->bindValue(":amount", $amount, PDO::PARAM_STR);
         $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
@@ -146,6 +146,20 @@ extends ClassDatabase
             return true;
         } else {
             error_log("Failed to update wallet for user ID: " . $idUser);
+            return false;
+        }
+    }
+
+    public function addToWallet(int $idUser, float $amount)
+    {
+        $query = "UPDATE users SET wallet = wallet + :amount WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":amount", $amount, PDO::PARAM_STR);
+        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        if ($req->execute()) {
+            return true;
+        } else {
+            error_log("Failed to add to wallet for user ID: " . $idUser);
             return false;
         }
     }

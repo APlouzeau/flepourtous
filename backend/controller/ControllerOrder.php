@@ -184,7 +184,7 @@ class ControllerOrder
             $modelPrices = new ModelPrices();
             $modelUser = new ModelUser();
             $lessonPrice = $modelPrices->getPriceByEventId($eventId);
-            $wallet = $modelUser->updateWallet($idUser, $lessonPrice['price']);
+            $wallet = $modelUser->addToWallet($idUser, $lessonPrice['price']);
             $status = $modelEvent->updateEventStatus($eventId, 'Refusé');
 
             if ($wallet && $status) {
