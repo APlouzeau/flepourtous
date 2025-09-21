@@ -99,6 +99,9 @@ class ControllerMail
 
     private function sendAppointmentReminderToUser($event)
     {
+        if ($event['mail'] == TEACHER_MAIL) {
+            return;
+        }
         $appointmentDateTime = new DateTime($event['startDateTime'], new DateTimeZone('UTC'));
         $appointmentHour = $appointmentDateTime->format('H:i');
 

@@ -85,11 +85,12 @@ class ModelEvent extends  ClassDatabase
 
     public function updateEvent(EntitieEvent $event)
     {
-        $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink WHERE idEvent = :idEvent');
+        $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink, userId = :userId WHERE idEvent = :idEvent');
         $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
+        $req->bindValue(':userId', $event->getUserId(), PDO::PARAM_INT);
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
         $req->bindValue(':timezone', $event->getTimeZone(), PDO::PARAM_STR);
         return $req->execute();

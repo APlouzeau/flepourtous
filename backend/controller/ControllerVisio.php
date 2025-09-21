@@ -7,6 +7,7 @@ class ControllerVisio
 
     public function createRoom($duration, $userStartDateTimeUTCToString, $eventId)
     {
+        error_log("time : " . $userStartDateTimeUTCToString);
         $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
         $durationInSeconds = $duration * 60; // Convertir la durée en secondes
         
