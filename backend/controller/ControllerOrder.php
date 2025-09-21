@@ -182,10 +182,12 @@ class ControllerOrder
         if ($eventId) {
             $modelEvent = new ModelEvent();
             $modelPrices = new ModelPrices();
+            $modelUser = new ModelUser();
             $lessonPrice = $modelPrices->getPriceByEventId($eventId);
-            $status = $modelEvent->setEventStatusRefused($eventId, $idUser, $lessonPrice['price']);
+            $wallet = $modelUser->updateWallet($idUser, $lessonPrice['price']);
+            $status = $modelEvent->updateEventStatus($eventId, 'Refusé');
 
-            if ($status) {
+            if ($wallet && $status) {
                 echo json_encode([
                     'code' => 1,
                     'message' => 'Rendez-vous refusé avec succès.'

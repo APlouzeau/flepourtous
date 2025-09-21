@@ -317,6 +317,12 @@ class ControllerCalendar
                 'message' => "L'annulation d'un rendez-vous moins de 24 heures avant le début entraîne le paiement de la totalité de la séance. Confirmez- vous l'annulation ?",
             ];
         }
+        if ($timeRemaining >= 24 * 3600) {
+            $response = [
+                'code' => 1,
+                'message' => "L'annulation d'un rendez-vous plus de 24 heures avant le début n'entraîne aucune pénalité. Le montant de votre leçon sera recrédité sur votre porte-monnaie. Confirmez-vous l'annulation ?",
+            ];
+        }
         echo json_encode($response);
     }
 
@@ -327,7 +333,7 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        if (!$data || !isset($data['idEvent'])) {
+        if (!$data || !isset($data['idEvent']) || !isset($data['code'])) {
             $response = [
                 'code' => 0,
                 'message' => 'Données manquantes pour supprimer l\'événement (idEvent requis).'
@@ -335,6 +341,9 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
+
+        $invoiced = $data['code'];
+
         $client = $this->getClient();
         $service = new Google\Service\Calendar($client);
         $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
@@ -348,10 +357,20 @@ class ControllerCalendar
             return;
         }
 
-
-
         $modelEvent = new ModelEvent();
-        $deleteEventSuccess = $modelEvent->deleteEvent($data['idEvent']);
+        $event = $modelEvent->getEventById($data['idEvent']);
+        $modelPrice = new ModelPrices();
+        $lessonPrice = $modelPrice->getPriceByEventId($event['idEvent']);
+        $modelUser = new ModelUser();
+        if ($invoiced == 1) {
+            $modelUser->updateWallet($event['userId'], $lessonPrice['price']);
+            $deleteEventSuccess = $modelEvent->deleteEvent($data['idEvent']);
+        }
+
+        if ($invoiced == 2) {
+            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'annulé - non remboursé');
+        }
+
         if (!$deleteEventSuccess) {
             $response = [
                 'code' => 0,
@@ -367,6 +386,7 @@ class ControllerCalendar
         }
         echo json_encode($response);
     }
+
 
     public function getAvailablesTimeSlots()
     {

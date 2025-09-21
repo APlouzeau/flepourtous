@@ -138,7 +138,7 @@ extends ClassDatabase
 
     public function updateWallet(int $idUser, float $amount)
     {
-        $query = "UPDATE users SET wallet = :amount WHERE idUser = :idUser";
+        $query = "UPDATE users SET wallet = wallet + :amount WHERE idUser = :idUser";
         $req = $this->conn->prepare($query);
         $req->bindValue(":amount", $amount, PDO::PARAM_STR);
         $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);

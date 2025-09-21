@@ -3,10 +3,11 @@
 import { showBasicAppointmentProps } from "@/app/types/appointments";
 
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { deleteAppointment, prepareRepaymentAction } from "./nouveau-rendez-vous/AppointmentAction";
+import { checkDeleteEvent, deleteAppointment, prepareRepaymentAction } from "./nouveau-rendez-vous/AppointmentAction";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import CancelConfirmationModal from "@/components/CancelConfirmationModal";
 
 interface AppointmentRowProps {
     listAppointments: showBasicAppointmentProps[];
@@ -15,6 +16,21 @@ interface AppointmentRowProps {
 export default function TableUser({ listAppointments }: AppointmentRowProps) {
     const [currentTime] = useState<Date>(new Date());
     const [isRepaying, setIsRepaying] = useState<string | null>(null);
+    const [cancelModal, setCancelModal] = useState<{
+        isOpen: boolean;
+        eventId: string | null;
+        eventTitle: string | null;
+        message: string;
+        code: number;
+        isDeleting: boolean;
+    }>({
+        isOpen: false,
+        eventId: null,
+        eventTitle: null,
+        message: "",
+        code: 0,
+        isDeleting: false,
+    });
     const router = useRouter();
 
     // Fonction pour formater la date et l'heure selon le fuseau de l'événement
@@ -147,37 +163,96 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
         }
     };
 
-    return (
-        <Table>
-            <TableHeader>
-                <TableRow className="hover:bg-transparent text-center">
-                    <TableHead>Cours</TableHead>
-                    <TableHead>Fuseau</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Heure</TableHead>
-                    <TableHead>Durée</TableHead>
-                    <TableHead>Statut Paiement</TableHead>
-                    <TableHead>Statut Visio</TableHead>
-                    <TableHead>Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {listAppointments.map((item) => {
-                    const visioStatus = getVisioStatus(item.startDateTime, item.duration);
-                    const { date: formattedDate, time: formattedTime } = formatDateTime(
-                        item.startDateTime,
-                        item.timezone
-                    ); // ← AJOUT ICI
-                    const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
-                    const today = new Date();
-                    const canCancel =
-                        appointmentDate > today && (item.status === "Confirmé" || item.status === "En attente");
-                    const canPay = appointmentDate > today && item.status === "En attente";
+    const handleCancelClick = async (eventId: string, eventTitle: string) => {
+        try {
+            const response = await checkDeleteEvent(eventId);
+            setCancelModal({
+                isOpen: true,
+                eventId,
+                eventTitle,
+                message: response.message || "Voulez-vous vraiment annuler ce rendez-vous ?",
+                code: response.code,
+                isDeleting: false,
+            });
+        } catch (error) {
+            console.error("Erreur lors de la vérification:", error);
+            setCancelModal({
+                isOpen: true,
+                eventId,
+                eventTitle,
+                message: "Erreur lors de la vérification de l'annulation. Voulez-vous continuer ?",
+                code: 0,
+                isDeleting: false,
+            });
+        }
+    };
 
-                    return (
-                        <TableRow
-                            key={item.idEvent}
-                            className={`
+    const handleConfirmCancel = async () => {
+        if (!cancelModal.eventId) return;
+
+        setCancelModal((prev) => ({ ...prev, isDeleting: true }));
+
+        try {
+            await deleteAppointment(cancelModal.eventId, cancelModal.code);
+            setCancelModal({
+                isOpen: false,
+                eventId: null,
+                eventTitle: null,
+                message: "",
+                code: 0,
+                isDeleting: false,
+            });
+            router.refresh();
+        } catch (error) {
+            console.error("Erreur lors de l'annulation:", error);
+            alert("Erreur lors de l'annulation du rendez-vous.");
+            setCancelModal((prev) => ({ ...prev, isDeleting: false }));
+        }
+    };
+
+    const handleCancelModalClose = () => {
+        setCancelModal({
+            isOpen: false,
+            eventId: null,
+            eventTitle: null,
+            message: "",
+            code: 0,
+            isDeleting: false,
+        });
+    };
+
+    return (
+        <>
+            <Table>
+                <TableHeader>
+                    <TableRow className="hover:bg-transparent text-center">
+                        <TableHead>Cours</TableHead>
+                        <TableHead>Fuseau</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Heure</TableHead>
+                        <TableHead>Durée</TableHead>
+                        <TableHead>Statut Paiement</TableHead>
+                        <TableHead>Statut Visio</TableHead>
+                        <TableHead>Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {listAppointments.map((item) => {
+                        const visioStatus = getVisioStatus(item.startDateTime, item.duration);
+                        const { date: formattedDate, time: formattedTime } = formatDateTime(
+                            item.startDateTime,
+                            item.timezone
+                        );
+                        const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
+                        const today = new Date();
+                        const canCancel =
+                            appointmentDate > today && (item.status === "Payé" || item.status === "En attente");
+                        const canPay = appointmentDate > today && item.status === "En attente";
+
+                        return (
+                            <TableRow
+                                key={item.idEvent}
+                                className={`
                                 ${
                                     visioStatus.isJoinable
                                         ? "cursor-pointer hover:bg-green-50"
@@ -185,68 +260,70 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                                 }
                                 transition-colors duration-200
                             `}
-                            title={visioStatus.tooltip}
-                            onClick={() => handleRowClick(item, visioStatus.isJoinable)}
-                        >
-                            <TableCell className="font-medium">{item.title}</TableCell>
-                            <TableCell>{item.timezone}</TableCell>
-                            <TableCell className="font-mono">{formattedDate}</TableCell> {/* ← MODIFIÉ */}
-                            <TableCell className="font-mono">{formattedTime}</TableCell> {/* ← MODIFIÉ */}
-                            <TableCell>{item.duration} mn</TableCell>
-                            <TableCell>
-                                {canPay ? (
-                                    <Button
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // Empêche le clic sur la ligne
-                                            handleRepay(item.idEvent.toString());
-                                        }}
-                                        disabled={isRepaying === item.idEvent.toString()}
-                                        variant="destructive"
-                                        size="sm"
-                                    >
-                                        {isRepaying === item.idEvent.toString() ? "..." : "Payer"}
-                                    </Button>
-                                ) : (
-                                    // Si on ne peut pas payer, on affiche le badge du collègue
-                                    getStatusBadge(item.status)
-                                )}
-                            </TableCell>
-                            <TableCell className={visioStatus.className}>{visioStatus.status}</TableCell>
-                            <TableCell>
-                                {canCancel ? (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={async (e) => {
-                                            e.stopPropagation(); // Empêche le clic sur la ligne
-                                            if (confirm("Êtes-vous sûr de vouloir annuler ce rendez-vous ?")) {
-                                                try {
-                                                    await deleteAppointment(item.idEvent.toString());
-                                                    alert(`Rendez-vous annulé.`);
-                                                    router.refresh();
-                                                } catch (error) {
-                                                    console.error("Erreur lors de l'annulation:", error);
-                                                    alert("Erreur lors de l'annulation du rendez-vous.");
-                                                }
-                                            }
-                                        }}
-                                    >
-                                        Annuler
-                                    </Button>
-                                ) : (
-                                    // Si on ne peut pas annuler, on affiche un tiret
-                                    <span className="text-gray-400">-</span>
-                                )}
-                            </TableCell>
-                        </TableRow>
-                    );
-                })}
-            </TableBody>
-            <TableFooter className="bg-transparent">
-                <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={7}></TableCell>
-                </TableRow>
-            </TableFooter>
-        </Table>
+                                title={visioStatus.tooltip}
+                                onClick={() => handleRowClick(item, visioStatus.isJoinable)}
+                            >
+                                <TableCell className="font-medium">{item.title}</TableCell>
+                                <TableCell>{item.timezone}</TableCell>
+                                <TableCell className="font-mono">{formattedDate}</TableCell> {/* ← MODIFIÉ */}
+                                <TableCell className="font-mono">{formattedTime}</TableCell> {/* ← MODIFIÉ */}
+                                <TableCell>{item.duration} mn</TableCell>
+                                <TableCell>
+                                    {canPay ? (
+                                        <Button
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Empêche le clic sur la ligne
+                                                handleRepay(item.idEvent.toString());
+                                            }}
+                                            disabled={isRepaying === item.idEvent.toString()}
+                                            variant="destructive"
+                                            size="sm"
+                                        >
+                                            {isRepaying === item.idEvent.toString() ? "..." : "Payer"}
+                                        </Button>
+                                    ) : (
+                                        // Si on ne peut pas payer, on affiche le badge du collègue
+                                        getStatusBadge(item.status)
+                                    )}
+                                </TableCell>
+                                <TableCell className={visioStatus.className}>{visioStatus.status}</TableCell>
+                                <TableCell>
+                                    {canCancel ? (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // Empêche le clic sur la ligne
+                                                handleCancelClick(item.idEvent.toString(), item.title);
+                                            }}
+                                        >
+                                            Annuler
+                                        </Button>
+                                    ) : (
+                                        // Si on ne peut pas annuler, on affiche un tiret
+                                        <span className="text-gray-400">-</span>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+                <TableFooter className="bg-transparent">
+                    <TableRow className="hover:bg-transparent">
+                        <TableCell colSpan={7}></TableCell>
+                    </TableRow>
+                </TableFooter>
+            </Table>
+
+            <CancelConfirmationModal
+                isOpen={cancelModal.isOpen}
+                onClose={handleCancelModalClose}
+                onConfirm={handleConfirmCancel}
+                isLoading={cancelModal.isDeleting}
+                message={cancelModal.message}
+                code={cancelModal.code}
+                appointmentTitle={cancelModal.eventTitle || undefined}
+            />
+        </>
     );
 }
