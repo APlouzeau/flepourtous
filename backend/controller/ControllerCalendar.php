@@ -17,8 +17,9 @@ class ControllerCalendar
     {
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
-
+        echo json_encode($_SESSION);
         if ($_SESSION['role'] != 'admin') {
+
             $this->listEventsUser();
         } else {
             $this->listEventsMain();

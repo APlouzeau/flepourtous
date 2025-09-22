@@ -14,7 +14,6 @@ export default function LoginForm() {
     const isValidForm = mail && password;
 
     const handleSubmit = async (e: React.FormEvent) => {
-        console.log("Form submitted");
         e.preventDefault();
         setIsLoading(true);
         await apiClient
@@ -32,7 +31,6 @@ export default function LoginForm() {
                 }
             )
             .then(async (response) => {
-                console.log("Login response:", response);
                 if (response.data.code == 1) {
                     await createSession(response.data.data.role);
                     redirect("/profil");

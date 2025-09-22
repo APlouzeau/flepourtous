@@ -2,7 +2,6 @@
 
 import { showBasicAppointmentProps } from "@/app/types/appointments";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { deleteAppointment } from "./nouveau-rendez-vous/AppointmentAction";
 import { useEffect, useState } from "react";
 
 interface AppointmentRowProps {
@@ -287,7 +286,7 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
                                             <button
                                                 onClick={async () => {
                                                     try {
-                                                        await deleteAppointment(item.idEvent.toString());
+                                                        //await deleteAppointment(item.idEvent.toString());
                                                         alert(`Rendez-vous annulé avec succès`);
                                                         window.location.reload();
                                                     } catch (error) {
@@ -405,7 +404,7 @@ export default function TableAdmin({ listAppointments }: AppointmentRowProps) {
                                     onClick={async (e) => {
                                         e.stopPropagation();
                                         try {
-                                            await deleteAppointment(item.idEvent.toString());
+                                            //await deleteAppointment(item.idEvent.toString());
                                             alert(`Rendez-vous annulé avec succès`);
                                             window.location.reload();
                                         } catch (error) {

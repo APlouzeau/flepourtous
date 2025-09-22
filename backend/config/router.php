@@ -57,3 +57,6 @@ $router->addRoute("POST", "/api/verify-payment", "ControllerOrder", "verifyPayme
 //debug
 $router->addRoute("GET", "/api/debug", "ControllerDebug", "debug");
 $router->addRoute("GET", "/api/debugBdd", "ControllerDebug", "debugBdd");
+
+//admin
+$router->addRoute("POST", "/api/getInvoices", "ControllerInvoice", "getInvoices");

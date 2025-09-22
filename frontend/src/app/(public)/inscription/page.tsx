@@ -32,7 +32,6 @@ export default function RegisterPage() {
             })
             .then((response) => {
                 if (response.data.code == 1) {
-                    console.log("Inscription réussie :", response.data);
                     setSuccess(response.data.message);
                 } else {
                     setError(response.data.message);
