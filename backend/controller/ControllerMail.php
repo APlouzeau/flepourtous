@@ -269,4 +269,6 @@ class ControllerMail
             }
         }
     }
+
+    public function sendMailToConfirmCancelAppointment(EntitieEvent $event, bool $paid) {}
 }

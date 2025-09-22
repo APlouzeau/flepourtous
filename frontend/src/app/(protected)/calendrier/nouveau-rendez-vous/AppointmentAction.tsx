@@ -57,12 +57,37 @@ export async function prepareRepaymentAction(eventId: string) {
     }
 }
 
-export async function deleteAppointment(idEvent: string) {
+export async function checkDeleteEvent(idEvent: string) {
+    const cookie = await getCookieBackend();
+    try {
+        const response = await apiClient.post(
+            "/api/checkDeleteEvent",
+            { idEvent },
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${cookie}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            }
+        );
+        console.log("Response from checkDeleteEvent:", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error checking deletion:", error);
+        if (axios.isAxiosError(error) && error.response && error.response.data) {
+            return error.response.data;
+        }
+        return { code: 0, message: "Une erreur s'est produite lors de la vérification de l'annulation." };
+    }
+}
+
+export async function deleteAppointment(idEvent: string, code: number) {
     const cookie = await getCookieBackend();
     try {
         await apiClient.post(
             "/api/deleteEvent",
-            { idEvent },
+            { idEvent, code },
             {
                 headers: {
                     Cookie: `PHPSESSID=${cookie}`,
