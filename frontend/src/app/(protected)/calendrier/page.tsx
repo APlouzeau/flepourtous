@@ -1,41 +1,16 @@
 import { Button } from "@/components/ui/button";
-import apiClient from "@/lib/axios";
 import Link from "next/link";
-import { getCookieBackend, getRole } from "@/lib/session";
-import { showBasicAppointmentProps } from "@/app/types/appointments";
+import { getRole } from "@/lib/session";
 import TableUser from "./TableUser";
 import TableAdmin from "./TableAdmin";
 import InstantVisioButton from "./InstantVisioButton";
+import { appointmentList, listInvoices } from "./listEventsActions"; // ✅ Import de la fonction
+import Badge from "@/app/components/front/badge";
 
 export default async function CalendarPage() {
-    const cookie = await getCookieBackend();
     const role = await getRole();
-    let appointmentList: showBasicAppointmentProps[] = [];
-    try {
-        const response = await apiClient.post(
-            "/api/listEvents",
-            {},
-            {
-                headers: {
-                    Cookie: `PHPSESSID=${cookie}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            }
-        );
-        if (response.data && Array.isArray(response.data.data)) {
-            appointmentList = response.data.data;
-            appointmentList.sort((a, b) => {
-                const dateA = new Date(a.startDateTime).getTime();
-                const dateB = new Date(b.startDateTime).getTime();
-                return dateB - dateA;
-            });
-        } else {
-            console.warn("La réponse de l'API ne contient pas de tableau d'événements valide dans .data");
-        }
-    } catch (error) {
-        console.error("Error during listEvents:", error);
-    }
+    const appointments = await appointmentList(); // ✅ Nom de variable différent
+    const invoiceList = await listInvoices(); // ❌ Tu passes des appointments à un composant qui attend des invoices
 
     const isAdmin = role === "admin";
 
@@ -76,30 +51,16 @@ export default async function CalendarPage() {
                 </div>
 
                 {/* Badge de rôle pour admin */}
-                {isAdmin && (
-                    <div className="flex justify-center mb-6">
-                        <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-full border border-amber-200">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-                                />
-                            </svg>
-                            <span className="text-sm font-medium">Mode administrateur</span>
-                        </div>
-                    </div>
-                )}
+                {isAdmin && <Badge role={role} />}
 
                 {/* Statistiques rapides pour admin */}
-                {isAdmin && appointmentList.length > 0 && (
+                {isAdmin && appointments.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600">Total rendez-vous</p>
-                                    <p className="text-2xl font-bold text-gray-900">{appointmentList.length}</p>
+                                    <p className="text-2xl font-bold text-gray-900">{appointments.length}</p>
                                 </div>
                                 <div className="bg-blue-100 rounded-full p-3">
                                     <svg
@@ -125,7 +86,7 @@ export default async function CalendarPage() {
                                     <p className="text-sm font-medium text-gray-600">Cours payés</p>
                                     <p className="text-2xl font-bold text-green-600">
                                         {
-                                            appointmentList.filter(
+                                            appointments.filter(
                                                 (item) =>
                                                     item.status.toLowerCase().includes("payé") ||
                                                     item.status.toLowerCase().includes("paye")
@@ -157,7 +118,7 @@ export default async function CalendarPage() {
                                     <p className="text-sm font-medium text-gray-600">En attente</p>
                                     <p className="text-2xl font-bold text-yellow-600">
                                         {
-                                            appointmentList.filter(
+                                            appointments.filter(
                                                 (item) =>
                                                     item.status.toLowerCase().includes("attente") ||
                                                     item.status.toLowerCase().includes("non payé") ||
@@ -201,17 +162,17 @@ export default async function CalendarPage() {
                             {isAdmin ? "Tous les rendez-vous" : "Mes rendez-vous"}
                         </h2>
                         <p className="text-sm text-gray-600 mt-1">
-                            {appointmentList.length > 0
-                                ? `${appointmentList.length} rendez-vous ${isAdmin ? "au total" : "planifiés"}`
+                            {appointments.length > 0
+                                ? `${appointments.length} rendez-vous ${isAdmin ? "au total" : "planifiés"}`
                                 : "Aucun rendez-vous pour le moment"}
                         </p>
                     </div>
 
                     <div className="p-6">
                         {isAdmin ? (
-                            <TableAdmin listAppointments={appointmentList} />
+                            <TableAdmin listAppointments={appointments} invoiceList={invoiceList} />
                         ) : (
-                            <TableUser listAppointments={appointmentList} />
+                            <TableUser listAppointments={appointments} />
                         )}
                     </div>
                 </div>

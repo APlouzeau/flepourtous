@@ -6,13 +6,19 @@ class ModelInvoice extends ClassDatabase
 {
     public function getInvoices($filtersToSql)
     {
-
-        $req = $this->conn->prepare('SELECT * FROM event WHERE ' . $filtersToSql['where']);
-        $req->execute($filtersToSql['params']);
+        $req = $this->conn->prepare('SELECT * FROM event ');
+        $req->execute();
         $datas = $req->fetchAll();
         $result = [];
         foreach ($datas as $data) {
-            $result[] = new EntitieEvent($data);
+            $result[] = [
+                'idEvent' => $data['idEvent'],
+                'userId' => $data['userId'],
+                'startDateTime' => $data['startDateTime'],
+                'status' => $data['status'],
+                'isInvoiced' => $data['is_invoiced'],
+                'duration' => $data['duration']
+            ];
         }
         return $result;
     }

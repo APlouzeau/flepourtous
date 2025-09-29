@@ -9,3 +9,20 @@ export interface showBasicAppointmentProps {
     startDateTime: string;
     timezone: string;
 }
+
+export interface showInvoicableAppointmentProps extends showBasicAppointmentProps {
+    studentName: string;
+    duration: string;
+    status: string;
+    startDateTime: string;
+    price: number;
+    isInvoiced: boolean;
+}
+
+export interface AppointmentRowProps {
+    listAppointments: showBasicAppointmentProps[];
+}
+
+export interface InvoiceRowProps {
+    invoiceList: showInvoicableAppointmentProps[];
+}

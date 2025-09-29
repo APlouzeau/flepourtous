@@ -6,9 +6,9 @@ class ControllerInvoice
     private $controllerUser;
     private $controllerError;
 
-    public function __construct($invoiceModel)
+    public function __construct()
     {
-        $this->invoiceModel = $invoiceModel;
+        $this->invoiceModel = new ModelInvoice();
         $this->controllerUser = new ControllerUser();
         $this->controllerError = new ControllerError();
     }
@@ -22,21 +22,13 @@ class ControllerInvoice
         }
 
         $input = json_decode(file_get_contents('php://input'), true);
-        if (!$this->controllerError->validateData($input, 'Pas de filtres envoyés')) {
-            return;
-        }
 
         $filters = $this->setFilters($input);
-        if (!$this->controllerError->validateData($filters, 'Pas de filtres valides envoyés')) {
-            return;
-        }
+
 
         $filtersToSql = $this->filterToSql($filters);
-        if (!$this->controllerError->validateData($filtersToSql, 'Erreur lors de la conversion des filtres')) {
-            return;
-        }
 
-        $lessonToInvoiced = $this->invoiceModel->getEventsWithFilters($filtersToSql);
+        $lessonToInvoiced = $this->invoiceModel->getInvoices($filtersToSql);
         if (!$this->controllerError->validateData($lessonToInvoiced, 'Aucun cours trouvé pour les filtres donnés')) {
             return;
         }
@@ -99,6 +91,10 @@ class ControllerInvoice
         if (isset($filters['invoiced'])) {
             $sqlParts[] = 'invoiced = :invoiced';
             $params[':invoiced'] = $filters['invoiced'];
+        }
+        if (empty($sqlParts)) {
+            $sqlParts = '';
+            return $sqlParts; // Aucun filtre fourni
         }
 
         return ['where' => implode(' AND ', $sqlParts), 'params' => $params];
