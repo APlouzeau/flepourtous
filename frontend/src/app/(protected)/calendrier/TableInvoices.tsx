@@ -1,9 +1,54 @@
-import { InvoiceRowProps } from "@/app/types/appointments";
+"use client";
+
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateInUserTimezone, useUserTimezone } from "@/lib/date";
+import { setInvoiced } from "./listEventsActions";
+import { Button } from "@/components/ui/button";
+import { showInvoicableAppointmentProps } from "@/app/types/appointments";
 
-export default function TableInvoices({ invoiceList }: InvoiceRowProps) {
+interface TableInvoicesProps {
+    invoiceList: showInvoicableAppointmentProps[];
+}
+
+export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
     const { userTimezone, isLoading: timezoneLoading } = useUserTimezone();
+    const [invoices, setInvoices] = useState(invoiceList);
+    const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
+
+    // Synchroniser le state local avec les nouvelles données du parent
+    useEffect(() => {
+        console.log("🔄 TableInvoices: Updating invoices from parent, received:", invoiceList.length, "items");
+        setInvoices(invoiceList);
+    }, [invoiceList]);
+
+    const handleSetInvoiced = async (eventId: string) => {
+        setLoadingItems((prev) => new Set([...prev, eventId]));
+
+        try {
+            const success = await setInvoiced(eventId);
+
+            if (success) {
+                setInvoices((prevInvoices) =>
+                    prevInvoices.map((invoice) =>
+                        invoice.idEvent === eventId ? { ...invoice, isInvoiced: 1 } : invoice
+                    )
+                );
+            } else {
+                alert("Erreur lors de la facturation");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Erreur lors de la facturation");
+        } finally {
+            // Retirer l'item du loading
+            setLoadingItems((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(eventId);
+                return newSet;
+            });
+        }
+    };
 
     const getStatusBadge = (status: string) => {
         const statusLower = status.toLowerCase();
@@ -107,11 +152,14 @@ export default function TableInvoices({ invoiceList }: InvoiceRowProps) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {invoiceList.map((item) => {
+                            {invoices.map((item) => {
                                 const { date: localDate } = formatDateInUserTimezone(
                                     item.startDateTime,
                                     userTimezone || "UTC"
                                 );
+                                const isLoading = loadingItems.has(item.idEvent);
+                                const isInvoiced = item.isInvoiced === 1;
+
                                 return (
                                     <TableRow
                                         key={item.idEvent}
@@ -125,36 +173,26 @@ export default function TableInvoices({ invoiceList }: InvoiceRowProps) {
                                         <TableCell className="text-gray-700">{localDate}</TableCell>
 
                                         <TableCell>{getStatusBadge(item.status)}</TableCell>
-
-                                        <TableCell onClick={(e) => e.stopPropagation()}>
-                                            <button
-                                                onClick={async () => {
-                                                    try {
-                                                        //await deleteAppointment(item.idEvent.toString());
-                                                        alert(`Rendez-vous annulé avec succès`);
-                                                        window.location.reload();
-                                                    } catch (error) {
-                                                        console.error("Erreur lors de l'annulation:", error);
-                                                        alert("Erreur lors de l'annulation du rendez-vous.");
-                                                    }
-                                                }}
-                                                className="inline-flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200"
-                                            >
-                                                <svg
-                                                    className="w-4 h-4"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
+                                        <TableCell className="whitespace-nowrap">
+                                            {!isInvoiced ? (
+                                                <Button
+                                                    onClick={() => handleSetInvoiced(item.idEvent)}
+                                                    disabled={isLoading}
+                                                    size="sm"
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white"
                                                 >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M6 18L18 6M6 6l12 12"
-                                                    />
-                                                </svg>
-                                                Annuler
-                                            </button>
+                                                    {isLoading ? (
+                                                        <>
+                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                            Facturation...
+                                                        </>
+                                                    ) : (
+                                                        "Marquer comme facturé"
+                                                    )}
+                                                </Button>
+                                            ) : (
+                                                <span className="text-sm text-gray-500 font-medium">✅ Facturé</span>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -163,6 +201,8 @@ export default function TableInvoices({ invoiceList }: InvoiceRowProps) {
                     </Table>
                 </div>
             </div>
+
+            {invoices.length === 0 && <div className="text-center py-8 text-gray-500">Aucune facture à traiter</div>}
         </div>
     );
 }

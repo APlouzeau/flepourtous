@@ -1,11 +1,13 @@
+("");
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getRole } from "@/lib/session";
 import TableUser from "./TableUser";
-import TableAdmin from "./TableAdmin";
 import InstantVisioButton from "./InstantVisioButton";
 import { appointmentList, listInvoices } from "./listEventsActions"; // ✅ Import de la fonction
 import Badge from "@/app/components/front/badge";
+import AdminDashboard from "./AdminDashboard";
 
 export default async function CalendarPage() {
     const role = await getRole();
@@ -148,34 +150,34 @@ export default async function CalendarPage() {
                 )}
 
                 {/* Contenu principal */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                                />
-                            </svg>
-                            {isAdmin ? "Tous les rendez-vous" : "Mes rendez-vous"}
-                        </h2>
-                        <p className="text-sm text-gray-600 mt-1">
-                            {appointments.length > 0
-                                ? `${appointments.length} rendez-vous ${isAdmin ? "au total" : "planifiés"}`
-                                : "Aucun rendez-vous pour le moment"}
-                        </p>
-                    </div>
+                {isAdmin ? (
+                    <AdminDashboard listAppointments={appointments} invoiceList={invoiceList} />
+                ) : (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                                    />
+                                </svg>
+                                Mes rendez-vous
+                            </h2>
+                            <p className="text-sm text-gray-600 mt-1">
+                                {appointments.length > 0
+                                    ? `${appointments.length} rendez-vous planifiés`
+                                    : "Aucun rendez-vous pour le moment"}
+                            </p>
+                        </div>
 
-                    <div className="p-6">
-                        {isAdmin ? (
-                            <TableAdmin listAppointments={appointments} invoiceList={invoiceList} />
-                        ) : (
+                        <div className="p-6">
                             <TableUser listAppointments={appointments} />
-                        )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

@@ -5,12 +5,14 @@ class ControllerInvoice
     private $invoiceModel;
     private $controllerUser;
     private $controllerError;
+    private $modelUser;
 
     public function __construct()
     {
         $this->invoiceModel = new ModelInvoice();
         $this->controllerUser = new ControllerUser();
         $this->controllerError = new ControllerError();
+        $this->modelUser = new ModelUser();
     }
 
 
@@ -25,7 +27,6 @@ class ControllerInvoice
 
         $filters = $this->setFilters($input);
 
-
         $filtersToSql = $this->filterToSql($filters);
 
         $lessonToInvoiced = $this->invoiceModel->getInvoices($filtersToSql);
@@ -33,7 +34,16 @@ class ControllerInvoice
             return;
         }
 
-        $this->controllerError->successResponse($lessonToInvoiced, 'Cours récupérés avec succès');
+        $finalList = [];
+
+        foreach ($lessonToInvoiced as $lesson) {
+
+            $user = $this->modelUser->getUser(new EntitieUser(['idUser' => $lesson['userId']]));
+            $userName = $user['firstName'] . ' ' . $user['lastName'];
+            $lesson['studentName'] = $userName;
+            $finalList[] = $lesson;
+        }
+        $this->controllerError->successResponse($finalList, 'Cours récupérés avec succès');
     }
 
     protected function setFilters($input)
@@ -93,10 +103,32 @@ class ControllerInvoice
             $params[':invoiced'] = $filters['invoiced'];
         }
         if (empty($sqlParts)) {
-            $sqlParts = '';
-            return $sqlParts; // Aucun filtre fourni
+            return ['where' => '1=1', 'params' => []]; // Aucun filtre fourni, retourner tous les résultats
         }
 
         return ['where' => implode(' AND ', $sqlParts), 'params' => $params];
+    }
+
+    /**
+     * Microservice pour marquer un cours comme facturés
+     */
+    public function setInvoiced()
+    {
+        if (!$this->controllerUser->verifyConnectAdmin()) {
+            $this->controllerError->unauthorizedResponse();
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($input['idEvent']) || empty($input['idEvent'])) {
+            $this->controllerError->unauthorizedResponse('ID de l\'événement manquant');
+            return;
+        }
+
+        $idEvent = $input['idEvent'];
+
+        $this->invoiceModel->setInvoiced($idEvent);
+        $this->controllerError->successResponse(null, 'Cours marqué comme facturé');
     }
 }

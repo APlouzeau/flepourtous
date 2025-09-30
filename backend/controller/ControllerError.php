@@ -30,7 +30,7 @@ class ControllerError
         http_response_code(401);
         echo json_encode([
             'code' => 0,
-            'error' => $message
+            'message' => $message
         ]);
     }
 

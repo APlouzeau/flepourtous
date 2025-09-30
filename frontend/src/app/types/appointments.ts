@@ -1,5 +1,5 @@
 export interface showBasicAppointmentProps {
-    idEvent: number;
+    idEvent: string;
     title: string;
     studentName: string;
     description: string;
@@ -11,12 +11,9 @@ export interface showBasicAppointmentProps {
 }
 
 export interface showInvoicableAppointmentProps extends showBasicAppointmentProps {
-    studentName: string;
-    duration: string;
     status: string;
-    startDateTime: string;
     price: number;
-    isInvoiced: boolean;
+    isInvoiced: number | null;
 }
 
 export interface AppointmentRowProps {

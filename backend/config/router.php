@@ -60,3 +60,4 @@ $router->addRoute("GET", "/api/debugBdd", "ControllerDebug", "debugBdd");
 
 //admin
 $router->addRoute("POST", "/api/getInvoices", "ControllerInvoice", "getInvoices");
+$router->addRoute("POST", "/api/setInvoiced", "ControllerInvoice", "setInvoiced");
