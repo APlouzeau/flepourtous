@@ -22,7 +22,6 @@ class ControllerInvoice
             $this->controllerError->unauthorizedResponse();
             return;
         }
-
         $input = json_decode(file_get_contents('php://input'), true);
 
         $filters = $this->setFilters($input);
@@ -46,7 +45,7 @@ class ControllerInvoice
         $this->controllerError->successResponse($finalList, 'Cours récupérés avec succès');
     }
 
-    protected function setFilters($input)
+    private function setFilters($input)
     {
         $filters = [];
 
@@ -66,14 +65,15 @@ class ControllerInvoice
             $filters['status'] = $input['status'];
         }
 
-        if (isset($input['invoiced']) && !empty($input['invoiced'])) {
-            $filters['invoiced'] = (float)$input['invoiced'];
+        if (isset($input['isInvoiced']) && $input['isInvoiced'] !== '') {
+            $filters['is_invoiced'] = (int)$input['isInvoiced'];
         }
+
 
         return $filters;
     }
 
-    protected function filterToSql($filters)
+    private function filterToSql($filters)
     {
         $sqlParts = [];
         $params = [];
@@ -98,10 +98,11 @@ class ControllerInvoice
             $params[':status'] = $filters['status'];
         }
 
-        if (isset($filters['invoiced'])) {
-            $sqlParts[] = 'invoiced = :invoiced';
-            $params[':invoiced'] = $filters['invoiced'];
+        if (isset($filters['is_invoiced'])) { // ← Nouveau filtre
+            $sqlParts[] = "is_invoiced = :is_invoiced";
+            $params[':is_invoiced'] = $filters['is_invoiced'];
         }
+
         if (empty($sqlParts)) {
             return ['where' => '1=1', 'params' => []]; // Aucun filtre fourni, retourner tous les résultats
         }
@@ -110,7 +111,7 @@ class ControllerInvoice
     }
 
     /**
-     * Microservice pour marquer un cours comme facturés
+     * Concentrateur pour marquer un cours comme facturés
      */
     public function setInvoiced()
     {

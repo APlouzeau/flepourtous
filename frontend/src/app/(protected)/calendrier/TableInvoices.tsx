@@ -18,7 +18,6 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
 
     // Synchroniser le state local avec les nouvelles données du parent
     useEffect(() => {
-        console.log("🔄 TableInvoices: Updating invoices from parent, received:", invoiceList.length, "items");
         setInvoices(invoiceList);
     }, [invoiceList]);
 

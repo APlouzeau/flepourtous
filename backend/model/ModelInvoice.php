@@ -7,6 +7,7 @@ class ModelInvoice extends ClassDatabase
     public function getInvoices($filtersToSql)
     {
         $req = $this->conn->prepare('SELECT * FROM event WHERE ' . $filtersToSql['where']);
+
         $req->execute($filtersToSql['params']);
         $datas = $req->fetchAll();
         $result = [];

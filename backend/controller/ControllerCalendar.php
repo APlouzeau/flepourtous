@@ -368,7 +368,7 @@ class ControllerCalendar
         }
 
         if ($invoiced == 2) {
-            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'annulé - non remboursé');
+            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - non remboursé');
         }
 
         if (!$deleteEventSuccess) {

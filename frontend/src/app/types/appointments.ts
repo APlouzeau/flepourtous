@@ -13,7 +13,7 @@ export interface showBasicAppointmentProps {
 export interface showInvoicableAppointmentProps extends showBasicAppointmentProps {
     status: string;
     price: number;
-    isInvoiced: number | null;
+    isInvoiced: number;
 }
 
 export interface AppointmentRowProps {

@@ -3,25 +3,31 @@
 import { useEffect, useState } from "react";
 import TableAdmin from "./TableAdmin";
 import TableInvoices from "./TableInvoices";
+import FilterSelect from "./FilterSelect";
 import { showBasicAppointmentProps, showInvoicableAppointmentProps } from "@/app/types/appointments";
 import { listInvoices } from "./listEventsActions";
 
-interface TableAdminProps {
+export interface TableAdminProps {
     listAppointments: showBasicAppointmentProps[];
     invoiceList: showInvoicableAppointmentProps[];
 }
 
 export default function AdminDashboard({ listAppointments, invoiceList }: TableAdminProps) {
     const [activeTab, setActiveTab] = useState("rendez-vous");
-    const [statusFilter, setStatusFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState(""); // Pour le statut (Payé, En attente...)
+    const [userFilter, setUserFilter] = useState(""); // Pour le filtre utilisateur
+    const [invoicedFilter, setInvoicedFilter] = useState(""); // Pour l'état facturé (0, 1)
     const [filteredInvoices, setFilteredInvoices] = useState<showInvoicableAppointmentProps[]>(invoiceList);
 
     useEffect(() => {
         const fetchFilteredInvoices = async () => {
             try {
-                console.log("🔍 Filtering with status:", statusFilter);
-                const data = await listInvoices(statusFilter ? { status: statusFilter } : {});
-                console.log("📊 Filtered data received:", data.length, "items");
+                // Construire l'objet de filtres
+                const filters: { status?: string; isInvoiced?: number } = {};
+                if (statusFilter) filters.status = statusFilter;
+                if (invoicedFilter) filters.isInvoiced = Number(invoicedFilter);
+
+                const data = await listInvoices(filters);
                 setFilteredInvoices(data);
             } catch (error) {
                 console.error("Error fetching filtered invoices:", error);
@@ -29,7 +35,10 @@ export default function AdminDashboard({ listAppointments, invoiceList }: TableA
         };
 
         fetchFilteredInvoices();
-    }, [statusFilter]);
+    }, [statusFilter, invoicedFilter]); // ← Écouter les 2 filtres
+
+    console.log("statusFilter:", statusFilter);
+    console.log("invoicedFilter:", invoicedFilter);
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -62,19 +71,42 @@ export default function AdminDashboard({ listAppointments, invoiceList }: TableA
                     <TableAdmin listAppointments={listAppointments} invoiceList={invoiceList} />
                 ) : (
                     <div>
-                        <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Filtrer par statut :</label>
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                <option value="">Tous les statuts</option>
-                                <option value="Payé">Payé</option>
-                                <option value="En attente">En attente</option>
-                                <option value="annulé - non remboursé">Annulé - non remboursé</option>
-                            </select>
-                        </div>
+                        {/* FILTRE 1 : Par statut */}
+                        <FilterSelect
+                            label="User"
+                            value={userFilter}
+                            onChange={setUserFilter}
+                            options={[...new Set(invoiceList.map((element) => element.studentName))].map((user) => ({
+                                value: user,
+                                label: user,
+                            }))}
+                            placeholder="Tous les utilisateurs"
+                        />
+                        <FilterSelect
+                            label="Statut"
+                            value={statusFilter}
+                            onChange={setStatusFilter}
+                            options={[...new Set(invoiceList.map((element) => element.status))].map((status) => ({
+                                value: status,
+                                label: status,
+                            }))}
+                            placeholder="Tous les statuts"
+                        />
+
+                        {/* FILTRE 2 : Par état facturé */}
+                        <FilterSelect
+                            label="État"
+                            value={invoicedFilter}
+                            onChange={setInvoicedFilter}
+                            options={[...new Set(invoiceList.map((element) => element.isInvoiced))].map(
+                                (isInvoiced) => ({
+                                    value: isInvoiced.toString(),
+                                    label: isInvoiced === 1 ? "Facturé" : "À facturer",
+                                })
+                            )}
+                            placeholder="Tous les états"
+                        />
+
                         <TableInvoices invoiceList={filteredInvoices} />
                     </div>
                 )}
