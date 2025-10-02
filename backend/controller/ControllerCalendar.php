@@ -17,8 +17,8 @@ class ControllerCalendar
     {
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
-
         if ($_SESSION['role'] != 'admin') {
+
             $this->listEventsUser();
         } else {
             $this->listEventsMain();
@@ -368,7 +368,7 @@ class ControllerCalendar
         }
 
         if ($invoiced == 2) {
-            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'annulé - non remboursé');
+            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - non remboursé');
         }
 
         if (!$deleteEventSuccess) {

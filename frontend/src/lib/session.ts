@@ -6,7 +6,6 @@ import { SignJWT, jwtVerify } from "jose";
 
 export async function createSession(userRole: string) {
     const cookie = (await cookies()).get("PHPSESSID");
-    console.log("PHPSESSID cookie:", cookie);
     const cookiePHP = cookie?.value;
 
     const jwt = await new SignJWT({ cookiePHP, role: userRole })

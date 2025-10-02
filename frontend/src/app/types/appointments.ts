@@ -1,5 +1,5 @@
 export interface showBasicAppointmentProps {
-    idEvent: number;
+    idEvent: string;
     title: string;
     studentName: string;
     description: string;
@@ -8,4 +8,19 @@ export interface showBasicAppointmentProps {
     visioLink: string;
     startDateTime: string;
     timezone: string;
+    userId: string;
+}
+
+export interface showInvoicableAppointmentProps extends showBasicAppointmentProps {
+    status: string;
+    price: number;
+    isInvoiced: number;
+}
+
+export interface AppointmentRowProps {
+    listAppointments: showBasicAppointmentProps[];
+}
+
+export interface InvoiceRowProps {
+    invoiceList: showInvoicableAppointmentProps[];
 }

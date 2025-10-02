@@ -71,7 +71,6 @@ export async function checkDeleteEvent(idEvent: string) {
                 withCredentials: true,
             }
         );
-        console.log("Response from checkDeleteEvent:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error checking deletion:", error);
