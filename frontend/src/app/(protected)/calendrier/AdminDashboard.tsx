@@ -6,6 +6,7 @@ import TableInvoices from "./TableInvoices";
 import FilterSelect from "./FilterSelect";
 import { showBasicAppointmentProps, showInvoicableAppointmentProps } from "@/app/types/appointments";
 import { listInvoices } from "./listEventsActions";
+import FilterDate from "./FilterDate";
 
 export interface TableAdminProps {
     listAppointments: showBasicAppointmentProps[];
@@ -13,19 +14,49 @@ export interface TableAdminProps {
 }
 
 export default function AdminDashboard({ listAppointments, invoiceList }: TableAdminProps) {
+    const defaultDates = () => {
+        const today = new Date();
+
+        // ✅ Fonction pour formater sans conversion UTC
+        const formatDate = (date: Date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        };
+
+        const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+
+        console.log("firstDay:", formatDate(firstDay));
+        console.log("lastDay:", formatDate(lastDay));
+
+        return [formatDate(firstDay), formatDate(lastDay)];
+    };
     const [activeTab, setActiveTab] = useState("rendez-vous");
     const [statusFilter, setStatusFilter] = useState(""); // Pour le statut (Payé, En attente...)
     const [userFilter, setUserFilter] = useState(""); // Pour le filtre utilisateur
     const [invoicedFilter, setInvoicedFilter] = useState(""); // Pour l'état facturé (0, 1)
+    const [beginPeriodFilter, setBeginPeriodFilter] = useState(defaultDates()[0]); // Pour le filtre de date de début
+    const [endPeriodFilter, setEndPeriodFilter] = useState(defaultDates()[1]); // Pour le filtre de date de fin
     const [filteredInvoices, setFilteredInvoices] = useState<showInvoicableAppointmentProps[]>(invoiceList);
 
     useEffect(() => {
         const fetchFilteredInvoices = async () => {
             try {
                 // Construire l'objet de filtres
-                const filters: { status?: string; isInvoiced?: number } = {};
+                const filters: {
+                    status?: string;
+                    isInvoiced?: number;
+                    userId?: number;
+                    beginPeriod?: string;
+                    endPeriod?: string;
+                } = {};
                 if (statusFilter) filters.status = statusFilter;
                 if (invoicedFilter) filters.isInvoiced = Number(invoicedFilter);
+                if (userFilter) filters.userId = Number(userFilter); // ← Ajouter ça !
+                if (beginPeriodFilter) filters.beginPeriod = beginPeriodFilter;
+                if (endPeriodFilter) filters.endPeriod = endPeriodFilter;
 
                 const data = await listInvoices(filters);
                 setFilteredInvoices(data);
@@ -35,10 +66,11 @@ export default function AdminDashboard({ listAppointments, invoiceList }: TableA
         };
 
         fetchFilteredInvoices();
-    }, [statusFilter, invoicedFilter]); // ← Écouter les 2 filtres
+    }, [statusFilter, invoicedFilter, userFilter, beginPeriodFilter, endPeriodFilter]); // ← Et ça !
 
     console.log("statusFilter:", statusFilter);
     console.log("invoicedFilter:", invoicedFilter);
+    console.log("userFilter:", userFilter);
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -71,41 +103,75 @@ export default function AdminDashboard({ listAppointments, invoiceList }: TableA
                     <TableAdmin listAppointments={listAppointments} invoiceList={invoiceList} />
                 ) : (
                     <div>
-                        {/* FILTRE 1 : Par statut */}
-                        <FilterSelect
-                            label="User"
-                            value={userFilter}
-                            onChange={setUserFilter}
-                            options={[...new Set(invoiceList.map((element) => element.studentName))].map((user) => ({
-                                value: user,
-                                label: user,
-                            }))}
-                            placeholder="Tous les utilisateurs"
-                        />
-                        <FilterSelect
-                            label="Statut"
-                            value={statusFilter}
-                            onChange={setStatusFilter}
-                            options={[...new Set(invoiceList.map((element) => element.status))].map((status) => ({
-                                value: status,
-                                label: status,
-                            }))}
-                            placeholder="Tous les statuts"
-                        />
+                        {/* Container avec grille pour les filtres */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+                            {/* FILTRE 1 : User */}
+                            <FilterSelect
+                                label="User"
+                                value={userFilter}
+                                onChange={setUserFilter}
+                                options={invoiceList
+                                    .filter(
+                                        (user, index, self) => index === self.findIndex((u) => u.userId === user.userId)
+                                    )
+                                    .map((user) => ({
+                                        value: user.userId.toString(),
+                                        label: user.studentName,
+                                    }))}
+                                placeholder="Tous les utilisateurs"
+                                className="mb-0" // ← Enlever le margin-bottom par défaut
+                            />
 
-                        {/* FILTRE 2 : Par état facturé */}
-                        <FilterSelect
-                            label="État"
-                            value={invoicedFilter}
-                            onChange={setInvoicedFilter}
-                            options={[...new Set(invoiceList.map((element) => element.isInvoiced))].map(
-                                (isInvoiced) => ({
-                                    value: isInvoiced.toString(),
-                                    label: isInvoiced === 1 ? "Facturé" : "À facturer",
-                                })
-                            )}
-                            placeholder="Tous les états"
-                        />
+                            {/* FILTRE 2 : Statut */}
+                            <FilterSelect
+                                label="Statut"
+                                value={statusFilter}
+                                onChange={setStatusFilter}
+                                options={[
+                                    ...new Set(
+                                        invoiceList
+                                            .filter((element) => element.status !== "En attente")
+                                            .map((element) => element.status)
+                                    ),
+                                ].map((status) => ({
+                                    value: status,
+                                    label: status,
+                                }))}
+                                placeholder="Tous les statuts"
+                                className="mb-0"
+                            />
+
+                            {/* FILTRE 3 : État */}
+                            <FilterSelect
+                                label="État"
+                                value={invoicedFilter}
+                                onChange={setInvoicedFilter}
+                                options={[...new Set(invoiceList.map((element) => element.isInvoiced))].map(
+                                    (isInvoiced) => ({
+                                        value: isInvoiced.toString(),
+                                        label: isInvoiced === 1 ? "Facturé" : "À facturer",
+                                    })
+                                )}
+                                placeholder="Tous les états"
+                                className="mb-0"
+                            />
+
+                            {/* FILTRE 4 : Date début */}
+                            <FilterDate
+                                label="Date de début"
+                                value={beginPeriodFilter}
+                                onChange={setBeginPeriodFilter}
+                                className="mb-0"
+                            />
+
+                            {/* FILTRE 5 : Date fin */}
+                            <FilterDate
+                                label="Date de fin"
+                                value={endPeriodFilter}
+                                onChange={setEndPeriodFilter}
+                                className="mb-0"
+                            />
+                        </div>
 
                         <TableInvoices invoiceList={filteredInvoices} />
                     </div>

@@ -151,51 +151,59 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {invoices.map((item) => {
-                                const { date: localDate } = formatDateInUserTimezone(
-                                    item.startDateTime,
-                                    userTimezone || "UTC"
-                                );
-                                const isLoading = loadingItems.has(item.idEvent);
-                                const isInvoiced = item.isInvoiced === 1;
+                            {invoices
+                                .filter((item) => item.status !== "En attente")
+                                .map((item) => {
+                                    const { date: localDate } = formatDateInUserTimezone(
+                                        item.startDateTime,
+                                        userTimezone || "UTC"
+                                    );
+                                    const isLoading = loadingItems.has(item.idEvent);
+                                    const isInvoiced = item.isInvoiced === 1;
 
-                                return (
-                                    <TableRow
-                                        key={item.idEvent}
-                                        className={`
+                                    return (
+                                        <TableRow
+                                            key={item.idEvent}
+                                            className={`
                                             hover:bg-gray-50 transition-all duration-200 border-b border-gray-100
                                         `}
-                                    >
-                                        <TableCell className="font-medium text-gray-900">{item.studentName}</TableCell>
-                                        <TableCell className="font-medium text-gray-900">{item.description}</TableCell>
-                                        <TableCell className="text-gray-700">{item.duration} min</TableCell>
-                                        <TableCell className="text-gray-700">{localDate}</TableCell>
+                                        >
+                                            <TableCell className="font-medium text-gray-900">
+                                                {item.studentName}
+                                            </TableCell>
+                                            <TableCell className="font-medium text-gray-900">
+                                                {item.description}
+                                            </TableCell>
+                                            <TableCell className="text-gray-700">{localDate}</TableCell>
+                                            <TableCell className="text-gray-700">{item.duration} min</TableCell>
 
-                                        <TableCell>{getStatusBadge(item.status)}</TableCell>
-                                        <TableCell className="whitespace-nowrap">
-                                            {!isInvoiced ? (
-                                                <Button
-                                                    onClick={() => handleSetInvoiced(item.idEvent)}
-                                                    disabled={isLoading}
-                                                    size="sm"
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                                                >
-                                                    {isLoading ? (
-                                                        <>
-                                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                                            Facturation...
-                                                        </>
-                                                    ) : (
-                                                        "Marquer comme facturé"
-                                                    )}
-                                                </Button>
-                                            ) : (
-                                                <span className="text-sm text-gray-500 font-medium">✅ Facturé</span>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
+                                            <TableCell>{getStatusBadge(item.status)}</TableCell>
+                                            <TableCell className="whitespace-nowrap">
+                                                {!isInvoiced ? (
+                                                    <Button
+                                                        onClick={() => handleSetInvoiced(item.idEvent)}
+                                                        disabled={isLoading}
+                                                        size="sm"
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                                    >
+                                                        {isLoading ? (
+                                                            <>
+                                                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                                                Facturation...
+                                                            </>
+                                                        ) : (
+                                                            "Marquer comme facturé"
+                                                        )}
+                                                    </Button>
+                                                ) : (
+                                                    <span className="text-sm text-gray-500 font-medium">
+                                                        ✅ Facturé
+                                                    </span>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
                         </TableBody>
                     </Table>
                 </div>

@@ -4,7 +4,6 @@ import { showBasicAppointmentProps, showInvoicableAppointmentProps } from "@/app
 import { useUserTimezone } from "@/lib/date";
 import { useEffect, useState } from "react";
 import TableAdminAppointments from "./TableAdminAppointments";
-import TableInvoices from "./TableInvoices";
 
 interface TableAdminProps {
     listAppointments: showBasicAppointmentProps[];
@@ -58,7 +57,6 @@ export default function TableAdmin({ listAppointments, invoiceList }: TableAdmin
             <div className="hidden xl:block">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                     <TableAdminAppointments listAppointments={listAppointments} />
-                    <TableInvoices invoiceList={invoiceList} />
                 </div>
             </div>
 

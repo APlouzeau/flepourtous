@@ -49,16 +49,16 @@ class ControllerInvoice
     {
         $filters = [];
 
-        if (isset($input['begin_period']) && !empty($input['begin_period'])) {
-            $filters['begin_period'] = $input['begin_period']; // ← CORRIGÉ : était $input['begin']
+        if (isset($input['beginPeriod']) && !empty($input['beginPeriod'])) {
+            $filters['beginPeriod'] = $input['beginPeriod']; // ← CORRIGÉ : était $input['begin']
         }
 
-        if (isset($input['end_period']) && !empty($input['end_period'])) {
-            $filters['end_period'] = $input['end_period'];
+        if (isset($input['endPeriod']) && !empty($input['endPeriod'])) {
+            $filters['endPeriod'] = $input['endPeriod'];
         }
 
-        if (isset($input['user_id']) && !empty($input['user_id'])) {
-            $filters['user_id'] = (int)$input['user_id'];
+        if (isset($input['userId']) && $input['userId'] !== '') {
+            $filters['userId'] = (int)$input['userId'];
         }
 
         if (isset($input['status']) && !empty($input['status'])) {
@@ -78,19 +78,19 @@ class ControllerInvoice
         $sqlParts = [];
         $params = [];
 
-        if (isset($filters['begin_period'])) {
-            $sqlParts[] = 'event_date >= :begin_period';
-            $params[':begin_period'] = $filters['begin_period'];
+        if (isset($filters['beginPeriod'])) {
+            $sqlParts[] = 'startDateTime >= :beginPeriod';
+            $params[':beginPeriod'] = $filters['beginPeriod'];
         }
 
-        if (isset($filters['end_period'])) {
-            $sqlParts[] = 'event_date <= :end_period';
-            $params[':end_period'] = $filters['end_period'];
+        if (isset($filters['endPeriod'])) {
+            $sqlParts[] = 'startDateTime <= :endPeriod';
+            $params[':endPeriod'] = $filters['endPeriod'];
         }
 
-        if (isset($filters['user_id'])) {
-            $sqlParts[] = 'user_id = :user_id';
-            $params[':user_id'] = $filters['user_id'];
+        if (isset($filters['userId'])) {
+            $sqlParts[] = 'userId = :userId';
+            $params[':userId'] = $filters['userId'];
         }
 
         if (isset($filters['status'])) {

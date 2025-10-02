@@ -8,6 +8,7 @@ export interface showBasicAppointmentProps {
     visioLink: string;
     startDateTime: string;
     timezone: string;
+    userId: string;
 }
 
 export interface showInvoicableAppointmentProps extends showBasicAppointmentProps {
