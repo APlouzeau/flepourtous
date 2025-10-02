@@ -222,34 +222,38 @@ export default function TableAdminAppointments({ listAppointments }: Appointment
                                         </div>
                                     </TableCell>
                                     <TableCell onClick={(e) => e.stopPropagation()}>
-                                        <button
-                                            onClick={async () => {
-                                                try {
-                                                    //await deleteAppointment(item.idEvent.toString());
-                                                    alert(`Rendez-vous annulé avec succès`);
-                                                    window.location.reload();
-                                                } catch (error) {
-                                                    console.error("Erreur lors de l'annulation:", error);
-                                                    alert("Erreur lors de l'annulation du rendez-vous.");
-                                                }
-                                            }}
-                                            className="inline-flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200"
-                                        >
-                                            <svg
-                                                className="w-4 h-4"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                        {new Date(item.startDateTime) > currentTime ? (
+                                            <button
+                                                onClick={async () => {
+                                                    try {
+                                                        //await deleteAppointment(item.idEvent.toString());
+                                                        alert(`Rendez-vous annulé avec succès`);
+                                                        window.location.reload();
+                                                    } catch (error) {
+                                                        console.error("Erreur lors de l'annulation:", error);
+                                                        alert("Erreur lors de l'annulation du rendez-vous.");
+                                                    }
+                                                }}
+                                                className="inline-flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200"
                                             >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M6 18L18 6M6 6l12 12"
-                                                />
-                                            </svg>
-                                            Annuler
-                                        </button>
+                                                <svg
+                                                    className="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M6 18L18 6M6 6l12 12"
+                                                    />
+                                                </svg>
+                                                Annuler
+                                            </button>
+                                        ) : (
+                                            <span className="text-gray-500">Terminé</span>
+                                        )}
                                     </TableCell>
                                 </TableRow>
                             );

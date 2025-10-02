@@ -100,7 +100,7 @@ export default function AdminDashboard({ listAppointments, invoiceList }: TableA
             {/* Contenu */}
             <div className="p-6">
                 {activeTab === "rendez-vous" ? (
-                    <TableAdmin listAppointments={listAppointments} invoiceList={invoiceList} />
+                    <TableAdmin listAppointments={listAppointments} />
                 ) : (
                     <div>
                         {/* Container avec grille pour les filtres */}
