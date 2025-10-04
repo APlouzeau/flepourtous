@@ -271,4 +271,30 @@ class ControllerMail
     }
 
     public function sendMailToConfirmCancelAppointment(EntitieEvent $event, bool $paid) {}
+    public function sendMailToAlertEventDeleteByAdmin($userId, $startDateTime, $timezone, $amount)
+    {
+        $modelUser = new ModelUser();
+        $userInformations = $modelUser->getUser(new EntitieUser(['idUser' => $userId]));
+        $appointmentDateTimeUTC = new DateTime($startDateTime);
+        $appointmentDateTime = $appointmentDateTimeUTC->setTimezone(new DateTimeZone($timezone));
+
+        // 🎨 Formatage user-friendly
+        setlocale(LC_TIME, 'fr_FR.UTF-8', 'fr_FR', 'french'); // Pour les noms français
+        $appointmentDate = $appointmentDateTime->format('j F Y'); // "4 octobre 2025"
+        $appointmentHour = $appointmentDateTime->format('G\hi'); // "14h30" au lieu de "14:30"
+
+
+        $this->mailer->addAddress($userInformations['mail']);
+        $this->mailer->isHTML(true);
+        $this->mailer->Subject = "Annulation de rendez-vous par l'administrateur sur FLEpourtous";
+        $emailBody = "Bonjour " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . ",<br><br>";
+        $emailBody .= "Nous vous informons que votre rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " a été annulé par l'administrateur du site.<br>";
+        $emailBody .= "Le montant de " . htmlspecialchars($amount) . " € a été recrédité sur votre porte-monnaie électronique.<br>";
+        $emailBody .= "Nous vous invitons à prendre un nouveau rendez-vous.<br>";
+        $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
+        $this->mailer->Body = $emailBody;
+        $this->mailer->send();
+        $this->mailer->clearAddresses();
+        $this->mailer->clearAttachments();
+    }
 }

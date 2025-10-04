@@ -28,9 +28,6 @@ export default function AdminDashboard({ listAppointments, invoiceList }: TableA
         const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
         const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
 
-        console.log("firstDay:", formatDate(firstDay));
-        console.log("lastDay:", formatDate(lastDay));
-
         return [formatDate(firstDay), formatDate(lastDay)];
     };
     const [activeTab, setActiveTab] = useState("rendez-vous");
@@ -67,10 +64,6 @@ export default function AdminDashboard({ listAppointments, invoiceList }: TableA
 
         fetchFilteredInvoices();
     }, [statusFilter, invoicedFilter, userFilter, beginPeriodFilter, endPeriodFilter]); // ← Et ça !
-
-    console.log("statusFilter:", statusFilter);
-    console.log("invoicedFilter:", invoicedFilter);
-    console.log("userFilter:", userFilter);
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

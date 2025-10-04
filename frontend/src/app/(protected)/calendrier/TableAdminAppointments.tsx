@@ -2,10 +2,60 @@ import { AppointmentRowProps, showBasicAppointmentProps } from "@/app/types/appo
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateInUserTimezone, useUserTimezone } from "@/lib/date";
 import { useEffect, useState } from "react";
+import { checkDeleteEvent, deleteAppointment } from "./nouveau-rendez-vous/AppointmentAction";
+import CancelConfirmationModal from "@/components/CancelConfirmationModal";
+import { useRouter } from "next/dist/client/components/navigation";
 
 export default function TableAdminAppointments({ listAppointments }: AppointmentRowProps) {
     const { userTimezone, isLoading: timezoneLoading } = useUserTimezone();
+    const router = useRouter();
+    const [cancelModal, setCancelModal] = useState<{
+        isOpen: boolean;
+        eventId: string | null;
+        eventTitle: string | null;
+        message: string;
+        code: number;
+        isDeleting: boolean;
+    }>({
+        isOpen: false,
+        eventId: null,
+        eventTitle: null,
+        message: "",
+        code: 0,
+        isDeleting: false,
+    });
+    const handleCancelModalClose = () => {
+        setCancelModal({
+            isOpen: false,
+            eventId: null,
+            eventTitle: null,
+            message: "",
+            code: 0,
+            isDeleting: false,
+        });
+    };
+    const handleConfirmCancel = async () => {
+        if (!cancelModal.eventId) return;
 
+        setCancelModal((prev) => ({ ...prev, isDeleting: true }));
+
+        try {
+            await deleteAppointment(cancelModal.eventId, cancelModal.code); // Utiliser le code de la modal
+            setCancelModal({
+                isOpen: false,
+                eventId: null,
+                eventTitle: null,
+                message: "",
+                code: 0,
+                isDeleting: false,
+            });
+            router.refresh();
+        } catch (error) {
+            console.error("Erreur lors de l'annulation:", error);
+            alert("Erreur lors de l'annulation du rendez-vous.");
+            setCancelModal((prev) => ({ ...prev, isDeleting: false }));
+        }
+    };
     const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
     useEffect(() => {
@@ -122,6 +172,31 @@ export default function TableAdminAppointments({ listAppointments }: Appointment
         return `${minutes} min`;
     };
 
+    const handleCancelClick = async (eventId: string, eventTitle: string) => {
+        try {
+            // Pour l'admin, on passe le code 3 pour indiquer une annulation admin
+            const response = await checkDeleteEvent(eventId, 3);
+            setCancelModal({
+                isOpen: true,
+                eventId,
+                eventTitle,
+                message: response.message || "Voulez-vous vraiment annuler ce rendez-vous ?",
+                code: response.code || 3, // Utiliser le code retourné par l'API
+                isDeleting: false,
+            });
+        } catch (error) {
+            console.error("Erreur lors de la vérification:", error);
+            setCancelModal({
+                isOpen: true,
+                eventId,
+                eventTitle,
+                message: "Erreur lors de la vérification de l'annulation. Voulez-vous continuer ?",
+                code: 0,
+                isDeleting: false,
+            });
+        }
+    };
+
     return (
         <div className="hidden xl:block">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -222,17 +297,14 @@ export default function TableAdminAppointments({ listAppointments }: Appointment
                                         </div>
                                     </TableCell>
                                     <TableCell onClick={(e) => e.stopPropagation()}>
-                                        {new Date(item.startDateTime) > currentTime ? (
+                                        {new Date(item.startDateTime) > currentTime &&
+                                        item.status !== "Annulé - Admin" &&
+                                        item.status !== "Annulé - Non remboursé" &&
+                                        item.status !== "Annulé - Remboursé" ? (
                                             <button
-                                                onClick={async () => {
-                                                    try {
-                                                        //await deleteAppointment(item.idEvent.toString());
-                                                        alert(`Rendez-vous annulé avec succès`);
-                                                        window.location.reload();
-                                                    } catch (error) {
-                                                        console.error("Erreur lors de l'annulation:", error);
-                                                        alert("Erreur lors de l'annulation du rendez-vous.");
-                                                    }
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // Empêche le clic sur la ligne
+                                                    handleCancelClick(item.idEvent.toString(), item.title);
                                                 }}
                                                 className="inline-flex items-center gap-1 bg-red-500 hover:bg-red-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors duration-200"
                                             >
@@ -260,6 +332,15 @@ export default function TableAdminAppointments({ listAppointments }: Appointment
                         })}
                     </TableBody>
                 </Table>
+                <CancelConfirmationModal
+                    isOpen={cancelModal.isOpen}
+                    onClose={handleCancelModalClose}
+                    onConfirm={handleConfirmCancel}
+                    isLoading={cancelModal.isDeleting}
+                    message={cancelModal.message}
+                    code={cancelModal.code}
+                    appointmentTitle={cancelModal.eventTitle || undefined}
+                />
             </div>
         </div>
     );

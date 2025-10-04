@@ -299,7 +299,7 @@ class ControllerCalendar
         $data = json_decode($requestBody, true);
 
         $modelEvent = new ModelEvent();
-
+        error_log("data received : " . print_r($data, true));
         $event = $modelEvent->getEventById($data['idEvent']);
         if (!$event) {
             $response = [
@@ -311,17 +311,26 @@ class ControllerCalendar
         }
 
         $timeRemaining = (new DateTime($event['startDateTime']))->getTimestamp() - (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
-        if ($timeRemaining < 24 * 3600) {
+
+        // Vérifier si c'est une annulation admin
+        if (isset($data['code']) && $data['code'] === 3) {
             $response = [
-                'code' => 2,
-                'message' => "L'annulation d'un rendez-vous moins de 24 heures avant le début entraîne le paiement de la totalité de la séance. Confirmez- vous l'annulation ?",
+                'code' => 3,
+                'message' => "En tant qu'administrateur, vous pouvez annuler ce rendez-vous sans frais pour l'utilisateur. Un mail sera automatiquement envoyé à l'élève afin de le prévenir, et son porte-monnaie sera recrédité. Confirmez-vous l'annulation ?",
             ];
-        }
-        if ($timeRemaining >= 24 * 3600) {
-            $response = [
-                'code' => 1,
-                'message' => "L'annulation d'un rendez-vous plus de 24 heures avant le début n'entraîne aucune pénalité. Le montant de votre leçon sera recrédité sur votre porte-monnaie. Confirmez-vous l'annulation ?",
-            ];
+        } else {
+            // Logique normale pour les utilisateurs
+            if ($timeRemaining < 24 * 3600) {
+                $response = [
+                    'code' => 2,
+                    'message' => "L'annulation d'un rendez-vous moins de 24 heures avant le début entraîne le paiement de la totalité de la séance. Confirmez- vous l'annulation ?",
+                ];
+            } else {
+                $response = [
+                    'code' => 1,
+                    'message' => "L'annulation d'un rendez-vous plus de 24 heures avant le début n'entraîne aucune pénalité. Le montant de votre leçon sera recrédité sur votre porte-monnaie. Confirmez-vous l'annulation ?",
+                ];
+            }
         }
         echo json_encode($response);
     }
@@ -363,12 +372,19 @@ class ControllerCalendar
         $lessonPrice = $modelPrice->getPriceByEventId($event['idEvent']);
         $modelUser = new ModelUser();
         if ($invoiced == 1) {
-            $modelUser->updateWallet($event['userId'], $lessonPrice['price']);
-            $deleteEventSuccess = $modelEvent->deleteEvent($data['idEvent']);
+            $modelUser->addToWallet($event['userId'], $lessonPrice['price']);
+            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Remboursé');
         }
 
         if ($invoiced == 2) {
             $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - non remboursé');
+        }
+
+        if ($invoiced == 3) {
+            $modelUser->addToWallet($event['userId'], $lessonPrice['price']);
+            $controllerMail = new ControllerMail();
+            $controllerMail->sendMailToAlertEventDeleteByAdmin($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price']);
+            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Admin');
         }
 
         if (!$deleteEventSuccess) {
