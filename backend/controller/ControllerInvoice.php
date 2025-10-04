@@ -18,8 +18,11 @@ class ControllerInvoice
 
     public function getInvoices()
     {
-        // verifyConnectAdmin() fait déjà exit() si l'utilisateur n'est pas admin
-        $this->controllerUser->verifyConnectAdmin();
+        if (!$this->controllerUser->verifyConnectAdmin()) {
+            $this->controllerError->unauthorizedResponse();
+            return;
+        }
+
         $input = json_decode(file_get_contents('php://input'), true);
 
         $filters = $this->setFilters($input);
@@ -48,10 +51,22 @@ class ControllerInvoice
         $filters = [];
 
         if (isset($input['beginPeriod']) && !empty($input['beginPeriod'])) {
-            $filters['beginPeriod'] = $input['beginPeriod']; // ← CORRIGÉ : était $input['begin']
+            if ($input['beginPeriod'] > date('Y-m-d')) {
+                $input['beginPeriod'] = date('Y-m-d');
+            }
+            $filters['beginPeriod'] = $input['beginPeriod'];
         }
 
         if (isset($input['endPeriod']) && !empty($input['endPeriod'])) {
+            if ($input['endPeriod'] > date('Y-m-d')) {
+                $input['endPeriod'] = date('Y-m-d');
+            }
+
+            // ✅ Si endPeriod < beginPeriod, ajuster endPeriod au lieu de faire une erreur
+            if (isset($input['beginPeriod']) && $input['endPeriod'] < $input['beginPeriod']) {
+                $input['endPeriod'] = $input['beginPeriod'];
+            }
+
             $filters['endPeriod'] = $input['endPeriod'];
         }
 
@@ -64,7 +79,9 @@ class ControllerInvoice
         }
 
         if (isset($input['isInvoiced']) && $input['isInvoiced'] !== '') {
+            error_log("🔍 Processing isInvoiced: " . $input['isInvoiced']); // ← DEBUG
             $filters['is_invoiced'] = (int)$input['isInvoiced'];
+            error_log("🔍 Filters after isInvoiced: " . json_encode($filters)); // ← DEBUG
         }
 
 
@@ -75,6 +92,7 @@ class ControllerInvoice
     {
         $sqlParts = [];
         $params = [];
+        error_log("🔍 filterToSql received: " . json_encode($filters)); // ← DEBUG
 
         if (isset($filters['beginPeriod'])) {
             $sqlParts[] = 'startDateTime >= :beginPeriod';

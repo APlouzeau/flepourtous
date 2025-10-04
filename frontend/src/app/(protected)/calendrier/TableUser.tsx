@@ -264,8 +264,8 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                             >
                                 <TableCell className="font-medium">{item.title}</TableCell>
                                 <TableCell>{item.timezone}</TableCell>
-                                <TableCell className="font-mono">{formattedDate}</TableCell>
-                                <TableCell className="font-mono">{formattedTime}</TableCell>
+                                <TableCell>{formattedDate}</TableCell>
+                                <TableCell>{formattedTime}</TableCell>
                                 <TableCell>{item.duration} mn</TableCell>
                                 <TableCell>
                                     {canPay ? (

@@ -4,6 +4,23 @@ require_once APP_PATH . 'vendor/autoload.php';
 class ControllerOrder
 {
 
+    private $invoiceModel;
+    private $controllerUser;
+    private $controllerError;
+    private $modelUser;
+    private $modelPrice;
+    private $modelEvent;
+
+    public function __construct()
+    {
+        $this->invoiceModel = new ModelInvoice();
+        $this->controllerUser = new ControllerUser();
+        $this->controllerError = new ControllerError();
+        $this->modelUser = new ModelUser();
+        $this->modelPrice = new ModelPrices();
+        $this->modelEvent = new ModelEvent();
+    }
+
     public function getWallet()
     {
         $verifyConnect = new ControllerUser();
@@ -71,21 +88,28 @@ class ControllerOrder
         $controllerUser = new ControllerUser();
         $controllerUser->verifyConnectBack();
 
-        $modelUser = new ModelUser();
-
         $idUser = $_SESSION['idUser'];
         $lessonPrice = $_SESSION['lesson_price'];
         $lessonName = $_SESSION['lesson_name'];
         $eventId = $_SESSION['event_id'];
 
-        $userWallet = $modelUser->getWalletFromUser($idUser);
+        if ($eventId !== 0) {
+            $this->payExistingAppointment($idUser, $lessonPrice, $lessonName, $eventId,);
+        } else {
+            $this->payPackPurchase($idUser, $lessonPrice, $lessonName);
+        }
+    }
 
-        $amount = $userWallet - $lessonPrice;
+    private function payExistingAppointment($idUser, $lessonPrice, $lessonName, $eventId)
+    {
+        $userWallet = $this->modelUser->getWalletFromUser($idUser);
+        $remainingAmount = $userWallet - $lessonPrice;
 
-        if ($amount >= 0) {
+        if ($remainingAmount >= 0) {
             $modelEvent = new ModelEvent();
-            $modelUser->updateWallet($idUser, $amount);
+            $this->modelUser->updateWallet($idUser, $remainingAmount);
             $modelEvent->setEventStatusPaid($eventId);
+
             echo json_encode([
                 'code' => 1,
                 'payment_method' => 'wallet',
@@ -94,37 +118,50 @@ class ControllerOrder
             return;
         }
 
-        if ($amount < 0) {
-            $amountToPay = abs($amount);
+        $amountToPay = abs($remainingAmount); // Montant manquant
+        $this->createStripeSession($amountToPay, $lessonName, $eventId, $idUser);
+    }
 
-            $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+    private function payPackPurchase($idUser, $lessonPrice, $lessonName)
+    {
+        $amountToPay = $lessonPrice;
+        $this->createStripeSession($amountToPay, $lessonName, 0, $idUser);
+    }
 
-            try {
-                $checkout_session = $stripe->checkout->sessions->create([
-                    'ui_mode' => 'embedded',
-                    'line_items' => [[
-                        'price_data' => [
-                            'currency' => 'eur',
-                            'product_data' => [
-                                'name' => "Paiement d'une leçon de {$lessonName} ",
-                            ],
-                            'unit_amount' => $amountToPay * 100,
+    private function createStripeSession($amountToPay, $lessonName, $eventId, $idUser)
+    {
+        $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+
+        try {
+            $productName = $eventId === 0
+                ? "Achat d'un pack de {$lessonName}"
+                : "Paiement d'une leçon de {$lessonName}";
+
+            $checkout_session = $stripe->checkout->sessions->create([
+                'ui_mode' => 'embedded',
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'eur',
+                        'product_data' => [
+                            'name' => $productName,
                         ],
-                        'quantity' => 1,
-                    ]],
-                    'mode' => 'payment',
-                    'return_url' => URI_STRIPE . '/retour-paiement?session_id={CHECKOUT_SESSION_ID}',
-                    'metadata' => [
-                        'event_id' => $eventId,
-                        'user_id' => $idUser,
-                        'lesson_name' => $lessonName,
-                    ]
-                ]);
-                echo json_encode(array('clientSecret' => $checkout_session->client_secret));
-            } catch (Error $e) {
-                http_response_code(500);
-                echo json_encode(['error' => $e->getMessage()]);
-            }
+                        'unit_amount' => $amountToPay * 100,
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'return_url' => URI_STRIPE . '/retour-paiement?session_id={CHECKOUT_SESSION_ID}',
+                'metadata' => [
+                    'event_id' => $eventId,
+                    'user_id' => $idUser,
+                    'lesson_name' => $lessonName,
+                ]
+            ]);
+
+            echo json_encode(['clientSecret' => $checkout_session->client_secret]);
+        } catch (Error $e) {
+            http_response_code(500);
+            echo json_encode(['error' => $e->getMessage()]);
         }
     }
 
@@ -133,37 +170,59 @@ class ControllerOrder
         $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
 
         try {
-            // retrieve JSON from POST body
             $jsonStr = file_get_contents('php://input');
             $jsonObj = json_decode($jsonStr);
+
+            // ✅ Vérifier si déjà traité via les sessions PHP
+            $sessionKey = "stripe_processed_" . $jsonObj->session_id;
+
+            if (isset($_SESSION[$sessionKey])) {
+                echo json_encode([
+                    'status' => 'already_processed',
+                    'payment_status' => 'paid',
+                    'message' => 'Paiement déjà traité avec succès !'
+                ]);
+                return;
+            }
 
             $session = $stripe->checkout->sessions->retrieve($jsonObj->session_id);
 
             if ($session->payment_status === 'paid') {
-
                 $idUser = $session->metadata->user_id;
+                $eventId = $session->metadata->event_id;
 
-                $modelEvent = new ModelEvent();
-                $status = $modelEvent->setEventStatusPaid($session->metadata->event_id);
+                if ($eventId != 0) {
+                    $modelEvent = new ModelEvent();
+                    $modelEvent->setEventStatusPaid($eventId);
+                } else {
+                    $amount = $session->amount_total / 100;
+                    $modelUser = new ModelUser();
+                    $modelUser->addToWallet($idUser, $amount);
+                }
 
-                $modelUser = new ModelUser();
-                $modelUser->updateWallet($idUser, 0);
-            }
-
-            if (isset($status) && $status === true) {
+                // ✅ MARQUER COMME TRAITÉ dans la session PHP
+                $_SESSION[$sessionKey] = [
+                    'processed_at' => date('Y-m-d H:i:s'),
+                    'user_id' => $idUser,
+                    'event_id' => $eventId
+                ];
 
                 echo json_encode([
-                    'status' => $session->status, // 'complete', 'open', 'expired'
-                    'payment_status' => $session->payment_status, // 'paid', 'unpaid', 'no_payment_required'
-                    'customer_email' => $session->customer_details ? $session->customer_details->email : null
+                    'status' => 'complete',
+                    'payment_status' => 'paid',
+                    'message' => 'Paiement traité avec succès !'
+                ]);
+            } else {
+                echo json_encode([
+                    'status' => $session->status ?? 'unknown',
+                    'payment_status' => $session->payment_status ?? 'unknown',
+                    'message' => 'Paiement en cours ou non payé'
                 ]);
             }
         } catch (\Stripe\Exception\ApiErrorException $e) {
+            error_log("Erreur Stripe: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode(['error' => 'Erreur serveur générale.']);
         }
     }
 
@@ -201,5 +260,35 @@ class ControllerOrder
                 'message' => 'ID de l\'événement manquant.'
             ]);
         }
+    }
+
+    public function orderPacks()
+    {
+        $controllerUser = new ControllerUser();
+        $controllerUser->verifyConnectBack();
+
+        $input = json_decode(file_get_contents('php://input'), true);
+
+        if (!$this->controllerError->validateData($input, 'Données d\'entrée invalides.', 400)) {
+            return;
+        }
+
+        $price = $this->modelPrice->getPriceByDurationAndLesson($input['duration'], $input['idLesson']);
+
+        if (!$price) {
+            $this->controllerError->unauthorizedResponse('Prix introuvable pour la leçon et la durée spécifiées.');
+            return;
+        }
+
+        $packAmount = $this->packAmount($price, $input['pack']);
+        $_SESSION['lesson_price'] = $packAmount;
+        $_SESSION['lesson_name'] = $input['idLesson'];
+        $_SESSION['event_id'] = 0;
+        $this->controllerError->successResponse($packAmount, 'Demande de commande de pack réussie.');
+    }
+
+    private function packAmount($price, $pack)
+    {
+        return $price * $pack;
     }
 }
