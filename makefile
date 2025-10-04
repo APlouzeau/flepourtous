@@ -144,3 +144,9 @@ db-drop-recreate: ## Drop et recréation des tables
 	@echo "🗑️  Suppression et recréation des tables..."
 	@docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) exec db mysql -u flepourtous -p1234 flepourtous -e "DROP DATABASE IF EXISTS flepourtous; CREATE DATABASE flepourtous;"
 	@$(MAKE) db-import
+
+reset-all: 
+	echo "🔄 Reset complet du projet..."
+	@$(MAKE) clean-all
+	@$(MAKE) db-reset
+	@$(MAKE) first-install
