@@ -351,6 +351,44 @@ class ControllerCalendar
             return;
         }
 
+        $modelEvent = new ModelEvent();
+        $event = $modelEvent->getEventById($data['idEvent']);
+        if (!$event) {
+            $response = [
+                'code' => 0,
+                'message' => 'Événement non trouvé en base de données',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if ($event['userId'] != $_SESSION['idUser'] && $_SESSION['role'] != 'admin') {
+            $response = [
+                'code' => 0,
+                'message' => 'Vous n\'êtes pas autorisé à supprimer cet événement.',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if ($event['status'] != 'Payé') {
+            $response = [
+                'code' => 0,
+                'message' => 'Seuls les rendez-vous payés peuvent être supprimés.',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if ($event['status'] == 'Annulé - Remboursé' || $event['status'] == 'Annulé - Non remboursé' || $event['status'] == 'Annulé - Admin') {
+            $response = [
+                'code' => 0,
+                'message' => 'Cet événement a déjà été annulé.',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
         $invoiced = $data['code'];
 
         $client = $this->getClient();
@@ -366,8 +404,8 @@ class ControllerCalendar
             return;
         }
 
-        $modelEvent = new ModelEvent();
-        $event = $modelEvent->getEventById($data['idEvent']);
+
+
         $modelPrice = new ModelPrices();
         $lessonPrice = $modelPrice->getPriceByEventId($event['idEvent']);
         $modelUser = new ModelUser();
