@@ -1,16 +1,15 @@
 "use client";
 
-import { showBasicAppointmentProps, showInvoicableAppointmentProps } from "@/app/types/appointments";
+import { showBasicAppointmentProps } from "@/app/types/appointments";
 import { useUserTimezone } from "@/lib/date";
 import { useEffect, useState } from "react";
 import TableAdminAppointments from "./TableAdminAppointments";
 
 interface TableAdminProps {
     listAppointments: showBasicAppointmentProps[];
-    invoiceList: showInvoicableAppointmentProps[];
 }
 
-export default function TableAdmin({ listAppointments, invoiceList }: TableAdminProps) {
+export default function TableAdmin({ listAppointments }: TableAdminProps) {
     const { userTimezone, isLoading: timezoneLoading } = useUserTimezone();
     const [currentTime, setCurrentTime] = useState<Date>(new Date());
 

@@ -18,10 +18,8 @@ class ControllerInvoice
 
     public function getInvoices()
     {
-        if (!$this->controllerUser->verifyConnectAdmin()) {
-            $this->controllerError->unauthorizedResponse();
-            return;
-        }
+        // verifyConnectAdmin() fait déjà exit() si l'utilisateur n'est pas admin
+        $this->controllerUser->verifyConnectAdmin();
         $input = json_decode(file_get_contents('php://input'), true);
 
         $filters = $this->setFilters($input);
@@ -115,10 +113,8 @@ class ControllerInvoice
      */
     public function setInvoiced()
     {
-        if (!$this->controllerUser->verifyConnectAdmin()) {
-            $this->controllerError->unauthorizedResponse();
-            return;
-        }
+        // verifyConnectAdmin() fait déjà exit() si l'utilisateur n'est pas admin
+        $this->controllerUser->verifyConnectAdmin();
 
         $input = json_decode(file_get_contents('php://input'), true);
 

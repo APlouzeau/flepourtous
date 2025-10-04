@@ -1,5 +1,3 @@
-("");
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getRole } from "@/lib/session";
@@ -11,8 +9,9 @@ import AdminDashboard from "./AdminDashboard";
 
 export default async function CalendarPage() {
     const role = await getRole();
-    const appointments = await appointmentList(); // ✅ Nom de variable différent
-    const invoiceList = await listInvoices(); // ❌ Tu passes des appointments à un composant qui attend des invoices
+    const appointments = await appointmentList();
+
+    const invoiceList = role === "admin" ? await listInvoices() : [];
 
     const isAdmin = role === "admin";
 

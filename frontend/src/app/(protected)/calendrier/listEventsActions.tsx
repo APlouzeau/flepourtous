@@ -48,7 +48,6 @@ export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
 
 export async function listInvoices(filters?: filtersProps): Promise<showInvoicableAppointmentProps[]> {
     const cookie = await getCookieBackend();
-    console.log("cookie:", cookie);
 
     try {
         const response = await apiClient.post("/api/getInvoices", filters || {}, {
@@ -57,7 +56,6 @@ export async function listInvoices(filters?: filtersProps): Promise<showInvoicab
                 "Content-Type": "application/json",
             },
         });
-        console.log("response.data:", response.data);
         if (response.data && Array.isArray(response.data.data)) {
             const invoiceList = response.data.data;
 
