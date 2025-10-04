@@ -1,6 +1,9 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 
+<<<<<<< HEAD
+=======
 DROP TABLE IF EXISTS `duration`;
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 CREATE TABLE `duration` (
   `idDuration` int(11) NOT NULL,
   `duration` int(2) NOT NULL
@@ -11,7 +14,10 @@ INSERT INTO `duration` (`idDuration`, `duration`) VALUES
 (2, 45),
 (3, 60);
 
+<<<<<<< HEAD
+=======
 DROP TABLE IF EXISTS `event`;
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 CREATE TABLE `event` (
   `idEvent` varchar(50) NOT NULL,
   `userId` int(11) NOT NULL,
@@ -28,6 +34,12 @@ CREATE TABLE `event` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `event` (`idEvent`, `userId`, `description`, `duration`, `createdAt`, `startDateTime`, `timezone`, `updatedAt`, `status`, `visioLink`, `id_lesson`, `is_invoiced`) VALUES
+<<<<<<< HEAD
+('71i5dmogdsp590a2h6ureuk3mc', 1, '', 60, '2025-09-01 20:39:18', '2025-09-02 07:30:00', 'UTC', '2025-09-30 21:39:53', 'Payé', 'https://flepourtous.daily.co/VHOWVMDVbF61qeGOxwJY', 1, 0),
+('986iitl9q24t0k0r50vrt1s5s4', 1, '', 30, '2025-09-01 20:10:42', '2025-09-03 06:00:00', 'UTC', '2025-09-30 21:39:55', 'Payé', 'https://flepourtous.daily.co/73Ya6FigOwuZGbPhsxfn', 1, 0),
+('s8k36aiur95829e63flb8v3u1g', 1, '', 60, '2025-09-30 19:13:16', '2025-10-01 12:00:00', 'Europe/Paris', '2025-09-30 21:47:15', 'Payé', 'https://flepourtous.daily.co/3Dj2PemSh56rr2orxgKm', 1, 1);
+
+=======
 ('1jpbsggusmhveg8qk41uor7cn4', 2, 'Une description', 30, '2025-09-21 18:35:56', '2025-09-22 06:00:00', 'Europe/Paris', '2025-10-01 21:31:38', 'Annulé - non remboursé', 'https://flepourtous.daily.co/EYQKCkbSCSFcnReEVNOA', 1, 0),
 ('63mpma5tfbdj0bje9i61jcmhto', 2, '', 30, '2025-09-21 20:50:56', '2025-09-23 06:00:00', 'Europe/Paris', '2025-10-02 20:30:34', 'Annulé - non remboursé', 'https://flepourtous.daily.co/4MCuoQy0YdfCyhftMzKJ', 1, 1),
 ('71i5dmogdsp590a2h6ureuk3mc', 1, '', 60, '2025-09-01 20:39:18', '2025-09-02 07:30:00', 'UTC', '2025-09-30 21:39:53', 'Payé', 'https://flepourtous.daily.co/VHOWVMDVbF61qeGOxwJY', 1, 0),
@@ -43,6 +55,7 @@ INSERT INTO `event` (`idEvent`, `userId`, `description`, `duration`, `createdAt`
 ('vus0rd8obg8q7q76tveems6vl4', 2, '', 45, '2025-09-11 21:10:15', '2025-09-12 08:00:00', 'Australia/Sydney', '2025-09-30 21:40:17', 'Payé', 'https://flepourtous.daily.co/hqEgGdQcPlZK5btC4SPJ', NULL, 0);
 
 DROP TABLE IF EXISTS `google`;
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 CREATE TABLE `google` (
   `canalId` varchar(250) NOT NULL,
   `resourceId` varchar(250) NOT NULL,
@@ -55,13 +68,19 @@ CREATE TABLE `google` (
 INSERT INTO `google` (`canalId`, `resourceId`, `resourceUri`, `expiration`, `token`, `calendarId`) VALUES
 ('flepourtous_channel_68325d811eb29', 'rlubMlfOuXotsL7ysp39hC_at1Y', 'https://www.googleapis.com/calendar/v3/calendars/ef7995ba9623e0baa51a0050ba9c48ab6a191193f402b024ddcf27864434b807%40group.calendar.google.com/events?alt=json', 1748736001000, 'Jr7mc0St05S9cuDCShp1FoC2rcBxfReK1YU6oiTU0bwGtAhHvRkHIdCtGAKd98FP', NULL);
 
+<<<<<<< HEAD
+=======
 DROP TABLE IF EXISTS `googleSync`;
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 CREATE TABLE `googleSync` (
   `idCalendar` varchar(90) NOT NULL,
   `nextSyncToken` varchar(90) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+<<<<<<< HEAD
+=======
 DROP TABLE IF EXISTS `invoices`;
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 CREATE TABLE `invoices` (
   `id_invoices` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
@@ -79,7 +98,10 @@ CREATE TABLE `invoices` (
   `invoice_date` date NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+<<<<<<< HEAD
+=======
 DROP TABLE IF EXISTS `lesson`;
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 CREATE TABLE `lesson` (
   `idLesson` int(11) NOT NULL,
   `title` varchar(50) DEFAULT NULL,
@@ -91,9 +113,15 @@ CREATE TABLE `lesson` (
 
 INSERT INTO `lesson` (`idLesson`, `title`, `shortDescription`, `fullDescription`, `imagePath`, `slug`) VALUES
 (1, 'Cours de conversation', 'Venez découvrir mes cours pour les enfants', 'Pleins de cours pour les petits et moyen enfants', '/images/enfant.jpg', 'cours-pour-enfants'),
+<<<<<<< HEAD
+(2, 'Cours de préparation aux examens', 'DELF / TCF / TEF ?', 'Et bien il faut venir !', '/images/ados.jpg', 'delf-tcf-tef'),
+(3, 'Français général', 'Un cours général', 'C\'est un cours général', NULL, 'francais-general');
+
+=======
 (2, 'DELF', 'DELF / TCF / TEF ?', 'Et bien il faut venir !', '/images/ados.jpg', 'delf-tcf-tef');
 
 DROP TABLE IF EXISTS `lessonPrices`;
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 CREATE TABLE `lessonPrices` (
   `id_lesson` int(11) NOT NULL,
   `id_price` int(11) NOT NULL,
@@ -102,6 +130,17 @@ CREATE TABLE `lessonPrices` (
 
 INSERT INTO `lessonPrices` (`id_lesson`, `id_price`, `id_duration`) VALUES
 (1, 1, 1),
+<<<<<<< HEAD
+(1, 3, 2),
+(1, 5, 3),
+(2, 2, 1),
+(2, 4, 2),
+(2, 6, 3),
+(3, 1, 1),
+(3, 3, 2),
+(3, 5, 3);
+
+=======
 (1, 2, 2),
 (1, 3, 3),
 (2, 1, 1),
@@ -109,18 +148,24 @@ INSERT INTO `lessonPrices` (`id_lesson`, `id_price`, `id_duration`) VALUES
 (2, 3, 3);
 
 DROP TABLE IF EXISTS `prices`;
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 CREATE TABLE `prices` (
   `idPrice` int(11) NOT NULL,
   `price` decimal(4,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `prices` (`idPrice`, `price`) VALUES
-(1, 12.00),
-(2, 18.00),
-(3, 24.00),
-(4, 35.00);
+(1, 11.00),
+(2, 12.00),
+(3, 16.50),
+(4, 18.00),
+(5, 22.00),
+(6, 24.00);
 
+<<<<<<< HEAD
+=======
 DROP TABLE IF EXISTS `users`;
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 CREATE TABLE `users` (
   `idUser` int(11) NOT NULL,
   `firstName` varchar(50) NOT NULL,
@@ -142,8 +187,14 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `users` (`idUser`, `firstName`, `lastName`, `role`, `mail`, `nickName`, `password`, `wallet`, `address`, `address_2`, `address_3`, `zip`, `city`, `country`, `dateInscription`, `isVerified`, `verifyToken`) VALUES
+<<<<<<< HEAD
+(1, 'cezcxze', 'cezczecz', 'user', 'eyola@live.fr', 'cxzeczec', '$2y$12$X9baMPUou.1gTIMffUttXupxHsv4Mnwn766Sa1AbquSJ7oyrjXdnC', 76.00, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-18 23:40:31', 1, '830999bce58e3c57415d1028247535bac27fae52192af566f90737ca854364c6'),
+(3, 'Ludivine', 'Plouzeau', 'admin', 'flepourtous.online@gmail.com', 'Lulu', '$2y$12$9HihvTfGVjK0ejnJtbQ/jOaXVCGbHg54VMzks3LyZNLw/0tTGGhVO', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-04 17:28:49', 1, '79fd01a7ea72aab8184748664d435f946951214f6fb006752f99a377e5e74734'),
+(4, 'Duncan', 'Gaubert', 'user', 'egaube0494@gmail.com', 'Dunky', '$2y$12$GoKzGwx.9PKbfUVIMgrHPuqWh1YMLtjmoeyADFTDUluiN7vpw4w4C', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-04 17:33:22', 1, '6efeeeabbf0638028cb2906e3ac36e861e9e8759a75837f935280060cb9d0ee3');
+=======
 (1, 'cezcxze', 'cezczecz', 'admin', 'alex@gmail.com', 'cxzeczec', '$2y$12$X9baMPUou.1gTIMffUttXupxHsv4Mnwn766Sa1AbquSJ7oyrjXdnC', 76.00, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-18 23:40:31', 1, '830999bce58e3c57415d1028247535bac27fae52192af566f90737ca854364c6'),
 (2, 'la', 'lala', 'user', 'plouzeau.alexandre@hotmail.fr', 'Eyo', '$2y$12$6xmnQs4MfSPhytSIdtnrp.nWAnLRy1O5sDx9.m9DraPzvaQmKZNPO', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, '2025-09-11 20:54:07', 1, NULL);
+>>>>>>> a081800f987687601345c56d033533fd3d4f8922
 
 
 ALTER TABLE `duration`
