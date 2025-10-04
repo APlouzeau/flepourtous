@@ -3,7 +3,7 @@ import Button from "@/app/components/front/Button";
 import { LessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { orderPacks } from "./PacksAction";
 import { useRouter } from "next/navigation";
 
@@ -11,10 +11,25 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
     const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);
     const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [selectedPack, setSelectedPack] = useState<string>("");
     const [success, setSuccess] = useState<string | null>(null);
     const router = useRouter();
+    const [price, setPrice] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (selectedLesson && selectedDuration && selectedPack) {
+            // ✅ Trouver le prix de la durée sélectionnée
+            const priceForDuration =
+                selectedLesson.price?.find((p) => p.duration.toString() === selectedDuration)?.price || 0;
+
+            // ✅ Multiplier par le nombre de cours du pack
+            const packQuantity = parseInt(selectedPack); // "5" → 5 ou "10" → 10
+            setPrice(priceForDuration * packQuantity);
+        } else {
+            setPrice(null);
+        }
+    }, [selectedLesson, selectedDuration, selectedPack]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -43,8 +58,6 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
         } catch (error) {
             console.error("Erreur lors de la création du pack :", error);
             setError("Une erreur s'est produite lors de la création du pack.");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -86,7 +99,6 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                         <RadioGroupItem
                                             value={lesson.idLesson.toString()}
                                             id={`lesson-${lesson.idLesson}`}
-                                            disabled={loading}
                                             className="text-gray-700"
                                             style={{ "--primary": "#1D1E1C" } as React.CSSProperties}
                                         />
@@ -138,7 +150,6 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                                 <RadioGroupItem
                                                     value={durationPriceOption.duration.toString()}
                                                     id={`duration-option-${selectedLesson.idLesson}-${durationPriceOption.duration}`}
-                                                    disabled={loading}
                                                     className="text-gray-700"
                                                     style={{ "--primary": "#1D1E1C" } as React.CSSProperties}
                                                 />
@@ -184,7 +195,10 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <RadioGroup
                                     value={selectedPack || ""}
-                                    onValueChange={(value: string) => setSelectedPack(value)}
+                                    onValueChange={(value: string) => {
+                                        setSelectedPack(value);
+                                        setLoading(false);
+                                    }}
                                     name="pack"
                                     className="grid grid-cols-1 md:grid-cols-2 gap-3"
                                 >
@@ -196,7 +210,6 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                             <RadioGroupItem
                                                 value="5"
                                                 id="pack-5"
-                                                disabled={loading}
                                                 className="text-gray-700"
                                                 style={{ "--primary": "#1D1E1C" } as React.CSSProperties}
                                             />
@@ -210,7 +223,6 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                             <RadioGroupItem
                                                 value="10"
                                                 id="pack-10"
-                                                disabled={loading}
                                                 className="text-gray-700"
                                                 style={{ "--primary": "#1D1E1C" } as React.CSSProperties}
                                             />
@@ -225,11 +237,37 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                     )}
                 </div>
             </div>
+            {/* ✅ Affichage du prix calculé */}
+            {price !== null && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                            <svg
+                                className="w-5 h-5 text-blue-600"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                                />
+                            </svg>
+                            <span className="text-sm font-medium text-blue-900">Prix total du pack :</span>
+                        </div>
+                        <span className="text-xl font-bold text-blue-900">{price}€</span>
+                    </div>
+                </div>
+            )}
+            {success && <div className="text-green-600 font-medium">{success}</div>}
             {error && <div className="text-red-600 font-medium">{error}</div>}
             {/* Bouton de soumission */}
             <div className="pt-6">
                 <Button
                     type="submit"
+                    disabled={loading}
                     className="w-full inline-flex items-center justify-center px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-white shadow-lg hover:shadow-xl"
                 >
                     Commander un pack
