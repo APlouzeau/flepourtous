@@ -15,6 +15,7 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
     const { userTimezone, isLoading: timezoneLoading } = useUserTimezone();
     const [invoices, setInvoices] = useState(invoiceList);
     const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
+    const [error, setError] = useState<string | null>(null);
 
     // Synchroniser le state local avec les nouvelles données du parent
     useEffect(() => {
@@ -23,6 +24,7 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
 
     const handleSetInvoiced = async (eventId: string) => {
         setLoadingItems((prev) => new Set([...prev, eventId]));
+        setError(null); // ← Réinitialiser l'erreur
 
         try {
             const success = await setInvoiced(eventId);
@@ -34,19 +36,23 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
                     )
                 );
             } else {
-                alert("Erreur lors de la facturation");
+                setError("Erreur lors de la facturation"); // ← Utiliser setError au lieu d'alert
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("Erreur lors de la facturation");
+            setError(error instanceof Error ? error.message : "Erreur lors de la facturation"); // ← Utiliser setError
         } finally {
-            // Retirer l'item du loading
             setLoadingItems((prev) => {
                 const newSet = new Set(prev);
                 newSet.delete(eventId);
                 return newSet;
             });
         }
+    };
+
+    // ✅ Fonction pour fermer l'erreur
+    const closeError = () => {
+        setError(null);
     };
 
     const getStatusBadge = (status: string) => {
@@ -98,8 +104,43 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
             </div>
         );
     }
+
     return (
         <div className="space-y-6">
+            {/* ✅ Affichage du message d'erreur */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                            <svg
+                                className="w-5 h-5 text-red-400 mr-2"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                            <p className="text-sm text-red-800 font-medium">{error}</p>
+                        </div>
+                        <button onClick={closeError} className="text-red-400 hover:text-red-600 transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M6 18L18 6M6 6l12 12"
+                                />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Version desktop - tableau */}
             <div className="hidden xl:block">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -164,9 +205,7 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
                                     return (
                                         <TableRow
                                             key={item.idEvent}
-                                            className={`
-                                            hover:bg-gray-50 transition-all duration-200 border-b border-gray-100
-                                        `}
+                                            className="hover:bg-gray-50 transition-all duration-200 border-b border-gray-100"
                                         >
                                             <TableCell className="font-medium text-gray-900">
                                                 {item.studentName}
@@ -184,7 +223,7 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
                                                         onClick={() => handleSetInvoiced(item.idEvent)}
                                                         disabled={isLoading}
                                                         size="sm"
-                                                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed" // ← Ajouter styles disabled
                                                     >
                                                         {isLoading ? (
                                                             <>
@@ -209,7 +248,25 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
                 </div>
             </div>
 
-            {invoices.length === 0 && <div className="text-center py-8 text-gray-500">Aucune facture à traiter</div>}
+            {/* ✅ Message si pas de données */}
+            {invoices.length === 0 && (
+                <div className="text-center py-8">
+                    <svg
+                        className="w-12 h-12 text-gray-300 mx-auto mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                    </svg>
+                    <p className="text-gray-500">Aucune facture à traiter</p>
+                </div>
+            )}
         </div>
     );
 }
