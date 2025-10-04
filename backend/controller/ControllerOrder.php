@@ -148,9 +148,6 @@ class ControllerOrder
 
                 $modelUser = new ModelUser();
                 $modelUser->updateWallet($idUser, 0);
-
-                $controllerEmail = new ControllerMail();
-                $controllerEmail->sendMailForPaymentSuccess($_SESSION['idUser'], $_SESSION['event_id']);
             }
 
             if (isset($status) && $status === true) {

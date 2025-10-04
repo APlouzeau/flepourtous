@@ -203,7 +203,7 @@ class ControllerMail
         }
     }
 
-    public function sendMailForPaymentSuccess(string $user, string $eventId,)
+    public function sendMailForPaymentSuccess(string $user, string $eventId)
     {
         $modelEvent = new ModelEvent();
         $modelUser = new ModelUser();
@@ -217,7 +217,7 @@ class ControllerMail
             $eventDateTimeUserTimezone = $eventDateTimeUtc->setTimezone(new DateTimeZone($event['timezone']));
 
             $eventDate = $eventDateTimeUserTimezone->format('d F Y');    // 11 September 2025
-            $eventHour = $eventDateTimeUserTimezone->format('H:i');       // 14:30
+            $eventHour = $eventDateTimeUserTimezone->format('G\hi');       // 14:30
 
             $this->mailer->addAddress($userMail);
             $this->mailer->isHTML(true);

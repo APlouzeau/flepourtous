@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import CancelConfirmationModal from "@/components/CancelConfirmationModal";
+import { cn } from "@/lib/utils";
 
 interface AppointmentRowProps {
     listAppointments: showBasicAppointmentProps[];
@@ -252,27 +253,25 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                         return (
                             <TableRow
                                 key={item.idEvent}
-                                className={`
-                                ${
+                                className={cn(
+                                    "transition-colors duration-200",
                                     visioStatus.isJoinable
                                         ? "cursor-pointer hover:bg-green-50"
                                         : "cursor-not-allowed hover:bg-red-50"
-                                }
-                                transition-colors duration-200
-                            `}
+                                )}
                                 title={visioStatus.tooltip}
                                 onClick={() => handleRowClick(item, visioStatus.isJoinable)}
                             >
                                 <TableCell className="font-medium">{item.title}</TableCell>
                                 <TableCell>{item.timezone}</TableCell>
-                                <TableCell className="font-mono">{formattedDate}</TableCell> {/* ← MODIFIÉ */}
-                                <TableCell className="font-mono">{formattedTime}</TableCell> {/* ← MODIFIÉ */}
+                                <TableCell className="font-mono">{formattedDate}</TableCell>
+                                <TableCell className="font-mono">{formattedTime}</TableCell>
                                 <TableCell>{item.duration} mn</TableCell>
                                 <TableCell>
                                     {canPay ? (
                                         <Button
                                             onClick={(e) => {
-                                                e.stopPropagation(); // Empêche le clic sur la ligne
+                                                e.stopPropagation();
                                                 handleRepay(item.idEvent.toString());
                                             }}
                                             disabled={isRepaying === item.idEvent.toString()}
@@ -282,7 +281,6 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                                             {isRepaying === item.idEvent.toString() ? "..." : "Payer"}
                                         </Button>
                                     ) : (
-                                        // Si on ne peut pas payer, on affiche le badge du collègue
                                         getStatusBadge(item.status)
                                     )}
                                 </TableCell>
@@ -293,14 +291,13 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                                             variant="outline"
                                             size="sm"
                                             onClick={(e) => {
-                                                e.stopPropagation(); // Empêche le clic sur la ligne
+                                                e.stopPropagation();
                                                 handleCancelClick(item.idEvent.toString(), item.title);
                                             }}
                                         >
                                             Annuler
                                         </Button>
                                     ) : (
-                                        // Si on ne peut pas annuler, on affiche un tiret
                                         <span className="text-gray-400">-</span>
                                     )}
                                 </TableCell>

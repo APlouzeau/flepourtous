@@ -152,6 +152,7 @@ class ModelEvent extends  ClassDatabase
                 'startDateTime' => $data['startDateTime'],
                 'timezone' => $data['timezone'],
                 'visioLink' => $data['visioLink'],
+                'status' => $data['status'],
 
             ];
             if ($data['id_lesson'] !== null) {
