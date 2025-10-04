@@ -114,7 +114,7 @@ export default function TableAdmin({ listAppointments }: TableAdminProps) {
                                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                                             />
                                         </svg>
-                                        <span className="font-mono">{localTime}</span>
+                                        <span>{localTime}</span>
                                         <span className="text-gray-400">•</span>
                                         <span>{formatDuration(item.duration)}</span>
                                     </div>

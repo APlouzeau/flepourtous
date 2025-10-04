@@ -281,7 +281,7 @@ export default function TableAdminAppointments({ listAppointments }: Appointment
                                     <TableCell className="font-medium text-gray-900">{item.studentName}</TableCell>
                                     <TableCell className="font-medium text-gray-900">{item.description}</TableCell>
                                     <TableCell className="text-gray-700">{localDate}</TableCell>
-                                    <TableCell className="text-gray-700 font-mono">{localTime}</TableCell>
+                                    <TableCell className="text-gray-700">{localTime}</TableCell>
                                     <TableCell className="text-gray-700">{formatDuration(item.duration)}</TableCell>
                                     <TableCell>{getStatusBadge(item.status)}</TableCell>
                                     <TableCell>
