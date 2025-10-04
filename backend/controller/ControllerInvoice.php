@@ -24,7 +24,6 @@ class ControllerInvoice
         }
 
         $input = json_decode(file_get_contents('php://input'), true);
-        error_log("🔍 Backend received input: " . json_encode($input)); // ← DEBUG
 
         $filters = $this->setFilters($input);
 
@@ -50,7 +49,6 @@ class ControllerInvoice
     private function setFilters($input)
     {
         $filters = [];
-        error_log("🔍 setFilters received: " . json_encode($input)); // ← DEBUG
 
         if (isset($input['beginPeriod']) && !empty($input['beginPeriod'])) {
             if ($input['beginPeriod'] > date('Y-m-d')) {

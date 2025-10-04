@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { getRole } from "@/lib/session";
 import TableUser from "./TableUser";
@@ -32,10 +31,24 @@ export default async function CalendarPage() {
 
                 {/* Barre d'actions */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-8 justify-center">
-                    <Button asChild>
+                    <Link
+                        href="/calendrier/nouveau-rendez-vous"
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg flex items-center justify-center gap-2 min-w-64"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                            />
+                        </svg>
+                        Nouveau rendez-vous
+                    </Link>
+                    {!isAdmin && (
                         <Link
-                            href="/calendrier/nouveau-rendez-vous"
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg flex items-center gap-2"
+                            href="/calendrier/packs"
+                            className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-200 hover:shadow-lg flex items-center justify-center gap-2 min-w-64"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path
@@ -45,9 +58,10 @@ export default async function CalendarPage() {
                                     d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                 />
                             </svg>
-                            Nouveau rendez-vous
+                            Pack
                         </Link>
-                    </Button>
+                    )}
+
                     {isAdmin && <InstantVisioButton />}
                 </div>
 

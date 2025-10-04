@@ -114,4 +114,23 @@ class ModelPrices extends  ClassDatabase
         }
         return null;
     }
+
+    public function getPriceByDurationAndLesson(int $duration, int $idLesson)
+    {
+        $req = $this->conn->prepare('
+            SELECT p.price
+            FROM prices p
+            INNER JOIN lessonPrices lp ON p.idPrice = lp.id_price
+            INNER JOIN duration d ON lp.id_duration = d.idDuration
+            WHERE d.duration = :duration AND lp.id_lesson = :idLesson
+        ');
+        $req->bindValue(':duration', $duration, PDO::PARAM_INT);
+        $req->bindValue(':idLesson', $idLesson, PDO::PARAM_INT);
+        $req->execute();
+        $data = $req->fetch();
+        if ($data) {
+            return $data['price'];
+        }
+        return null;
+    }
 }

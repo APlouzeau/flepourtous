@@ -50,7 +50,6 @@ export async function listInvoices(filters?: filtersProps): Promise<showInvoicab
     const cookie = await getCookieBackend();
 
     try {
-        console.log("🔍 Sending filters to backend:", filters); // ← DEBUG
         const response = await apiClient.post("/api/getInvoices", filters || {}, {
             headers: {
                 Cookie: `PHPSESSID=${cookie}`,
