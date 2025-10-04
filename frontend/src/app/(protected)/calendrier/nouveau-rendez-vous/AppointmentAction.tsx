@@ -57,12 +57,17 @@ export async function prepareRepaymentAction(eventId: string) {
     }
 }
 
-export async function deleteAppointment(idEvent: string) {
+export async function checkDeleteEvent(idEvent: string, code?: number) {
     const cookie = await getCookieBackend();
     try {
-        await apiClient.post(
-            "/api/deleteEvent",
-            { idEvent },
+        const requestData: { idEvent: string; code?: number } = { idEvent };
+        if (code !== undefined) {
+            requestData.code = code;
+        }
+        
+        const response = await apiClient.post(
+            "/api/checkDeleteEvent",
+            requestData,
             {
                 headers: {
                     Cookie: `PHPSESSID=${cookie}`,
@@ -71,9 +76,41 @@ export async function deleteAppointment(idEvent: string) {
                 withCredentials: true,
             }
         );
+        return response.data;
+    } catch (error) {
+        console.error("Error checking deletion:", error);
+        if (axios.isAxiosError(error) && error.response && error.response.data) {
+            return error.response.data;
+        }
+        return { code: 0, message: "Une erreur s'est produite lors de la vérification de l'annulation." };
+    }
+}
+
+export async function deleteAppointment(idEvent: string, code: number) {
+    const cookie = await getCookieBackend();
+    console.log("Attempting to delete event with id:", idEvent, "and code:", code);
+    try {
+        const response = await apiClient.post(
+            "/api/deleteEvent",
+            { idEvent, code },
+            {
+                headers: {
+                    Cookie: `PHPSESSID=${cookie}`,
+                    "Content-Type": "application/json",
+                },
+                withCredentials: true,
+            }
+        );
+        console.log("deletedAppointment received:", JSON.stringify(response.data));
         revalidatePath("/calendrier");
+        return response.data;
     } catch (error) {
         console.error("Error during deletion:", error);
+        if (axios.isAxiosError(error) && error.response && error.response.data) {
+            console.error("Error response:", error.response.data);
+            throw new Error(error.response.data.message || "Erreur lors de l'annulation");
+        }
+        throw error;
     }
 }
 

@@ -63,7 +63,7 @@ extends ClassDatabase
 
     public function getUser(EntitieUser $user)
     {
-        $req = $this->conn->prepare('SELECT idUser, nickName, firstName, lastName, mail, address, address_2, address_3, zip, city, country FROM users WHERE idUser = :idUser');
+        $req = $this->conn->prepare('SELECT idUser, nickName, firstName, lastName, mail, role, address, address_2, address_3, zip, city, country FROM users WHERE idUser = :idUser');
         $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
@@ -81,6 +81,7 @@ extends ClassDatabase
                     'zip' => $data['zip'] ?? null,
                     'city' => $data['city'] ?? null,
                     'country' => $data['country'] ?? null,
+                    'role' => $data['role'] ?? null
                 ];
         } else {
             return null; // Utilisateur non trouvé
@@ -146,6 +147,20 @@ extends ClassDatabase
             return true;
         } else {
             error_log("Failed to update wallet for user ID: " . $idUser);
+            return false;
+        }
+    }
+
+    public function addToWallet(int $idUser, float $amount)
+    {
+        $query = "UPDATE users SET wallet = wallet + :amount WHERE idUser = :idUser";
+        $req = $this->conn->prepare($query);
+        $req->bindValue(":amount", $amount, PDO::PARAM_STR);
+        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        if ($req->execute()) {
+            return true;
+        } else {
+            error_log("Failed to add to wallet for user ID: " . $idUser);
             return false;
         }
     }

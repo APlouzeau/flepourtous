@@ -92,6 +92,7 @@ class ModelPrices extends  ClassDatabase
 
     public function getPriceByEventId(string $idEvent)
     {
+        Error_log("Fetching price for event ID: " . $idEvent);
         $req = $this->conn->prepare('
             SELECT l.title, p.price
             FROM event e
@@ -104,6 +105,7 @@ class ModelPrices extends  ClassDatabase
         $req->bindValue(':idEvent', $idEvent, PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
+        Error_log("Fetched price data: " . print_r($data, true));
         if ($data) {
             return [
                 'price' => $data['price'],

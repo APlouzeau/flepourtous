@@ -148,9 +148,6 @@ class ControllerOrder
 
                 $modelUser = new ModelUser();
                 $modelUser->updateWallet($idUser, 0);
-
-                $controllerEmail = new ControllerMail();
-                $controllerEmail->sendMailForPaymentSuccess($_SESSION['idUser'], $_SESSION['event_id']);
             }
 
             if (isset($status) && $status === true) {
@@ -182,10 +179,12 @@ class ControllerOrder
         if ($eventId) {
             $modelEvent = new ModelEvent();
             $modelPrices = new ModelPrices();
+            $modelUser = new ModelUser();
             $lessonPrice = $modelPrices->getPriceByEventId($eventId);
-            $status = $modelEvent->setEventStatusRefused($eventId, $idUser, $lessonPrice['price']);
+            $wallet = $modelUser->addToWallet($idUser, $lessonPrice['price']);
+            $status = $modelEvent->updateEventStatus($eventId, 'Refusé');
 
-            if ($status) {
+            if ($wallet && $status) {
                 echo json_encode([
                     'code' => 1,
                     'message' => 'Rendez-vous refusé avec succès.'

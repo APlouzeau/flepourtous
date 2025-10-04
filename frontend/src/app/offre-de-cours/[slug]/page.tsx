@@ -9,7 +9,6 @@ export default async function LessonPage(props: { params: tParams }) {
     const { slug } = await props.params;
 
     const lesson: Lesson = await getLessons(slug);
-    console.log("Fetched lesson:", lesson);
     const { title, fullDescription, imagePath } = lesson;
 
     return (

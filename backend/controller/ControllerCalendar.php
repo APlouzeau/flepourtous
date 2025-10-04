@@ -17,8 +17,8 @@ class ControllerCalendar
     {
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
-
         if ($_SESSION['role'] != 'admin') {
+
             $this->listEventsUser();
         } else {
             $this->listEventsMain();
@@ -222,6 +222,7 @@ class ControllerCalendar
                 $roomUrl = $responseVisio['url'];
             }
             error_log("enregistrement en base de données.");
+
             //DATABASE
             $idEvent = $createdEvent->getId();
             $eventDatabase = new EntitieEvent([
@@ -262,6 +263,9 @@ class ControllerCalendar
                     'message' => 'Événement enregistré avec succès',
                 ];
             }
+
+            $controllerMail = new ControllerMail();
+            $controllerMail->sendMailForPaymentSuccess($userId, $idEvent);
         } catch (Exception $e) {
             echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(), $eventDatabase]);
             return;
@@ -291,16 +295,58 @@ class ControllerCalendar
         echo json_encode($response);
     }
 
+    public function checkDeleteEvent()
+    {
+        $userController = new ControllerUser();
+        $userController->verifyConnectBack();
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+
+        $modelEvent = new ModelEvent();
+        error_log("data received : " . print_r($data, true));
+        $event = $modelEvent->getEventById($data['idEvent']);
+        if (!$event) {
+            $response = [
+                'code' => 0,
+                'message' => 'Événement non trouvé en base de données',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $timeRemaining = (new DateTime($event['startDateTime']))->getTimestamp() - (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
+
+        // Vérifier si c'est une annulation admin
+        if (isset($data['code']) && $data['code'] === 3) {
+            $response = [
+                'code' => 3,
+                'message' => "En tant qu'administrateur, vous pouvez annuler ce rendez-vous sans frais pour l'utilisateur. Un mail sera automatiquement envoyé à l'élève afin de le prévenir, et son porte-monnaie sera recrédité. Confirmez-vous l'annulation ?",
+            ];
+        } else {
+            // Logique normale pour les utilisateurs
+            if ($timeRemaining < 24 * 3600) {
+                $response = [
+                    'code' => 2,
+                    'message' => "L'annulation d'un rendez-vous moins de 24 heures avant le début entraîne le paiement de la totalité de la séance. Confirmez- vous l'annulation ?",
+                ];
+            } else {
+                $response = [
+                    'code' => 1,
+                    'message' => "L'annulation d'un rendez-vous plus de 24 heures avant le début n'entraîne aucune pénalité. Le montant de votre leçon sera recrédité sur votre porte-monnaie. Confirmez-vous l'annulation ?",
+                ];
+            }
+        }
+        echo json_encode($response);
+    }
+
     public function deleteEvent()
     {
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
-        echo json_encode("data");
-        echo json_encode($data);
 
-        if (!$data || !isset($data['idEvent'])) {
+        if (!$data || !isset($data['idEvent']) || !isset($data['code'])) {
             $response = [
                 'code' => 0,
                 'message' => 'Données manquantes pour supprimer l\'événement (idEvent requis).'
@@ -308,6 +354,47 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
+
+        $modelEvent = new ModelEvent();
+        $event = $modelEvent->getEventById($data['idEvent']);
+        if (!$event) {
+            $response = [
+                'code' => 0,
+                'message' => 'Événement non trouvé en base de données',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if ($event['userId'] != $_SESSION['idUser'] && $_SESSION['role'] != 'admin') {
+            $response = [
+                'code' => 0,
+                'message' => 'Vous n\'êtes pas autorisé à supprimer cet événement.',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if ($event['status'] != 'Payé') {
+            $response = [
+                'code' => 0,
+                'message' => 'Seuls les rendez-vous payés peuvent être supprimés.',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        if ($event['status'] == 'Annulé - Remboursé' || $event['status'] == 'Annulé - Non remboursé' || $event['status'] == 'Annulé - Admin') {
+            $response = [
+                'code' => 0,
+                'message' => 'Cet événement a déjà été annulé.',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+        $invoiced = $data['code'];
+
         $client = $this->getClient();
         $service = new Google\Service\Calendar($client);
         $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
@@ -321,8 +408,27 @@ class ControllerCalendar
             return;
         }
 
-        $modelEvent = new ModelEvent();
-        $deleteEventSuccess = $modelEvent->deleteEvent($data['idEvent']);
+
+
+        $modelPrice = new ModelPrices();
+        $lessonPrice = $modelPrice->getPriceByEventId($event['idEvent']);
+        $modelUser = new ModelUser();
+        if ($invoiced == 1) {
+            $modelUser->addToWallet($event['userId'], $lessonPrice['price']);
+            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Remboursé');
+        }
+
+        if ($invoiced == 2) {
+            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - non remboursé');
+        }
+
+        if ($invoiced == 3) {
+            $modelUser->addToWallet($event['userId'], $lessonPrice['price']);
+            $controllerMail = new ControllerMail();
+            $controllerMail->sendMailToAlertEventDeleteByAdmin($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price']);
+            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Admin');
+        }
+
         if (!$deleteEventSuccess) {
             $response = [
                 'code' => 0,
@@ -338,6 +444,7 @@ class ControllerCalendar
         }
         echo json_encode($response);
     }
+
 
     public function getAvailablesTimeSlots()
     {

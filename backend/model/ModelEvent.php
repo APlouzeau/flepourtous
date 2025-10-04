@@ -144,7 +144,7 @@ class ModelEvent extends  ClassDatabase
         $req->execute();
         $data = $req->fetch();
         if ($data) {
-            return [
+            $event = [
                 'idEvent' => $data['idEvent'],
                 'userId' => $data['userId'],
                 'description' => $data['description'],
@@ -152,7 +152,13 @@ class ModelEvent extends  ClassDatabase
                 'startDateTime' => $data['startDateTime'],
                 'timezone' => $data['timezone'],
                 'visioLink' => $data['visioLink'],
+                'status' => $data['status'],
+
             ];
+            if ($data['id_lesson'] !== null) {
+                $event['id_lesson'] = $data['id_lesson'];
+            }
+            return $event;
         } else {
             return null;
         }
@@ -195,16 +201,14 @@ class ModelEvent extends  ClassDatabase
         return $req->execute();
     }
 
-    public function setEventStatusRefused(string $idEvent, int $idUser, int $lessonPrice): void
+
+
+    public function updateEventStatus(string $idEvent, string $status): bool
     {
-        $req = $this->conn->prepare('
-        UPDATE users SET wallet = wallet + :lessonPrice WHERE idUser = :idUser;
-        UPDATE event SET status = "Refusé" WHERE idEvent = :idEvent
-        ');
+        $req = $this->conn->prepare('UPDATE event SET status = :status WHERE idEvent = :idEvent');
         $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
-        $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
-        $req->bindValue(':lessonPrice', $lessonPrice, PDO::PARAM_INT);
-        $req->execute();
+        $req->bindValue(':status', $status, PDO::PARAM_STR);
+        return $req->execute();
     }
 
     public function deleteWaitingEvent()
