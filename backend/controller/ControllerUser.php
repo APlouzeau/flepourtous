@@ -21,6 +21,21 @@ class ControllerUser
         }
     }
 
+    public function verifyConnectAdmin()
+    {
+        if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser']) && isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+            return true;
+        } else {
+            http_response_code(401);
+            $response = [
+                'code' => 0,
+                'message' => 'Utilisateur non autorisé'
+            ];
+            echo json_encode($response);
+            exit();
+        }
+    }
+
     public function verifyConnect()
     {
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser'])) {

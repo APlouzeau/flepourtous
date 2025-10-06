@@ -13,6 +13,7 @@ class EntitieEvent
     private string $status;
     private ?string $visioLink = null;
     private ?int $id_lesson = null;
+    private int $isInvoiced = 0;
 
     public function __construct(array $data)
     {
@@ -188,6 +189,16 @@ class EntitieEvent
     public function setId_lesson($id_lesson)
     {
         $this->id_lesson = $id_lesson;
+
+        return $this;
+    }
+    public function getIsInvoiced()
+    {
+        return $this->isInvoiced;
+    }
+    public function setIsInvoiced($isInvoiced)
+    {
+        $this->isInvoiced = $isInvoiced;
 
         return $this;
     }

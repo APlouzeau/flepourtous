@@ -23,7 +23,6 @@ $router->addRoute("POST", "/api/forgetedPassword", "ControllerUser", "forgetedPa
 $router->addRoute("GET", "/api/reset-password/{token}", "ControllerUser", "resetPasswordLink");
 $router->addRoute("POST", "/api/resetPassword", "ControllerUser", "resetPassword");
 
-
 //Lessons
 $router->addRoute("GET", "/api/lessons", "ControllerLesson", "getAllLessons");
 $router->addRoute("GET", "/api/offre-de-cours/{slug}", "ControllerLesson", "getLessonByName");
@@ -57,3 +56,10 @@ $router->addRoute("POST", "/api/verify-payment", "ControllerOrder", "verifyPayme
 //debug
 $router->addRoute("GET", "/api/debug", "ControllerDebug", "debug");
 $router->addRoute("GET", "/api/debugBdd", "ControllerDebug", "debugBdd");
+
+//admin
+$router->addRoute("POST", "/api/getInvoices", "ControllerInvoice", "getInvoices");
+$router->addRoute("POST", "/api/setInvoiced", "ControllerInvoice", "setInvoiced");
+
+//packs
+$router->addRoute("POST", "/api/orderPacks", "ControllerOrder", "orderPacks");

@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, generateRefreshedToken } from "./lib/session";
 
-const isProtectedRoute = ["/calendrier", "/profil", "/calendrier/nouveau-rendez-vous"];
+const isProtectedRoute = [
+    "/calendrier",
+    "/profil",
+    "/calendrier/nouveau-rendez-vous",
+    "/calendrier/nouveau-rendez-vous/paiement",
+    "/calendrier/packs",
+    "/calendrier/admin-dashboard",
+    "/retour-paiement",
+];
 const ONE_HOUR_IN_MS = 1 * 60 * 60 * 1000;
 // Rafraîchir si le token a plus de 30 minutes (la moitié de sa durée de vie de 1h)
 const REFRESH_IF_OLDER_THAN_MS = ONE_HOUR_IN_MS / 2;

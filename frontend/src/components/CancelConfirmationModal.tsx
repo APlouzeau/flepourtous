@@ -52,6 +52,16 @@ export default function CancelConfirmationModal({
                     title: "Annulation avec frais",
                     confirmVariant: "destructive" as const,
                 };
+            case 3:
+                return {
+                    // Annulation admin
+                    icon: AlertTriangle,
+                    iconColor: "text-green-600",
+                    bgColor: "bg-green-50",
+                    borderColor: "border-green-200",
+                    title: "Annulation",
+                    confirmVariant: "default" as const,
+                };
             default: // Erreur
                 return {
                     icon: AlertTriangle,

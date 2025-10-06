@@ -57,12 +57,17 @@ export async function prepareRepaymentAction(eventId: string) {
     }
 }
 
-export async function checkDeleteEvent(idEvent: string) {
+export async function checkDeleteEvent(idEvent: string, code?: number) {
     const cookie = await getCookieBackend();
     try {
+        const requestData: { idEvent: string; code?: number } = { idEvent };
+        if (code !== undefined) {
+            requestData.code = code;
+        }
+        
         const response = await apiClient.post(
             "/api/checkDeleteEvent",
-            { idEvent },
+            requestData,
             {
                 headers: {
                     Cookie: `PHPSESSID=${cookie}`,
@@ -71,7 +76,6 @@ export async function checkDeleteEvent(idEvent: string) {
                 withCredentials: true,
             }
         );
-        console.log("Response from checkDeleteEvent:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error checking deletion:", error);
@@ -84,8 +88,9 @@ export async function checkDeleteEvent(idEvent: string) {
 
 export async function deleteAppointment(idEvent: string, code: number) {
     const cookie = await getCookieBackend();
+    console.log("Attempting to delete event with id:", idEvent, "and code:", code);
     try {
-        await apiClient.post(
+        const response = await apiClient.post(
             "/api/deleteEvent",
             { idEvent, code },
             {
@@ -96,9 +101,16 @@ export async function deleteAppointment(idEvent: string, code: number) {
                 withCredentials: true,
             }
         );
+        console.log("deletedAppointment received:", JSON.stringify(response.data));
         revalidatePath("/calendrier");
+        return response.data;
     } catch (error) {
         console.error("Error during deletion:", error);
+        if (axios.isAxiosError(error) && error.response && error.response.data) {
+            console.error("Error response:", error.response.data);
+            throw new Error(error.response.data.message || "Erreur lors de l'annulation");
+        }
+        throw error;
     }
 }
 
