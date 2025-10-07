@@ -78,6 +78,16 @@ export default function Footer() {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link href="/cgv" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                        CGV
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/reglement-interieur" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                        Règlement intérieur
+                                    </Link>
+                                </li>
+                                <li>
                                     <Link href="/rgpd" className="text-gray-300 hover:text-white transition-colors duration-200">
                                         RGPD
                                     </Link>
