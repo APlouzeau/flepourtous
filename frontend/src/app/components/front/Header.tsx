@@ -48,12 +48,6 @@ export default function Header({ isLoggedIn }: HeaderProps) {
                     {/* Navigation Desktop */}
                     <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
                         <Link
-                            href="/"
-                            className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base"
-                        >
-                            Présentation
-                        </Link>
-                        <Link
                             href="/offre-de-cours"
                             className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base"
                         >
@@ -64,12 +58,6 @@ export default function Header({ isLoggedIn }: HeaderProps) {
                             className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base"
                         >
                             Ressources utilisées
-                        </Link>
-                        <Link
-                            href="/"
-                            className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base"
-                        >
-                            Avis élèves
                         </Link>
 
                         {/* Boutons d'action Desktop */}

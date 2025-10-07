@@ -44,11 +44,6 @@ export default function Footer() {
                                         Ressources utilisées
                                     </Link>
                                 </li>
-                                <li>
-                                    <Link href="/" className="text-gray-300 hover:text-white transition-colors duration-200">
-                                        Avis élèves
-                                    </Link>
-                                </li>
                             </ul>
                         </div>
 
@@ -58,16 +53,6 @@ export default function Footer() {
                                 COMPTE
                             </h4>
                             <ul className="space-y-3">
-                                <li>
-                                    <Link href="/inscription" className="text-gray-300 hover:text-white transition-colors duration-200">
-                                        Inscription
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/connexion" className="text-gray-300 hover:text-white transition-colors duration-200">
-                                        Connexion
-                                    </Link>
-                                </li>
                                 <li>
                                     <Link href="/profil" className="text-gray-300 hover:text-white transition-colors duration-200">
                                         Profil
@@ -95,11 +80,6 @@ export default function Footer() {
                                 <li>
                                     <Link href="/rgpd" className="text-gray-300 hover:text-white transition-colors duration-200">
                                         RGPD
-                                    </Link>
-                                </li>
-                                <li>
-                                    <Link href="/mentions-legales" className="text-gray-300 hover:text-white transition-colors duration-200">
-                                        Mentions légales
                                     </Link>
                                 </li>
                             </ul>
