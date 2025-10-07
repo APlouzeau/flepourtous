@@ -27,7 +27,7 @@ class ModelLesson extends  ClassDatabase
     public function getLessonByName($slug)
     {
         $req = $this->conn->prepare('
-        SELECT lesson.title, lesson.shortDescription, lesson.fullDescription, lesson.imagePath, lesson.title_1, lesson.text_1, lesson.text_2, lesson.text_3, lesson.text_4, prices.price, duration.duration
+        SELECT lesson.title, lesson.shortDescription, lesson.fullDescription, lesson.imagePath, lesson.title_1, lesson.text_1, lesson.text_2, lesson.text_3, lesson.text_4, lesson.text_5, lesson.text_6, prices.price, duration.duration
         FROM lesson
         INNER JOIN lessonPrices ON lessonPrices.id_lesson = lesson.idLesson
         INNER JOIN prices ON lessonPrices.id_price = prices.idPrice
@@ -56,6 +56,8 @@ class ModelLesson extends  ClassDatabase
                 'text_2' => $datas[0]['text_2'],
                 'text_3' => $datas[0]['text_3'],
                 'text_4' => $datas[0]['text_4'],
+                'text_5' => $datas[0]['text_5'],
+                'text_6' => $datas[0]['text_6'],
                 'times' => $times
             ];
         return $lesson;

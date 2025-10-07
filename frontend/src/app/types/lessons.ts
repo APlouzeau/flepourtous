@@ -17,6 +17,8 @@ export interface Lesson {
     text_2?: string;
     text_3?: string;
     text_4?: string;
+    text_5?: string;
+    text_6?: string;
     times: [
         {
             duration: number;
