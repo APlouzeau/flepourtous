@@ -50,7 +50,7 @@ export default async function LessonPage(props: { params: tParams }) {
     const { slug } = await props.params;
 
     const lesson: Lesson = await getLessons(slug);
-    const { title, fullDescription, imagePath } = lesson;
+    const { title, fullDescription, imagePath, title_1, text_1, text_2, text_3, text_4 } = lesson;
 
     // Vérifier si l'utilisateur est connecté
     const isAuthenticated = await getCookieBackend();
@@ -103,45 +103,63 @@ export default async function LessonPage(props: { params: tParams }) {
                 </div>
             </section>
 
-            {/* Features Section */}
-            <section className="py-16 bg-gray-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                            Pourquoi choisir nos <span className="text-red-600">cours individuels</span> ?
-                        </h2>
-                        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                            Une approche pédagogique unique qui s'adapte à chaque élève
-                        </p>
+            {/* Approaches Section */}
+            {title_1 && (
+                <section className="py-16 bg-gray-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                                {title_1}
+                            </h2>
+                        </div>
+
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {text_1 && (
+                                <div className="text-center p-8 rounded-3xl bg-blue-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-blue-100">
+                                    <div className="bg-blue-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span className="text-3xl">📘</span>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Avec un manuel</h3>
+                                    <p className="text-gray-600 text-lg leading-relaxed">{text_1}</p>
+                                </div>
+                            )}
+
+                            {text_2 && (
+                                <div className="text-center p-8 rounded-3xl bg-green-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-green-100">
+                                    <div className="bg-green-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span className="text-3xl">🗂️</span>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Avec des fiches pédagogiques</h3>
+                                    <p className="text-gray-600 text-lg leading-relaxed">{text_2}</p>
+                                </div>
+                            )}
+
+                            {text_3 && (
+                                <div className="text-center p-8 rounded-3xl bg-purple-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-purple-100">
+                                    <div className="bg-purple-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span className="text-3xl">🎬</span>
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Avec du matériel authentique</h3>
+                                    <p className="text-gray-600 text-lg leading-relaxed">{text_3}</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
+                </section>
+            )}
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div className="text-center p-8 rounded-3xl bg-red-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-red-100">
-                            <div className="bg-red-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <UserIcon className="w-10 h-10 text-white" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Cours individuels</h3>
-                            <p className="text-gray-600 text-lg leading-relaxed">Attention exclusive du professeur pour un apprentissage optimal</p>
-                        </div>
-
-                        <div className="text-center p-8 rounded-3xl bg-red-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-red-100">
-                            <div className="bg-red-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <AcademicCapIcon className="w-10 h-10 text-white" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Méthode éprouvée</h3>
-                            <p className="text-gray-600 text-lg leading-relaxed">8 années d'expérience avec plus de 150 élèves satisfaits</p>
-                        </div>
-
-                        <div className="text-center p-8 rounded-3xl bg-red-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-red-100">
-                            <div className="bg-red-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <ChatBubbleLeftRightIcon className="w-10 h-10 text-white" />
-                            </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-4">Communication fluide</h3>
-                            <p className="text-gray-600 text-lg leading-relaxed">Développement de l'expression orale et écrite en français</p>
+            {/* Final Message Section */}
+            {text_4 && (
+                <section className="py-16 bg-white">
+                    <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+                        <div className="bg-gray-50 rounded-2xl p-8 shadow-lg border border-gray-200">
+                            <p className="text-lg text-gray-600 leading-relaxed">
+                                {text_4}
+                            </p>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             {/* Pricing Section */}
             <section id="tarifs" className="py-16 bg-white">

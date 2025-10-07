@@ -12,6 +12,11 @@ export interface Lesson {
     fullDescription: string;
     imagePath: string;
     slug: string;
+    title_1?: string;
+    text_1?: string;
+    text_2?: string;
+    text_3?: string;
+    text_4?: string;
     times: [
         {
             duration: number;
