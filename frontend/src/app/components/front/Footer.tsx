@@ -10,15 +10,14 @@ export default function Footer() {
                         {/* Logo et nom */}
                         <div className="md:col-span-1">
                             <div className="flex items-center space-x-3 mb-4">
-                                
-                                    <Image
-                                        src="/images/logo.png"
-                                        alt="Logo FLE Pour Tous"
-                                        width={72}
-                                        height={72}
-                                        className="object-contain"
-                                    />
-                               
+                                <Image
+                                    src="/images/logo.png"
+                                    alt="Logo FLE Pour Tous"
+                                    width={72}
+                                    height={72}
+                                    className="object-contain"
+                                />
+
                                 <h3 className="text-xl font-bold text-white">FLE Pour Tous</h3>
                             </div>
                         </div>
@@ -30,17 +29,26 @@ export default function Footer() {
                             </h4>
                             <ul className="space-y-3">
                                 <li>
-                                    <Link href="/" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link
+                                        href="/"
+                                        className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    >
                                         Accueil
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/offre-de-cours" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link
+                                        href="/offre-de-cours"
+                                        className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    >
                                         Offre de cours
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link
+                                        href="/"
+                                        className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    >
                                         Ressources utilisées
                                     </Link>
                                 </li>
@@ -54,12 +62,18 @@ export default function Footer() {
                             </h4>
                             <ul className="space-y-3">
                                 <li>
-                                    <Link href="/profil" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link
+                                        href="/profil"
+                                        className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    >
                                         Profil
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/calendrier" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link
+                                        href="/calendrier"
+                                        className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    >
                                         Calendrier
                                     </Link>
                                 </li>
@@ -73,22 +87,34 @@ export default function Footer() {
                             </h4>
                             <ul className="space-y-3">
                                 <li>
-                                    <Link href="/me-contacter" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <a
+                                        href="mailto:flepourtous.online@gmail.com?subject=Demande%20d'information&body=Bonjour,%0D%0A%0D%0AJe%20souhaiterais%20obtenir%20plus%20d'informations%20sur%20vos%20cours%20de%20français.%0D%0A%0D%0AMerci."
+                                        className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    >
                                         Me contacter
-                                    </Link>
+                                    </a>
                                 </li>
                                 <li>
-                                    <Link href="/cgv" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link
+                                        href="/cgv"
+                                        className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    >
                                         CGV
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/reglement-interieur" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link
+                                        href="/reglement-interieur"
+                                        className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    >
                                         Règlement intérieur
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/rgpd" className="text-gray-300 hover:text-white transition-colors duration-200">
+                                    <Link
+                                        href="/rgpd"
+                                        className="text-gray-300 hover:text-white transition-colors duration-200"
+                                    >
                                         RGPD
                                     </Link>
                                 </li>
@@ -99,17 +125,24 @@ export default function Footer() {
                     {/* Ligne de séparation */}
                     <div className="border-t border-gray-700 mt-8 pt-8">
                         <div className="flex flex-col md:flex-row justify-between items-center">
-                            <div className="text-gray-400 text-sm">
-                                © 2025 FLE pour tous. Tous droits réservés.
-                            </div>
+                            <div className="text-gray-400 text-sm">© 2025 FLE pour tous. Tous droits réservés.</div>
                             <div className="flex space-x-6 mt-4 md:mt-0">
-                                <Link href="/politique-confidentialite" className="text-gray-400 hover:text-white text-sm transition-colors duration-200">
+                                <Link
+                                    href="/politique-confidentialite"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+                                >
                                     Politique de confidentialité
                                 </Link>
-                                <Link href="/conditions-utilisation" className="text-gray-400 hover:text-white text-sm transition-colors duration-200">
+                                <Link
+                                    href="/conditions-utilisation"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+                                >
                                     Conditions d&apos;utilisation
                                 </Link>
-                                <Link href="/cookies" className="text-gray-400 hover:text-white text-sm transition-colors duration-200">
+                                <Link
+                                    href="/cookies"
+                                    className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
+                                >
                                     Paramètres des cookies
                                 </Link>
                             </div>
