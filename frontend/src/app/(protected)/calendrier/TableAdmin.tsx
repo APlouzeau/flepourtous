@@ -10,7 +10,7 @@ interface TableAdminProps {
 }
 
 export default function TableAdmin({ listAppointments }: TableAdminProps) {
-    const { userTimezone, isLoading: timezoneLoading } = useUserTimezone();
+    const { isLoading: timezoneLoading } = useUserTimezone();
     const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
     useEffect(() => {
