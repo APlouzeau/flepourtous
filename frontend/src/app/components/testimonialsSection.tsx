@@ -9,13 +9,13 @@ const testimonials = [
         bgColor: "bg-orange-200",
     },
     {
-        quote: "En tant qu’introverti ayant grandi dans une famille française sans jamais avoir réellement appris la langue, j’ai toujours eu très peur de parler français — trop inquiet·ète de faire des erreurs ou de paraître ridicule. Depuis que j’ai commencé les cours avec Ludivine, je sens que cela change peu à peu. Elle est incroyablement patiente, à l’écoute, et crée un espace où je ne me sens jamais jugé·e. En seulement quelques mois, j’ai parlé plus français que durant toute ma vie, et je commence enfin à gagner en confiance grâce à ses cours. Je ne peux que la recommander chaleureusement.",
+        quote: "En tant qu’introverti ayant grandi dans une famille française sans jamais avoir réellement appris la langue, j’ai toujours eu très peur de parler français : trop inquiet de faire des erreurs ou de paraître ridicule. Depuis que j’ai commencé les cours avec Ludivine, je sens que cela change peu à peu. Elle est incroyablement patiente, à l’écoute, et crée un espace où je ne me sens jamais jugé. En seulement quelques mois, j’ai parlé plus français que durant toute ma vie, et je commence enfin à gagner en confiance grâce à ses cours. Je ne peux que la recommander chaleureusement.",
         author: "August",
         nationality: "Américain-Français",
         bgColor: "bg-gray-200",
     },
     {
-        quote: 'Je dois dire qu’au moment de m’inscrire sur Preply, j’étais terrifié·e à l’idée de devoir vraiment parler français. Ludivine est incroyable, elle sait mettre à l’aise immédiatement. J’apprends à parler français en tant que grand·e débutant·e, et elle est la personne la plus patiente du monde. Elle supporte mon accent affreux et ma grammaire approximative, et me corrige toujours avec douceur. Elle a un don pour faire couler le français naturellement. Elle parle lentement et clairement. Elle est vraiment formidable. Merci Ludivine, tu es très gentille et tu es une professeure exceptionnelle."',
+        quote: 'Je dois dire qu’au moment de m’inscrire, j’étais terrifié à l’idée de devoir vraiment parler français. Ludivine est incroyable, elle sait mettre à l’aise immédiatement. J’apprends à parler français en tant que grand débutant, et elle est la personne la plus patiente du monde. Elle supporte mon accent affreux et ma grammaire approximative, et me corrige toujours avec douceur. Elle a un don pour faire couler le français naturellement. Elle parle lentement et clairement. Elle est vraiment formidable. Merci Ludivine, tu es très gentille et tu es une professeure exceptionnelle."',
         author: "Graham",
         nationality: "Anglais",
         bgColor: "bg-pink-200",
