@@ -8,10 +8,12 @@ class EntitieEvent
     private int $duration;
     private string $createdAt;
     private string $startDateTime;
+    public string $timezone;
     private string $updatedAt;
     private string $status;
     private ?string $visioLink = null;
     private ?int $id_lesson = null;
+    private int $isInvoiced = 0;
 
     public function __construct(array $data)
     {
@@ -112,6 +114,26 @@ class EntitieEvent
     }
 
     /**
+     * Get the value of timezone
+     */
+    public function getTimezone()
+    {
+        return $this->timezone;
+    }
+
+    /**
+     * Set the value of timezone
+     *
+     * @return  self
+     */
+    public function setTimezone($timezone)
+    {
+        $this->timezone = $timezone;
+
+        return $this;
+    }
+
+    /**
      * Get the value of status
      */
     public function getStatus()
@@ -167,6 +189,16 @@ class EntitieEvent
     public function setId_lesson($id_lesson)
     {
         $this->id_lesson = $id_lesson;
+
+        return $this;
+    }
+    public function getIsInvoiced()
+    {
+        return $this->isInvoiced;
+    }
+    public function setIsInvoiced($isInvoiced)
+    {
+        $this->isInvoiced = $isInvoiced;
 
         return $this;
     }

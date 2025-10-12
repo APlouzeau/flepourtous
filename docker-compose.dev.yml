@@ -1,23 +1,23 @@
 services:
     api:
-      ports:
-        - "8000:80"
-      depends_on:
-          - db
-      build:
-        context: ./backend
-        target: dev
+        ports:
+            - "8000:80"
+        depends_on:
+            - db
+        build:
+            context: ./backend
+            target: dev
 
     app:
-      ports:
-        - "3000:3000"
-      depends_on:
-        - api
-      build:
-        context: ./frontend
-        dockerfile: dockerfile
-        target: dev
-      command: pnpm run dev
+        ports:
+            - "3000:3000"
+        depends_on:
+            - api
+        build:
+            context: ./frontend
+            dockerfile: dockerfile
+            target: dev
+        command: pnpm run dev
 
     db:
         image: mariadb:10.6
@@ -33,6 +33,9 @@ services:
         volumes:
             - ./db_data:/var/lib/mysql
             - ./db:/docker-entrypoint-initdb.d
+        networks:
+            - web
+            - internal
 
     phpmyadmin:
         profiles:
@@ -46,7 +49,8 @@ services:
             - "8081:80"
         depends_on:
             - db
+        networks:
+            - web
+            - internal
 volumes:
     db_data:
-
-

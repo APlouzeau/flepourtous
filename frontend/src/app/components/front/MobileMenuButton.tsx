@@ -65,13 +65,6 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
                     <nav className="p-4">
                         <div className="space-y-2">
                             <Link 
-                                href="/" 
-                                className="text-white hover:text-gray-200 hover:bg-red-700 transition-colors block px-4 py-3 rounded-md font-medium text-lg"
-                                onClick={toggleMenu}
-                            >
-                                Présentation
-                            </Link>
-                            <Link 
                                 href="/offre-de-cours" 
                                 className="text-white hover:text-gray-200 hover:bg-red-700 transition-colors block px-4 py-3 rounded-md font-medium text-lg"
                                 onClick={toggleMenu}
@@ -84,13 +77,6 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
                                 onClick={toggleMenu}
                             >
                                 Ressources utilisées
-                            </Link>
-                            <Link 
-                                href="/" 
-                                className="text-white hover:text-gray-200 hover:bg-red-700 transition-colors block px-4 py-3 rounded-md font-medium text-lg"
-                                onClick={toggleMenu}
-                            >
-                                Avis élèves
                             </Link>
                         </div>
 

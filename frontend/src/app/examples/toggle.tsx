@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext } from "react";
-import { Context } from "./provider";
+import { Context } from "./context";
 
 export default function Toggle() {
     const { setIsOpen } = useContext(Context);

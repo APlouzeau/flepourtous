@@ -3,64 +3,67 @@
 import { showBasicAppointmentProps } from "@/app/types/appointments";
 
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { deleteAppointment, prepareRepaymentAction } from "./nouveau-rendez-vous/AppointmentAction";
-import { useEffect, useState } from "react";
+import { checkDeleteEvent, deleteAppointment, prepareRepaymentAction } from "./nouveau-rendez-vous/AppointmentAction";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import CancelConfirmationModal from "@/components/CancelConfirmationModal";
+import { cn } from "@/lib/utils";
 
 interface AppointmentRowProps {
     listAppointments: showBasicAppointmentProps[];
 }
 
 export default function TableUser({ listAppointments }: AppointmentRowProps) {
-    const [userTimezone, setUserTimezone] = useState<string | null>(null);
-    const [currentTime, setCurrentTime] = useState<Date>(new Date());
-    //const [isLoading, setIsLoading] = useState(true);
+    const [currentTime] = useState<Date>(new Date());
     const [isRepaying, setIsRepaying] = useState<string | null>(null);
+    const [cancelModal, setCancelModal] = useState<{
+        isOpen: boolean;
+        eventId: string | null;
+        eventTitle: string | null;
+        message: string;
+        code: number;
+        isDeleting: boolean;
+    }>({
+        isOpen: false,
+        eventId: null,
+        eventTitle: null,
+        message: "",
+        code: 0,
+        isDeleting: false,
+    });
     const router = useRouter();
 
-    useEffect(() => {
-        setUserTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-        //  setIsLoading(false);
-
-        // Mettre à jour l'heure actuelle toutes les minutes
-        const interval = setInterval(() => {
-            setCurrentTime(new Date());
-        }, 60000);
-
-        return () => clearInterval(interval);
-    }, []);
-
-    const formatDateInUserTimezone = (utcDateTimeString: string | undefined) => {
-        if (!utcDateTimeString || !userTimezone) {
-            return { date: "Chargement...", time: "" };
-        }
+    // Fonction pour formater la date et l'heure selon le fuseau de l'événement
+    const formatDateTime = (dateTimeString: string, timezone: string) => {
         try {
-            const isoUtcString = utcDateTimeString.includes("T")
-                ? utcDateTimeString
-                : utcDateTimeString.replace(" ", "T") + "Z";
-            const dateObj = new Date(isoUtcString);
+            // Convertir la string en objet Date (UTC)
+            const dateObj = new Date(dateTimeString.replace(" ", "T") + "Z");
 
             if (isNaN(dateObj.getTime())) {
-                return { date: "Date invalide", time: "" };
+                return { date: "Date invalide", time: "Heure invalide" };
             }
 
-            const formattedDate = dateObj.toLocaleDateString(undefined, {
-                timeZone: userTimezone,
-                year: "numeric",
-                month: "2-digit",
+            // Formater la date selon le fuseau de l'événement
+            const formattedDate = dateObj.toLocaleDateString("fr-FR", {
                 day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                timeZone: timezone, // ← AJOUT : utilise le fuseau de l'événement
             });
-            const formattedTime = dateObj.toLocaleTimeString(undefined, {
-                timeZone: userTimezone,
+
+            // Formater l'heure selon le fuseau de l'événement
+            const formattedTime = dateObj.toLocaleTimeString("fr-FR", {
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: false,
+                timeZone: timezone, // ← AJOUT : utilise le fuseau de l'événement
             });
+
             return { date: formattedDate, time: formattedTime };
         } catch (error) {
             console.error("Error formatting date:", error);
-            return { date: "Erreur", time: "" };
+            return { date: "Erreur", time: "Erreur" };
         }
     };
 
@@ -161,114 +164,163 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
         }
     };
 
-    if (!userTimezone) {
-        return <p>Chargement du fuseau horaire de l&apos;utilisateur...</p>;
-    }
+    const handleCancelClick = async (eventId: string, eventTitle: string) => {
+        try {
+            const response = await checkDeleteEvent(eventId);
+            setCancelModal({
+                isOpen: true,
+                eventId,
+                eventTitle,
+                message: response.message || "Voulez-vous vraiment annuler ce rendez-vous ?",
+                code: response.code,
+                isDeleting: false,
+            });
+        } catch (error) {
+            console.error("Erreur lors de la vérification:", error);
+            setCancelModal({
+                isOpen: true,
+                eventId,
+                eventTitle,
+                message: "Erreur lors de la vérification de l'annulation. Voulez-vous continuer ?",
+                code: 0,
+                isDeleting: false,
+            });
+        }
+    };
+
+    const handleConfirmCancel = async () => {
+        if (!cancelModal.eventId) return;
+
+        setCancelModal((prev) => ({ ...prev, isDeleting: true }));
+
+        try {
+            await deleteAppointment(cancelModal.eventId, cancelModal.code);
+            setCancelModal({
+                isOpen: false,
+                eventId: null,
+                eventTitle: null,
+                message: "",
+                code: 0,
+                isDeleting: false,
+            });
+            router.refresh();
+        } catch (error) {
+            console.error("Erreur lors de l'annulation:", error);
+            alert("Erreur lors de l'annulation du rendez-vous.");
+            setCancelModal((prev) => ({ ...prev, isDeleting: false }));
+        }
+    };
+
+    const handleCancelModalClose = () => {
+        setCancelModal({
+            isOpen: false,
+            eventId: null,
+            eventTitle: null,
+            message: "",
+            code: 0,
+            isDeleting: false,
+        });
+    };
 
     return (
-        <Table>
-            <TableHeader>
-                <TableRow className="hover:bg-transparent text-center">
-                    <TableHead>Cours</TableHead>
-                    <TableHead>Date (votre fuseau)</TableHead>
-                    <TableHead>Heure (votre fuseau)</TableHead>
-                    <TableHead>Durée</TableHead>
-                    {/* Étape 1 : On renomme les colonnes pour plus de clarté */}
-                    <TableHead>Statut Paiement</TableHead>
-                    <TableHead>Statut Visio</TableHead>
-                    <TableHead>Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {listAppointments.map((item) => {
-                    // --- Ta logique existante (parfaite, on n'y touche pas) ---
-                    const visioStatus = getVisioStatus(item.startDateTime, item.duration);
-                    const { date: localDate, time: localTime } = formatDateInUserTimezone(item.startDateTime);
-                    const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
-                    const today = new Date();
-                    const canCancel =
-                        appointmentDate > today && (item.status === "Confirmé" || item.status === "En attente");
-                    const canPay = appointmentDate > today && item.status === "En attente";
-                    // --- Fin de la logique ---
+        <>
+            <Table>
+                <TableHeader>
+                    <TableRow className="hover:bg-transparent text-center">
+                        <TableHead>Cours</TableHead>
+                        <TableHead>Fuseau</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Heure</TableHead>
+                        <TableHead>Durée</TableHead>
+                        <TableHead>Statut Paiement</TableHead>
+                        <TableHead>Statut Visio</TableHead>
+                        <TableHead>Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {listAppointments.map((item) => {
+                        const visioStatus = getVisioStatus(item.startDateTime, item.duration);
+                        const { date: formattedDate, time: formattedTime } = formatDateTime(
+                            item.startDateTime,
+                            item.timezone
+                        );
+                        const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
+                        const today = new Date();
+                        const canCancel =
+                            appointmentDate > today && (item.status === "Payé" || item.status === "En attente");
+                        const canPay = appointmentDate > today && item.status === "En attente";
 
-                    return (
-                        <TableRow
-                            key={item.idEvent}
-                            className={`
-                                    ${
-                                        visioStatus.isJoinable
-                                            ? "cursor-pointer hover:bg-green-50"
-                                            : "cursor-not-allowed hover:bg-red-50"
-                                    }
-                                    transition-colors duration-200
-                                `}
-                            title={visioStatus.tooltip}
-                            onClick={() => handleRowClick(item, visioStatus.isJoinable)}
-                        >
-                            <TableCell className="font-medium">{item.title}</TableCell>
-                            <TableCell>{localDate}</TableCell>
-                            <TableCell>{localTime}</TableCell>
-                            <TableCell>{item.duration} mn</TableCell>
-
-                            {/* Étape 2 : La colonne "Statut Paiement" fusionnée */}
-                            <TableCell>
-                                {canPay ? (
-                                    <Button
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // Empêche le clic sur la ligne
-                                            handleRepay(item.idEvent.toString());
-                                        }}
-                                        disabled={isRepaying === item.idEvent.toString()}
-                                        variant="destructive"
-                                        size="sm"
-                                    >
-                                        {isRepaying === item.idEvent.toString() ? "..." : "Payer"}
-                                    </Button>
-                                ) : (
-                                    // Si on ne peut pas payer, on affiche le badge du collègue
-                                    getStatusBadge(item.status)
+                        return (
+                            <TableRow
+                                key={item.idEvent}
+                                className={cn(
+                                    "transition-colors duration-200",
+                                    visioStatus.isJoinable
+                                        ? "cursor-pointer hover:bg-green-50"
+                                        : "cursor-not-allowed hover:bg-red-50"
                                 )}
-                            </TableCell>
+                                title={visioStatus.tooltip}
+                                onClick={() => handleRowClick(item, visioStatus.isJoinable)}
+                            >
+                                <TableCell className="font-medium">{item.title}</TableCell>
+                                <TableCell>{item.timezone}</TableCell>
+                                <TableCell>{formattedDate}</TableCell>
+                                <TableCell>{formattedTime}</TableCell>
+                                <TableCell>{item.duration} mn</TableCell>
+                                <TableCell>
+                                    {canPay ? (
+                                        <Button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleRepay(item.idEvent.toString());
+                                            }}
+                                            disabled={isRepaying === item.idEvent.toString()}
+                                            variant="destructive"
+                                            size="sm"
+                                        >
+                                            {isRepaying === item.idEvent.toString() ? "..." : "Payer"}
+                                        </Button>
+                                    ) : (
+                                        getStatusBadge(item.status)
+                                    )}
+                                </TableCell>
+                                <TableCell className={visioStatus.className}>{visioStatus.status}</TableCell>
+                                <TableCell>
+                                    {canCancel ? (
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleCancelClick(item.idEvent.toString(), item.title);
+                                            }}
+                                        >
+                                            Annuler
+                                        </Button>
+                                    ) : (
+                                        <span className="text-gray-400">-</span>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        );
+                    })}
+                </TableBody>
+                <TableFooter className="bg-transparent">
+                    <TableRow className="hover:bg-transparent">
+                        <TableCell colSpan={7}></TableCell>
+                    </TableRow>
+                </TableFooter>
+            </Table>
 
-                            {/* Étape 3 : On réintègre la colonne "Statut Visio" du collègue */}
-                            <TableCell className={visioStatus.className}>{visioStatus.status}</TableCell>
-
-                            {/* Étape 4 : La colonne "Actions" fusionnée */}
-                            <TableCell>
-                                {canCancel ? (
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={async (e) => {
-                                            e.stopPropagation(); // Empêche le clic sur la ligne
-                                            if (confirm("Êtes-vous sûr de vouloir annuler ce rendez-vous ?")) {
-                                                try {
-                                                    await deleteAppointment(item.idEvent.toString());
-                                                    alert(`Rendez-vous annulé.`);
-                                                    router.refresh();
-                                                } catch (error) {
-                                                    console.error("Erreur lors de l'annulation:", error);
-                                                    alert("Erreur lors de l'annulation du rendez-vous.");
-                                                }
-                                            }
-                                        }}
-                                    >
-                                        Annuler
-                                    </Button>
-                                ) : (
-                                    // Si on ne peut pas annuler, on affiche un tiret
-                                    <span className="text-gray-400">-</span>
-                                )}
-                            </TableCell>
-                        </TableRow>
-                    );
-                })}
-            </TableBody>
-            <TableFooter className="bg-transparent">
-                <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={7}></TableCell> {/* Ajuster le colSpan */}
-                </TableRow>
-            </TableFooter>
-        </Table>
+            <CancelConfirmationModal
+                isOpen={cancelModal.isOpen}
+                onClose={handleCancelModalClose}
+                onConfirm={handleConfirmCancel}
+                isLoading={cancelModal.isDeleting}
+                message={cancelModal.message}
+                code={cancelModal.code}
+                appointmentTitle={cancelModal.eventTitle || undefined}
+            />
+        </>
     );
 }

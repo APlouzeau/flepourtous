@@ -2,8 +2,12 @@
 
 import { useEffect, useState } from "react";
 
+type User = {
+    mail: string;
+};
+
 export default function MyComponent() {
-    const [data, setData] = useState(null);
+    const [data, setData] = useState<User[]>();
 
     useEffect(() => {
         fetch("http://flepourtous.localhost/api/users", {
@@ -12,5 +16,10 @@ export default function MyComponent() {
             .then((response) => response.json())
             .then((data) => setData(data));
     }, []);
-    return <div>{data ? <p>{data[0].mail}</p> : <p>Loading...</p>}</div>;
+
+    return (
+        <div>
+            <p>{data ? data[0].mail : "Loading..."}</p>
+        </div>
+    );
 }

@@ -8,12 +8,14 @@ define("DB_HOST", getenv('DB_HOST'));
 define("DB_NAME", getenv('DB_NAME'));
 define("DB_USER", getenv('DB_USER'));
 define("DB_PSW", getenv('DB_PSW'));
+define("DB_PORT", getenv('DB_PORT'));
 
 define("GOOGLE_CALENDAR_ID", getenv('GOOGLE_CALENDAR_ID'));
 define("GOOGLE_TOKEN", getenv('GOOGLE_TOKEN'));
 
 define("VISIO_API_KEY", getenv('VISIO_API_KEY'));
 define("URI", getenv('URI'));
+define("URI_MAIL", getenv('URI_MAIL'));
 define("URI_FRONT", getenv('URI_FRONT'));
 define('URI_STRIPE', getenv('URI_STRIPE'));
 define("COOKIE_DOMAIN", getenv('COOKIE_DOMAIN'));

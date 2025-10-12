@@ -190,7 +190,7 @@ class ControllerGoogle
 
             $dtEnd = new DateTime($endDateTimeISO);
             $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
-            
+
             // Ignorer seulement les événements très anciens (plus de 24 heures dans le passé)
             // ACCEPTER TOUS LES ÉVÉNEMENTS FUTURS
             $now = new DateTime('now', new DateTimeZone('UTC'));
@@ -267,11 +267,12 @@ class ControllerGoogle
                     'description' => $description,
                     'duration' => $duration,
                     'startDateTime' => $startDateTimeUtcFormatted,
+                    'timezone' => 'Europe/Paris',
                     'visioLink' => $roomUrl,
                 ]);
                 $modelEvent->updateEvent($eventDatabase);
             } else {
-                
+
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
                 if (!$roomUrl) {
                     error_log("Erreur lors de la création de la room visio pour le nouvel événement ID: " . $idEvent . ". L'événement sera créé sans lien de visio.");

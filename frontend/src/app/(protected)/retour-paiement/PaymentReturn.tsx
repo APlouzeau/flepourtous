@@ -12,25 +12,29 @@ interface PaymentReturnProps {
 export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps) {
     const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
     const [message, setMessage] = useState<string>("");
+    const [hasChecked, setHasChecked] = useState(false); // ← État pour éviter les appels multiples
     const router = useRouter();
     const searchParams = useSearchParams();
 
     useEffect(() => {
+        // ✅ Éviter les appels multiples
+        if (hasChecked) return;
+
         const paymentMethod = searchParams.get("method");
         const paymentStatus = searchParams.get("status");
 
-        //  Gérer le cas du paiement par portefeuille
         if (paymentStatus === "success" && paymentMethod === "wallet") {
             setStatus("success");
-            setMessage("Paiement réussi avec votre portefeuille ! Votre rendez-vous est enregistré.");
-            setTimeout(() => {
-                router.push("/calendrier");
-            }, 3000);
+            setMessage("Paiement réussi avec votre portefeuille !");
+            setHasChecked(true);
+            setTimeout(() => router.push("/calendrier"), 3000);
             return;
         }
 
         const checkPaymentStatus = async () => {
             try {
+                setHasChecked(true); // ← Marquer comme vérifié AVANT l'appel
+
                 const response = await apiClient.post(
                     "/api/payment-status",
                     { session_id: sessionId },
@@ -45,31 +49,25 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
 
                 const result = response.data;
 
-                if (result.payment_status === "paid") {
+                if (result.payment_status === "paid" || result.status === "already_processed") {
                     setStatus("success");
-                    setMessage("Paiement réussi ! Votre rendez-vous est enregistré !");
-
-                    setTimeout(() => {
-                        router.push("/calendrier");
-                    }, 3000);
-                } else if (result.status === "open") {
-                    setStatus("error");
-                    setMessage("Session de paiement encore ouverte. Le paiement n'est pas terminé.");
+                    setMessage(result.message || "Paiement réussi !");
+                    setTimeout(() => router.push("/calendrier"), 3000);
                 } else {
                     setStatus("error");
-                    setMessage(`Statut du paiement: ${result.payment_status || "inconnu"}`);
+                    setMessage(`Statut: ${result.payment_status || "inconnu"}`);
                 }
             } catch (error) {
-                console.error("Erreur lors de la vérification du paiement:", error);
+                console.error("Erreur:", error);
                 setStatus("error");
-                setMessage("Une erreur inattendue est survenue lors de la vérification.");
+                setMessage("Erreur lors de la vérification.");
             }
         };
 
         if (sessionId) {
             checkPaymentStatus();
         }
-    }, [sessionId, router, cookie, searchParams]);
+    }, [sessionId, router, cookie, searchParams, hasChecked]); // ← Ajouter hasChecked
 
     return (
         <div className="p-4 md:p-8 text-center max-w-md mx-auto">

@@ -44,7 +44,7 @@ class ControllerMail
 
             $emailBody = "Bonjour " . htmlspecialchars($user->getFirstName() . " " . $user->getLastName()) . ",<br><br>";
             $emailBody .= "Merci de vous être inscrit sur FlePourTous ! Veuillez cliquer sur le lien ci-dessous pour vérifier votre adresse email :<br>";
-            $emailBody .= "<a href=\"" . htmlspecialchars(URI_MAIL . "api/verify-email/" . $verificationToken) . "\">" . "Lien de confirmation</a><br><br>";
+            $emailBody .= "<a href=\"" . htmlspecialchars(URI_MAIL . "api/verify-email/" . $verificationToken) . "\">Cliquez ici pour confirmer votre email</a><br><br>";
             $emailBody .= "Si vous n'avez pas créé de compte, veuillez ignorer cet email.<br><br>";
             $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
             $this->mailer->Body = $emailBody;
@@ -185,8 +185,47 @@ class ControllerMail
 
             $emailBody = "Bonjour " . ",<br><br>";
             $emailBody .= "Nous avons reçu une demande de réinitialisation de votre mot de passe. Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe :<br>";
-            $emailBody .= "<a href=\"" . htmlspecialchars(URI_MAIL . "api/reset-password/" . $token) . "\">" . "Lien de réinitialisation</a><br><br>";
+            $emailBody .= "<a href=\"" . htmlspecialchars(URI . "api/reset-password/" . $token) . "\">" . "Lien de réinitialisation</a><br><br>";
             $emailBody .= "Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.<br><br>";
+            $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
+            $this->mailer->Body = $emailBody;
+
+            $this->mailer->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Mailer Error: " . $this->mailer->ErrorInfo);
+            return false;
+        } finally {
+            if ($this->mailer) {
+                $this->mailer->clearAddresses(); // Clear addresses after sending
+                $this->mailer->clearAttachments(); // Clear attachments if any
+            }
+        }
+    }
+
+    public function sendMailForPaymentSuccess(string $user, string $eventId)
+    {
+        $modelEvent = new ModelEvent();
+        $modelUser = new ModelUser();
+        try {
+            $user = $modelUser->getUser(new EntitieUser(['idUser' => $user]));
+            $userMail = $user['mail'];
+            error_log("Sending registration email to: " . $user['firstName'] . " " . $user['lastName'] . " at " . $userMail);
+
+            $event = $modelEvent->getEventById($eventId);
+            $eventDateTimeUtc = new DateTime($event['startDateTime']);
+            $eventDateTimeUserTimezone = $eventDateTimeUtc->setTimezone(new DateTimeZone($event['timezone']));
+
+            $eventDate = $eventDateTimeUserTimezone->format('d F Y');    // 11 September 2025
+            $eventHour = $eventDateTimeUserTimezone->format('G\hi');       // 14:30
+
+            $this->mailer->addAddress($userMail);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = "Flepourtous - Confirmation de paiement";
+
+            $emailBody = "Bonjour " . htmlspecialchars($user['firstName'] . " " . $user['lastName']) . ",<br><br>";
+            $emailBody .= "Merci d'avoir reservé un cours sur FlePourTous !<br>";
+            $emailBody .= "Nous vous confirmons que votre paiement a bien été pris en compte et que votre rendez-vous le " . htmlspecialchars($eventDate) . " à " . htmlspecialchars($eventHour) . " (heure " . htmlspecialchars($event['timezone']) . ")" . " est confirmé.<br>";
             $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
             $this->mailer->Body = $emailBody;
 
@@ -229,5 +268,33 @@ class ControllerMail
                 $this->mailer->clearAttachments(); // Clear attachments if any
             }
         }
+    }
+
+    public function sendMailToConfirmCancelAppointment(EntitieEvent $event, bool $paid) {}
+    public function sendMailToAlertEventDeleteByAdmin($userId, $startDateTime, $timezone, $amount)
+    {
+        $modelUser = new ModelUser();
+        $userInformations = $modelUser->getUser(new EntitieUser(['idUser' => $userId]));
+        $appointmentDateTimeUTC = new DateTime($startDateTime);
+        $appointmentDateTime = $appointmentDateTimeUTC->setTimezone(new DateTimeZone($timezone));
+
+        // 🎨 Formatage user-friendly
+        setlocale(LC_TIME, 'fr_FR.UTF-8', 'fr_FR', 'french'); // Pour les noms français
+        $appointmentDate = $appointmentDateTime->format('j F Y'); // "4 octobre 2025"
+        $appointmentHour = $appointmentDateTime->format('G\hi'); // "14h30" au lieu de "14:30"
+
+
+        $this->mailer->addAddress($userInformations['mail']);
+        $this->mailer->isHTML(true);
+        $this->mailer->Subject = "Annulation de rendez-vous par l'administrateur sur FLEpourtous";
+        $emailBody = "Bonjour " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . ",<br><br>";
+        $emailBody .= "Nous vous informons que votre rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " a été annulé par l'administrateur du site.<br>";
+        $emailBody .= "Le montant de " . htmlspecialchars($amount) . " € a été recrédité sur votre porte-monnaie électronique.<br>";
+        $emailBody .= "Nous vous invitons à prendre un nouveau rendez-vous.<br>";
+        $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
+        $this->mailer->Body = $emailBody;
+        $this->mailer->send();
+        $this->mailer->clearAddresses();
+        $this->mailer->clearAttachments();
     }
 }

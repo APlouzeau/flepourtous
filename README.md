@@ -6,18 +6,172 @@ Welcome to the FlePourTous project! This document will guide you through install
 
 FlePourTous is a web application that allows users to book online French as a Foreign Language (FLE) courses, manage their schedules, and pay through a secure platform.
 
-## Prerequisites
+## 🚀 Quick Start Guide
 
-Before you begin, ensure you have the following tools installed on your machine:
+### Prerequisites
 
--   [Docker](https://www.docker.com/products/docker-desktop/)
--   [Docker Compose](https://docs.docker.com/compose/install/) (usually included with Docker Desktop)
+Ensure you have the following tools installed:
+
+-   [Docker](https://www.docker.com/products/docker-desktop/) & Docker Compose
 -   [Git](https://git-scm.com/)
--   [Make](https://www.gnu.org/software/make/) (optional, for convenience commands - usually pre-installed on Linux, macOS, and WSL)
+-   [Make](https://www.gnu.org/software/make/) (optional but recommended)
 
-> **Note**: You do **not** need to install PHP, Composer, Node.js, or npm on your host machine. Everything is managed inside the Docker containers.
+> **Windows Users**: We **strongly recommend** using [WSL2 for significantly better performance](#-windows-users-wsl2-setup-recommended) (5-10x faster builds and development experience).
+>
+> _Alternative: Windows users without WSL2 can use the [manual installation steps](#-manual-installation-alternative) instead of `make` commands._
 
-## Windows Users: WSL2 Setup (Highly Recommended)
+> **Note**: You do **not** need PHP, Composer, Node.js, or npm locally. Everything runs in Docker containers.
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/APlouzeau/flepourtous.git
+cd flepourtous
+
+# 2. Complete setup (dependencies + Docker build + launch)
+make first-install
+```
+
+That's it! 🎉 Your development environment is ready.
+
+### Access Your Application
+
+After `make first-install` completes successfully:
+
+-   **Frontend**: [http://localhost:3000](http://localhost:3000) ⭐
+-   **Backend API**: [http://localhost:8000](http://localhost:8000)
+-   **PhpMyAdmin**: [http://localhost:8081](http://localhost:8081) 🗄️
+-   **Database**: `localhost:3307` (for external connections)
+
+### Available Commands
+
+```bash
+# Development commands
+make help           # Show all available commands
+make dev            # Start development environment
+make status         # Check services status
+make restart        # Restart all services
+make logs           # View logs from all services
+make logs-backend   # View backend logs only
+make logs-frontend  # View frontend logs only
+
+# Utility commands
+make shell-backend  # Access backend container shell
+make shell-frontend # Access frontend container shell
+make clean          # Clean containers and volumes
+make clean-all      # Complete cleanup (images, cache, etc.)
+
+# Database commands
+make db-backup      # Backup database
+```
+
+### Troubleshooting
+
+If you encounter issues:
+
+1. **Clean and reinstall**:
+
+    ```bash
+    make clean-all
+    make first-install
+    ```
+
+2. **Check service status**:
+
+    ```bash
+    make status
+    ```
+
+3. **View logs**:
+    ```bash
+    make logs
+    ```
+
+### Testing the Complete Installation
+
+To verify everything works correctly, you can test the complete installation process:
+
+```bash
+# Complete cleanup and fresh install
+make clean-all
+make first-install
+
+# Check all services are running
+make status
+
+# Expected output should show all containers running:
+# - backend (port 8000)
+# - frontend (port 3000)
+# - database (port 3307)
+# - phpmyadmin (port 8081)
+```
+
+If any service fails to start, check the logs:
+
+```bash
+make logs-backend   # For backend issues
+make logs-frontend  # For frontend issues
+```
+
+---
+
+## 🔧 Advanced Configuration (Optional)
+
+The application works out-of-the-box for development, but you can customize various settings:
+
+### Environment Variables
+
+The default `.env` file is configured for local development. For production or custom setups, modify `backend/.env`:
+
+```bash
+# Database (configured for Docker by default)
+DB_HOST=db
+DB_NAME=flepourtous
+DB_USER=flepourtous
+DB_PSW=1234
+DB_PORT=3306
+
+# App URLs (configured for local development)
+URI=http://localhost:8000/
+URI_FRONT=http://localhost:3000/
+COOKIE_DOMAIN=localhost
+
+# Google Calendar Integration (optional)
+GOOGLE_CALENDAR_ID=your_calendar_id
+GOOGLE_TOKEN=your_google_token
+
+# Email Configuration (for production)
+MAIL_HOST=smtp.gmail.com
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_app_password
+MAIL_PORT=465
+
+# Stripe Payment (for production)
+STRIPE_SECRET_KEY=your_stripe_key
+```
+
+### Google Services (Optional)
+
+For Google Calendar integration, add these files:
+
+-   `backend/config/credentials.json` - Google OAuth credentials
+-   `backend/config/service-account-key.json` - Service account key
+
+### Docker Network Setup
+
+The application automatically creates a Docker network called `web`. If you encounter network issues:
+
+```bash
+# Recreate the network
+docker network rm web
+docker network create web
+make restart
+```
+
+---
+
+## 🔍 Windows Users: WSL2 Setup (Recommended)
 
 For Windows users, we **strongly recommend** using WSL2 for significantly better performance and a smoother development experience.
 
@@ -99,34 +253,9 @@ make first-install
 
 ---
 
-## Quick Start
+## 📋 Manual Installation (Alternative)
 
-### Option 1: Using Make (Recommended)
-
-```bash
-# Clone the repository
-git clone https://github.com/APlouzeau/flepourtous.git
-cd flepourtous
-
-# Configure environment files (see Configuration section below)
-cp backend/.env.example backend/.env
-# Edit backend/.env with your values
-# Add Google service account files (see Configuration section)
-
-# One-command setup for new developers
-make first-install
-
-# Launch the app
-make dev
-```
-
-### Option 2: Manual Setup
-
-Follow the detailed steps below if you prefer manual installation or don't have Make installed.
-
-## Installation and Setup
-
-### 1. Clone the Repository
+If you prefer manual setup or don't have Make installed:
 
 Open a terminal and clone this repository to your local machine:
 

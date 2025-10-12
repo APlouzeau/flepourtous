@@ -21,7 +21,6 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
         setError("");
 
         try {
-            console.log("Creating instant visio with:", { email, duration });
             const response = await apiClient.post(
                 "/api/createInstantVisio",
                 {
@@ -49,7 +48,6 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
             } else {
                 setError(response.data.message || "Erreur lors de la création du salon");
             }
-            console.log(response.data);
         } catch (error: unknown) {
             console.error("Error creating instant visio:", error);
             const errorMessage =

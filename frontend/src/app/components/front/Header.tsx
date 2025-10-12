@@ -47,29 +47,52 @@ export default function Header({ isLoggedIn }: HeaderProps) {
 
                     {/* Navigation Desktop */}
                     <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+                        {/* Menu déroulant Offre de cours */}
+                        <div className="relative group">
+                            <Link
+                                href="/offre-de-cours"
+                                className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base flex items-center"
+                            >
+                                Offre de cours
+                                <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </Link>
+
+                            {/* Dropdown menu */}
+                            <div className="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                <div className="py-2">
+                                    <Link
+                                        href="/offre-de-cours/francais-general"
+                                        className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                    >
+                                        Français général
+                                    </Link>
+                                    <Link
+                                        href="/offre-de-cours/cours-de-conversation"
+                                        className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                    >
+                                        Cours de conversation
+                                    </Link>
+                                    <Link
+                                        href="/offre-de-cours/delf-tcf-tef"
+                                        className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                    >
+                                        Préparation aux examens
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
                         <Link
-                            href="/"
-                            className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base"
-                        >
-                            Présentation
-                        </Link>
-                        <Link
-                            href="/offre-de-cours"
-                            className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base"
-                        >
-                            Offre de cours
-                        </Link>
-                        <Link
-                            href="/"
+                            href="/ressources-utilisees"
                             className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base"
                         >
                             Ressources utilisées
-                        </Link>
-                        <Link
-                            href="/"
-                            className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base"
-                        >
-                            Avis élèves
                         </Link>
 
                         {/* Boutons d'action Desktop */}
