@@ -40,8 +40,8 @@ export default function RGPDPage() {
                             <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2">
                                 <li><strong>Formulaire de contact</strong> : nom, prénom, adresse email, message.</li>
                                 <li><strong>Inscription utilisateur</strong> : nom, prénom, adresse email, mot de passe (chiffré).</li>
-                                <li><strong>Prise de rendez-vous</strong> : nom, prénom, email, téléphone, date et heure choisies (enregistrées dans notre base de données et sur le calendrier Google de l'administrateur).</li>
-                                <li><strong>Paiement</strong> : informations nécessaires au traitement du paiement (transmises directement et uniquement à Stripe ou PayPal – aucune donnée bancaire n'est stockée sur ce site).</li>
+                                <li><strong>Prise de rendez-vous</strong> : nom, prénom, email, téléphone, date et heure choisies (enregistrées dans notre base de données et sur le calendrier Google de l&apos;administrateur).</li>
+                                <li><strong>Paiement</strong> : informations nécessaires au traitement du paiement (transmises directement et uniquement à Stripe ou PayPal – aucune donnée bancaire n&apos;est stockée sur ce site).</li>
                                 <li><strong>Cookies</strong> : uniquement un cookie technique de session (PHPSESSID).</li>
                             </ul>
                         </div>
@@ -55,7 +55,7 @@ export default function RGPDPage() {
                             <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2">
                                 <li>Gérer et répondre à vos demandes via le formulaire de contact.</li>
                                 <li>Créer et gérer votre compte utilisateur.</li>
-                                <li>Gérer vos rendez-vous et les synchroniser avec le calendrier de l'administrateur.</li>
+                                <li>Gérer vos rendez-vous et les synchroniser avec le calendrier de l&apos;administrateur.</li>
                                 <li>Traiter vos paiements via Stripe/PayPal.</li>
                                 <li>Assurer le bon fonctionnement technique du site.</li>
                             </ul>
@@ -65,7 +65,7 @@ export default function RGPDPage() {
                         <div className="mb-12">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">Base légale du traitement</h2>
                             <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2">
-                                <li><strong>Exécution d'un contrat</strong> : création de compte, réservation de rendez-vous, paiement.</li>
+                                <li><strong>Exécution d&apos;un contrat</strong> : création de compte, réservation de rendez-vous, paiement.</li>
                                 <li><strong>Consentement</strong> : utilisation du formulaire de contact.</li>
                                 <li><strong>Obligation légale</strong> : conservation des documents comptables (factures, paiements).</li>
                                 <li><strong>Intérêt légitime</strong> : bon fonctionnement technique du site (cookie de session).</li>
@@ -88,7 +88,7 @@ export default function RGPDPage() {
                         <div className="mb-12">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">Destinataires des données</h2>
                             <p className="text-gray-700 mb-4">
-                                Vos données sont uniquement accessibles par <strong>Ludivine PLOUZEAU</strong> en tant qu'auto-entrepreneur.
+                                Vos données sont uniquement accessibles par <strong>Ludivine PLOUZEAU</strong> en tant qu&apos;auto-entrepreneur.
                             </p>
                             <p className="text-gray-700 mb-4">
                                 Elles peuvent être transmises à des prestataires techniques strictement nécessaires :
@@ -104,7 +104,7 @@ export default function RGPDPage() {
                         <div className="mb-12">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">Transfert hors Union européenne</h2>
                             <p className="text-gray-700 mb-4">
-                                Certains prestataires (Google, Stripe, PayPal) sont situés hors de l'Union européenne.
+                                Certains prestataires (Google, Stripe, PayPal) sont situés hors de l&apos;Union européenne.
                             </p>
                             <p className="text-gray-700">
                                 Ils appliquent des garanties conformes au RGPD, notamment via les clauses contractuelles types validées par la Commission européenne.
@@ -120,15 +120,15 @@ export default function RGPDPage() {
                             <div className="bg-gray-50 p-6 rounded-lg">
                                 <ul className="list-disc list-inside text-gray-700 mb-4 space-y-2">
                                     <li><strong>Type</strong> : cookie technique de session</li>
-                                    <li><strong>Finalité</strong> : maintenir votre navigation et vos actions d'une page à l'autre</li>
+                                    <li><strong>Finalité</strong> : maintenir votre navigation et vos actions d&apos;une page à l&apos;autre</li>
                                     <li><strong>Durée</strong> : supprimé à la fermeture du navigateur</li>
                                     <li><strong>Consentement</strong> : non requis (cookie indispensable)</li>
                                 </ul>
                                 <p className="text-gray-700 mb-4">
-                                    Aucun cookie publicitaire ou de suivi n'est utilisé.
+                                    Aucun cookie publicitaire ou de suivi n&apos;est utilisé.
                                 </p>
                                 <p className="text-gray-700">
-                                    Lors de l'utilisation du module de paiement, Stripe et PayPal peuvent déposer leurs propres cookies nécessaires au traitement sécurisé des transactions.
+                                    Lors de l&apos;utilisation du module de paiement, Stripe et PayPal peuvent déposer leurs propres cookies nécessaires au traitement sécurisé des transactions.
                                 </p>
                             </div>
                         </div>

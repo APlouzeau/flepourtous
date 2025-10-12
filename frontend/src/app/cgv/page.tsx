@@ -21,7 +21,9 @@ export default function CGVPage() {
                         <div className="mb-12">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">1 – Inscription aux cours</h2>
 
-                            <h3 className="text-xl font-semibold text-gray-800 mb-4">a. Modalités d&apos;inscription</h3>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                                a. Modalités d&apos;inscription
+                            </h3>
                             <p className="text-gray-700 mb-4">
                                 Toute inscription implique l&apos;acceptation pleine et entière des présentes conditions
                                 générales de vente.
@@ -32,10 +34,10 @@ export default function CGVPage() {
                                 à l&apos;élève.
                             </p>
                             <p className="text-gray-700 mb-4">
-                                L&apos;inscription s&apos;effectue via une fiche disponible lors de la création du compte
-                                utilisateur sur le site internet de FLE pour tous. Les données personnelles communiquées
-                                sont conservées pendant toute la durée des cours. Au-delà de cette période, l&apos;élève peut
-                                demander par écrit la suppression de ses données.
+                                L&apos;inscription s&apos;effectue via une fiche disponible lors de la création du
+                                compte utilisateur sur le site internet de FLE pour tous. Les données personnelles
+                                communiquées sont conservées pendant toute la durée des cours. Au-delà de cette période,
+                                l&apos;élève peut demander par écrit la suppression de ses données.
                             </p>
                             <p className="text-gray-700">
                                 FLE pour tous se réserve le droit de refuser une inscription en cas de comportement
@@ -45,7 +47,7 @@ export default function CGVPage() {
 
                         {/* Article 2 - Modalités de paiement */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">2 – Modalités de paiement</h2>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-4">b. Modalités de paiement</h3>
                             <p className="text-gray-700 mb-4">
                                 Le règlement des cours doit être effectué en une seule fois avant la participation au
                                 cours sélectionné, par carte bancaire via la boutique en ligne.
@@ -55,7 +57,7 @@ export default function CGVPage() {
 
                         {/* Article 3 - Tarifs des cours */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">3 – Tarifs des cours</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">2 – Tarifs des cours</h2>
                             <p className="text-gray-700 mb-4">
                                 Les tarifs sont indiqués en euros, toutes taxes comprises (TTC) sur le site internet.
                                 Aucun frais supplémentaire ne sera appliqué, sauf frais liés au mode de paiement (ex. :
@@ -68,7 +70,7 @@ export default function CGVPage() {
 
                         {/* Article 4 - Cours privés */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">4 – Cours privés</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">3 – Cours privés</h2>
                             <p className="text-gray-700 mb-4">Les cours sont accessibles à partir de 10 ans.</p>
                             <p className="text-gray-700 mb-4">
                                 Ils peuvent être suivis en présentiel à Tours ou en ligne, depuis la France ou
@@ -81,13 +83,15 @@ export default function CGVPage() {
 
                             <h3 className="text-xl font-semibold text-gray-800 mb-4">Formules :</h3>
                             <p className="text-gray-700 mb-4">
-                                Les cours particuliers peuvent être achetés à l&apos;unité ou sous forme de crédits valables
-                                6 mois à compter de la date d&apos;achat. Ces crédits sont nominatifs et non transférables.
+                                Les cours particuliers peuvent être achetés à l&apos;unité ou sous forme de crédits
+                                valables 6 mois à compter de la date d&apos;achat. Ces crédits sont nominatifs et non
+                                transférables.
                             </p>
 
                             <h3 className="text-xl font-semibold text-gray-800 mb-4">Réservation des cours :</h3>
                             <p className="text-gray-700 mb-4">
-                                Les réservations via le site sont acceptées jusqu&apos;à 8 heures avant le début du cours.
+                                Les réservations via le site sont acceptées jusqu&apos;à 8 heures avant le début du
+                                cours.
                             </p>
 
                             <h3 className="text-xl font-semibold text-gray-800 mb-4">Confirmation :</h3>
@@ -98,20 +102,20 @@ export default function CGVPage() {
 
                             <h3 className="text-xl font-semibold text-gray-800 mb-4">Changement / annulation :</h3>
                             <p className="text-gray-700">
-                                Les modifications ou annulations de cours à l&apos;initiative de l&apos;élève sont acceptées
-                                jusqu&apos;à 24 heures avant le début du cours. Passé ce délai, le cours est dû et le crédit
-                                est considéré comme consommé. En cas d&apos;absence non justifiée, le cours est également
-                                perdu.
+                                Les modifications ou annulations de cours à l&apos;initiative de l&apos;élève sont
+                                acceptées jusqu&apos;à 24 heures avant le début du cours. Passé ce délai, le cours est
+                                dû et le crédit est considéré comme consommé. En cas d&apos;absence non justifiée, le
+                                cours est également perdu.
                             </p>
                         </div>
 
                         {/* Article 5 - Remboursement */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">5 – Remboursement</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">4 – Remboursement</h2>
                             <p className="text-gray-700 mb-4">
                                 Un remboursement partiel des crédits non utilisés peut être accordé, uniquement sur
-                                présentation d&apos;un certificat médical ou d&apos;une attestation de l&apos;employeur. Le
-                                remboursement sera calculé sur la base du tarif unitaire d&apos;achat.
+                                présentation d&apos;un certificat médical ou d&apos;une attestation de l&apos;employeur.
+                                Le remboursement sera calculé sur la base du tarif unitaire d&apos;achat.
                             </p>
                             <p className="text-gray-700">
                                 Des frais administratifs de 20 % seront déduits du montant total à rembourser.
@@ -121,11 +125,11 @@ export default function CGVPage() {
                         {/* Article 6 - Cas de force majeure */}
                         <div className="mb-12">
                             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                                6 – Cas de force majeure / situation exceptionnelle
+                                5 – Cas de force majeure / situation exceptionnelle
                             </h2>
                             <p className="text-gray-700 mb-4">
-                                En cas de force majeure (catastrophes naturelles, troubles de l&apos;ordre public, pandémie,
-                                etc.), FLE pour tous se réserve le droit d&apos;annuler ou reporter les cours.
+                                En cas de force majeure (catastrophes naturelles, troubles de l&apos;ordre public,
+                                pandémie, etc.), FLE pour tous se réserve le droit d&apos;annuler ou reporter les cours.
                             </p>
                             <p className="text-gray-700 mb-4">
                                 Les cours annulés seront reprogrammés dans la mesure du possible. Ces séances de
@@ -140,7 +144,7 @@ export default function CGVPage() {
 
                         {/* Article 7 - Cours de groupe */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">7 – Cours de groupe</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">6 – Cours de groupe</h2>
                             <p className="text-gray-700 mb-4">
                                 Pour toute demande de cours en groupe (plus de deux personnes), un mail devra être
                                 envoyé à FLE pour tous, précisant :
@@ -156,7 +160,7 @@ export default function CGVPage() {
 
                         {/* Article 8 - Avoirs */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">8 – Avoirs</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">7 – Avoirs</h2>
                             <p className="text-gray-700 mb-4">
                                 Les avoirs (crédits non consommés ou gestes commerciaux) sont valables 6 mois à compter
                                 de leur émission.
@@ -169,16 +173,16 @@ export default function CGVPage() {
 
                         {/* Article 9 - Modalités de remboursement */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">9 – Modalités de remboursement</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">8 – Modalités de remboursement</h2>
                             <p className="text-gray-700">
-                                Tout remboursement s&apos;effectuera par virement bancaire, dans un délai maximum de 30 jours
-                                à compter de la réception de la demande complète.
+                                Tout remboursement s&apos;effectuera par virement bancaire, dans un délai maximum de 30
+                                jours à compter de la réception de la demande complète.
                             </p>
                         </div>
 
                         {/* Article 10 - Réclamations */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">10 – Réclamations</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">9 – Réclamations</h2>
                             <p className="text-gray-700 mb-4">
                                 Toute demande ou réclamation peut être envoyée par email à l&apos;adresse suivante :
                             </p>
@@ -198,7 +202,7 @@ export default function CGVPage() {
 
                         {/* Article 11 - Mentions légales */}
                         <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-6">11 - Mentions légales</h2>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-6">10 - Mentions légales</h2>
                             <div className="bg-gray-50 p-6 rounded-lg">
                                 <p className="text-gray-700 mb-2">
                                     <strong>FLE pour tous (Entrepreneur individuel)</strong>

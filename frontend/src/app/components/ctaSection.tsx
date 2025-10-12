@@ -6,7 +6,7 @@ export default function CtaSection() {
         <ScrollSection className="bg-white py-12 sm:py-16 px-4 scroll-animate-scale">
             <div className="max-w-4xl mx-auto text-center">
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
-                    Saisissez le Moment :
+                    Saisissez le moment :
                 </h2>
                 <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
                     Rejoignez nous !

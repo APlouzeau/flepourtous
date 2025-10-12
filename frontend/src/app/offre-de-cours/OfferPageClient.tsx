@@ -27,7 +27,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <div className="bg-gray-50 rounded-2xl px-8 py-4 border border-gray-200">
-                            <div className="text-3xl font-bold text-gray-900">150+</div>
+                            <div className="text-3xl font-bold text-gray-900">200+</div>
                             <div className="text-gray-600">Élèves satisfaits</div>
                         </div>
                         <div className="bg-gray-50 rounded-2xl px-8 py-4 border border-gray-200">
@@ -50,7 +50,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-                            Choisissez votre <span className="text-red-600">Formule</span>
+                            Choisissez votre <span className="text-red-600">formule</span>
                         </h2>
                         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
                             Choisissez le cours qui convient le mieux suivant vos objectifs et la durée que vous
@@ -175,7 +175,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                             </div>
                             <h3 className="text-2xl font-bold text-gray-900 mb-4">Méthode éprouvée</h3>
                             <p className="text-gray-600 text-lg leading-relaxed">
-                                8 années d&apos;expérience avec plus de 150 élèves satisfaits et des résultats garantis
+                                8 années d&apos;expérience avec plus de 200 élèves satisfaits et des résultats garantis
                             </p>
                         </div>
 
@@ -236,7 +236,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
                             <Button
                                 variant="black"
-                                href="/inscription"
+                                href="/calendrier/nouveau-rendez-vous"
                                 className="text-lg py-3 px-6 rounded-xl font-semibold hover:scale-105 transition-all duration-300"
                             >
                                 Commencer maintenant
@@ -281,7 +281,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                     />
                                 </svg>
-                                <span className="font-semibold">150+ élèves</span>
+                                <span className="font-semibold">200+ élèves</span>
                             </div>
                             <div className="flex items-center">
                                 <svg

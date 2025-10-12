@@ -68,10 +68,32 @@ export default async function LessonPage(props: { params: tParams }) {
     const { slug } = await props.params;
 
     const lesson: Lesson = await getLessons(slug);
-    const { title, fullDescription, imagePath, title_1, text_1, text_2, text_3, text_4, text_5, text_6 } = lesson;
+    const {
+        title,
+        fullDescription_1,
+        fullDescription_2,
+        fullDescription_3,
+        imagePath,
+        introduction,
+        subtitle_1,
+        text_1,
+        subtitle_2,
+        text_2,
+        subtitle_3,
+        text_3,
+        subtitle_4,
+        text_4,
+        subtitle_5,
+        text_5,
+        subtitle_6,
+        text_6,
+    } = lesson;
 
     // Vérifier si l'utilisateur est connecté
     const isAuthenticated = await getCookieBackend();
+
+    // ✅ Variable pour simplifier les conditions
+    const isConversationCourse = title === "Cours de conversation";
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -84,7 +106,9 @@ export default async function LessonPage(props: { params: tParams }) {
                                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-gray-900">
                                     {title}
                                 </h1>
-                                <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">{fullDescription}</p>
+                                <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">{fullDescription_1}</p>
+                                <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">{fullDescription_2}</p>
+                                <p className="text-xl text-gray-600 leading-relaxed max-w-2xl">{fullDescription_3}</p>
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-4">
@@ -120,20 +144,24 @@ export default async function LessonPage(props: { params: tParams }) {
             </section>
 
             {/* Approaches Section - Standard layout for most courses */}
-            {title_1 && slug !== "cours-pour-enfants" && (
+            {introduction && (
                 <section className="py-16 bg-gray-50">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-12">
-                            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{title_1}</h2>
+                            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{introduction}</h2>
                         </div>
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {text_1 && (
                                 <div className="text-center p-8 rounded-3xl bg-blue-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-blue-100">
                                     <div className="bg-blue-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-3xl">📘</span>
+                                        <span className="text-3xl font-bold">
+                                            {isConversationCourse ? subtitle_1 : "📘"}
+                                        </span>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Avec un manuel</h3>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                                        {isConversationCourse ? "" : subtitle_1}
+                                    </h3>
                                     <p className="text-gray-600 text-lg leading-relaxed">{text_1}</p>
                                 </div>
                             )}
@@ -141,10 +169,12 @@ export default async function LessonPage(props: { params: tParams }) {
                             {text_2 && (
                                 <div className="text-center p-8 rounded-3xl bg-green-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-green-100">
                                     <div className="bg-green-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-3xl">🗂️</span>
+                                        <span className="text-3xl font-bold">
+                                            {isConversationCourse ? subtitle_2 : "📁"}
+                                        </span>
                                     </div>
                                     <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                                        Avec des fiches pédagogiques
+                                        {isConversationCourse ? "" : subtitle_2}
                                     </h3>
                                     <p className="text-gray-600 text-lg leading-relaxed">{text_2}</p>
                                 </div>
@@ -153,105 +183,58 @@ export default async function LessonPage(props: { params: tParams }) {
                             {text_3 && (
                                 <div className="text-center p-8 rounded-3xl bg-purple-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-purple-100">
                                     <div className="bg-purple-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-3xl">🎬</span>
+                                        <span className="text-3xl font-bold">
+                                            {isConversationCourse ? subtitle_3 : "🎬"}
+                                        </span>
                                     </div>
                                     <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                                        Avec du matériel authentique
+                                        {isConversationCourse ? "" : subtitle_3}
                                     </h3>
                                     <p className="text-gray-600 text-lg leading-relaxed">{text_3}</p>
                                 </div>
                             )}
-                        </div>
-                    </div>
-                </section>
-            )}
 
-            {/* Conversation Levels Section - Special layout for conversation course */}
-            {title_1 && slug === "cours-pour-enfants" && (
-                <section className="py-16 bg-gray-50">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{title_1}</h2>
-                        </div>
-
-                        {/* Niveaux en quinconce */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {/* A1 */}
-                            {text_1 && (
-                                <div className="text-center p-8 rounded-3xl bg-blue-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-blue-100">
-                                    <div className="bg-blue-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-2xl font-bold text-white">A1</span>
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Niveau A1</h3>
-                                    <p className="text-gray-600 text-lg leading-relaxed">{text_1}</p>
-                                </div>
-                            )}
-
-                            {/* A2 */}
-                            {text_2 && (
-                                <div className="text-center p-8 rounded-3xl bg-green-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-green-100">
-                                    <div className="bg-green-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-2xl font-bold text-white">A2</span>
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Niveau A2</h3>
-                                    <p className="text-gray-600 text-lg leading-relaxed">{text_2}</p>
-                                </div>
-                            )}
-
-                            {/* B1 */}
-                            {text_3 && (
-                                <div className="text-center p-8 rounded-3xl bg-yellow-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-yellow-100">
-                                    <div className="bg-yellow-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-2xl font-bold text-white">B1</span>
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Niveau B1</h3>
-                                    <p className="text-gray-600 text-lg leading-relaxed">{text_3}</p>
-                                </div>
-                            )}
-
-                            {/* B2 */}
                             {text_4 && (
                                 <div className="text-center p-8 rounded-3xl bg-orange-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-orange-100">
                                     <div className="bg-orange-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-2xl font-bold text-white">B2</span>
+                                        <span className="text-3xl font-bold">
+                                            {isConversationCourse ? subtitle_4 : "🎯"}
+                                        </span>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Niveau B2</h3>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                                        {isConversationCourse ? "" : subtitle_4}
+                                    </h3>
                                     <p className="text-gray-600 text-lg leading-relaxed">{text_4}</p>
                                 </div>
                             )}
 
-                            {/* C1 */}
                             {text_5 && (
-                                <div className="text-center p-8 rounded-3xl bg-purple-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-purple-100">
-                                    <div className="bg-purple-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-2xl font-bold text-white">C1</span>
+                                <div className="text-center p-8 rounded-3xl bg-yellow-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-yellow-100">
+                                    <div className="bg-yellow-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span className="text-3xl font-bold">
+                                            {isConversationCourse ? subtitle_5 : "�"}
+                                        </span>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Niveau C1</h3>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                                        {isConversationCourse ? "" : subtitle_5}
+                                    </h3>
                                     <p className="text-gray-600 text-lg leading-relaxed">{text_5}</p>
                                 </div>
                             )}
 
-                            {/* C2 */}
                             {text_6 && (
                                 <div className="text-center p-8 rounded-3xl bg-red-50 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-red-100">
                                     <div className="bg-red-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-2xl font-bold text-white">C2</span>
+                                        <span className="text-3xl font-bold">
+                                            {isConversationCourse ? subtitle_6 : "🚀"}
+                                        </span>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">Niveau C2</h3>
+                                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                                        {isConversationCourse ? "" : subtitle_6}
+                                    </h3>
                                     <p className="text-gray-600 text-lg leading-relaxed">{text_6}</p>
                                 </div>
                             )}
-                        </div>
-                    </div>
-                </section>
-            )}
-
-            {/* Final Message Section */}
-            {text_4 && slug !== "cours-pour-enfants" && (
-                <section className="py-16 bg-white">
-                    <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-                        <div className="bg-gray-50 rounded-2xl p-8 shadow-lg border border-gray-200">
-                            <p className="text-lg text-gray-600 leading-relaxed">{text_4}</p>
                         </div>
                     </div>
                 </section>
@@ -265,7 +248,7 @@ export default async function LessonPage(props: { params: tParams }) {
                         <p className="text-lg text-gray-600">Choisissez la durée qui vous convient le mieux</p>
                     </div>
 
-                    {lesson.times.length > 0 && (
+                    {lesson.times && lesson.times.length > 0 && (
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {lesson.times.map((lessonTime, index) => (
                                 <div
@@ -358,7 +341,7 @@ export default async function LessonPage(props: { params: tParams }) {
                             </div>
                             <div className="flex items-center">
                                 <UserIcon className="w-5 h-5 text-red-600 mr-1" />
-                                <span className="font-semibold">150+ élèves</span>
+                                <span className="font-semibold">200+ élèves</span>
                             </div>
                             <div className="flex items-center">
                                 <AcademicCapIcon className="w-5 h-5 text-red-600 mr-1" />

@@ -16,10 +16,10 @@ export default function NumbersSection() {
                         <StatCard number="2000+" description="Cours" />
                     </ScrollDiv>
                     <ScrollDiv className="scroll-animate scroll-animate-delay-2">
-                        <StatCard number="99%" description="De satisfaction" />
+                        <StatCard number="8 ans" description="d'expérience" />
                     </ScrollDiv>
                     <ScrollDiv className="scroll-animate scroll-animate-delay-3">
-                        <StatCard number="200+" description="D'heureux élèves" />
+                        <StatCard number="800+" description="D'heureux élèves" />
                     </ScrollDiv>
                     <ScrollDiv className="scroll-animate scroll-animate-delay-4">
                         <StatCard number="100%" description="Pédagogique" />
