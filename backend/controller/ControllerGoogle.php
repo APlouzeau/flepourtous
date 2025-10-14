@@ -255,6 +255,10 @@ class ControllerGoogle
         } else {
             $eventExist = $modelEvent->checkEvent($idEvent);
             if ($eventExist) {
+                // ✅ L'événement existe déjà en base de données
+                // On ne doit PAS écraser le userId qui a été correctement défini lors de la création
+                // On met à jour uniquement les informations modifiables (date, durée, visio)
+                error_log("Événement existant trouvé ID: " . $idEvent . ". Mise à jour sans modification du userId.");
                 $controllerVisio->deleteRoom($idEvent);
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
                 if (!$roomUrl) {
@@ -263,7 +267,7 @@ class ControllerGoogle
                 }
                 $eventDatabase = new EntitieEvent([
                     'idEvent' => $idEvent,
-                    'userId' => $userId,
+                    // ✅ NE PAS inclure userId pour éviter de l'écraser
                     'description' => $description,
                     'duration' => $duration,
                     'startDateTime' => $startDateTimeUtcFormatted,
@@ -271,7 +275,29 @@ class ControllerGoogle
                     'visioLink' => $roomUrl,
                 ]);
                 $modelEvent->updateEvent($eventDatabase);
+                error_log("Événement existant mis à jour ID: " . $idEvent . " sans modifier le userId");
             } else {
+                // L'événement n'existe pas encore en BDD
+                // Il se peut que ce webhook arrive AVANT que createEvent() ait fini d'enregistrer en BDD
+                // On attend jusqu'à 3 secondes pour laisser le temps à l'application de créer l'événement
+                error_log("Événement non trouvé en BDD ID: " . $idEvent . ". Vérification si c'est une création récente...");
+                
+                $maxWait = 3; // Attendre maximum 3 secondes
+                $checks = 6; // Faire 6 vérifications
+                $waitInterval = $maxWait / $checks; // 500ms entre chaque vérification
+                
+                for ($i = 0; $i < $checks; $i++) {
+                    usleep($waitInterval * 1000000); // Convertir en microsecondes
+                    $eventExist = $modelEvent->checkEvent($idEvent);
+                    if ($eventExist) {
+                        error_log("Événement ID: " . $idEvent . " trouvé en BDD après " . (($i + 1) * $waitInterval) . " secondes d'attente. Ignoré (déjà créé par l'application).");
+                        return; // L'événement a été créé par l'application, on ne fait rien
+                    }
+                }
+                
+                // Après 3 secondes, l'événement n'existe toujours pas
+                // C'est probablement un événement créé manuellement dans Google Calendar
+                error_log("Événement ID: " . $idEvent . " toujours introuvable après " . $maxWait . " secondes. Création en BDD.");
 
                 $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
                 if (!$roomUrl) {

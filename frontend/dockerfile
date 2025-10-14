@@ -16,12 +16,13 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 
 # --- PROD-DEPENDENCIES
-# A target that'll have only production dependencies installed
+# A target that'll have production + essential dev dependencies
 FROM base AS prod-dependencies
 
 COPY package.json pnpm-lock.yaml ./
 
-RUN pnpm install --production
+# Install all dependencies including TypeScript for next.config.ts
+RUN pnpm install
 
 # --- BUILDER
 # A target that'll build the Next.js application using dev-dependencies and source code
@@ -53,4 +54,4 @@ COPY --from=build /app/.next ./.next
 
 EXPOSE 3000
 
-CMD ["pnpm", "start"]
+CMD ["pnpm", "run", "start"]

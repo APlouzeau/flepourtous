@@ -4,6 +4,7 @@
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
     'http://localhost:3000',
+    'https://flepourtous.plouzor.fr',
 ];
 
 

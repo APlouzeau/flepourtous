@@ -25,7 +25,12 @@ export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
                 withCredentials: true,
             }
         );
-
+        
+        console.log("Fetched appointments:", response.data);
+        console.log("response.data type:", typeof response.data);
+        console.log("response.data.data:", response.data?.data);
+        console.log("Is response.data.data an array?", Array.isArray(response.data?.data));
+        
         if (response.data && Array.isArray(response.data.data)) {
             const appointments = response.data.data;
 
@@ -34,7 +39,6 @@ export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
                 const dateB = new Date(b.startDateTime).getTime();
                 return dateB - dateA;
             });
-
             return appointments;
         } else {
             console.warn("La réponse de l'API ne contient pas de tableau d'événements valide dans .data");
@@ -56,6 +60,8 @@ export async function listInvoices(filters?: filtersProps): Promise<showInvoicab
                 "Content-Type": "application/json",
             },
         });
+        console.log("Fetched appointments:", response.data);
+
         if (response.data && Array.isArray(response.data.data)) {
             const invoiceList = response.data.data;
 

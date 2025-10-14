@@ -3,6 +3,7 @@
 # Variables
 COMPOSE_FILE = docker-compose.yml
 COMPOSE_DEV_FILE = docker-compose.dev.yml
+COMPOSE_PREPROD_FILE = docker-compose.preprod.yml
 FRONTEND_DIR = frontend
 BACKEND_DIR = backend
 
@@ -27,24 +28,42 @@ first-install: check-pnpm network ## Installation complète pour nouveau projet
 	@echo "🚀 Setup initial du projet..."
 	@echo "📦 Installation des dépendances frontend avec pnpm..."
 	cd $(FRONTEND_DIR) && pnpm install
-	@echo "📦 Installation des dépendances backend..."
-	cd $(BACKEND_DIR) && composer install
-	make dev
+	@echo "🔨 Build des images Docker..."
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
+	@echo "📦 Installation des dépendances backend via Docker..."
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) run --rm backend composer install
+	make preprod
+
+# Setup pour la préprod
+first-install-preprod: check-pnpm network ## Installation pour environnement préprod
+	@echo "🚀 Setup initial du projet (préprod)..."
+	@echo "📦 Installation des dépendances frontend avec pnpm..."
+	cd $(FRONTEND_DIR) && pnpm install
+	@echo "🔨 Build des images Docker..."
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
+	@echo "📦 Installation des dépendances backend via Docker..."
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) run --rm backend composer install
+	make preprod
 
 # Développement
 dependencies: check-pnpm ## Installe les dépendances localement (pour IDE)
 	@echo "📦 Installation des dépendances pour l'IDE avec pnpm..."
 	cd $(FRONTEND_DIR) && pnpm install
-	cd $(BACKEND_DIR) && composer install
+	@echo "📦 Installation des dépendances backend via Docker..."
+	docker compose -f $(COMPOSE_FILE) build backend
+	docker compose -f $(COMPOSE_FILE) run --rm backend composer install
 
 # Garder le fallback npm au cas où
 dependencies-npm: ## Fallback : installe avec npm si problème pnpm
 	@echo "📦 Installation des dépendances avec npm (fallback)..."
 	cd $(FRONTEND_DIR) && npm install --legacy-peer-deps
-	cd $(BACKEND_DIR) && composer install
+	docker compose -f $(COMPOSE_FILE) run --rm backend composer install
 
 build: ## Build les images Docker
 	docker compose -f $(COMPOSE_FILE) build
+
+build-preprod: ## Build les images Docker pour préprod
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
 
 network: ## Crée le réseau web s'il n'existe pas
 	@docker network inspect web >/dev/null 2>&1 || docker network create web
@@ -58,13 +77,28 @@ dev: network build ## Lance l'environnement de développement
 	@echo "🗃️  PhpMyAdmin: http://localhost:8081"
 	@echo "🗄️  Database: localhost:3307 (pour connexions externes)"
 
+preprod: network build-preprod ## Lance l'environnement de préprod
+	@echo "🔥 Démarrage de l'environnement de préprod..."
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) up -d
+	@echo "✅ Environnement préprod prêt !"
+	@echo "📱 Frontend: https://flepourtous.plouzor.fr"
+	@echo "🔧 Backend: https://api.flepourtous.plouzor.fr"
+
 up: ## Démarre les services (sans rebuild)
 	docker compose -f $(COMPOSE_FILE) up -d
+
+up-preprod: ## Démarre les services préprod (sans rebuild)
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) up -d
 
 down: ## Arrête tous les services
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev down
 
+down-preprod: ## Arrête les services préprod
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) down
+
 restart: down dev ## Redémarre complètement l'environnement
+
+restart-preprod: down-preprod preprod ## Redémarre complètement l'environnement préprod
 
 # Logs et debug
 logs: ## Affiche les logs de tous les services
@@ -142,11 +176,11 @@ db-reset: ## Recrée la base complètement avec le schéma
 
 db-drop-recreate: ## Drop et recréation des tables
 	@echo "🗑️  Suppression et recréation des tables..."
-	@docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) exec db mysql -u flepourtous -p1234 flepourtous -e "DROP DATABASE IF EXISTS flepourtous; CREATE DATABASE flepourtous;"
+	@docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) exec db mysql -u flepourtous -p1234 flepourtous -e "DROP	DATABASE IF EXISTS flepourtous; CREATE DATABASE flepourtous;"
 	@$(MAKE) db-import
 
 reset-all: 
-	echo "🔄 Reset complet du projet..."
+		docker compose -f docker-compose.yml -f docker-compose.preprod.yml run --rm api composer installecho "🔄 Reset complet du projet..."
 	@$(MAKE) clean-all
 	@$(MAKE) db-reset
 	@$(MAKE) first-install
