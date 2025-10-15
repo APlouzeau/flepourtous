@@ -38,10 +38,7 @@ CMD ["pnpm", "run", "dev"]
 
 # --- BUILD
 # Target to build the Next.js application for production
-FROM base AS build
-
-COPY package.json pnpm-lock.yaml ./
-COPY --from=dev-dependencies /app/node_modules ./node_modules
+FROM dev-dependencies AS build
 
 COPY . .
 
