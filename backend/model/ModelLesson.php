@@ -137,7 +137,6 @@ class ModelLesson extends  ClassDatabase
                 'idLesson' => $data['idLesson'],
                 'title' => $data['title'],
                 'shortDescription' => $data['shortDescription'],
-                'fullDescription' => $data['fullDescription'],
                 'imagePath' => $data['imagePath'],
                 'slug' => $data['slug']
             ];
