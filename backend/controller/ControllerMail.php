@@ -102,15 +102,20 @@ class ControllerMail
         if ($event['mail'] == TEACHER_MAIL) {
             return;
         }
-        $appointmentDateTime = new DateTime($event['startDateTime'], new DateTimeZone('UTC'));
-        $appointmentHour = $appointmentDateTime->format('H:i');
+            $eventDateTimeUtc = new DateTime($event['startDateTime']);
+            $eventDateTimeUserTimezone = $eventDateTimeUtc->setTimezone(new DateTimeZone($event['timezone']));
+
+            // Formatage en français avec IntlDateFormatter
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::LONG, IntlDateFormatter::NONE);
+            $eventHour = $eventDateTimeUserTimezone->format('G\hi');       // 14h30
 
         $this->mailer->addAddress($event['mail']);
         $this->mailer->isHTML(true);
         $this->mailer->Subject = "Appointment reminder on FlePourTous";
 
+
         $emailBody = "Dear " . htmlspecialchars($event['firstName'] . " " . $event['lastName']) . ",<br><br>";
-        $emailBody .= "This is a reminder for your appointment at " . htmlspecialchars($appointmentHour) . " UTC.<br>";
+        $emailBody .= "This is a reminder for your appointment at " . htmlspecialchars($eventHour) . " UTC.<br>";
 
         if ($event['description'] != '') {
             $emailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
@@ -216,8 +221,10 @@ class ControllerMail
             $eventDateTimeUtc = new DateTime($event['startDateTime']);
             $eventDateTimeUserTimezone = $eventDateTimeUtc->setTimezone(new DateTimeZone($event['timezone']));
 
-            $eventDate = $eventDateTimeUserTimezone->format('d F Y');    // 11 September 2025
-            $eventHour = $eventDateTimeUserTimezone->format('G\hi');       // 14:30
+            // Formatage en français avec IntlDateFormatter
+            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::LONG, IntlDateFormatter::NONE);
+            $eventDate = $formatter->format($eventDateTimeUserTimezone);    // 16 octobre 2025
+            $eventHour = $eventDateTimeUserTimezone->format('G\hi');       // 14h30
 
             $this->mailer->addAddress($userMail);
             $this->mailer->isHTML(true);

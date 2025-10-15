@@ -1,0 +1,73 @@
+name: Deploy to Pre-Prod (Docker)
+
+on:
+  push:
+    branches:
+      - preprod  # Se déclenche quand une PR est mergée vers preprod
+  pull_request:
+    branches:
+      - preprod  # Lint uniquement pour valider la PR avant merge
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.3"
+          cache: "pnpm"
+          cache-dependency-path: "frontend/pnpm-lock.yaml"
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint frontend
+        working-directory: ./frontend
+        run: pnpm lint
+
+  deploy:
+    name: Deploy to VPS with Docker
+    needs: lint
+    if: github.event_name == 'push' && github.ref == 'refs/heads/preprod'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            set -e
+            echo "🚀 Starting Docker deployment..."
+            
+            cd ~/projects/projects/preprod/flepourtous
+            
+            echo "📥 Pulling latest changes from preprod..."
+            git fetch origin preprod
+            git reset --hard origin/preprod
+            
+            echo "🔍 Linting backend code..."
+            docker compose -f docker-compose.yml -f docker-compose.preprod.yml run --rm backend composer check-style || echo "⚠️ Backend lint warnings (non-blocking)"
+            
+            echo "🔨 Building and restarting containers..."
+            make preprod
+            
+            echo "🧹 Cleaning up old Docker images..."
+            docker image prune -f
+            
+            echo "✅ Deployment complete!"
+            echo "📊 Container status:"
+            docker compose -f docker-compose.yml -f docker-compose.preprod.yml ps

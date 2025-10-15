@@ -10,6 +10,7 @@ class ControllerOrder
     private $modelUser;
     private $modelPrice;
     private $modelEvent;
+    private $controllerMail;
 
     public function __construct()
     {
@@ -19,6 +20,7 @@ class ControllerOrder
         $this->modelUser = new ModelUser();
         $this->modelPrice = new ModelPrices();
         $this->modelEvent = new ModelEvent();
+        $this->controllerMail = new ControllerMail();
     }
 
     public function getWallet()
@@ -109,7 +111,7 @@ class ControllerOrder
             $modelEvent = new ModelEvent();
             $this->modelUser->updateWallet($idUser, $remainingAmount);
             $modelEvent->setEventStatusPaid($eventId);
-
+            $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
             echo json_encode([
                 'code' => 1,
                 'payment_method' => 'wallet',
@@ -207,6 +209,7 @@ class ControllerOrder
                     'event_id' => $eventId
                 ];
 
+                $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
                 echo json_encode([
                     'status' => 'complete',
                     'payment_status' => 'paid',

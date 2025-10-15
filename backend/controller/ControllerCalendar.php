@@ -264,8 +264,6 @@ class ControllerCalendar
                 ];
             }
 
-            $controllerMail = new ControllerMail();
-            $controllerMail->sendMailForPaymentSuccess($userId, $idEvent);
         } catch (Exception $e) {
             echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(), $eventDatabase]);
             return;

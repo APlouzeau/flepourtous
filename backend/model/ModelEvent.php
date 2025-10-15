@@ -178,7 +178,7 @@ class ModelEvent extends  ClassDatabase
     {
 
         $req = $this->conn->prepare('
-        SELECT u.firstName, u.lastName, u.mail, e.description, e.startDateTime, e.visioLink
+        SELECT u.firstName, u.lastName, u.mail, e.description, e.startDateTime, e.visioLink, e.timezone
         FROM event e INNER JOIN users u ON e.userId = u.idUser
         WHERE startDateTime >= DATE_ADD(:dateNow, INTERVAL 55 minute)
         AND startDateTime <= DATE_ADD(:dateNow, INTERVAL 65 minute);');
@@ -196,6 +196,7 @@ class ModelEvent extends  ClassDatabase
                     'description' => $data['description'],
                     'startDateTime' => $data['startDateTime'],
                     'visioLink' => $data['visioLink'],
+                    'timezone' => $data['timezone'],
                 ];
             }
             return $events; // Il y a des événements dans l'heure à venir
