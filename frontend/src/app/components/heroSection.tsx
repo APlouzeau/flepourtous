@@ -10,7 +10,7 @@ export default function HeroSection() {
                 <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                     <div className="order-2 md:order-1">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">
-                            Augmenter votre niveau en français avec Ludivine de FlePourTous
+                            Augmenter votre niveau en français avec Lulu de FlePourTous
                         </h1>
                         <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                             Développez vos connaissances avec FLE Pour Tous, votre partenaire de cours de français en

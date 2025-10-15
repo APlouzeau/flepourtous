@@ -1,0 +1,65 @@
+services:
+  api:
+    build:
+      context: ./backend
+      target: dev
+    container_name: backend-staging
+    environment:
+      - URI=https://api-staging.flepourtous.plouzor.fr/
+      - URI_FRONT=https://staging.flepourtous.plouzor.fr/
+      - URI_STRIPE=https://staging.flepourtous.plouzor.fr
+      - URI_MAIL=https://api-staging.flepourtous.plouzor.fr/
+      - COOKIE_DOMAIN=.flepourtous.plouzor.fr
+      - SESSION_SECURE=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-staging.rule=Host(`api-staging.flepourtous.plouzor.fr`)"
+      - "traefik.http.routers.api-staging.entrypoints=websecure"
+      - "traefik.http.routers.api-staging.tls.certresolver=le"
+      - "traefik.http.services.api-staging.loadbalancer.server.port=80"
+      - "traefik.docker.network=web"
+    volumes:
+      - ./backend:/var/www/html
+      - backend_vendor_staging:/var/www/html/vendor
+    networks:
+      - web
+      - internal
+
+  app:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+      target: dev
+    container_name: frontend-staging
+    command: pnpm run dev
+    environment:
+      - NEXT_PUBLIC_API_URL=https://api-staging.flepourtous.plouzor.fr
+      - NODE_ENV=development
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app-staging.rule=Host(`staging.flepourtous.plouzor.fr`)"
+      - "traefik.http.routers.app-staging.entrypoints=websecure"
+      - "traefik.http.routers.app-staging.tls.certresolver=le"
+      - "traefik.http.services.app-staging.loadbalancer.server.port=3000"
+      - "traefik.docker.network=web"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules_staging:/app/node_modules
+      - frontend_next_staging:/app/.next
+      - frontend_pnpm_store_staging:/app/.pnpm-store
+    networks:
+      - web
+      - internal
+
+volumes:
+  backend_vendor_staging:
+  frontend_node_modules_staging:
+  frontend_next_staging:
+  frontend_pnpm_store_staging:
+
+networks:
+  web:
+    external: true
+    name: web
+  internal:
+    internal: true

@@ -16,17 +16,15 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
 
 # --- PROD-DEPENDENCIES
-# A target that'll have production + essential dev dependencies
+# A target that'll have only production dependencies installed
 FROM base AS prod-dependencies
 
 COPY package.json pnpm-lock.yaml ./
 
-# Install all dependencies including TypeScript for next.config.ts
-RUN pnpm install
+RUN pnpm install --production
 
-# --- BUILDER
-# A target that'll build the Next.js application using dev-dependencies and source code
-# This target will be rebuild on each change in the source code
+# --- DEV
+# Target for development with hot reload
 FROM base AS dev
 
 COPY package.json pnpm-lock.yaml ./
@@ -36,14 +34,23 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["pnpm", "run", "preprod"]
+CMD ["pnpm", "run", "dev"]
 
-FROM prod-dependencies AS build
+# --- BUILD
+# Target to build the Next.js application for production
+FROM base AS build
+
+COPY package.json pnpm-lock.yaml ./
+COPY --from=dev-dependencies /app/node_modules ./node_modules
 
 COPY . .
 
 RUN pnpm run build
 
+# --- RUNNER
+# Target for production runtime
+# --- RUNNER
+# Target for production runtime
 FROM base AS runner
 
 COPY --from=prod-dependencies /app/package.json ./package.json
@@ -54,4 +61,4 @@ COPY --from=build /app/.next ./.next
 
 EXPOSE 3000
 
-CMD ["pnpm", "run", "start"]
+CMD ["pnpm", "start"]

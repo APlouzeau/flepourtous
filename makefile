@@ -3,6 +3,7 @@
 # Variables
 COMPOSE_FILE = docker-compose.yml
 COMPOSE_DEV_FILE = docker-compose.dev.yml
+COMPOSE_STAGING_FILE = docker-compose.staging.yml
 COMPOSE_PREPROD_FILE = docker-compose.preprod.yml
 FRONTEND_DIR = frontend
 BACKEND_DIR = backend
@@ -65,6 +66,9 @@ build: ## Build les images Docker
 build-preprod: ## Build les images Docker pour préprod
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
 
+build-staging: ## Build les images Docker pour staging
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) build
+
 network: ## Crée le réseau web s'il n'existe pas
 	@docker network inspect web >/dev/null 2>&1 || docker network create web
 
@@ -76,6 +80,15 @@ dev: network build ## Lance l'environnement de développement
 	@echo "🔧 Backend: http://localhost:8000"
 	@echo "🗃️  PhpMyAdmin: http://localhost:8081"
 	@echo "🗄️  Database: localhost:3307 (pour connexions externes)"
+
+staging: network build-staging ## Lance l'environnement staging (debug avec hot reload)
+	@echo "🔥 Démarrage de l'environnement staging..."
+	@echo "📌 Branche actuelle: $$(git branch --show-current)"
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) up -d
+	@echo "✅ Environnement staging prêt avec HOT RELOAD !"
+	@echo "📱 Frontend: https://staging.flepourtous.plouzor.fr"
+	@echo "🔧 Backend: https://api-staging.flepourtous.plouzor.fr"
+	@echo "💡 Les modifications de code sont appliquées en temps réel"
 
 preprod: network build-preprod ## Lance l'environnement de préprod
 	@echo "🔥 Démarrage de l'environnement de préprod..."
@@ -90,15 +103,23 @@ up: ## Démarre les services (sans rebuild)
 up-preprod: ## Démarre les services préprod (sans rebuild)
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) up -d
 
+up-staging: ## Démarre les services staging (sans rebuild)
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) up -d
+
 down: ## Arrête tous les services
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev down
 
 down-preprod: ## Arrête les services préprod
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) down
 
+down-staging: ## Arrête les services staging
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) down
+
 restart: down dev ## Redémarre complètement l'environnement
 
 restart-preprod: down-preprod preprod ## Redémarre complètement l'environnement préprod
+
+restart-staging: down-staging staging ## Redémarre complètement l'environnement staging
 
 # Logs et debug
 logs: ## Affiche les logs de tous les services
