@@ -48,6 +48,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
                 );
 
                 const result = response.data;
+                console.log("Résultat de la vérification du paiement:", result);
 
                 if (result.payment_status === "paid" || result.status === "already_processed") {
                     setStatus("success");

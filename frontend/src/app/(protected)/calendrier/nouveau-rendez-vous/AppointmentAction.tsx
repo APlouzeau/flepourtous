@@ -88,7 +88,6 @@ export async function checkDeleteEvent(idEvent: string, code?: number) {
 
 export async function deleteAppointment(idEvent: string, code: number) {
     const cookie = await getCookieBackend();
-    console.log("Attempting to delete event with id:", idEvent, "and code:", code);
     try {
         const response = await apiClient.post(
             "/api/deleteEvent",
@@ -101,7 +100,6 @@ export async function deleteAppointment(idEvent: string, code: number) {
                 withCredentials: true,
             }
         );
-        console.log("deletedAppointment received:", JSON.stringify(response.data));
         revalidatePath("/calendrier");
         return response.data;
     } catch (error) {

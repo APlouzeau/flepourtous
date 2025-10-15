@@ -355,7 +355,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             id="startTime"
                             name="startTime"
                             required
-                            disabled={timeSlots.length === 0}
+                            disabled={timeSlots.length === 0 || loading}
                             className="w-full bg-white border-gray-300 rounded-lg shadow-sm p-3 disabled:bg-gray-100 disabled:text-gray-400"
                             style={{ "--ring-color": "#1D1E1C", "--border-color": "#1D1E1C" } as React.CSSProperties}
                             onFocus={(e) => {

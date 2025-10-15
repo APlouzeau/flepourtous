@@ -111,7 +111,7 @@ class ControllerOrder
             $modelEvent = new ModelEvent();
             $this->modelUser->updateWallet($idUser, $remainingAmount);
             $modelEvent->setEventStatusPaid($eventId);
-            $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
+            
             echo json_encode([
                 'code' => 1,
                 'payment_method' => 'wallet',
@@ -194,8 +194,8 @@ class ControllerOrder
                 $eventId = $session->metadata->event_id;
 
                 if ($eventId != 0) {
-                    $modelEvent = new ModelEvent();
-                    $modelEvent->setEventStatusPaid($eventId);
+                    $this->modelEvent->setEventStatusPaid($eventId);
+                    $this->modelUser->updateWallet($idUser, 0); // Mettre à jour le portefeuille à 0
                 } else {
                     $amount = $session->amount_total / 100;
                     $modelUser = new ModelUser();
@@ -209,7 +209,14 @@ class ControllerOrder
                     'event_id' => $eventId
                 ];
 
-                $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
+                // Envoyer l'email approprié selon le type de paiement
+                if ($eventId != 0) {
+                    $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
+                } else {
+                    $amount = $session->amount_total / 100;
+                    $this->controllerMail->sendMailForPackPurchase($idUser, $amount);
+                }
+
                 echo json_encode([
                     'status' => 'complete',
                     'payment_status' => 'paid',

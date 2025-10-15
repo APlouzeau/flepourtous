@@ -213,17 +213,35 @@ class ControllerMail
         $modelEvent = new ModelEvent();
         $modelUser = new ModelUser();
         try {
+            // Vérifier que l'événement existe
+            if (empty($eventId) || $eventId == '0') {
+                error_log("sendMailForPaymentSuccess: eventId invalide ($eventId), email non envoyé");
+                return false;
+            }
+
+            $event = $modelEvent->getEventById($eventId);
+            if (!$event || empty($event['startDateTime']) || empty($event['timezone'])) {
+                error_log("sendMailForPaymentSuccess: Événement introuvable ou incomplet (ID: $eventId)");
+                return false;
+            }
+
             $user = $modelUser->getUser(new EntitieUser(['idUser' => $user]));
             $userMail = $user['mail'];
             error_log("Sending registration email to: " . $user['firstName'] . " " . $user['lastName'] . " at " . $userMail);
 
-            $event = $modelEvent->getEventById($eventId);
             $eventDateTimeUtc = new DateTime($event['startDateTime']);
             $eventDateTimeUserTimezone = $eventDateTimeUtc->setTimezone(new DateTimeZone($event['timezone']));
 
-            // Formatage en français avec IntlDateFormatter
-            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::LONG, IntlDateFormatter::NONE);
-            $eventDate = $formatter->format($eventDateTimeUserTimezone);    // 16 octobre 2025
+            // Formatage en français - Traduction manuelle des mois
+            $moisFr = [
+                1 => 'janvier', 2 => 'février', 3 => 'mars', 4 => 'avril',
+                5 => 'mai', 6 => 'juin', 7 => 'juillet', 8 => 'août',
+                9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre'
+            ];
+            $jour = $eventDateTimeUserTimezone->format('j');
+            $mois = $moisFr[(int)$eventDateTimeUserTimezone->format('n')];
+            $annee = $eventDateTimeUserTimezone->format('Y');
+            $eventDate = "$jour $mois $annee";    // 16 octobre 2025
             $eventHour = $eventDateTimeUserTimezone->format('G\hi');       // 14h30
 
             $this->mailer->addAddress($userMail);
@@ -245,6 +263,39 @@ class ControllerMail
             if ($this->mailer) {
                 $this->mailer->clearAddresses(); // Clear addresses after sending
                 $this->mailer->clearAttachments(); // Clear attachments if any
+            }
+        }
+    }
+
+    public function sendMailForPackPurchase(string $userId, float $amount)
+    {
+        $modelUser = new ModelUser();
+        try {
+            $user = $modelUser->getUser(new EntitieUser(['idUser' => $userId]));
+            $userMail = $user['mail'];
+            error_log("Sending pack purchase confirmation email to: " . $user['firstName'] . " " . $user['lastName'] . " at " . $userMail);
+
+            $this->mailer->addAddress($userMail);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = "Flepourtous - Confirmation d'achat de pack";
+
+            $emailBody = "Bonjour " . htmlspecialchars($user['firstName'] . " " . $user['lastName']) . ",<br><br>";
+            $emailBody .= "Merci d'avoir acheté un pack de cours sur FlePourTous !<br><br>";
+            $emailBody .= "Nous vous confirmons que votre paiement de " . htmlspecialchars(number_format($amount, 2, ',', ' ')) . " € a bien été pris en compte.<br>";
+            $emailBody .= "Le montant a été crédité sur votre porte-monnaie électronique.<br><br>";
+            $emailBody .= "Vous pouvez maintenant réserver vos cours en utilisant votre solde disponible.<br><br>";
+            $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
+            $this->mailer->Body = $emailBody;
+
+            $this->mailer->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Mailer Error: " . $this->mailer->ErrorInfo);
+            return false;
+        } finally {
+            if ($this->mailer) {
+                $this->mailer->clearAddresses();
+                $this->mailer->clearAttachments();
             }
         }
     }

@@ -12,7 +12,6 @@ export async function orderPacks(selectedLesson: string, selectedDuration: strin
         });
 
         if (response.data) {
-            console.log("Pack commandé avec succès :", response.data);
             return response.data;
         }
     } catch (error) {

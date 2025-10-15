@@ -15,7 +15,6 @@ export default function Provider({ children, initialUser = null }: ProviderProps
 
     // Objet valeur à fournir aux enfants
     const value = { dataUser, setDataUser };
-    console.log("Provider initialized with user data:", initialUser);
 
     return <Context.Provider value={value}>{children}</Context.Provider>;
 }

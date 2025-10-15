@@ -199,7 +199,6 @@ export default function TableAdmin({ listAppointments }: TableAdminProps) {
                                                 if (confirm("Êtes-vous sûr de vouloir annuler ce rendez-vous ?")) {
                                                     try {
                                                         // La fonction d'annulation existe déjà dans le code commenté
-                                                        console.log("Annulation du rendez-vous:", appointment.idEvent);
                                                         alert(
                                                             "Fonctionnalité d'annulation à implémenter via deleteAppointment"
                                                         );
