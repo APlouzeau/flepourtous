@@ -46,7 +46,7 @@ export default function Footer() {
                                 </li>
                                 <li>
                                     <Link
-                                        href="/"
+                                        href="/ressources-utilisees"
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
                                         Ressources utilisées

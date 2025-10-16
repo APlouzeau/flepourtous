@@ -9,6 +9,14 @@ class ControllerVisio
     {
         error_log("time : " . $userStartDateTimeUTCToString);
         $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
+        
+        // Vérifier si l'événement est dans le passé
+        $now = time();
+        if ($startDateTimeUnix < $now) {
+            error_log("Événement dans le passé (start: $startDateTimeUnix, now: $now). Pas de création de room visio.");
+            return null; // Retourner null au lieu d'une erreur
+        }
+        
         $durationInSeconds = $duration * 60; // Convertir la durée en secondes
         
         // Créer un nom de room unique en combinant eventId et timestamp

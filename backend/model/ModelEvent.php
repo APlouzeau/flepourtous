@@ -32,7 +32,7 @@ class ModelEvent extends  ClassDatabase
     public function getEventsUser(int $idUser)
     {
         $req = $this->conn->prepare('
-        SELECT idEvent, userId, description, duration, createdAt, updatedAt, status, visioLink, startDateTime, timezone, title FROM event INNER JOIN lesson l ON event.id_lesson = l.idLesson
+        SELECT idEvent, userId, description, duration, createdAt, updatedAt, status, visioLink, startDateTime, timezone, title FROM event LEFT JOIN lesson l ON event.id_lesson = l.idLesson
         WHERE userId = :idUser');
         $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
         $req->execute();
@@ -87,7 +87,7 @@ class ModelEvent extends  ClassDatabase
     {
         // Si userId est fourni, on le met à jour aussi, sinon on ne touche pas à ce champ
         $userId = $event->getUserId();
-        
+        error_log("Mise à jour de l'événement ID: " . $event->getIdEvent() . " avec userId: " . var_export($userId, true));
         if ($userId !== null) {
             // Mise à jour complète incluant userId
             $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink, userId = :userId WHERE idEvent = :idEvent');

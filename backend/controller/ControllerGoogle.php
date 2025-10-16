@@ -174,20 +174,23 @@ class ControllerGoogle
 
         $eventStart = $event->getStart();
         $eventEnd = $event->getEnd();
-
+        
         if (!$eventStart || !$eventStart->getDateTime() || !$eventEnd || !$eventEnd->getDateTime()) {
             error_log("Événement Google ID: " . $idEvent . " est un événement 'toute la journée' ou invalide. Ignoré.");
             return;
         }
-
+        
         $startDateTimeISO = $eventStart->getDateTime();
         $endDateTimeISO = $eventEnd->getDateTime();
-
+        
         try {
             $dtStart = new DateTime($startDateTimeISO);
+            $dtDbStart = $dtStart;
             $dtStart->setTimezone(new DateTimeZone('UTC'));
             $startDateTimeUtcFormatted = $dtStart->format('Y-m-d H:i:s');
-
+            
+            $startDateTime = $dtDbStart->format('Y-m-d H:i:s');
+            
             $dtEnd = new DateTime($endDateTimeISO);
             $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
 
@@ -210,6 +213,8 @@ class ControllerGoogle
 
         $emailsToCheck = [];
         $attendees = $event->getAttendees();
+        error_log("Traitement de l'invité Google ID: " . $attendee[0] . " avec " . (is_array($attendees) ? count($attendees) : 0) . " participants.");
+
         if (!empty($attendees)) {
             foreach ($attendees as $attendee) {
                 if ($attendee && !empty($attendee->getEmail())) {
@@ -265,13 +270,14 @@ class ControllerGoogle
                 }
                 $eventDatabase = new EntitieEvent([
                     'idEvent' => $idEvent,
-                    // ✅ NE PAS inclure userId pour éviter de l'écraser
+                    'userId' => $userId,
                     'description' => $description,
                     'duration' => $duration,
-                    'startDateTime' => $startDateTimeUtcFormatted,
+                    'startDateTime' => $startDateTime,
                     'timezone' => 'Europe/Paris',
                     'visioLink' => $roomUrl,
                 ]);
+                error_log("Mise à jour de l'événement ID: " . $idEvent . " avec les nouvelles informations.");
                 $modelEvent->updateEvent($eventDatabase);
                 error_log("Événement existant mis à jour ID: " . $idEvent . " sans modifier le userId");
             } else {
@@ -286,7 +292,7 @@ class ControllerGoogle
                     'userId' => $userId,
                     'description' => $description,
                     'duration' => $duration,
-                    'startDateTime' => $startDateTimeUtcFormatted,
+                    'startDateTime' => $startDateTime,
                     'visioLink' => $roomUrl,
                 ]);
 
