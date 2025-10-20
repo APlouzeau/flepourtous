@@ -213,7 +213,7 @@ class ControllerGoogle
 
         $emailsToCheck = [];
         $attendees = $event->getAttendees();
-        error_log("Traitement de l'invité Google ID: " . $attendee[0] . " avec " . (is_array($attendees) ? count($attendees) : 0) . " participants.");
+        error_log("Traitement de l'événement Google ID: " . $idEvent . " avec " . (is_array($attendees) ? count($attendees) : 0) . " participants.");
 
         if (!empty($attendees)) {
             foreach ($attendees as $attendee) {
@@ -221,6 +221,13 @@ class ControllerGoogle
                     $emailsToCheck[] = $attendee->getEmail();
                 }
             }
+        }
+
+        // Parser la description pour trouver l'email de l'utilisateur (format: "User: email@example.com")
+        $eventDescription = $event->getDescription();
+        if ($eventDescription && preg_match('/User:\s*([^\s]+@[^\s]+)/i', $eventDescription, $matches)) {
+            $emailsToCheck[] = trim($matches[1]);
+            error_log("Email trouvé dans la description: " . trim($matches[1]));
         }
 
         $creator = $event->getCreator();
@@ -270,7 +277,7 @@ class ControllerGoogle
                 }
                 $eventDatabase = new EntitieEvent([
                     'idEvent' => $idEvent,
-                    'userId' => $userId,
+                    'userId' => null, // NE PAS PASSER userId pour éviter d'écraser l'utilisateur d'origine
                     'description' => $description,
                     'duration' => $duration,
                     'startDateTime' => $startDateTime,

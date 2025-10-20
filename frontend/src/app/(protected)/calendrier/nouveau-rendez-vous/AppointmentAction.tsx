@@ -23,6 +23,7 @@ export async function registerAppointment(formData: FormData) {
             },
             withCredentials: true,
         });
+        console.log("Response from registerAppointment:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error during registration:", error);

@@ -4,7 +4,7 @@ import { showBasicAppointmentProps } from "@/app/types/appointments";
 
 import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { checkDeleteEvent, deleteAppointment, prepareRepaymentAction } from "./nouveau-rendez-vous/AppointmentAction";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import CancelConfirmationModal from "@/components/CancelConfirmationModal";
@@ -15,7 +15,7 @@ interface AppointmentRowProps {
 }
 
 export default function TableUser({ listAppointments }: AppointmentRowProps) {
-    const [currentTime] = useState<Date>(new Date());
+    const [currentTime, setCurrentTime] = useState<Date>(new Date());
     const [isRepaying, setIsRepaying] = useState<string | null>(null);
     const [cancelModal, setCancelModal] = useState<{
         isOpen: boolean;
@@ -33,6 +33,15 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
         isDeleting: false,
     });
     const router = useRouter();
+
+    // Mettre à jour l'heure actuelle toutes les 30 secondes
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 30000); // 30 secondes
+
+        return () => clearInterval(interval);
+    }, []);
 
     // Fonction pour formater la date et l'heure selon le fuseau de l'événement
     const formatDateTime = (dateTimeString: string, timezone: string) => {
@@ -75,10 +84,12 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
 
             // Autoriser l'accès 15 minutes avant le début
             const accessTime = new Date(appointmentStart.getTime() - 15 * 60000);
+            // Autoriser l'accès jusqu'à 15 minutes après la fin
+            const endAccessTime = new Date(appointmentEnd.getTime() + 15 * 60000);
 
             const now = currentTime;
 
-            if (now >= accessTime && now <= appointmentEnd) {
+            if (now >= accessTime && now <= endAccessTime) {
                 return {
                     status: "Rejoignable",
                     className: "text-green-600 font-semibold",

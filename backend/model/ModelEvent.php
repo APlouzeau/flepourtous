@@ -85,9 +85,13 @@ class ModelEvent extends  ClassDatabase
 
     public function updateEvent(EntitieEvent $event)
     {
+        // Logs dans un fichier pour debugging
+        $logFile = '/var/www/html/update_event_debug.log';
+        file_put_contents($logFile, "[" . date('Y-m-d H:i:s') . "] START updateEvent pour idEvent: " . $event->getIdEvent() . "\n", FILE_APPEND);
+        
         // Si userId est fourni, on le met à jour aussi, sinon on ne touche pas à ce champ
         $userId = $event->getUserId();
-        error_log("Mise à jour de l'événement ID: " . $event->getIdEvent() . " avec userId: " . var_export($userId, true));
+        
         if ($userId !== null) {
             // Mise à jour complète incluant userId
             $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink, userId = :userId WHERE idEvent = :idEvent');

@@ -61,12 +61,12 @@ class ControllerCalendar
     public function createEvent()
     {
 
-
         $userController = new ControllerUser();
         $userController->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
-
+        
+        error_log("Début de la création de l'événement.");
         if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['idLesson'])) {
             http_response_code(400); // Bad Request
             $response = [
@@ -119,6 +119,16 @@ class ControllerCalendar
         $status = 'active';
         $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
 
+        // Récupérer l'email de l'utilisateur pour l'ajouter comme attendee dans Google Calendar
+        $modelUser = new ModelUser();
+        $user = new EntitieUser([
+            'idUser' => $userId,
+        ]);
+        $userData = $modelUser->getUser($user);
+        $userEmail = $userData['mail'] ?? null;
+
+
+
         try {
             $utcDateTimeForGoogle = new DateTime($userStartDateTimeUTCToString, new DateTimeZone('UTC'));
 
@@ -152,9 +162,15 @@ class ControllerCalendar
             }
 
             //GOOGLE CALENDAR register
+            // Ajouter l'email de l'utilisateur dans la description pour que le webhook puisse l'identifier
+            $eventDescription = $description ?? '';
+            if ($userEmail) {
+                $eventDescription .= "\n\nUser: " . $userEmail;
+            }
+            
             $event = new Google\Service\Calendar\Event([
                 'summary' => $appointmentName,
-                'description' => $description ?? '',
+                'description' => $eventDescription,
                 'start' => [
                     'dateTime' => $googleStartDateTime, // Format RFC3339 : '2025-05-03T10:00:00+02:00'
                     'timeZone' => $this->frenchTimeZone,
