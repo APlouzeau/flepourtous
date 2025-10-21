@@ -10,7 +10,7 @@ class EntitieEvent
     private string $startDateTime;
     public string $timezone;
     private string $updatedAt;
-    private string $status;
+    private ?string $status = null;
     private ?string $visioLink = null;
     private ?int $id_lesson = null;
     private int $isInvoiced = 0;

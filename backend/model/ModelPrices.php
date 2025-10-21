@@ -41,6 +41,7 @@ class ModelPrices extends  ClassDatabase
         $req->bindValue(':price', $price->getPrice(), PDO::PARAM_STR);
         return $req->execute();
     }
+
     public function updatePrice(EntitiePrice $price)
     {
         $req = $this->conn->prepare('UPDATE prices SET price = :price WHERE idPrice = :idPrice');
@@ -48,12 +49,14 @@ class ModelPrices extends  ClassDatabase
         $req->bindValue(':idPrice', $price->getIdPrice(), PDO::PARAM_INT);
         return $req->execute();
     }
+
     public function deletePrice(int $idPrice)
     {
         $req = $this->conn->prepare('DELETE FROM prices WHERE idPrice = :idPrice');
         $req->bindValue(':idPrice', $idPrice, PDO::PARAM_INT);
         return $req->execute();
     }
+
     public function getPriceByDurationId(int $durationId)
     {
         $req = $this->conn->prepare('SELECT * FROM prices WHERE durationId = :durationId');
@@ -86,6 +89,22 @@ class ModelPrices extends  ClassDatabase
         $data = $req->fetch();
         if ($data) {
             return $data['price'];
+        }
+        return null;
+    }
+
+    public function getUserIdByEventId(string $idEvent)
+    {
+        $req = $this->conn->prepare('
+            SELECT e.id_user
+            FROM event e
+            WHERE e.idEvent = :idEvent
+        ');
+        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_INT);
+        $req->execute();
+        $data = $req->fetch();
+        if ($data) {
+            return $data['id_user'];
         }
         return null;
     }

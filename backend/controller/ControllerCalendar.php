@@ -12,11 +12,32 @@ if (!class_exists('Google_Service_Calendar')) {
 class ControllerCalendar
 {
     private $frenchTimeZone = "Europe/Paris";
+    private $modelEvent;
+    private $modelUser;
+    private $modelLesson;
+    private $modelPrice;
+    private $controllerMail;
+    private $controllerUser;
+    private $controllerLesson;
+    private $controllerVisio;
+
+    public function __construct()
+    {
+        $this->modelEvent = new ModelEvent();
+        $this->modelUser = new ModelUser();
+        $this->modelLesson = new ModelLesson();
+        $this->modelPrice = new ModelPrices();
+        $this->controllerMail = new ControllerMail();
+        $this->controllerUser = new ControllerUser();
+        $this->controllerLesson = new ControllerLesson();
+        $this->controllerVisio = new ControllerVisio();
+    }
 
     public function listEvents()
     {
-        $userController = new ControllerUser();
-        $userController->verifyConnectBack();
+        $this->controllerUser->verifyConnectBack();
+        error_log("Récupération des événements pour l'utilisateur ID: " . $_SESSION['idUser']);
+
         if ($_SESSION['role'] != 'admin') {
 
             $this->listEventsUser();
@@ -41,8 +62,7 @@ class ControllerCalendar
 
     public function listEventsMain()
     {
-        $modelEvent = new ModelEvent();
-        $events = $modelEvent->getAllEvents();
+        $events = $this->modelEvent->getAllEvents();
         if (count($events) == 0) {
             $response = [
                 'code' => 0,
@@ -60,9 +80,7 @@ class ControllerCalendar
 
     public function createEvent()
     {
-
-        $userController = new ControllerUser();
-        $userController->verifyConnectBack();
+        $this->controllerUser->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
         
@@ -120,14 +138,11 @@ class ControllerCalendar
         $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
 
         // Récupérer l'email de l'utilisateur pour l'ajouter comme attendee dans Google Calendar
-        $modelUser = new ModelUser();
         $user = new EntitieUser([
             'idUser' => $userId,
         ]);
-        $userData = $modelUser->getUser($user);
+        $userData = $this->modelUser->getUser($user);
         $userEmail = $userData['mail'] ?? null;
-
-
 
         try {
             $utcDateTimeForGoogle = new DateTime($userStartDateTimeUTCToString, new DateTimeZone('UTC'));
@@ -255,12 +270,9 @@ class ControllerCalendar
                 'id_lesson' => $idLesson,
             ]);
 
-            $modelEvent = new ModelEvent();
-            $createdEvent = $modelEvent->createEvent($eventDatabase);
-            $modelPrice = new ModelPrices();
-            $price = $modelPrice->getPriceForAppointment($duration, $idLesson);
-            $modelLesson = new ModelLesson();
-            $lesson = $modelLesson->getLessonById($idLesson);
+            $createdEvent = $this->modelEvent->createEvent($eventDatabase);
+            $price = $this->modelPrice->getPriceForAppointment($duration, $idLesson);
+            $lesson = $this->modelLesson->getLessonById($idLesson);
             $_SESSION['lesson_price'] = $price;
             $_SESSION['lesson_name'] = $lesson['title'];
             $_SESSION['event_id'] = $idEvent;
@@ -289,11 +301,9 @@ class ControllerCalendar
 
     public function listEventsUser()
     {
-        $userController = new ControllerUser();
-        $userController->verifyConnectBack();
+        $this->controllerUser->verifyConnectBack();
 
-        $modelEvent = new ModelEvent();
-        $events = $modelEvent->getEventsUser($_SESSION['idUser']);
+        $events = $this->modelEvent->getEventsUser($_SESSION['idUser']);
         if (count($events) == 0) {
             $response = [
                 'code' => 0,
@@ -311,14 +321,12 @@ class ControllerCalendar
 
     public function checkDeleteEvent()
     {
-        $userController = new ControllerUser();
-        $userController->verifyConnectBack();
+        $this->controllerUser->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        $modelEvent = new ModelEvent();
         error_log("data received : " . print_r($data, true));
-        $event = $modelEvent->getEventById($data['idEvent']);
+        $event = $this->modelEvent->getEventById($data['idEvent']);
         if (!$event) {
             $response = [
                 'code' => 0,
@@ -355,8 +363,7 @@ class ControllerCalendar
 
     public function deleteEvent()
     {
-        $userController = new ControllerUser();
-        $userController->verifyConnectBack();
+        $this->controllerUser->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
@@ -369,8 +376,7 @@ class ControllerCalendar
             return;
         }
 
-        $modelEvent = new ModelEvent();
-        $event = $modelEvent->getEventById($data['idEvent']);
+        $event = $this->modelEvent->getEventById($data['idEvent']);
         if (!$event) {
             $response = [
                 'code' => 0,
@@ -424,23 +430,20 @@ class ControllerCalendar
 
 
 
-        $modelPrice = new ModelPrices();
-        $lessonPrice = $modelPrice->getPriceByEventId($event['idEvent']);
-        $modelUser = new ModelUser();
+        $lessonPrice = $this->modelPrice->getPriceByEventId($event['idEvent']);
         if ($invoiced == 1) {
-            $modelUser->addToWallet($event['userId'], $lessonPrice['price']);
-            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Remboursé');
+            $this->modelUser->addToWallet($event['userId'], $lessonPrice['price']);
+            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Remboursé');
         }
 
         if ($invoiced == 2) {
-            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - non remboursé');
+            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], 'Annulé - non remboursé');
         }
 
         if ($invoiced == 3) {
-            $modelUser->addToWallet($event['userId'], $lessonPrice['price']);
-            $controllerMail = new ControllerMail();
-            $controllerMail->sendMailToAlertEventDeleteByAdmin($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price']);
-            $deleteEventSuccess = $modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Admin');
+            $this->modelUser->addToWallet($event['userId'], $lessonPrice['price']);
+            $this->controllerMail->sendMailToAlertEventDeleteByAdmin($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price']);
+            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Admin');
         }
 
         if (!$deleteEventSuccess) {
@@ -462,8 +465,7 @@ class ControllerCalendar
 
     public function getAvailablesTimeSlots()
     {
-        $userController = new ControllerUser();
-        $userController->verifyConnectBack();
+        $this->userController->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
@@ -557,12 +559,11 @@ class ControllerCalendar
 
     public function checkWaitingEvents()
     {
-        $modelEvent = new ModelEvent();
-        $userWithEventDelete = $modelEvent->deleteWaitingEvent();
+        $userWithEventDelete = $this->modelEvent->deleteWaitingEvent();
         if (!$userWithEventDelete) {
-            $controllerMail = new ControllerMail();
+            $this->controllerMail = new ControllerMail();
             foreach ($userWithEventDelete as $user) {
-                $controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($user);
+                $this->controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($user);
             }
             $response = [
                 'code' => 1,
@@ -570,5 +571,80 @@ class ControllerCalendar
             ];
             echo json_encode($response);
         }
+    }
+
+    public function createNewEventFromGoogle($event, $idEvent, $duration, $startDateTimeUtcFormatted, $startDateTime)
+    {
+        $description = $event->getSummary();
+        $userId = null;
+
+        $emailsToCheck = [];
+        $attendees = $event->getAttendees();
+
+        if (!empty($attendees)) {
+            foreach ($attendees as $attendee) {
+                if ($attendee->getEmail()) {
+                    $emailsToCheck[] = $attendee->getEmail();
+                }
+            }
+        }
+
+        $creator = $event->getCreator();
+        if ($creator && $creator->getEmail()) $emailsToCheck[] = $creator->getEmail();
+        $organizer = $event->getOrganizer();
+        if ($organizer && $organizer->getEmail()) $emailsToCheck[] = $organizer->getEmail();
+
+        foreach ($emailsToCheck as $email) {
+            $foundUserId = $this->modelUser->checkMail($email);
+            if ($foundUserId) {
+                $userId = $foundUserId;
+                break;
+            }
+        }
+
+        if ($userId === null) {
+            error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Utilisation de l'admin par défaut.");
+            $adminUserId = $modelUser->checkMail(TEACHER_MAIL);
+            if ($adminUserId) {
+                $userId = $adminUserId;
+            } else {
+                error_log("Erreur : L'utilisateur admin par défaut n'a pas été trouvé. L'événement Google ID: " . $idEvent . " ne peut pas être créé en base de données.");
+                return;
+            }
+        }
+
+        $createdAt = date('Y-m-d H:i:s');
+        $updatedAt = date('Y-m-d H:i:s');
+        $status = 'active';
+
+        $userTimeZone = 'Europe/Paris';
+
+
+        $this->registerEventInDatabase($idEvent, $userId, $description, $duration, $startDateTimeUtcFormatted, $userTimeZone);
+
+    }
+
+    private function registerEventInDatabase($idEvent, $userId, $description, $duration, $startDateTimeUtcFormatted, $userTimeZone, $visioLink)
+    {
+        $createdAt = date('Y-m-d H:i:s');
+        $updatedAt = date('Y-m-d H:i:s');
+        $status = 'active';
+
+        $eventDatabase = new EntitieEvent([
+            'idEvent' => $idEvent,
+            'userId' => $userId,
+            'description' => $description,
+            'duration' => $duration,
+            'createdAt' => $createdAt,
+            'startDateTime' => $startDateTimeUtcFormatted,
+            'timezone' => $userTimeZone,
+            'updatedAt' => $updatedAt,
+            'status' => $status,
+            'visioLink' => $visioLink,
+        ]);
+
+        $createdEvent = $this->modelEvent->createEvent($eventDatabase);
+
+        return $createdEvent;
     }
 }

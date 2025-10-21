@@ -105,7 +105,6 @@ extends ClassDatabase
         $data = $req->fetch(PDO::FETCH_ASSOC);
         if ($data) {
             $idUser = $data['idUser'];
-            error_log("Mail already exists: " . $mail . " - ID: " . $idUser);
             return $idUser;
         } else {
             return false;

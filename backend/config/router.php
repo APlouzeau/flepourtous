@@ -29,7 +29,6 @@ $router->addRoute("GET", "/api/offre-de-cours/{slug}", "ControllerLesson", "getL
 $router->addRoute("POST", "/api/getAllLessonsWithPrices", "ControllerLesson", "getAllLessonsWithPrices");
 
 //Events
-$router->addRoute("GET", "/api/listEvents", "ControllerCalendar", "listEvents");
 $router->addRoute("POST", "/api/createEvent", "ControllerCalendar", "createEvent");
 $router->addRoute("POST", "/api/listEvents", "ControllerCalendar", "listEvents");
 $router->addRoute("POST", "/api/checkDeleteEvent", "ControllerCalendar", "checkDeleteEvent");

@@ -46,28 +46,19 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
     // Fonction pour formater la date et l'heure selon le fuseau de l'événement
     const formatDateTime = (dateTimeString: string, timezone: string) => {
         try {
-            // Convertir la string en objet Date (UTC)
-            const dateObj = new Date(dateTimeString.replace(" ", "T") + "Z");
-
-            if (isNaN(dateObj.getTime())) {
+            // La date vient de la BDD au format 'YYYY-MM-DD HH:mm:ss' 
+            // et est déjà dans le timezone spécifié (pas besoin de conversion)
+            const parts = dateTimeString.match(/(\d{4})-(\d{2})-(\d{2})\s(\d{2}):(\d{2}):(\d{2})/);
+            
+            if (!parts) {
                 return { date: "Date invalide", time: "Heure invalide" };
             }
 
-            // Formater la date selon le fuseau de l'événement
-            const formattedDate = dateObj.toLocaleDateString("fr-FR", {
-                day: "2-digit",
-                month: "2-digit",
-                year: "numeric",
-                timeZone: timezone, // ← AJOUT : utilise le fuseau de l'événement
-            });
-
-            // Formater l'heure selon le fuseau de l'événement
-            const formattedTime = dateObj.toLocaleTimeString("fr-FR", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-                timeZone: timezone, // ← AJOUT : utilise le fuseau de l'événement
-            });
+            const [, year, month, day, hour, minute] = parts;
+            
+            // Formater directement sans conversion de timezone
+            const formattedDate = `${day}/${month}/${year}`;
+            const formattedTime = `${hour}:${minute}`;
 
             return { date: formattedDate, time: formattedTime };
         } catch (error) {

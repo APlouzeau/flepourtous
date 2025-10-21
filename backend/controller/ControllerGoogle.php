@@ -3,6 +3,22 @@
 require_once APP_PATH . 'vendor/autoload.php';
 class ControllerGoogle
 {
+    private $modelEvent;
+    private $modelUser;
+    private $modelGoogleSync;
+    private $modelGoogle;
+    private $controllerVisio;
+    private $controllerCalendar;
+
+    public function __construct()
+    {
+        $this->modelEvent = new ModelEvent();
+        $this->modelUser = new ModelUser();
+        $this->modelGoogleSync = new ModelGoogleSync();
+        $this->modelGoogle = new ModelGoogle();
+        $this->controllerVisio = new ControllerVisio();
+        $this->controllerCalendar = new ControllerCalendar();
+    }
     protected function getClient()
     {
         $keyFilePath = APP_PATH . 'config/service-account-key.json'; // Chemin vers ta clé JSON
@@ -78,6 +94,7 @@ class ControllerGoogle
 
     public function handleGoogleNotification()
     {
+        error_log("Notification Google reçue.");
         $channelIdHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_ID'] ?? null;
         $resourceStateHeader = $_SERVER['HTTP_X_GOOG_RESOURCE_STATE'] ?? null;
         $messageNumberHeader = $_SERVER['HTTP_X_GOOG_MESSAGE_NUMBER'] ?? null;
@@ -169,9 +186,7 @@ class ControllerGoogle
 
     public function updateCalendar($event)
     {
-        $modelEvent = new ModelEvent();
         $idEvent = $event->getId();
-
         $eventStart = $event->getStart();
         $eventEnd = $event->getEnd();
         
@@ -186,18 +201,15 @@ class ControllerGoogle
         try {
             $dtStart = new DateTime($startDateTimeISO);
             $dtDbStart = $dtStart;
-            $dtStart->setTimezone(new DateTimeZone('UTC'));
-            $startDateTimeUtcFormatted = $dtStart->format('Y-m-d H:i:s');
+            $startDateTimeParisFormatted = $dtStart->format('Y-m-d H:i:s');
             
             $startDateTime = $dtDbStart->format('Y-m-d H:i:s');
             
             $dtEnd = new DateTime($endDateTimeISO);
             $duration = ($dtEnd->getTimestamp() - $dtStart->getTimestamp()) / 60;
 
-            // Ignorer seulement les événements très anciens (plus de 24 heures dans le passé)
-            // ACCEPTER TOUS LES ÉVÉNEMENTS FUTURS
-            $now = new DateTime('now', new DateTimeZone('UTC'));
-            if ($dtEnd->getTimestamp() < ($now->getTimestamp() - 86400)) { // 24 heures = 86400 secondes
+            $now = new DateTime('now', new DateTimeZone('Europe/Paris'));
+            if ($dtEnd->getTimestamp() < ($now->getTimestamp() - 86400)) {
                 error_log("Événement Google ID: " . $idEvent . " est trop ancien (fin: " . $dtEnd->format('Y-m-d H:i:s') . "). Ignoré.");
                 return;
             }
@@ -206,108 +218,93 @@ class ControllerGoogle
             return;
         }
 
-        $description = $event->getSummary();
+        $eventExist = $this->modelEvent->checkEvent($idEvent);
+        if ($eventExist) {
+            error_log("Événement Google ID: " . $idEvent . " existe déjà. Mise à jour en cours.");
+            if ($event->getStatus() == 'cancelled') {
+                error_log("Événement Google ID: " . $idEvent . " annulé. Suppression de la room visio et mise à jour de l'état.");
+                $this->controllerVisio->deleteRoom($idEvent);
+                $this->markGoogleEventAsCancelled($idEvent);
+                return;
+            }
+            if ($event->getStatus() != 'cancelled'){
+            error_log("Mise à jour de l'événement Google ID: " . $idEvent . " dans la base de données locale.");
+            $this->modelEvent->updateExistingEvent($event, $idEvent, $duration, $startDateTimeParisFormatted, $startDateTime);
+            return;
+            }
+        }
 
-        $modelUser = new ModelUser();
-        $userId = null;
+        if (!$eventExist) {
+            $this->createNewEventFromGoogle($event,$idEvent, $duration, $startDateTimeParisFormatted, $startDateTime);
+            return;
+        }
+    }
+    
+    public function createNewEventFromGoogle($event, $idEvent, $duration, $startDateTimeParisFormatted, $startDateTime)
+    {
+        $startDateTimeUtc = (new DateTime($startDateTimeParisFormatted))->setTimezone(new DateTimeZone('UTC'));
+        $visioLink = $this->controllerVisio->createRoom($duration, $startDateTimeUtc->format('Y-m-d H:i:s'), $idEvent);
+        $userId = $this->getAttendeeFromGoogleEvent($event);
 
-        $emailsToCheck = [];
-        $attendees = $event->getAttendees();
-        error_log("Traitement de l'événement Google ID: " . $idEvent . " avec " . (is_array($attendees) ? count($attendees) : 0) . " participants.");
+        error_log("Préparation de l'objet EntitieEvent pour l'enregistrement.");
+        $event = new EntitieEvent([
+            'idEvent' => $idEvent,
+            'duration' => $duration,
+            'startDateTime' => $startDateTimeParisFormatted,
+            'timezone' => 'Europe/Paris',
+            'visioLink' => $visioLink,
+            'userId' => $userId,
+            'description' => $event->getSummary(),
+            'status' => 'Google'
+        ]);
+        error_log("Préparation à l'enregistrement.");
+        $this->modelEvent->createEvent($event);
+    }
 
-        if (!empty($attendees)) {
-            foreach ($attendees as $attendee) {
-                if ($attendee && !empty($attendee->getEmail())) {
-                    $emailsToCheck[] = $attendee->getEmail();
+    public function getAttendeeFromGoogleEvent($event)
+    {
+        try {
+            if ($event->getAttendees() && count($event->getAttendees()) > 0) {
+                error_log("Récupération de l'assignee pour l'événement Google ID: " . $event->getId());
+                foreach ($event->getAttendees() as $attendee) {
+                    $userId = $this->modelUser->checkMail($attendee->getEmail());
+                    if ($userId) {
+                        return $userId;
+                    }
                 }
             }
+            error_log("Aucun participant trouvé autre que le compte de service. Utilisation de l'email par défaut de l'enseignant.");
+            return defined('TEACHER_MAIL') ? TEACHER_MAIL : null;
+        } catch (Exception $e) {
+            error_log('Erreur lors de la récupération de l\'assignee pour l\'événement Google ID: ' . ($event && method_exists($event, "getId") ? $event->getId() : 'unknown') . ' - ' . $e->getMessage());
+            return null;
         }
+    }
 
-        // Parser la description pour trouver l'email de l'utilisateur (format: "User: email@example.com")
-        $eventDescription = $event->getDescription();
-        if ($eventDescription && preg_match('/User:\s*([^\s]+@[^\s]+)/i', $eventDescription, $matches)) {
-            $emailsToCheck[] = trim($matches[1]);
-            error_log("Email trouvé dans la description: " . trim($matches[1]));
-        }
+    public function updateExistingEvent($event, $idEvent, $duration, $startDateTimeParisFormatted, $startDateTime)
+    {
+        $startDateTimeUtc = new DateTime($event->getStart()->getDateTime(), new DateTimeZone('UTC'));
+        $this->controllerVisio->deleteRoom($idEvent);
+        $visioLink = $this->controllerVisio->createRoom($duration, $startDateTimeUtc->format('Y-m-d H:i:s'), $idEvent);
+        $event = new EntitieEvent([
+            'idEvent' => $idEvent,
+            'description' => $event->getSummary(),
+            'duration' => $duration,
+            'startDateTime' => $startDateTimeParisFormatted,
+            'timezone' => 'Europe/Paris',
+            'visioLink' => $visioLink,
 
-        $creator = $event->getCreator();
-        if ($creator && $creator->getEmail()) $emailsToCheck[] = $creator->getEmail();
-        $organizer = $event->getOrganizer();
-        if ($organizer && $organizer->getEmail()) $emailsToCheck[] = $organizer->getEmail();
+        ]);
+        $this->modelEvent->updateEvent($event);
+    }
 
-        foreach (array_unique($emailsToCheck) as $email) { // array_unique pour éviter de vérifier deux fois le même email
-            $potentialUserId = $modelUser->checkMail($email);
-            if ($potentialUserId) {
-                $userId = $potentialUserId;
-                break;
-            }
-        }
-
-        if ($userId === null) {
-            // Aucun utilisateur trouvé parmi les participants, utiliser l'admin par défaut
-            error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Utilisation de l'admin par défaut.");
-            $adminUserId = $modelUser->checkMail(TEACHER_MAIL);
-            if ($adminUserId) {
-                $userId = $adminUserId;
-                error_log("Admin trouvé avec l'ID: " . $userId . " pour l'événement: " . $idEvent);
-            } else {
-                error_log("ERREUR CRITIQUE: Admin non trouvé avec l'email: " . TEACHER_MAIL . " pour l'événement: " . $idEvent);
-                return; // Impossible de continuer sans utilisateur valide
-            }
-        }
-
-        error_log("Traitement de l'événement Google ID: " . $idEvent . " pour l'utilisateur ID: " . $userId);
-
-        $controllerVisio = new ControllerVisio();
-        $status = $event->getStatus();
-
-        if ($status == 'cancelled') {
-            $controllerVisio->deleteRoom($idEvent);
-            $modelEvent->deleteEvent($idEvent);
-        } else {
-            $eventExist = $modelEvent->checkEvent($idEvent);
-            if ($eventExist) {
-
-                error_log("Événement existant trouvé ID: " . $idEvent . ". Mise à jour sans modification du userId.");
-                $controllerVisio->deleteRoom($idEvent);
-                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
-                if (!$roomUrl) {
-                    error_log("Erreur lors de la création de la room visio pour la mise à jour de l'événement ID: " . $idEvent . ". L'événement sera mis à jour sans lien de visio.");
-                    $roomUrl = ''; // On continue avec une URL vide
-                }
-                $eventDatabase = new EntitieEvent([
-                    'idEvent' => $idEvent,
-                    'userId' => null, // NE PAS PASSER userId pour éviter d'écraser l'utilisateur d'origine
-                    'description' => $description,
-                    'duration' => $duration,
-                    'startDateTime' => $startDateTime,
-                    'timezone' => 'Europe/Paris',
-                    'visioLink' => $roomUrl,
-                ]);
-                error_log("Mise à jour de l'événement ID: " . $idEvent . " avec les nouvelles informations.");
-                $modelEvent->updateEvent($eventDatabase);
-                error_log("Événement existant mis à jour ID: " . $idEvent . " sans modifier le userId");
-            } else {
-
-                $roomUrl = $controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
-                if (!$roomUrl) {
-                    error_log("Erreur lors de la création de la room visio pour le nouvel événement ID: " . $idEvent . ". L'événement sera créé sans lien de visio.");
-                    $roomUrl = ''; // On continue avec une URL vide
-                }
-                $eventDatabase = new EntitieEvent([
-                    'idEvent' => $idEvent,
-                    'userId' => $userId,
-                    'description' => $description,
-                    'duration' => $duration,
-                    'startDateTime' => $startDateTime,
-                    'visioLink' => $roomUrl,
-                ]);
-
-                error_log("DEBUG: EntitieEvent créée, maintenant appel à createEvent()");
-                $modelEvent->createEvent($eventDatabase);
-                error_log("DEBUG: createEvent() terminé");
-            }
-        }
+    public function markGoogleEventAsCancelled($idEvent)
+    {
+        $price = $this->modelPrices->getPriceByEventId($idEvent);
+        $userId = $this->modelEvent->getUserIdByEventId($idEvent);
+        $this->modelUser->updateWallet($userId, $price);
+        $this->modelEvent->updateEventStatus($idEvent, 'Annulé - Remboursé');
+        error_log("Événement Google ID: " . $idEvent . " marqué comme annulé dans la base de données locale.");
     }
 
     public function getOccupiedSlotsOnGoogleCalendar($startDateTime, $endDateTime)
