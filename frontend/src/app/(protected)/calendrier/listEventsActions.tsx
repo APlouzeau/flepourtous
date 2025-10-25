@@ -25,7 +25,6 @@ export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
                 withCredentials: true,
             }
         );
-        console.log("Fetched appointments:", response.data);
                 
         if (response.data && Array.isArray(response.data.data)) {
             const appointments = response.data.data;
@@ -65,7 +64,6 @@ export async function listInvoices(filters?: filtersProps): Promise<showInvoicab
                 const dateB = new Date(b.startDateTime).getTime();
                 return dateB - dateA;
             });
-            console.log("Fetched invoices:", invoiceList);
             return invoiceList;
         } else {
             console.warn("La réponse de l'API ne contient pas de tableau d'événements facturables valide dans .data");

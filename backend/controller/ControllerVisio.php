@@ -112,6 +112,7 @@ class ControllerVisio
     {
         $modelEvent = new ModelEvent();
         $event = $modelEvent->getEventById($idEvent);
+        $modelEvent->deleteVisioLink($idEvent);
         $path = parse_url($event['visioLink'], PHP_URL_PATH);
         $roomNameOnly = $path ? ltrim($path, '/') : null;
         $visioApiKey = VISIO_API_KEY;

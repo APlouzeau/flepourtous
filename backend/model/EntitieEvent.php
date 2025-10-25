@@ -3,7 +3,7 @@
 class EntitieEvent
 {
     private string $idEvent;
-    private string $userId;
+    private ?string $userId = null;  // 🔥 Rendre nullable pour permettre les mises à jour sans userId
     private string $description;
     private int $duration;
     private string $createdAt;

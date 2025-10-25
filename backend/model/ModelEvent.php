@@ -118,7 +118,7 @@ class ModelEvent extends  ClassDatabase
         if ($status !== null && $status !== '') {
             $req->bindValue(':status', $status, PDO::PARAM_STR);
         }
-
+        error_log("DEBUG 9: Exécution de la requête avec " . print_r($event->getIdEvent() . ", " . $event->getUserId() . ", " . $event->getDescription() . ", " . $event->getDuration() . ", " . $event->getStartDateTime() . ", " . $event->getTimezone() . ", " . $event->getVisioLink(), true));
         $result = $req->execute();
         error_log("Résultat de l'insertion: " . ($result ? "SUCCESS" : "FAILED"));
         
@@ -132,13 +132,26 @@ class ModelEvent extends  ClassDatabase
 
     public function updateEvent(EntitieEvent $event)
     {        
-        $userId = $event->getUserId();
-        
-        if ($userId !== null) {
-            $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink, userId = :userId WHERE idEvent = :idEvent');
-            $req->bindValue(':userId', $userId, PDO::PARAM_INT);
-        } else {
-            $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink WHERE idEvent = :idEvent');
+        try {
+            error_log("DEBUG 1: Début mise à jour de l'événement");
+            error_log("DEBUG 1.5: Tentative d'appel getUserId()");
+            $userId = $event->getUserId();
+            error_log("DEBUG 1.6: getUserId() = " . var_export($userId, true));
+            
+            if ($userId) {
+                error_log("DEBUG 2: userId présent, mise à jour avec userId");
+                $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink, userId = :userId WHERE idEvent = :idEvent');
+                $req->bindValue(':userId', $userId, PDO::PARAM_INT);
+            } else {
+                error_log("DEBUG 2: userId absent, mise à jour sans userId");
+                $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink WHERE idEvent = :idEvent');
+            }
+
+            error_log("Requête SQL: " . $req->queryString);
+        } catch (Throwable $e) {
+            error_log("ERREUR FATALE dans updateEvent: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            throw $e;
         }
         
         $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
@@ -225,6 +238,15 @@ class ModelEvent extends  ClassDatabase
         }
     }
 
+    public function getUserIdByEventId(string $idEvent)
+    {
+        $req = $this->conn->prepare('SELECT userId FROM event WHERE idEvent = :idEvent');
+        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req->execute();
+        $data = $req->fetch();
+        return $data ? $data['userId'] : null;
+    }
+
     public function checkEventForNextHour(string $dateNow)
     {
 
@@ -297,5 +319,12 @@ class ModelEvent extends  ClassDatabase
         $this->conn->commit();
 
         return $datasToAlert;
+    }
+
+    public function deleteVisioLink(string $idEvent): bool
+    {
+        $req = $this->conn->prepare('UPDATE event SET visioLink = NULL WHERE idEvent = :idEvent');
+        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        return $req->execute();
     }
 }
