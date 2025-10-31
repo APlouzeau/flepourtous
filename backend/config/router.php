@@ -62,3 +62,7 @@ $router->addRoute("POST", "/api/setInvoiced", "ControllerInvoice", "setInvoiced"
 
 //packs
 $router->addRoute("POST", "/api/orderPacks", "ControllerOrder", "orderPacks");
+
+
+//tests
+$router->addRoute("GET", "/api/sql", "ModelPrices", "getPriceByEventId");

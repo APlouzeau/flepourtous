@@ -165,6 +165,9 @@ export default function CGVPage() {
                                 Les avoirs (crédits non consommés ou gestes commerciaux) sont valables 6 mois à compter
                                 de leur émission.
                             </p>
+                            <p className="text-gray-700 mb-4">
+                                Les avoirs sont crédités sur le compte utilisateur de l&apos;élève.
+                            </p>
                             <p className="text-gray-700">
                                 Ils ne peuvent être ni transférés ni prolongés. Au-delà de ce délai, aucun remboursement
                                 ne sera possible.

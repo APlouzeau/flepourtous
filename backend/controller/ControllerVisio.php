@@ -7,9 +7,7 @@ class ControllerVisio
 
     public function createRoom($duration, $userStartDateTimeUTCToString, $eventId)
     {
-        error_log("time : " . $userStartDateTimeUTCToString);
         $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
-        
         // Vérifier si l'événement est dans le passé
         $now = time();
         if ($startDateTimeUnix < $now) {
@@ -21,7 +19,7 @@ class ControllerVisio
         
         // Créer un nom de room unique en combinant eventId et timestamp
         $uniqueRoomName = 'flepourtous-' . $eventId . '-' . time();
-        
+
         $visio = [
             'name' => $uniqueRoomName,
             'privacy' => 'public',

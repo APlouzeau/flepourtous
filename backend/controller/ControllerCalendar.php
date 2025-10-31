@@ -20,6 +20,7 @@ class ControllerCalendar
     private $controllerUser;
     private $controllerLesson;
     private $controllerVisio;
+    private $controllerError;
 
     public function __construct()
     {
@@ -31,6 +32,7 @@ class ControllerCalendar
         $this->controllerUser = new ControllerUser();
         $this->controllerLesson = new ControllerLesson();
         $this->controllerVisio = new ControllerVisio();
+        $this->controllerError = new ControllerError();
     }
 
     public function listEvents()
@@ -182,6 +184,8 @@ class ControllerCalendar
             if ($userEmail) {
                 $eventDescription .= "\n\nUser: " . $userEmail;
             }
+            // Ajoute un tag pour identifier la création initiale par l'appli
+            $eventDescription .= "\n\nSource:app";
             
             $event = new Google\Service\Calendar\Event([
                 'summary' => $appointmentName,
@@ -256,14 +260,16 @@ class ControllerCalendar
 
             //DATABASE
             $idEvent = $createdEvent->getId();
+            
+            // ✅ BONNE PRATIQUE: Stocker en UTC + timezone utilisateur
             $eventDatabase = new EntitieEvent([
                 'idEvent' => $idEvent,
                 'userId' => $userId,
                 'description' => $description,
                 'duration' => $duration,
                 'createdAt' => $createdAt,
-                'startDateTime' => $userStartDateTimeUTCToString,
-                'timezone' => $userTimeZone,
+                'startDateTime' => $userStartDateTimeUTCToString,  // Stocké en UTC
+                'timezone' => $userTimeZone,  // Timezone de l'utilisateur pour affichage
                 'updatedAt' => $updatedAt,
                 'status' => $status,
                 'visioLink' => $roomUrl,
@@ -325,7 +331,6 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        error_log("data received : " . print_r($data, true));
         $event = $this->modelEvent->getEventById($data['idEvent']);
         if (!$event) {
             $response = [
@@ -335,6 +340,7 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
+        error_log("data received : " . print_r($data, true));
 
         $timeRemaining = (new DateTime($event['startDateTime']))->getTimestamp() - (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
 
@@ -366,6 +372,7 @@ class ControllerCalendar
         $this->controllerUser->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
+        error_log("Début de la suppression de l'événement : " . print_r($data, true));
 
         if (!$data || !isset($data['idEvent']) || !isset($data['code'])) {
             $response = [
@@ -394,15 +401,18 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
+        $this->controllerError->debug("Suppression de l'evenement : ", $event);
 
-        if ($event['status'] != 'Payé') {
+        if ($event['status'] != 'Payé' && $event['status'] != 'Google') {
             $response = [
                 'code' => 0,
-                'message' => 'Seuls les rendez-vous payés peuvent être supprimés.',
+                'message' => 'Seuls les rendez-vous payés ou pris par l\'enseignante peuvent être supprimés.',
             ];
+
             echo json_encode($response);
             return;
         }
+
 
         if ($event['status'] == 'Annulé - Remboursé' || $event['status'] == 'Annulé - Non remboursé' || $event['status'] == 'Annulé - Admin') {
             $response = [
@@ -465,7 +475,7 @@ class ControllerCalendar
 
     public function getAvailablesTimeSlots()
     {
-        $this->userController->verifyConnectBack();
+        $this->controllerUser->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 

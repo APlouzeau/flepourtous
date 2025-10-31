@@ -51,4 +51,27 @@ class ControllerError
             'data' => $data
         ]);
     }
+
+    public function debug(string $text, $data = null)
+    {
+    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+
+    if (is_array($data)) {
+        error_log($text);
+        foreach ($data as $key => $value) {
+            error_log($key . ' => ' . print_r($value, true));
+        }
+        } else {
+        error_log($text . print_r($data, true));
+        error_log($callerFile . ' line ' . $callerLine);
+        }
+
+    foreach ($trace as $frame) {
+        if (basename($frame['file']) !== 'index.php') {
+            error_log('Appel depuis : ' . $frame['file']);
+            error_log('Ligne ' . $frame['line']);
+            break;
+            }
+        }
+    }
 }

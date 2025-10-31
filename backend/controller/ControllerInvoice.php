@@ -15,7 +15,6 @@ class ControllerInvoice
         $this->modelUser = new ModelUser();
     }
 
-
     public function getInvoices()
     {
         if (!$this->controllerUser->verifyConnectAdmin()) {

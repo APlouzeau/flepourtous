@@ -111,9 +111,9 @@ class ModelPrices extends  ClassDatabase
 
     public function getPriceByEventId(string $idEvent)
     {
-        Error_log("Fetching price for event ID: " . $idEvent);
+        error_log("Fetching price for event ID: " . $idEvent);
         $req = $this->conn->prepare('
-            SELECT l.title, p.price
+            SELECT e.idEvent, l.title, p.price
             FROM event e
             INNER JOIN lesson l ON l.idLesson = e.id_lesson
             INNER JOIN lessonPrices lp ON lp.id_lesson = l.idLesson
@@ -121,10 +121,10 @@ class ModelPrices extends  ClassDatabase
             INNER JOIN duration d ON d.idDuration = lp.id_duration
             WHERE e.idEvent = :idEvent AND e.duration = d.duration
         ');
-        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_INT);
-        $req->execute();
+        $req->execute([':idEvent' => $idEvent]);
+        error_log($req->debugDumpParams() . " with idEvent=" . $idEvent . " executed in " . __FILE__ . " at line " . __LINE__);
         $data = $req->fetch();
-        Error_log("Fetched price data: " . print_r($data, true));
+        error_log("Fetched price data: " . print_r($data, true) . " in " . __FILE__ . " at line " . __LINE__);
         if ($data) {
             return [
                 'price' => $data['price'],

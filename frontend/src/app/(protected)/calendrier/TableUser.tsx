@@ -46,19 +46,32 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
     // Fonction pour formater la date et l'heure selon le fuseau de l'événement
     const formatDateTime = (dateTimeString: string, timezone: string) => {
         try {
-            // La date vient de la BDD au format 'YYYY-MM-DD HH:mm:ss' 
-            // et est déjà dans le timezone spécifié (pas besoin de conversion)
+            // ✅ La date vient de la BDD en UTC au format 'YYYY-MM-DD HH:mm:ss'
+            // On la convertit dans la timezone de l'événement pour l'affichage
             const parts = dateTimeString.match(/(\d{4})-(\d{2})-(\d{2})\s(\d{2}):(\d{2}):(\d{2})/);
             
             if (!parts) {
                 return { date: "Date invalide", time: "Heure invalide" };
             }
 
-            const [, year, month, day, hour, minute] = parts;
+            const [, year, month, day, hour, minute, second] = parts;
             
-            // Formater directement sans conversion de timezone
-            const formattedDate = `${day}/${month}/${year}`;
-            const formattedTime = `${hour}:${minute}`;
+            // Créer une date UTC et la convertir dans la timezone de l'événement
+            const utcDate = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
+            
+            const formattedDate = new Intl.DateTimeFormat('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                timeZone: timezone
+            }).format(utcDate);
+            
+            const formattedTime = new Intl.DateTimeFormat('fr-FR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: timezone,
+                hour12: false
+            }).format(utcDate);
 
             return { date: formattedDate, time: formattedTime };
         } catch (error) {
@@ -249,7 +262,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                         const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
                         const today = new Date();
                         const canCancel =
-                            appointmentDate > today && (item.status === "Payé" || item.status === "En attente");
+                            appointmentDate > today && (item.status === "Payé" || item.status === "En attente" || item.status === "Google");
                         const canPay = appointmentDate > today && item.status === "En attente";
 
                         return (

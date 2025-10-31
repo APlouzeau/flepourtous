@@ -112,8 +112,6 @@ class ControllerUser
         ]);
     }
 
-
-
     public function getUserInformations()
     {
         $this->verifyConnectBack();
