@@ -72,7 +72,7 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
                                 Offre de cours
                             </Link>
                             <Link 
-                                href="/" 
+                                href="/ressources-utilisees" 
                                 className="text-white hover:text-gray-200 hover:bg-red-700 transition-colors block px-4 py-3 rounded-md font-medium text-lg"
                                 onClick={toggleMenu}
                             >

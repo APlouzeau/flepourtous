@@ -27,7 +27,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <div className="bg-gray-50 rounded-2xl px-8 py-4 border border-gray-200">
-                            <div className="text-3xl font-bold text-gray-900">200+</div>
+                            <div className="text-3xl font-bold text-gray-900">2000+</div>
                             <div className="text-gray-600">Élèves satisfaits</div>
                         </div>
                         <div className="bg-gray-50 rounded-2xl px-8 py-4 border border-gray-200">

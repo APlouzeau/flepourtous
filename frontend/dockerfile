@@ -40,6 +40,10 @@ CMD ["pnpm", "run", "dev"]
 # Target to build the Next.js application for production
 FROM dev-dependencies AS build
 
+# Accept build arguments for Next.js public env vars
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 COPY . .
 
 RUN pnpm run build
