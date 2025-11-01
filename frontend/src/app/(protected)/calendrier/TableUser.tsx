@@ -80,7 +80,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
         }
     };
 
-    const getVisioStatus = (startDateTime: string, duration: string) => {
+    const getVisioStatus = (startDateTime: string, duration: string, status: string) => {
         try {
             const isoUtcString = startDateTime.includes("T") ? startDateTime : startDateTime.replace(" ", "T") + "Z";
             const appointmentStart = new Date(isoUtcString);
@@ -90,12 +90,13 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
             const accessTime = new Date(appointmentStart.getTime() - 15 * 60000);
             // Autoriser l'accès jusqu'à 15 minutes après la fin
             const endAccessTime = new Date(appointmentEnd.getTime() + 15 * 60000);
+            const statusOk = status === "Payé" || status === "Google";
 
             const now = currentTime;
 
-            if (now >= accessTime && now <= endAccessTime) {
+            if (now >= accessTime && now <= endAccessTime && statusOk) {
                 return {
-                    status: "Rejoignable",
+                    status: "Rejoindre",
                     className: "text-green-600 font-semibold",
                     isJoinable: true,
                     tooltip: "Vous pouvez rejoindre la visio",
@@ -254,7 +255,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                 </TableHeader>
                 <TableBody>
                     {listAppointments.map((item) => {
-                        const visioStatus = getVisioStatus(item.startDateTime, item.duration);
+                        const visioStatus = getVisioStatus(item.startDateTime, item.duration, item.status);
                         const { date: formattedDate, time: formattedTime } = formatDateTime(
                             item.startDateTime,
                             item.timezone

@@ -10,6 +10,7 @@ class ControllerGoogle
     private $controllerVisio;
     private $controllerCalendar;
     private $modelPrices;  // ✅ Ajouter la déclaration
+    private $controllerError;
 
     public function __construct()
     {
@@ -20,6 +21,7 @@ class ControllerGoogle
         $this->controllerVisio = new ControllerVisio();
         $this->controllerCalendar = new ControllerCalendar();
         $this->modelPrices = new ModelPrices();  // ✅ Initialiser
+        $this->controllerError = new ControllerError();
     }
     protected function getClient()
     {
@@ -160,12 +162,12 @@ class ControllerGoogle
         $modelGoogleSync = new ModelGoogleSync();
         $nextSyncToken = $modelGoogleSync->getNextSyncToken($calendarId);
 
-        error_log("Récupération des événements existants avec le syncToken : " . $nextSyncToken);
+        error_log("Recuperation des evenements existants avec le syncToken : " . $nextSyncToken);
         if ($nextSyncToken) {
             try {
                 $eventsResults = $service->events->listEvents($calendarId, ['syncToken' => $nextSyncToken]);
                 $events = $eventsResults->getItems();
-                error_log("Événements récupérés : " . print_r($events, true));
+                $this->controllerError->debug("Evenements recuperes : " , $events);
                 
                 foreach ($events as $event) {
                     if ($event->getSummary() === 'Pause' || $event->getSummary() === 'Absent') {
@@ -177,22 +179,24 @@ class ControllerGoogle
                 $newSyncToken = $eventsResults->getNextSyncToken();
                 if ($newSyncToken) {
                     $modelGoogleSync->saveNextSyncToken($calendarId, $newSyncToken);
-                    error_log("Nouveau syncToken sauvegardé après traitement des événements existants.");
+                    $this->controllerError->debug("Nouveau syncToken sauvegarde apres traitement des evenements existants.");
                 }
             } catch (Exception $e) {
-                error_log('Erreur lors de la récupération des événements : ' . $e->getMessage());
+                $this->controllerError->debug('Erreur lors de la recuperation des evenements : ', $e->getMessage());
                 $modelGoogleSync->deleteNextSyncToken($nextSyncToken);
                 $this->getEventsOnSync();
             }
         } else {
-            error_log('Aucun token de synchronisation trouvé.');
+            $this->controllerError->debug('Aucun token de synchronisation trouve.');
         }
     }
 
     public function updateCalendar($event)
     {
+        $this->controllerError->debug("Mise a jour de l'evenement Google ID: " , $event->getId());
         $idEvent = $event->getId();
         if ($event->getStatus() == 'cancelled') {
+            $this->controllerError->debug("Événement annulé Google ID: ", $idEvent);
             $this->googleEventStatusCancelled($idEvent);
             return;
         }
@@ -200,11 +204,11 @@ class ControllerGoogle
         $idEvent = $event->getId();
         $isAppEvent = strpos($event->getDescription(), 'Source:app') !== false;
         if ($isAppEvent && $this->checkSameEvent($event)) {
-        error_log("Événement Google ID: $idEvent ignoré car créé par l'appli (création initiale).");
+            $this->controllerError->debug("Evenement Google ignoré car créé par l'appli (création initiale) :", $idEvent);
         return;
         }
 
-
+        $this->controllerError->debug("Traitement de l'evenement Google ID: ", $event->getId());
         $eventStart = $event->getStart();
         $eventEnd = $event->getEnd();
 
@@ -249,20 +253,25 @@ class ControllerGoogle
 
     public function googleEventStatusCancelled($idEvent)
     {
+        $this->controllerError->debug("Annulation en cours de l'evenement Google ID: " , $idEvent);
         $eventExist = $this->modelEvent->checkEvent($idEvent);
+        error_log("checkEvent retourné: " . var_export($eventExist, true));
+        error_log("Type de eventExist: " . gettype($eventExist));
         if ($eventExist) {
-            error_log("Événement Google ID: " . $idEvent . " annulé et existe en BDD. Suppression de la room visio et mise à jour de l'état.");
+            $this->controllerError->debug("Événement Google ID: " , $idEvent);
+            $this->controllerError->debug(" annulé et existe en BDD. Suppression de la room visio et mise à jour de l'état.");
             $this->controllerVisio->deleteRoom($idEvent);
             $this->markGoogleEventAsCancelled($idEvent, $eventExist);
         } else {
-            error_log("Événement Google ID: " . $idEvent . " annulé mais n'existe pas en BDD. Ignoré.");
+            $this->controllerError->debug("Événement Google ID: " , $idEvent);
+            $this->controllerError->debug(" annulé mais n'existe pas en BDD. Ignoré.");
         }
-        error_log("==================== FIN updateCalendar (cancelled) ====================");
+        $this->controllerError->debug("==================== FIN updateCalendar (cancelled) ====================");
     }
     
     private function createNewEventFromGoogle($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone)
     {
-        error_log("Création d'un nouvel événement Google ID: " . $idEvent . " en BDD.");
+        $this->controllerError->debug("Création d'un nouvel événement Google ID: " , $idEvent);
     
         $userId = $this->getAttendeeFromGoogleEvent($event);
 

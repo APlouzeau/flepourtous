@@ -9,10 +9,12 @@ use PHPMailer\PHPMailer\Exception;
 class ControllerMail
 {
     private $mailer;
+    private $controllerError;
 
     public function __construct()
     {
         $this->mailer = new PHPMailer(true);
+        $this->controllerError = new ControllerError();
 
         try {
 
@@ -64,9 +66,10 @@ class ControllerMail
 
     public function sendMailToAlertForNextAppointment()
     {
-        error_log("Verifying if there are upcoming events in the next hour...");
+        $this->controllerError->debug("Verifying if there are upcoming events in the next hour...");
 
         $apiKey = $_SERVER['HTTP_API_KEY'] ?? null;
+        $this->controllerError->debug("Received API Key: " . ($apiKey ?? 'none'));
         if ($apiKey !== CRON_KEY) {
             error_log("Unauthorized attempt to access sendMailToAlertForNextAppointment. IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
             http_response_code(403); // Forbidden
@@ -115,14 +118,14 @@ class ControllerMail
 
 
         $emailBody = "Dear " . htmlspecialchars($event['firstName'] . " " . $event['lastName']) . ",<br><br>";
-        $emailBody .= "This is a reminder for your appointment at " . htmlspecialchars($eventHour) . " UTC.<br>";
+        $emailBody .= "This is a reminder for your appointment at " . htmlspecialchars($eventHour) . " " . htmlspecialchars($event['timezone']) . ".<br>";
 
         if ($event['description'] != '') {
             $emailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
         }
 
         if ($event['visioLink'] != '') {
-            $emailBody .= "VisioLink : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "click here at appointment time. </a><br>";
+            $emailBody .= "VisioLink : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "visiolink. </a><br>";
         }
         $emailBody .= "<br>Warm regards,<br>Flepourtous Team";
         $this->mailer->Body = $emailBody;
@@ -141,7 +144,7 @@ class ControllerMail
         $this->mailer->addAddress(TEACHER_MAIL);
         $this->mailer->Subject = "Rappel de rendez-vous pour " . htmlspecialchars($event['firstName'] . " " . $event['lastName']);
         $teacherEmailBody = "Un rappel a été envoyé à l'élève.<br><br>";
-        $teacherEmailBody .= "Rendez-vous prévu à : " . htmlspecialchars($dateTimeParis->format('H:i')) . " UTC.<br>";
+        $teacherEmailBody .= "Rendez-vous prévu à : " . htmlspecialchars($dateTimeParis->format('H:i')) . ".<br>";
         if ($event['description'] != '') {
             $teacherEmailBody .= "Description : " . htmlspecialchars($event['description']) . "<br>";
         }

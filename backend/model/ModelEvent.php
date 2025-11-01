@@ -4,6 +4,13 @@ require_once APP_PATH . "/class/ClassDatabase.php";
 
 class ModelEvent extends  ClassDatabase
 {
+    private $controllerError;
+
+    public function __construct()
+    {
+        parent::__construct(); // Initialise la connexion PDO
+        $this->controllerError = new ControllerError();
+    }
 
     public function getOccupiedTimeSlots($date)
     {
@@ -197,10 +204,33 @@ class ModelEvent extends  ClassDatabase
 
     public function checkEvent(string $idEvent)
     {
-        $req = $this->conn->prepare('SELECT * FROM event WHERE idEvent = :idEvent');
-        $req->bindValue(':idEvent', $idEvent);
-        $req->execute();
-        return $req->fetch();
+        try {
+            $this->controllerError->debug("Checking event: ", $idEvent);
+            error_log("DEBUG checkEvent: Avant prepare");
+            $req = $this->conn->prepare('SELECT * FROM event WHERE idEvent = :idEvent');
+            error_log("DEBUG checkEvent: Après prepare");
+            $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+            error_log("DEBUG checkEvent: Après bindValue");
+            $success = $req->execute();
+            error_log("DEBUG checkEvent: Après execute, success=" . ($success ? 'true' : 'false'));
+            
+            if (!$success) {
+                $errorInfo = $req->errorInfo();
+                error_log("ERREUR SQL checkEvent: " . $errorInfo[2]);
+                return null;
+            }
+            
+            error_log("DEBUG checkEvent: Avant fetch");
+            $data = $req->fetch();
+            error_log("DEBUG checkEvent: Après fetch, data=" . ($data ? 'trouvé' : 'false'));
+            $this->controllerError->debug("checkEvent result: ", $data ? "trouvé" : "non trouvé");
+            
+            return $data ? $data : null;
+        } catch (Exception $e) {
+            error_log("EXCEPTION dans checkEvent: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
+            return null;
+        }
     }
 
     public function getEventById(string $idEvent)
@@ -241,7 +271,7 @@ class ModelEvent extends  ClassDatabase
 
     public function checkEventForNextHour(string $dateNow)
     {
-
+        $this->controllerError->debug("Checking events for the next hour...");
         $req = $this->conn->prepare('
         SELECT u.firstName, u.lastName, u.mail, e.description, e.startDateTime, e.visioLink, e.timezone
         FROM event e INNER JOIN users u ON e.userId = u.idUser
@@ -251,6 +281,7 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':dateNow', $dateNow, PDO::PARAM_STR);
         $req->execute();
         $datas = $req->fetchAll();
+        $this->controllerError->debug("Found " . count($datas) . " events in the next hour.");
         if (count($datas) > 0) {
             $events = [];
             foreach ($datas as $data) {

@@ -298,6 +298,10 @@ export default function TableAdminAppointments({ listAppointments }: Appointment
                                     </TableCell>
                                     <TableCell onClick={(e) => e.stopPropagation()}>
                                         {new Date(item.startDateTime) > currentTime &&
+                                        item.status !== "Annulé - Google" &&
+                                        item.status !== "Annulé - non remboursé" &&
+                                        item.status !== "Annulé Google - Remboursé" &&
+                                        item.status !== "Annulé Google - Non Remboursé" &&
                                         item.status !== "Annulé - Admin" &&
                                         item.status !== "Annulé - Non remboursé" &&
                                         item.status !== "Annulé - Remboursé" ? (

@@ -61,10 +61,9 @@ class ControllerError
         foreach ($data as $key => $value) {
             error_log($key . ' => ' . print_r($value, true));
         }
-        } else {
+    } else {
         error_log($text . print_r($data, true));
-        error_log($callerFile . ' line ' . $callerLine);
-        }
+    }
 
     foreach ($trace as $frame) {
         if (basename($frame['file']) !== 'index.php') {

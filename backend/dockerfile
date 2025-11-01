@@ -10,10 +10,10 @@ RUN sed -ri -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-avail
 RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libzip-dev \
+    libicu-dev \
     unzip \
-    && docker-php-ext-install zip \
+    && docker-php-ext-install zip intl \
     && rm -rf /var/lib/apt/lists/*
-RUN docker-php-ext-install zip
 # INSTALL AND UPDATE COMPOSER
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 RUN composer self-update
