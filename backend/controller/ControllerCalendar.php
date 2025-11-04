@@ -187,6 +187,12 @@ class ControllerCalendar
             // Ajoute un tag pour identifier la création initiale par l'appli
             $eventDescription .= "\n\nSource:app";
             
+            // Préparer les attendees pour l'événement Google Calendar
+            $eventAttendees = [];
+            if ($userEmail) {
+                $eventAttendees[] = ['email' => $userEmail];
+            }
+            
             $event = new Google\Service\Calendar\Event([
                 'summary' => $appointmentName,
                 'description' => $eventDescription,
@@ -198,6 +204,7 @@ class ControllerCalendar
                     'dateTime' => $googleEndDateTime, // Format RFC3339 : '2025-05-03T11:00:00+02:00'
                     'timeZone' => $this->frenchTimeZone,
                 ],
+                'attendees' => $eventAttendees,
             ]);
 
             $createdEvent = $service->events->insert(GOOGLE_CALENDAR_ID, $event);
