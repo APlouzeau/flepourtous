@@ -11,6 +11,7 @@ class ControllerOrder
     private $modelPrice;
     private $modelEvent;
     private $controllerMail;
+    const ORDER_LOG_FILE = "orders";
 
     public function __construct()
     {
@@ -90,10 +91,39 @@ class ControllerOrder
         $controllerUser = new ControllerUser();
         $controllerUser->verifyConnectBack();
 
-        $idUser = $_SESSION['idUser'];
-        $lessonPrice = $_SESSION['lesson_price'];
-        $lessonName = $_SESSION['lesson_name'];
-        $eventId = $_SESSION['event_id'];
+        $idUser = $_SESSION['idUser'] ?? null;
+        $lessonPrice = $_SESSION['lesson_price'] ?? null;
+        $lessonName = $_SESSION['lesson_name'] ?? null;
+        $eventId = $_SESSION['event_id'] ?? null;
+
+        // Validation des données de session
+        if (!$idUser) {
+/*             $this->controllerError->logs(
+                "ERREUR checkout: Utilisateur non connecté", 
+                ["Session: " . session_id()], 
+                self::ORDER_LOG_FILE
+            ); */
+            http_response_code(401);
+            echo json_encode(['code' => 0, 'error' => 'Utilisateur non connecté']);
+            return;
+        }
+
+        if ($lessonPrice === null || $lessonName === null || $eventId === null) {
+/*             $this->controllerError->logs(
+                "ERREUR checkout: Données de session manquantes", 
+                [
+                    "Utilisateur ID: " . $idUser,
+                    "lesson_price: " . ($lessonPrice ?? 'NULL'),
+                    "lesson_name: " . ($lessonName ?? 'NULL'),
+                    "event_id: " . ($eventId ?? 'NULL'),
+                    "Session ID: " . session_id()
+                ], 
+                self::ORDER_LOG_FILE
+            ); */
+            http_response_code(400);
+            echo json_encode(['code' => 0, 'error' => 'Session invalide. Veuillez recommencer le processus de réservation.']);
+            return;
+        }
 
         if ($eventId !== 0) {
             $this->payExistingAppointment($idUser, $lessonPrice, $lessonName, $eventId,);
@@ -111,6 +141,19 @@ class ControllerOrder
             $modelEvent = new ModelEvent();
             $this->modelUser->updateWallet($idUser, $remainingAmount);
             $modelEvent->setEventStatusPaid($eventId);
+            
+/*             $this->controllerError->logs(
+                "Paiement de leçon via portefeuille réussi", 
+                [
+                    "Utilisateur ID: " . $idUser,
+                    "Événement ID: " . $eventId,
+                    "Leçon: " . $lessonName,
+                    "Prix: " . $lessonPrice . "€",
+                    "Portefeuille avant: " . $userWallet . "€",
+                    "Portefeuille après: " . $remainingAmount . "€"
+                ], 
+                self::ORDER_LOG_FILE
+            ); */
             
             echo json_encode([
                 'code' => 1,
@@ -160,8 +203,29 @@ class ControllerOrder
                 ]
             ]);
 
+/*             $this->controllerError->logs(
+                "Session Stripe créée", 
+                [
+                    "Utilisateur ID: " . $idUser,
+                    "Événement ID: " . $eventId,
+                    "Type: " . ($eventId === 0 ? "Pack" : "Leçon"),
+                    "Montant: " . $amountToPay . "€",
+                    "Session ID: " . $checkout_session->id
+                ], 
+                self::ORDER_LOG_FILE
+            ); */
+
             echo json_encode(['clientSecret' => $checkout_session->client_secret]);
         } catch (Error $e) {
+/*             $this->controllerError->logs(
+                "ERREUR création session Stripe", 
+                [
+                    "Utilisateur ID: " . $idUser,
+                    "Montant: " . $amountToPay . "€",
+                    "Message: " . $e->getMessage()
+                ], 
+                self::ORDER_LOG_FILE 
+            );*/
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
         }
@@ -196,10 +260,29 @@ class ControllerOrder
                 if ($eventId != 0) {
                     $this->modelEvent->setEventStatusPaid($eventId);
                     $this->modelUser->updateWallet($idUser, 0); // Mettre à jour le portefeuille à 0
+/*                     $this->controllerError->logs(
+                        "Paiement de leçon avec portefeuille réussi", 
+                        [
+                            "Utilisateur ID: " . $idUser,
+                            "Événement ID: " . $eventId,
+                            "Leçon: " . $session->metadata->lesson_name,
+                            "Montant: " . $session->amount_total / 100 . "€"
+                        ], 
+                        self::ORDER_LOG_FILE
+                    ); */
                 } else {
                     $amount = $session->amount_total / 100;
                     $modelUser = new ModelUser();
                     $modelUser->addToWallet($idUser, $amount);
+/*                     $this->controllerError->logs(
+                        "Achat de pack réussi", 
+                        [
+                            "Utilisateur ID: " . $idUser,
+                            "Montant: " . $amount . "€",
+                            "Leçon: " . $session->metadata->lesson_name
+                        ], 
+                        self::ORDER_LOG_FILE
+                    ); */
                 }
 
                 // ✅ MARQUER COMME TRAITÉ dans la session PHP
@@ -223,6 +306,16 @@ class ControllerOrder
                     'message' => 'Paiement traité avec succès !'
                 ]);
             } else {
+/*                 $this->controllerError->logs(
+                    "Paiement en attente ou non payé", 
+                    [
+                        "Utilisateur: " . $_SESSION['firstName'] . " " . $_SESSION['lastName'],
+                        "Mail: " . $_SESSION['email'],
+                        "Session ID: " . $jsonObj->session_id,
+                        "Statut de paiement: " . $session->payment_status
+                    ], 
+                    self::ORDER_LOG_FILE
+                ); */
                 echo json_encode([
                     'status' => $session->status ?? 'unknown',
                     'payment_status' => $session->payment_status ?? 'unknown',
@@ -230,6 +323,15 @@ class ControllerOrder
                 ]);
             }
         } catch (\Stripe\Exception\ApiErrorException $e) {
+/*             $this->controllerError->logs(
+                "ERREUR Stripe lors de la vérification du paiement", 
+                [
+                    "Utilisateur: " . ($_SESSION['firstName'] ?? 'Inconnu') . " " . ($_SESSION['lastName'] ?? ''),
+                    "Session ID: " . ($jsonObj->session_id ?? 'N/A'),
+                    "Message d'erreur: " . $e->getMessage()
+                ], 
+                self::ORDER_LOG_FILE
+            ); */
             error_log("Erreur Stripe: " . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
@@ -254,11 +356,30 @@ class ControllerOrder
             $status = $modelEvent->updateEventStatus($eventId, 'Refusé');
 
             if ($wallet && $status) {
+/*                 $this->controllerError->logs(
+                    "Rendez-vous refusé et remboursé", 
+                    [
+                        "Utilisateur ID: " . $idUser,
+                        "Événement ID: " . $eventId,
+                        "Montant remboursé: " . $lessonPrice['price'] . "€",
+                        "Leçon: " . $lessonPrice['title']
+                    ], 
+                    self::ORDER_LOG_FILE
+                ); */
                 echo json_encode([
                     'code' => 1,
                     'message' => 'Rendez-vous refusé avec succès.'
                 ]);
             } else {
+/*                 $this->controllerError->logs(
+                    "ERREUR lors du refus de rendez-vous", 
+                    [
+                        "Utilisateur ID: " . $idUser,
+                        "Événement ID: " . $eventId,
+                        "Raison: Échec de la mise à jour du wallet ou du statut"
+                    ], 
+                    self::ORDER_LOG_FILE
+                ); */
                 echo json_encode([
                     'code' => 0,
                     'message' => 'Échec du refus du rendez-vous.'

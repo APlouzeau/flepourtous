@@ -19,10 +19,10 @@ export default function PricesSection({
                 <div className="text-center mb-8 sm:mb-12">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                         Présentation des différentes{" "}
-                        <span className="text-red-600">Formules</span>
+                        <span className="text-red-600">formules</span>
                     </h2>
                     <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                        Choisissez le cours qui convient le mieux suivant vos
+                        Choisissez le cours qui vous convient le mieux suivant vos
                         objectifs et la durée que vous préférez.
                     </p>
                 </div>

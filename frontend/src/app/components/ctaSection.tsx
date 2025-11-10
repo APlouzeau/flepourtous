@@ -13,7 +13,7 @@ export default function CtaSection() {
                 </h2>
                 <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto">
                     Chaque journée est une occasion de progresser. Investissez dans votre avenir dès aujourd&apos;hui
-                    avec FLE Pour Tous. L&apos;excellence en français n&apos;attend pas – elle se construit maintenant,
+                    avec FLEpourtous. L&apos;excellence en français n&apos;attend pas – elle se construit maintenant,
                     un cours après l&apos;autre.
                 </p>
                 <Button variant="white" href="/offre-de-cours">

@@ -20,7 +20,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
             <section className="relative py-16 px-4 overflow-hidden bg-white">
                 <div className="relative max-w-7xl mx-auto text-center">
                     <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight text-gray-900">
-                        Nos <span className="text-red-600">Formules</span>
+                        Nos <span className="text-red-600">formules</span>
                     </h1>
                     <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-12 leading-relaxed">
                         Découvrez nos cours de français personnalisés, adaptés à tous les âges et tous les niveaux
@@ -36,7 +36,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                         </div>
                         <div className="bg-gray-50 rounded-2xl px-8 py-4 border border-gray-200">
                             <div className="text-3xl font-bold text-gray-900">99%</div>
-                            <div className="text-gray-600">Satisfaction</div>
+                            <div className="text-gray-600">de satisfaction</div>
                         </div>
                     </div>
                 </div>

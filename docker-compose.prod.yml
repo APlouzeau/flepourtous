@@ -6,6 +6,8 @@ services:
       target: prod
     env_file:
       - ./backend/.env
+    volumes:
+      - ./logs:/var/www/html/logs
     command: apache2-foreground
     labels:
       - "traefik.enable=true"
@@ -25,11 +27,12 @@ services:
       dockerfile: dockerfile
       target: runner
       args:
-        - NEXT_PUBLIC_API_URL=https://api.flepourtous.fr
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${NEXT_PUBLIC_STRIPE_PUBLIC_KEY}
+    env_file:
+      - ./frontend/.env
     environment:
       - INTERNAL_API_URL=http://backend
-      - JWT_SECRET=Vive_vive_vive_les_gros_nichons
-      - JWT_EXPIRES_IN=1h
     command: pnpm run start
     labels:
       - "traefik.enable=true"

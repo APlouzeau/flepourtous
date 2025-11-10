@@ -23,7 +23,7 @@ export default function WhyChooseFleSection() {
                     <ScrollDiv className="scroll-animate scroll-animate-delay-2">
                         <FeatureCard
                             icon="💰"
-                            title="Prix transparent"
+                            title="Prix transparents"
                             subtitle="Pas de frais cachés, juste des tarifs simples et accessibles."
                             description="Vous connaissez le prix dès le départ : que vous preniez un cours à l’unité ou un forfait, tout est clairement indiqué. Le rapport qualité-prix est pensé pour que chacun puisse progresser à son rythme, sans se ruiner."
                         />
