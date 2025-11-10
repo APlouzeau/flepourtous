@@ -64,7 +64,6 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        Cookie: `PHPSESSID=${cookie}`,
                     },
                     withCredentials: true,
                 }

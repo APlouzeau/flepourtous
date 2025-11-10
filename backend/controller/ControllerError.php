@@ -73,4 +73,24 @@ class ControllerError
             }
         }
     }
+
+    public function logs(string $title, array $messages, string $file)
+    {
+        $logFile = APP_PATH . '/../logs/' . $file . '.log';
+        $logDir = dirname($logFile);
+
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+        }
+
+        $timestamp = date('Y-m-d H:i:s');
+        
+        $logContent = "[{$timestamp}] {$title}\n";
+        foreach ($messages as $message) {
+            $logContent .= "  - {$message}\n";
+        }
+        $logContent .= "\n";
+
+        file_put_contents($logFile, $logContent, FILE_APPEND | LOCK_EX);
+    }
 }
