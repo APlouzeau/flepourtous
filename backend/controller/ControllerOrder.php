@@ -98,18 +98,19 @@ class ControllerOrder
 
         // Validation des données de session
         if (!$idUser) {
-/*             $this->controllerError->logs(
+            http_response_code(401);
+            $this->controllerError->logs(
                 "ERREUR checkout: Utilisateur non connecté", 
                 ["Session: " . session_id()], 
                 self::ORDER_LOG_FILE
-            ); */
-            http_response_code(401);
+            ); 
             echo json_encode(['code' => 0, 'error' => 'Utilisateur non connecté']);
             return;
         }
 
         if ($lessonPrice === null || $lessonName === null || $eventId === null) {
-/*             $this->controllerError->logs(
+            http_response_code(400);
+            $this->controllerError->logs(
                 "ERREUR checkout: Données de session manquantes", 
                 [
                     "Utilisateur ID: " . $idUser,
@@ -119,8 +120,7 @@ class ControllerOrder
                     "Session ID: " . session_id()
                 ], 
                 self::ORDER_LOG_FILE
-            ); */
-            http_response_code(400);
+            );
             echo json_encode(['code' => 0, 'error' => 'Session invalide. Veuillez recommencer le processus de réservation.']);
             return;
         }
@@ -141,25 +141,24 @@ class ControllerOrder
             $modelEvent = new ModelEvent();
             $this->modelUser->updateWallet($idUser, $remainingAmount);
             $modelEvent->setEventStatusPaid($eventId);
-            
-/*             $this->controllerError->logs(
-                "Paiement de leçon via portefeuille réussi", 
-                [
-                    "Utilisateur ID: " . $idUser,
-                    "Événement ID: " . $eventId,
-                    "Leçon: " . $lessonName,
-                    "Prix: " . $lessonPrice . "€",
-                    "Portefeuille avant: " . $userWallet . "€",
-                    "Portefeuille après: " . $remainingAmount . "€"
-                ], 
-                self::ORDER_LOG_FILE
-            ); */
-            
+            $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
             echo json_encode([
                 'code' => 1,
                 'payment_method' => 'wallet',
                 'message' => 'Le paiement a été effectué avec succès via votre portefeuille.',
             ]);
+            $this->controllerError->logs(
+               "Paiement de leçon via portefeuille réussi", 
+               [
+                   "Utilisateur ID: " . $idUser,
+                   "Événement ID: " . $eventId,
+                   "Leçon: " . $lessonName,
+                   "Prix: " . $lessonPrice . "€",
+                   "Portefeuille avant: " . $userWallet . "€",
+                   "Portefeuille après: " . $remainingAmount . "€"
+               ], 
+               self::ORDER_LOG_FILE
+           );
             return;
         }
 
@@ -203,29 +202,10 @@ class ControllerOrder
                 ]
             ]);
 
-/*             $this->controllerError->logs(
-                "Session Stripe créée", 
-                [
-                    "Utilisateur ID: " . $idUser,
-                    "Événement ID: " . $eventId,
-                    "Type: " . ($eventId === 0 ? "Pack" : "Leçon"),
-                    "Montant: " . $amountToPay . "€",
-                    "Session ID: " . $checkout_session->id
-                ], 
-                self::ORDER_LOG_FILE
-            ); */
-
             echo json_encode(['clientSecret' => $checkout_session->client_secret]);
+
+
         } catch (Error $e) {
-/*             $this->controllerError->logs(
-                "ERREUR création session Stripe", 
-                [
-                    "Utilisateur ID: " . $idUser,
-                    "Montant: " . $amountToPay . "€",
-                    "Message: " . $e->getMessage()
-                ], 
-                self::ORDER_LOG_FILE 
-            );*/
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
         }
@@ -260,7 +240,7 @@ class ControllerOrder
                 if ($eventId != 0) {
                     $this->modelEvent->setEventStatusPaid($eventId);
                     $this->modelUser->updateWallet($idUser, 0); // Mettre à jour le portefeuille à 0
-/*                     $this->controllerError->logs(
+                     $this->controllerError->logs(
                         "Paiement de leçon avec portefeuille réussi", 
                         [
                             "Utilisateur ID: " . $idUser,
@@ -269,12 +249,12 @@ class ControllerOrder
                             "Montant: " . $session->amount_total / 100 . "€"
                         ], 
                         self::ORDER_LOG_FILE
-                    ); */
+                    );
                 } else {
                     $amount = $session->amount_total / 100;
                     $modelUser = new ModelUser();
                     $modelUser->addToWallet($idUser, $amount);
-/*                     $this->controllerError->logs(
+                     $this->controllerError->logs(
                         "Achat de pack réussi", 
                         [
                             "Utilisateur ID: " . $idUser,
@@ -282,7 +262,7 @@ class ControllerOrder
                             "Leçon: " . $session->metadata->lesson_name
                         ], 
                         self::ORDER_LOG_FILE
-                    ); */
+                    );
                 }
 
                 // ✅ MARQUER COMME TRAITÉ dans la session PHP
