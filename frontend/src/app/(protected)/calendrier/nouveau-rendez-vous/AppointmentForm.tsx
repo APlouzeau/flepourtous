@@ -270,9 +270,10 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             className="grid grid-cols-1 md:grid-cols-2 gap-3"
                         >
                             {selectedLesson.price?.map((durationPriceOption) => (
-                                <div
+                                <Label
                                     key={durationPriceOption.duration}
-                                    className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 transition-colors"
+                                    htmlFor={`duration-option-${selectedLesson.idLesson}-${durationPriceOption.duration}`}
+                                    className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-400 transition-colors cursor-pointer"
                                 >
                                     <div className="flex items-center space-x-3">
                                         <RadioGroupItem
@@ -282,21 +283,16 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                                             className="text-gray-700"
                                             style={{ "--primary": "#1D1E1C" } as React.CSSProperties}
                                         />
-                                        <Label
-                                            htmlFor={`duration-option-${selectedLesson.idLesson}-${durationPriceOption.duration}`}
-                                            className="cursor-pointer"
-                                        >
-                                            <div className="font-medium text-gray-900">
-                                                {durationPriceOption.duration} minutes
-                                            </div>
-                                        </Label>
+                                        <div className="font-medium text-gray-900">
+                                            {durationPriceOption.duration} minutes
+                                        </div>
                                     </div>
                                     <div className="text-right">
                                         <div className="text-lg font-bold" style={{ color: "#1D1E1C" }}>
                                             {durationPriceOption.price}€
                                         </div>
                                     </div>
-                                </div>
+                                </Label>
                             ))}
                         </RadioGroup>
                     </div>
