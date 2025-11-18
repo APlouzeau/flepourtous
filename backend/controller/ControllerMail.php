@@ -77,10 +77,8 @@ class ControllerMail
             return false;
         }
 
-        $dateNow = new DateTime("now", new DateTimeZone('UTC'));
-
         $modelEvent = new ModelEvent();
-        $eventsToAlert = $modelEvent->checkEventForNextHour($dateNow->format('Y-m-d H:i:s'));
+        $eventsToAlert = $modelEvent->checkEventForNextHour();
         if (!$eventsToAlert) {
             error_log("No upcoming events found.");
             return false;
@@ -134,7 +132,6 @@ class ControllerMail
         $this->mailer->send();
         $this->controllerError->logs("Appointment reminder email sent to user", [
             "Email sent to: " . $event['mail'],
-            "Event ID: " . $event['idEvent']
         ], self::MAIL_LOG_FILE);
         $this->mailer->clearAddresses();
     }
@@ -162,7 +159,6 @@ class ControllerMail
         $this->mailer->send();
         $this->controllerError->logs("Appointment reminder email sent to teacher", [
             "Email sent to: " . TEACHER_MAIL,
-            "Event ID: " . $event['idEvent']
         ], self::MAIL_LOG_FILE);
         $this->mailer->clearAddresses();
     }

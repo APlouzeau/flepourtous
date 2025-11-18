@@ -269,16 +269,15 @@ class ModelEvent extends  ClassDatabase
         return $data ? $data['userId'] : null;
     }
 
-    public function checkEventForNextHour(string $dateNow)
+    public function checkEventForNextHour()
     {
         $this->controllerError->debug("Checking events for the next hour...");
         $req = $this->conn->prepare('
         SELECT u.firstName, u.lastName, u.mail, e.description, e.startDateTime, e.visioLink, e.timezone
         FROM event e INNER JOIN users u ON e.userId = u.idUser
-        WHERE startDateTime >= DATE_ADD(:dateNow, INTERVAL 55 minute)
-        AND startDateTime <= DATE_ADD(:dateNow, INTERVAL 65 minute);');
+        WHERE startDateTime >= DATE_ADD(NOW(), INTERVAL 55 minute)
+        AND startDateTime <= DATE_ADD(NOW(), INTERVAL 65 minute);');
 
-        $req->bindValue(':dateNow', $dateNow, PDO::PARAM_STR);
         $req->execute();
         $datas = $req->fetchAll();
         $this->controllerError->debug("Found " . count($datas) . " events in the next hour.");
