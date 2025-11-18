@@ -80,7 +80,7 @@ class ControllerError
         $logDir = dirname($logFile);
 
         if (!is_dir($logDir)) {
-            mkdir($logDir, 0755, true);
+            @mkdir($logDir, 0755, true);
         }
 
         $timestamp = date('Y-m-d H:i:s');
@@ -91,6 +91,6 @@ class ControllerError
         }
         $logContent .= "\n";
 
-        file_put_contents($logFile, $logContent, FILE_APPEND | LOCK_EX);
+        @file_put_contents($logFile, $logContent, FILE_APPEND);
     }
 }

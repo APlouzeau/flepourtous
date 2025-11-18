@@ -85,7 +85,6 @@ class ControllerGoogle
 
             $watchResponse = $service->events->watch($calendarId, $channel);
 
-            // ✅ Utiliser la nouvelle méthode plus simple et robuste
             $modelGoogle->upsertChannel($watchResponse, $calendarId);
 
             echo "Canal de notification reconfiguré. Nouvel ID: " . $watchResponse->getId() . " Expire le: " . date('Y-m-d H:i:s', $watchResponse->getExpiration() / 1000);

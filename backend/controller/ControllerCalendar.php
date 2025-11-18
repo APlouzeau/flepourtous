@@ -136,7 +136,7 @@ class ControllerCalendar
         $duration = $data['duration'];
         $createdAt = date('Y-m-d H:i:s');
         $updatedAt = date('Y-m-d H:i:s');
-        $status = 'active';
+        $status = 'En attente';
         $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
 
         // Récupérer l'email de l'utilisateur pour l'ajouter comme attendee dans Google Calendar
@@ -625,12 +625,12 @@ class ControllerCalendar
 
         $createdAt = date('Y-m-d H:i:s');
         $updatedAt = date('Y-m-d H:i:s');
-        $status = 'active';
+        $status = 'Google';
 
         $userTimeZone = 'Europe/Paris';
 
 
-        $this->registerEventInDatabase($idEvent, $userId, $description, $duration, $startDateTimeUtcFormatted, $userTimeZone);
+        $this->registerEventInDatabase($idEvent, $userId, $description, $duration, $startDateTimeUtcFormatted, $userTimeZone, $status);
 
     }
 
@@ -638,7 +638,6 @@ class ControllerCalendar
     {
         $createdAt = date('Y-m-d H:i:s');
         $updatedAt = date('Y-m-d H:i:s');
-        $status = 'active';
 
         $eventDatabase = new EntitieEvent([
             'idEvent' => $idEvent,
