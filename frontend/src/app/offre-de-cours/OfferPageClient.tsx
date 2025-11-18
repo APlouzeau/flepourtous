@@ -243,7 +243,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                             </Button>
                             <Button
                                 variant="white"
-                                href="/contact"
+                                 href="mailto:flepourtous.online@gmail.com?subject=Demande%20d'information&body=Bonjour,%0D%0A%0D%0AJe%20souhaiterais%20obtenir%20plus%20d'informations%20sur%20vos%20cours%20de%20français.%0D%0A%0D%0AMerci."
                                 className="text-lg py-3 px-6 rounded-xl font-semibold hover:scale-105 transition-all duration-300"
                             >
                                 Nous contacter

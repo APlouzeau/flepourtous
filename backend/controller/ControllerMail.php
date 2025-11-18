@@ -10,6 +10,7 @@ class ControllerMail
 {
     private $mailer;
     private $controllerError;
+    const MAIL_LOG_FILE = "mail";
 
     public function __construct()
     {
@@ -76,10 +77,8 @@ class ControllerMail
             return false;
         }
 
-        $dateNow = new DateTime("now", new DateTimeZone('UTC'));
-
         $modelEvent = new ModelEvent();
-        $eventsToAlert = $modelEvent->checkEventForNextHour($dateNow->format('Y-m-d H:i:s'));
+        $eventsToAlert = $modelEvent->checkEventForNextHour();
         if (!$eventsToAlert) {
             error_log("No upcoming events found.");
             return false;
@@ -131,6 +130,9 @@ class ControllerMail
         $this->mailer->Body = $emailBody;
 
         $this->mailer->send();
+        $this->controllerError->logs("Appointment reminder email sent to user", [
+            "Email sent to: " . $event['mail'],
+        ], self::MAIL_LOG_FILE);
         $this->mailer->clearAddresses();
     }
 
@@ -155,6 +157,9 @@ class ControllerMail
         $this->mailer->Body = $teacherEmailBody;
         $this->mailer->isHTML(true);
         $this->mailer->send();
+        $this->controllerError->logs("Appointment reminder email sent to teacher", [
+            "Email sent to: " . TEACHER_MAIL,
+        ], self::MAIL_LOG_FILE);
         $this->mailer->clearAddresses();
     }
 
@@ -199,9 +204,18 @@ class ControllerMail
             $this->mailer->Body = $emailBody;
 
             $this->mailer->send();
+            error_log("✅ Password reset email SENT successfully to: " . $mail);
+            $this->controllerError->logs("Password reset email sent", [
+                "Email sent to: " . $mail,
+            ], self::MAIL_LOG_FILE);
             return true;
         } catch (Exception $e) {
-            error_log("Mailer Error: " . $this->mailer->ErrorInfo);
+            error_log("❌ Password reset email FAILED: " . $e->getMessage());
+            error_log("PHPMailer Error: " . $this->mailer->ErrorInfo);
+            $this->controllerError->logs(
+                "Password reset email fail ",
+                [$this->mailer->ErrorInfo, $e->getMessage()],
+                self::MAIL_LOG_FILE);
             return false;
         } finally {
             if ($this->mailer) {
@@ -258,9 +272,17 @@ class ControllerMail
             $this->mailer->Body = $emailBody;
 
             $this->mailer->send();
+
+            $this->controllerError->logs("Payment success email sent", [
+                "Email sent to: " . $userMail,
+                "Event ID: " . $eventId
+            ], self::MAIL_LOG_FILE);
             return true;
         } catch (Exception $e) {
-            error_log("Mailer Error: " . $this->mailer->ErrorInfo);
+            $this->controllerError->logs("Payment success email fail", [
+                "PHPMailer Error: " . $this->mailer->ErrorInfo,
+                "Exception Message: " . $e->getMessage()
+            ], self::MAIL_LOG_FILE);
             return false;
         } finally {
             if ($this->mailer) {
@@ -291,9 +313,16 @@ class ControllerMail
             $this->mailer->Body = $emailBody;
 
             $this->mailer->send();
+            $this->controllerError->logs("Pack purchase email sent", [
+                "Email sent to: " . $userMail,
+                "Amount: " . $amount
+            ], self::MAIL_LOG_FILE);
             return true;
         } catch (Exception $e) {
-            error_log("Mailer Error: " . $this->mailer->ErrorInfo);
+            $this->controllerError->logs("Pack purchase email fail", [
+                "PHPMailer Error: " . $this->mailer->ErrorInfo,
+                "Exception Message: " . $e->getMessage()
+            ], self::MAIL_LOG_FILE);
             return false;
         } finally {
             if ($this->mailer) {
@@ -319,6 +348,11 @@ class ControllerMail
             $this->mailer->Body = $emailBody;
 
             $this->mailer->send();
+            $this->controllerError->logs("Visio email sent", [
+                "Email sent to: " . $email,
+                "Room URL: " . $roomUrl,
+                "Duration: " . $duration
+            ], self::MAIL_LOG_FILE);
             return true;
         } catch (Exception $e) {
             error_log("Mailer Error: " . $this->mailer->ErrorInfo);
@@ -355,6 +389,11 @@ class ControllerMail
         $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
         $this->mailer->Body = $emailBody;
         $this->mailer->send();
+        $this->controllerError->logs("Admin cancellation email sent", [
+            "Email sent to: " . $userInformations['mail'],
+            "Event DateTime: " . $startDateTime,
+            "Amount refunded: " . $amount
+        ], self::MAIL_LOG_FILE);
         $this->mailer->clearAddresses();
         $this->mailer->clearAttachments();
     }

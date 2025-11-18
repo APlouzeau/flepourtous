@@ -4,6 +4,8 @@ services:
       context: ./backend
       target: dev
     container_name: backend-staging
+    env_file:
+      - ./backend/.env
     environment:
       - URI=https://api-staging.flepourtous.plouzor.fr/
       - URI_FRONT=https://staging.flepourtous.plouzor.fr/
@@ -21,6 +23,7 @@ services:
     volumes:
       - ./backend:/var/www/html
       - backend_vendor_staging:/var/www/html/vendor
+      - ./logs:/var/www/logs
     networks:
       - web
       - internal
@@ -34,7 +37,9 @@ services:
     command: pnpm run dev
     environment:
       - NEXT_PUBLIC_API_URL=https://api-staging.flepourtous.plouzor.fr
+      - INTERNAL_API_URL=http://backend-staging
       - NODE_ENV=development
+      - NODE_OPTIONS=--no-deprecation
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app-staging.rule=Host(`staging.flepourtous.plouzor.fr`)"
