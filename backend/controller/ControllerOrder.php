@@ -241,7 +241,7 @@ class ControllerOrder
                     $this->modelEvent->setEventStatusPaid($eventId);
                     $this->modelUser->updateWallet($idUser, 0); // Mettre à jour le portefeuille à 0
                      $this->controllerError->logs(
-                        "Paiement de leçon avec portefeuille réussi", 
+                        "Paiement de leçon avec carte réussi", 
                         [
                             "Utilisateur ID: " . $idUser,
                             "Événement ID: " . $eventId,
