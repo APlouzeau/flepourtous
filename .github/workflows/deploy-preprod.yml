@@ -53,7 +53,7 @@ jobs:
             set -e
             echo "🚀 Starting Docker deployment..."
             
-            cd ~/projects/projects/preprod/flepourtous
+            cd ${{ secrets.DEPLOY_PREPROD_PATH }}
             
             echo "📥 Pulling latest changes from preprod..."
             git fetch origin preprod
