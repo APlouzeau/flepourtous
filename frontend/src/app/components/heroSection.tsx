@@ -10,7 +10,7 @@ export default function HeroSection() {
                 <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                     <div className="order-2 md:order-1">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">
-                            Augmentez votre niveau en français avec Ludivine de FlePourTous
+                            Améliorez votre niveau en français avec Ludivine de FlePourTous
                         </h1>
                         <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                             Développez vos connaissances avec FLE Pour Tous, votre partenaire de cours de français en
@@ -25,7 +25,7 @@ export default function HeroSection() {
                     <div className="relative order-1 md:order-2">
                         <div className="relative h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden">
                             <Image
-                                src="/images/triomphe.jpg"
+                                src="/images/Chenonceau.webp"
                                 alt="Apprentissage du français"
                                 fill
                                 className="object-cover"
