@@ -308,7 +308,7 @@ class ControllerCalendar
     public function listEventsUser()
     {
         $this->controllerUser->verifyConnectBack();
-
+        echo json_encode("coucou");
         $events = $this->modelEvent->getEventsUser($_SESSION['idUser']);
         if (count($events) == 0) {
             $response = [
