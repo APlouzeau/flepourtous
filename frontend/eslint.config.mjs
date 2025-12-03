@@ -28,6 +28,7 @@ const eslintConfig = [
     },
     ...compat.extends("next/core-web-vitals", "next/typescript"),
     {
+        files: ["**/*.ts", "**/*.tsx"],
         languageOptions: {
             parser: tsParser,
             parserOptions: { project: true },
