@@ -20,6 +20,7 @@ const eslintConfig = [
             "prettier.config.mjs",
             "eslint.config.mjs",
             "postcss.config.mjs",
+            "next.config.mjs",
             "node_modules/**",
             "next-env.d.ts",
             "ecosystem.js",
