@@ -56,7 +56,7 @@ jobs:
             set -e
             echo "🚀 Starting Docker deployment..."
             
-            cd $DEPLOY_PATH
+            cd ~/projects/projects/preprod/flepourtous || { echo "❌ Project directory not found"; exit 1; }
             
             echo "📥 Pulling latest changes from preprod..."
             git fetch origin preprod
