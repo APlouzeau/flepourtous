@@ -3,9 +3,8 @@ import { createSession } from "@/lib/session";
 import apiClient from "@/lib/axios";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Button from "../../components/front/Button";
-import Image from "next/image";
 import ShowPassword from "@/app/components/front/showPassword";
 
 export default function LoginForm() {
