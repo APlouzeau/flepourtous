@@ -153,7 +153,7 @@ class ControllerMail
         if ($event['visioLink'] != '') {
             $teacherEmailBody .= "Lien de visio : <a href=\"" . htmlspecialchars($event['visioLink']) . "\">" . "Cliquez ici à l'heure du rendez-vous</a><br>";
         }
-        $teacherEmailBody .= "<br>Cordialement,<br>L'équipe Flepourtous<br><br><br><br>Alex quoi :D";
+        $teacherEmailBody .= "<br>Cordialement,<br>L'équipe Flepourtous<br><br><br><br>";
         $this->mailer->Body = $teacherEmailBody;
         $this->mailer->isHTML(true);
         $this->mailer->send();
