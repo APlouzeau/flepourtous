@@ -1,3 +1,5 @@
+name: flepourtous-dev
+
 services:
     api:
         ports:
@@ -7,6 +9,7 @@ services:
         build:
             context: ./backend
             target: dev
+        container_name: flepourtous-backend-dev
 
     app:
         ports:
@@ -18,10 +21,11 @@ services:
             dockerfile: dockerfile
             target: dev
         command: pnpm run dev
+        container_name: flepourtous-frontend-dev
 
     db:
         image: mariadb:10.6
-        container_name: database
+        container_name: flepourtous-database-dev
         restart: unless-stopped
         environment:
             MYSQL_ROOT_PASSWORD: root
@@ -41,7 +45,7 @@ services:
         profiles:
             - dev
         image: phpmyadmin/phpmyadmin
-        container_name: phpmyadmin
+        container_name: flepourtous-phpmyadmin-dev
         environment:
             PMA_HOST: db
             PMA_PORT: 3306

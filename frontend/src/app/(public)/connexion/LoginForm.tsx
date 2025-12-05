@@ -3,14 +3,17 @@ import { createSession } from "@/lib/session";
 import apiClient from "@/lib/axios";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../../components/front/Button";
+import Image from "next/image";
+import ShowPassword from "@/app/components/front/showPassword";
 
 export default function LoginForm() {
     const [mail, setMail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const isValidForm = mail && password;
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -54,15 +57,19 @@ export default function LoginForm() {
                     className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                 />
             </div>
-            <div>
+            <div className="relative">
                 <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     name="password"
                     placeholder="Mot de passe"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                    className="w-full p-3 sm:p-4 pr-12 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                />
+                <ShowPassword 
+                    showPassword={showPassword}
+                    setShowPassword={setShowPassword}
                 />
             </div>
 

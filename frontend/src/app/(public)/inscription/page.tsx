@@ -4,6 +4,7 @@ import apiClient from "@/lib/axios";
 import Link from "next/link";
 import Image from "next/image";
 import Button from "../../components/front/Button";
+import ShowPassword from "@/app/components/front/showPassword";
 
 export default function RegisterPage() {
     const [nickName, setNickName] = useState("");
@@ -16,6 +17,7 @@ export default function RegisterPage() {
     const [success, setSuccess] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [disabled, setDisabled] = useState(true);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -130,44 +132,46 @@ export default function RegisterPage() {
                             className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                         />
                     </div>
-                    <div>
-                        {/* C'est ce div qui doit être "relative" */}
-                        <div className="relative">
-                            <input
-                                type="password"
-                                placeholder="Mot de passe"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                pattern="((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,60})"
-                                title="Le mot de passe doit respecter les règles de complexité."
-                                className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
-                            />
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-4 group">
-                                <div className="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-full cursor-help">
-                                    <span className="text-sm font-bold text-gray-600">?</span>
-                                </div>
-                                <div className="absolute bottom-full right-0 mb-2 w-max max-w-xs p-3 bg-black text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                    Le mot de passe doit contenir :
-                                    <ul className="list-disc list-inside mt-1">
-                                        <li>Au moins 8 caractères</li>
-                                        <li>Une lettre majuscule (A-Z)</li>
-                                        <li>Une lettre minuscule (a-z)</li>
-                                        <li>Un chiffre (0-9)</li>
-                                        <li>Un caractère spécial (par exemple : !@#$%^&*)</li>
-                                    </ul>
-                                </div>
+                    <div className="relative">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Mot de passe"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            pattern="((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,60})"
+                            title="Le mot de passe doit respecter les règles de complexité."
+                            className="w-full p-3 sm:p-4 pr-28 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                        />
+
+                        <div className="absolute inset-y-0 right-12 flex items-center group">
+                            <div className="w-6 h-6 flex items-center justify-center bg-gray-200 rounded-full cursor-help">
+                                <span className="text-sm font-bold text-gray-600">?</span>
+                            </div>
+                            <div className="absolute bottom-full right-0 mb-2 w-max max-w-xs p-3 bg-black text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
+                                Le mot de passe doit contenir :
+                                <ul className="list-disc list-inside mt-1">
+                                    <li>Au moins 8 caractères</li>
+                                    <li>Une lettre majuscule (A-Z)</li>
+                                    <li>Une lettre minuscule (a-z)</li>
+                                    <li>Un chiffre (0-9)</li>
+                                    <li>Un caractère spécial (par exemple : !@#$%^&*)</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
-                    <div>
+                    <div className="relative">
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             placeholder="Confirmer le mot de passe"
                             value={passwordConfirm}
                             onChange={(e) => setPasswordConfirm(e.target.value)}
                             required
-                            className="w-full p-3 sm:p-4 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                            className="w-full p-3 sm:p-4 pr-12 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
+                        />
+                        <ShowPassword 
+                            showPassword={showPassword}
+                            setShowPassword={setShowPassword}
                         />
                     </div>
 

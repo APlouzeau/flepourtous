@@ -20,6 +20,7 @@ const eslintConfig = [
             "prettier.config.mjs",
             "eslint.config.mjs",
             "postcss.config.mjs",
+            "next.config.mjs",
             "node_modules/**",
             "next-env.d.ts",
             "ecosystem.js",
@@ -27,6 +28,7 @@ const eslintConfig = [
     },
     ...compat.extends("next/core-web-vitals", "next/typescript"),
     {
+        files: ["**/*.ts", "**/*.tsx"],
         languageOptions: {
             parser: tsParser,
             parserOptions: { project: true },
