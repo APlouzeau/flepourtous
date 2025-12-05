@@ -22,7 +22,7 @@ export default function FormulaCard({ image, title, description, price, duration
                     <h3 className="text-xl font-semibold mb-2 text-gray-800">{title}</h3>
                     <p className="text-gray-600 mb-4">{description}</p>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-baseline">
                     <p className="text-gray-500 mb-4">A partir de </p>
                     <div className="flex justify-end items-center mb-4">
                         <span className="text-2xl font-bold text-red-600">{price}</span>
