@@ -46,9 +46,9 @@ jobs:
       - name: Deploy to Production VPS
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST_PROD }}  # À créer dans tes secrets GitHub
-          username: ${{ secrets.SSH_USERNAME_PROD }}  # À créer dans tes secrets GitHub
-          key: ${{ secrets.SSH_KEY_PROD }}  # À créer dans tes secrets GitHub
+          host: ${{ secrets.SSH_HOST }}  # À créer dans tes secrets GitHub
+          username: ${{ secrets.SSH_USERNAME }}  # À créer dans tes secrets GitHub
+          key: ${{ secrets.SSH_KEY }}  # À créer dans tes secrets GitHub
           script: |
             set -e
             echo "🚀 Starting Production Docker deployment..."
