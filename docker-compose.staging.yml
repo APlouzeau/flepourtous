@@ -23,6 +23,7 @@ services:
     volumes:
       - ./backend:/var/www/html
       - backend_vendor_staging:/var/www/html/vendor
+      - ./logs:/var/www/html/logs
     networks:
       - web
       - internal

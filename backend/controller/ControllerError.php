@@ -76,7 +76,7 @@ class ControllerError
 
     public function logs(string $title, array $messages, string $file)
     {
-        $logFile = APP_PATH . '/../logs/' . $file . '.log';
+        $logFile = APP_PATH . '/logs/' . $file . '.log';
         $logDir = dirname($logFile);
 
         if (!is_dir($logDir)) {
