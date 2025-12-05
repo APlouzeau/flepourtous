@@ -129,7 +129,7 @@ down-preprod: ## Arrête les services préprod
 down-staging: ## Arrête les services staging
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) down
 
-restart: down dev ## Redémarre complètement l'environnement
+restart-dev: down dev ## Redémarre complètement l'environnement
 
 restart-preprod: down-preprod preprod ## Redémarre complètement l'environnement préprod
 
@@ -142,10 +142,19 @@ logs: ## Affiche les logs de tous les services
 	docker compose -f $(COMPOSE_FILE) logs -f
 
 logs-backend: ## Logs du backend uniquement
-	docker compose -f $(COMPOSE_FILE) logs -f api
+	docker logs flepourtous-backend-staging -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f api
 
 logs-frontend: ## Logs du frontend uniquement
-	docker compose -f $(COMPOSE_FILE) logs -f app
+	docker logs flepourtous-frontend-staging -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f app
+
+logs-staging: ## Logs de l'environnement staging
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) logs -f
+
+logs-preprod: ## Logs de l'environnement preprod
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) logs -f
+
+logs-prod: ## Logs de l'environnement production
+	docker compose -f $(COMPOSE_PROD_FILE) logs -f
 
 logs-db: ## Logs de la base de données uniquement
 	docker compose -f $(COMPOSE_FILE) logs -f db

@@ -45,15 +45,18 @@ jobs:
     steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
+        env:
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PREPROD_PATH }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
+          envs: DEPLOY_PATH
           script: |
             set -e
             echo "🚀 Starting Docker deployment..."
             
-            cd ~/projects/projects/preprod/flepourtous
+            cd ~/projects/projects/preprod/flepourtous || { echo "❌ Project directory not found"; exit 1; }
             
             echo "📥 Pulling latest changes from preprod..."
             git fetch origin preprod
