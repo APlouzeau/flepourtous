@@ -84,4 +84,4 @@ docker-compose.preprod.yml
 docker-compose.staging.yml
 
 flepourtous.zip
-Flepourtous.zip
+Flepourtous.zip.env.staging
