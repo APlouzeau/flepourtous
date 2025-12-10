@@ -100,10 +100,10 @@ class ControllerOrder
         if (!$idUser) {
             http_response_code(401);
             $this->controllerError->logs(
-                "ERREUR checkout: Utilisateur non connecté", 
-                ["Session: " . session_id()], 
+                "ERREUR checkout: Utilisateur non connecté",
+                ["Session: " . session_id()],
                 self::ORDER_LOG_FILE
-            ); 
+            );
             echo json_encode(['code' => 0, 'error' => 'Utilisateur non connecté']);
             return;
         }
@@ -111,14 +111,14 @@ class ControllerOrder
         if ($lessonPrice === null || $lessonName === null || $eventId === null) {
             http_response_code(400);
             $this->controllerError->logs(
-                "ERREUR checkout: Données de session manquantes", 
+                "ERREUR checkout: Données de session manquantes",
                 [
                     "Utilisateur ID: " . $idUser,
                     "lesson_price: " . ($lessonPrice ?? 'NULL'),
                     "lesson_name: " . ($lessonName ?? 'NULL'),
                     "event_id: " . ($eventId ?? 'NULL'),
                     "Session ID: " . session_id()
-                ], 
+                ],
                 self::ORDER_LOG_FILE
             );
             echo json_encode(['code' => 0, 'error' => 'Session invalide. Veuillez recommencer le processus de réservation.']);
@@ -148,17 +148,17 @@ class ControllerOrder
                 'message' => 'Le paiement a été effectué avec succès via votre portefeuille.',
             ]);
             $this->controllerError->logs(
-               "Paiement de leçon via portefeuille réussi", 
-               [
-                   "Utilisateur ID: " . $idUser,
-                   "Événement ID: " . $eventId,
-                   "Leçon: " . $lessonName,
-                   "Prix: " . $lessonPrice . "€",
-                   "Portefeuille avant: " . $userWallet . "€",
-                   "Portefeuille après: " . $remainingAmount . "€"
-               ], 
-               self::ORDER_LOG_FILE
-           );
+                "Paiement de leçon via portefeuille réussi",
+                [
+                    "Utilisateur ID: " . $idUser,
+                    "Événement ID: " . $eventId,
+                    "Leçon: " . $lessonName,
+                    "Prix: " . $lessonPrice . "€",
+                    "Portefeuille avant: " . $userWallet . "€",
+                    "Portefeuille après: " . $remainingAmount . "€"
+                ],
+                self::ORDER_LOG_FILE
+            );
             return;
         }
 
@@ -203,8 +203,6 @@ class ControllerOrder
             ]);
 
             echo json_encode(['clientSecret' => $checkout_session->client_secret]);
-
-
         } catch (Error $e) {
             http_response_code(500);
             echo json_encode(['error' => $e->getMessage()]);
@@ -240,27 +238,27 @@ class ControllerOrder
                 if ($eventId != 0) {
                     $this->modelEvent->setEventStatusPaid($eventId);
                     $this->modelUser->updateWallet($idUser, 0); // Mettre à jour le portefeuille à 0
-                     $this->controllerError->logs(
-                        "Paiement de leçon avec carte réussi", 
+                    $this->controllerError->logs(
+                        "Paiement de leçon avec carte réussi",
                         [
                             "Utilisateur ID: " . $idUser,
                             "Événement ID: " . $eventId,
                             "Leçon: " . $session->metadata->lesson_name,
                             "Montant: " . $session->amount_total / 100 . "€"
-                        ], 
+                        ],
                         self::ORDER_LOG_FILE
                     );
                 } else {
                     $amount = $session->amount_total / 100;
                     $modelUser = new ModelUser();
                     $modelUser->addToWallet($idUser, $amount);
-                     $this->controllerError->logs(
-                        "Achat de pack réussi", 
+                    $this->controllerError->logs(
+                        "Achat de pack réussi",
                         [
                             "Utilisateur ID: " . $idUser,
                             "Montant: " . $amount . "€",
                             "Leçon: " . $session->metadata->lesson_name
-                        ], 
+                        ],
                         self::ORDER_LOG_FILE
                     );
                 }
@@ -286,7 +284,7 @@ class ControllerOrder
                     'message' => 'Paiement traité avec succès !'
                 ]);
             } else {
-/*                 $this->controllerError->logs(
+                /*                 $this->controllerError->logs(
                     "Paiement en attente ou non payé", 
                     [
                         "Utilisateur: " . $_SESSION['firstName'] . " " . $_SESSION['lastName'],
@@ -303,7 +301,7 @@ class ControllerOrder
                 ]);
             }
         } catch (\Stripe\Exception\ApiErrorException $e) {
-/*             $this->controllerError->logs(
+            /*             $this->controllerError->logs(
                 "ERREUR Stripe lors de la vérification du paiement", 
                 [
                     "Utilisateur: " . ($_SESSION['firstName'] ?? 'Inconnu') . " " . ($_SESSION['lastName'] ?? ''),
@@ -336,7 +334,7 @@ class ControllerOrder
             $status = $modelEvent->updateEventStatus($eventId, 'Refusé');
 
             if ($wallet && $status) {
-/*                 $this->controllerError->logs(
+                /*                 $this->controllerError->logs(
                     "Rendez-vous refusé et remboursé", 
                     [
                         "Utilisateur ID: " . $idUser,
@@ -351,7 +349,7 @@ class ControllerOrder
                     'message' => 'Rendez-vous refusé avec succès.'
                 ]);
             } else {
-/*                 $this->controllerError->logs(
+                /*                 $this->controllerError->logs(
                     "ERREUR lors du refus de rendez-vous", 
                     [
                         "Utilisateur ID: " . $idUser,
