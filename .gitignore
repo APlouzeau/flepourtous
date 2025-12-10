@@ -79,9 +79,6 @@ switchStartFlepourtous.sh
 
 #docker
 db_data
-docker-compose.dev.yml
-docker-compose.preprod.yml
-docker-compose.staging.yml
 
 flepourtous.zip
 Flepourtous.zip.env.staging

@@ -226,3 +226,20 @@ reset-all:
 	@$(MAKE) clean-all
 	@$(MAKE) db-reset
 	@$(MAKE) first-install
+
+# Google Calendar Webhooks
+google-setup-watch: ## Configure le webhook Google Calendar
+	@echo "🔔 Configuration du webhook Google Calendar..."
+	@curl -X POST "http://localhost:8000/api/setupGoogleWatch" \
+		-H "Content-Type: application/json" \
+		-H "Api-Key: $${CRON_KEY:-IFyAdjbJa1OHCFfLirZXtumCrTBprgZKoZMYaKoUE0UozKwSTyCd8LkHBefGPEzY}" \
+		-s || echo "❌ Erreur lors de la configuration"
+	@echo ""
+	@echo "✅ Webhook configuré !"
+
+google-tunnel: ## Lance cloudflared tunnel pour le backend
+	@echo "🌐 Lancement du tunnel cloudflared pour le backend..."
+	@echo "⚠️  Note: L'URL du tunnel change à chaque redémarrage (version gratuite)"
+	@pkill cloudflared 2>/dev/null || true
+	@sleep 1
+	@cloudflared tunnel --url http://localhost:8000
