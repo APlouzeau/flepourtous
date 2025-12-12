@@ -142,10 +142,10 @@ logs: ## Affiche les logs de tous les services
 	docker compose -f $(COMPOSE_FILE) logs -f
 
 logs-backend: ## Logs du backend uniquement
-	docker logs flepourtous-backend-staging -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f api
+	docker logs flepourtous-prod-api -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f api
 
 logs-frontend: ## Logs du frontend uniquement
-	docker logs flepourtous-frontend-staging -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f app
+	docker logs flepourtous-prod-frontend -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f app
 
 logs-staging: ## Logs de l'environnement staging
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) logs -f
