@@ -85,21 +85,12 @@ dev: network build ## Lance l'environnement de développement
 	@echo "🗃️  PhpMyAdmin: http://localhost:8081"
 	@echo "🗄️  Database: localhost:3307 (pour connexions externes)"
 
-staging: network build-staging ## Lance l'environnement staging (debug avec hot reload)
-	@echo "🔥 Démarrage de l'environnement staging..."
-	@echo "📌 Branche actuelle: $$(git branch --show-current)"
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) up -d
-	@echo "✅ Environnement staging prêt avec HOT RELOAD !"
-	@echo "📱 Frontend: https://staging.flepourtous.plouzor.fr"
-	@echo "🔧 Backend: https://api-staging.flepourtous.plouzor.fr"
-	@echo "💡 Les modifications de code sont appliquées en temps réel"
-
 preprod: network build-preprod ## Lance l'environnement de préprod
 	@echo "🔥 Démarrage de l'environnement de préprod..."
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) up -d
 	@echo "✅ Environnement préprod prêt !"
-	@echo "📱 Frontend: https://flepourtous.plouzor.fr"
-	@echo "🔧 Backend: https://api.flepourtous.plouzor.fr"
+	@echo "📱 Frontend: https://preprod.flepourtous.fr"
+	@echo "🔧 Backend: https://api.preprod.flepourtous.fr"
 
 prod: network ## Lance l'environnement de production
 	@echo "🔥 Démarrage de l'environnement de production..."

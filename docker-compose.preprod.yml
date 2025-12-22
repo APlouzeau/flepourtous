@@ -1,0 +1,55 @@
+name: flepourtous-preprod
+
+services:
+  api:
+    container_name: flepourtous-backend-preprod
+    build:
+      context: ./backend
+      target: prod
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./logs:/var/www/html/logs
+    command: apache2-foreground
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-prod.rule=Host(`api.preprod.flepourtous.fr`)"
+      - "traefik.http.routers.api-prod.entrypoints=web,websecure"
+      - "traefik.http.routers.api-prod.tls.certresolver=le"
+      - "traefik.http.services.api-prod.loadbalancer.server.port=80"
+      - "traefik.docker.network=web"
+    networks:
+      - web
+      - internal
+
+  app:
+    container_name: flepourtous-frontend-preprod
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+      target: runner
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${NEXT_PUBLIC_STRIPE_PUBLIC_KEY}
+    environment:
+      - INTERNAL_API_URL=http://flepourtous-backend-preprod
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=1h
+    command: pnpm run start
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app-prod.rule=Host(`preprod.flepourtous.fr`)"
+      - "traefik.http.routers.app-prod.entrypoints=web,websecure"
+      - "traefik.http.routers.app-prod.tls.certresolver=le"
+      - "traefik.http.services.app-prod.loadbalancer.server.port=3000"
+      - "traefik.docker.network=web"
+    networks:
+      - web
+      - internal
+
+networks:
+  web:
+    external: true
+    name: web
+  internal:
+    internal: true
