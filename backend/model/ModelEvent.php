@@ -70,18 +70,18 @@ class ModelEvent extends  ClassDatabase
     public function createEvent(EntitieEvent $event)
     {
         error_log("Création de l'événement avec les données suivantes : " . print_r($event, true));
-        
+
         error_log("DEBUG 1: Début construction requête");
-        
+
         // Construire la requête dynamiquement
         $baseReq = 'idEvent, userId, description, duration, startDateTime, visioLink, timezone';
         $baseValue = ':idEvent, :userId, :description, :duration, :startDateTime, :visioLink, :timezone';
-        
+
         error_log("DEBUG 2: Récupération id_lesson");
         // Ajouter id_lesson si présent et non vide
         $idLesson = $event->getId_lesson();
         error_log("DEBUG 3: id_lesson = " . var_export($idLesson, true));
-        
+
         if ($idLesson !== null && $idLesson !== '' && $idLesson !== 0) {
             $baseReq .= ', id_lesson';
             $baseValue .= ', :id_lesson';
@@ -89,12 +89,12 @@ class ModelEvent extends  ClassDatabase
         } else {
             error_log("DEBUG 4: id_lesson ignoré (null ou vide)");
         }
-        
+
         error_log("DEBUG 5: Récupération status");
         // Ajouter status si présent et non vide
         $status = $event->getStatus();
         error_log("DEBUG 6: status = " . var_export($status, true));
-        
+
         if ($status !== null && $status !== '') {
             $baseReq .= ', status';
             $baseValue .= ', :status';
@@ -102,11 +102,11 @@ class ModelEvent extends  ClassDatabase
         } else {
             error_log("DEBUG 7: status ignoré");
         }
-        
+
         error_log("DEBUG 8: Préparation de la requête SQL");
         $req = $this->conn->prepare('INSERT INTO event (' . $baseReq . ') VALUES (' . $baseValue . ')');
         error_log("Requête SQL: " . $req->queryString);
-        
+
         // Bind des valeurs communes
         $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
         $req->bindValue(':userId', $event->getUserId(), PDO::PARAM_INT);
@@ -115,32 +115,32 @@ class ModelEvent extends  ClassDatabase
         $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
         $req->bindValue(':timezone', $event->getTimezone(), PDO::PARAM_STR);
         $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
-        
+
         // Bind conditionnel de id_lesson
         if ($idLesson !== null && $idLesson !== '' && $idLesson !== 0) {
             $req->bindValue(':id_lesson', $idLesson, PDO::PARAM_INT);
         }
-        
+
         // Bind conditionnel de status
         if ($status !== null && $status !== '') {
             $req->bindValue(':status', $status, PDO::PARAM_STR);
         }
-        
+
         $result = $req->execute();
-        
+
         if (!$result) {
             $errorInfo = $req->errorInfo();
             error_log("ERREUR SQL createEvent: " . $errorInfo[0] . " - " . $errorInfo[1] . " - " . $errorInfo[2]);
         }
-        
+
         return $result;
     }
 
     public function updateEvent(EntitieEvent $event)
-    {        
+    {
         try {
             $userId = $event->getUserId();
-            
+
             if ($userId) {
                 $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink, userId = :userId WHERE idEvent = :idEvent');
                 $req->bindValue(':userId', $userId, PDO::PARAM_INT);
@@ -151,7 +151,7 @@ class ModelEvent extends  ClassDatabase
             error_log("Erreur dans updateEvent: " . $e->getMessage());
             throw $e;
         }
-        
+
         $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
@@ -169,7 +169,7 @@ class ModelEvent extends  ClassDatabase
         return $req->execute();
     }
 
-        public function cancelEvent(string $idEvent)
+    public function cancelEvent(string $idEvent)
     {
         $req = $this->conn->prepare('UPDATE event SET status = "Annulé - Remboursé" WHERE idEvent = :idEvent');
         $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
@@ -206,25 +206,17 @@ class ModelEvent extends  ClassDatabase
     {
         try {
             $this->controllerError->debug("Checking event: ", $idEvent);
-            error_log("DEBUG checkEvent: Avant prepare");
             $req = $this->conn->prepare('SELECT * FROM event WHERE idEvent = :idEvent');
-            error_log("DEBUG checkEvent: Après prepare");
             $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
-            error_log("DEBUG checkEvent: Après bindValue");
             $success = $req->execute();
-            error_log("DEBUG checkEvent: Après execute, success=" . ($success ? 'true' : 'false'));
-            
+
             if (!$success) {
                 $errorInfo = $req->errorInfo();
-                error_log("ERREUR SQL checkEvent: " . $errorInfo[2]);
                 return null;
             }
-            
-            error_log("DEBUG checkEvent: Avant fetch");
+
             $data = $req->fetch();
-            error_log("DEBUG checkEvent: Après fetch, data=" . ($data ? 'trouvé' : 'false'));
-            $this->controllerError->debug("checkEvent result: ", $data ? "trouvé" : "non trouvé");
-            
+
             return $data ? $data : null;
         } catch (Exception $e) {
             error_log("EXCEPTION dans checkEvent: " . $e->getMessage());

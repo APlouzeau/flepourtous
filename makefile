@@ -85,21 +85,12 @@ dev: network build ## Lance l'environnement de développement
 	@echo "🗃️  PhpMyAdmin: http://localhost:8081"
 	@echo "🗄️  Database: localhost:3307 (pour connexions externes)"
 
-staging: network build-staging ## Lance l'environnement staging (debug avec hot reload)
-	@echo "🔥 Démarrage de l'environnement staging..."
-	@echo "📌 Branche actuelle: $$(git branch --show-current)"
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) up -d
-	@echo "✅ Environnement staging prêt avec HOT RELOAD !"
-	@echo "📱 Frontend: https://staging.flepourtous.plouzor.fr"
-	@echo "🔧 Backend: https://api-staging.flepourtous.plouzor.fr"
-	@echo "💡 Les modifications de code sont appliquées en temps réel"
-
 preprod: network build-preprod ## Lance l'environnement de préprod
 	@echo "🔥 Démarrage de l'environnement de préprod..."
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) up -d
 	@echo "✅ Environnement préprod prêt !"
-	@echo "📱 Frontend: https://flepourtous.plouzor.fr"
-	@echo "🔧 Backend: https://api.flepourtous.plouzor.fr"
+	@echo "📱 Frontend: https://preprod.flepourtous.fr"
+	@echo "🔧 Backend: https://api.preprod.flepourtous.fr"
 
 prod: network ## Lance l'environnement de production
 	@echo "🔥 Démarrage de l'environnement de production..."
@@ -142,10 +133,10 @@ logs: ## Affiche les logs de tous les services
 	docker compose -f $(COMPOSE_FILE) logs -f
 
 logs-backend: ## Logs du backend uniquement
-	docker logs flepourtous-backend-staging -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f api
+	docker logs flepourtous-prod-api -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f api
 
 logs-frontend: ## Logs du frontend uniquement
-	docker logs flepourtous-frontend-staging -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f app
+	docker logs flepourtous-prod-frontend -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f app
 
 logs-staging: ## Logs de l'environnement staging
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) logs -f
@@ -226,3 +217,20 @@ reset-all:
 	@$(MAKE) clean-all
 	@$(MAKE) db-reset
 	@$(MAKE) first-install
+
+# Google Calendar Webhooks
+google-setup-watch: ## Configure le webhook Google Calendar
+	@echo "🔔 Configuration du webhook Google Calendar..."
+	@curl -X POST "http://localhost:8000/api/setupGoogleWatch" \
+		-H "Content-Type: application/json" \
+		-H "Api-Key: $${CRON_KEY:-IFyAdjbJa1OHCFfLirZXtumCrTBprgZKoZMYaKoUE0UozKwSTyCd8LkHBefGPEzY}" \
+		-s || echo "❌ Erreur lors de la configuration"
+	@echo ""
+	@echo "✅ Webhook configuré !"
+
+google-tunnel: ## Lance cloudflared tunnel pour le backend
+	@echo "🌐 Lancement du tunnel cloudflared pour le backend..."
+	@echo "⚠️  Note: L'URL du tunnel change à chaque redémarrage (version gratuite)"
+	@pkill cloudflared 2>/dev/null || true
+	@sleep 1
+	@cloudflared tunnel --url http://localhost:8000

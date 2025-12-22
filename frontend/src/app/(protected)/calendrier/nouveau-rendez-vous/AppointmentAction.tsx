@@ -65,18 +65,14 @@ export async function checkDeleteEvent(idEvent: string, code?: number) {
         if (code !== undefined) {
             requestData.code = code;
         }
-        
-        const response = await apiClient.post(
-            "/api/checkDeleteEvent",
-            requestData,
-            {
-                headers: {
-                    Cookie: `PHPSESSID=${cookie}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            }
-        );
+
+        const response = await apiClient.post("/api/checkDeleteEvent", requestData, {
+            headers: {
+                Cookie: `PHPSESSID=${cookie}`,
+                "Content-Type": "application/json",
+            },
+            withCredentials: true,
+        });
         return response.data;
     } catch (error) {
         console.error("Error checking deletion:", error);

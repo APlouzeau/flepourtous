@@ -85,7 +85,7 @@ class ControllerCalendar
         $this->controllerUser->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
-        
+
         error_log("Début de la création de l'événement.");
         if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['idLesson'])) {
             http_response_code(400); // Bad Request
@@ -178,6 +178,7 @@ class ControllerCalendar
                 exit();
             }
 
+            $this->controllerError->debug("Création de l'événement Google Calendar pour l'utilisateur ID: " . $userId);
             //GOOGLE CALENDAR register
             // Ajouter l'email de l'utilisateur dans la description pour que le webhook puisse l'identifier
             $eventDescription = $description ?? '';
@@ -186,7 +187,7 @@ class ControllerCalendar
             }
             // Ajoute un tag pour identifier la création initiale par l'appli
             $eventDescription .= "\n\nSource:app";
-            
+
             $event = new Google\Service\Calendar\Event([
                 'summary' => $appointmentName,
                 'description' => $eventDescription,
@@ -260,7 +261,6 @@ class ControllerCalendar
 
             //DATABASE
             $idEvent = $createdEvent->getId();
-            
             // ✅ BONNE PRATIQUE: Stocker en UTC + timezone utilisateur
             $eventDatabase = new EntitieEvent([
                 'idEvent' => $idEvent,
@@ -297,9 +297,12 @@ class ControllerCalendar
                     'message' => 'Événement enregistré avec succès',
                 ];
             }
-
         } catch (Exception $e) {
-            echo json_encode(['error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(), $eventDatabase]);
+            $errorResponse = [
+                'error' => 'Erreur lors de la création de l\'événement: ' . $e->getMessage(),
+                'details' => isset($eventDatabase) ? $eventDatabase : null
+            ];
+            echo json_encode($errorResponse);
             return;
         }
         echo json_encode($response);
@@ -308,7 +311,6 @@ class ControllerCalendar
     public function listEventsUser()
     {
         $this->controllerUser->verifyConnectBack();
-        echo json_encode("coucou");
         $events = $this->modelEvent->getEventsUser($_SESSION['idUser']);
         if (count($events) == 0) {
             $response = [
@@ -425,21 +427,6 @@ class ControllerCalendar
 
         $invoiced = $data['code'];
 
-        $client = $this->getClient();
-        $service = new Google\Service\Calendar($client);
-        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
-
-        if (!$deletedEvent) {
-            $response = [
-                'code' => 0,
-                'message' => 'Erreur lors de la suppression de l\'événement dans Google Calendar',
-            ];
-            echo json_encode($response);
-            return;
-        }
-
-
-
         $lessonPrice = $this->modelPrice->getPriceByEventId($event['idEvent']);
         if ($invoiced == 1) {
             $this->modelUser->addToWallet($event['userId'], $lessonPrice['price']);
@@ -455,6 +442,22 @@ class ControllerCalendar
             $this->controllerMail->sendMailToAlertEventDeleteByAdmin($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price']);
             $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Admin');
         }
+
+        $client = $this->getClient();
+        $service = new Google\Service\Calendar($client);
+        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
+
+        if (!$deletedEvent) {
+            $response = [
+                'code' => 0,
+                'message' => 'Erreur lors de la suppression de l\'événement dans Google Calendar',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
+
+
 
         if (!$deleteEventSuccess) {
             $response = [
@@ -614,7 +617,7 @@ class ControllerCalendar
 
         if ($userId === null) {
             error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Utilisation de l'admin par défaut.");
-            $adminUserId = $modelUser->checkMail(TEACHER_MAIL);
+            $adminUserId = $this->modelUser->checkMail(TEACHER_MAIL);
             if ($adminUserId) {
                 $userId = $adminUserId;
             } else {
@@ -623,18 +626,14 @@ class ControllerCalendar
             }
         }
 
-        $createdAt = date('Y-m-d H:i:s');
-        $updatedAt = date('Y-m-d H:i:s');
         $status = 'Google';
-
+        $visioLink = $this->controllerVisio->createRoom($duration, $startDateTimeUtcFormatted, $idEvent);
         $userTimeZone = 'Europe/Paris';
 
-
-        $this->registerEventInDatabase($idEvent, $userId, $description, $duration, $startDateTimeUtcFormatted, $userTimeZone, $status);
-
+        $this->registerEventInDatabase($idEvent, $userId, $description, $duration, $startDateTimeUtcFormatted, $userTimeZone, $visioLink, $status);
     }
 
-    private function registerEventInDatabase($idEvent, $userId, $description, $duration, $startDateTimeUtcFormatted, $userTimeZone, $visioLink)
+    private function registerEventInDatabase($idEvent, $userId, $description, $duration, $startDateTimeUtcFormatted, $userTimeZone, $visioLink, $status)
     {
         $createdAt = date('Y-m-d H:i:s');
         $updatedAt = date('Y-m-d H:i:s');
