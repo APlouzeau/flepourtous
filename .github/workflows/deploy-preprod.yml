@@ -56,16 +56,13 @@ jobs:
                       set -e
                       echo "🚀 Starting Docker deployment..."
 
-                      cd ~/projects/projects/preprod/flepourtous || { echo "❌ Project directory not found"; exit 1; }
+                      cd "$DEPLOY_PATH" || { echo "❌ Project directory not found"; exit 1; }
 
                       echo "📥 Pulling latest changes from preprod..."
                       git fetch origin preprod
                       git reset --hard origin/preprod
 
-                      echo "🔍 Linting backend code..."
-                      docker compose -f docker-compose.yml -f docker-compose.preprod.yml run --rm backend composer check-style || echo "⚠️ Backend lint warnings (non-blocking)"
-
-                      echo "🔨 Building and restarting containers..."
+                      echo " Building and restarting containers..."
                       make preprod
 
                       echo "🧹 Cleaning up old Docker images..."
