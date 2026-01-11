@@ -3,10 +3,10 @@ name: Deploy to Prod (Docker)
 on:
     push:
         branches:
-            - prod # Se déclenche quand une PR est mergée vers prod
+            - main # Se déclenche quand une PR est mergée vers prod
     pull_request:
         branches:
-            - prod # Lint uniquement pour valider la PR avant merge
+            - main # Lint uniquement pour valider la PR avant merge
     workflow_dispatch:
 
 jobs:
