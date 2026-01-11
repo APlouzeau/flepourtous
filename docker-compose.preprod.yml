@@ -36,6 +36,7 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=1h
     command: pnpm run start
+    volumes: []
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app-preprod.rule=Host(`preprod.flepourtous.fr`)"
