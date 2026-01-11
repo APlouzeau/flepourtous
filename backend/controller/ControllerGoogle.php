@@ -163,7 +163,7 @@ class ControllerGoogle
                 $this->controllerError->debug("Evenements recuperes : ", $events);
 
                 foreach ($events as $event) {
-                    if ($event->getSummary() === 'Pause' || $event->getSummary() === 'Absent') {
+                    if (strtolower($event->getSummary()) === 'pause' || strtolower($event->getSummary()) === 'absent' || strtolower($event->getSummary()) === 'ab' || strtolower($event->getSummary()) === 'abs') {
                         continue;
                     }
                     $this->updateCalendar($event);
