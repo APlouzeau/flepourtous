@@ -5,7 +5,7 @@ services:
     container_name: flepourtous-backend-preprod
     build:
       context: ./backend
-      target: preprod
+      target: prod
     env_file:
       - ./backend/.env
     volumes:
