@@ -86,7 +86,6 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        error_log("Début de la création de l'événement.");
         if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['idLesson'])) {
             http_response_code(400); // Bad Request
             $response = [
@@ -178,14 +177,11 @@ class ControllerCalendar
                 exit();
             }
 
-            $this->controllerError->debug("Création de l'événement Google Calendar pour l'utilisateur ID: " . $userId);
             //GOOGLE CALENDAR register
-            // Ajouter l'email de l'utilisateur dans la description pour que le webhook puisse l'identifier
             $eventDescription = $description ?? '';
             if ($userEmail) {
                 $eventDescription .= "\n\nUser: " . $userEmail;
             }
-            // Ajoute un tag pour identifier la création initiale par l'appli
             $eventDescription .= "\n\nSource:app";
 
             $event = new Google\Service\Calendar\Event([
@@ -211,57 +207,20 @@ class ControllerCalendar
                 exit();
             }
 
+            $idEvent = $createdEvent->getId();
             //Visio
-            $visioApiKey = VISIO_API_KEY;
-            $url = 'https://api.daily.co/v1/rooms/';
+            $roomUrl = $this->controllerVisio->createRoom($duration, $userStartDateTimeUTCToString, $idEvent);
 
-            $startDateTimeUnix = strtotime($userStartDateTimeUTCToString);
-            $durationInSeconds = $duration * 60; // Convertir la durée en secondes
-            $visio = [
-                'privacy' => 'public',
-                'properties' => [
-                    'nbf' => $startDateTimeUnix - 15 * 60,
-                    'exp' => $startDateTimeUnix + $durationInSeconds + 15 * 60,
-                    'start_audio_off' => false,
-                    'start_video_off' => false,
-                    'enable_pip_ui' => true,
-                    'enable_people_ui' => true,
-                    'enable_emoji_reactions' => true,
-                    'enable_screenshare' => true,
-                    'enable_video_processing_ui' => true,
-                    'enable_chat' => true,
-                    'enable_advanced_chat' => true,
-                    'enable_recording' => 'local',
-                ]
-            ];
-
-            $options = [
-                'http' => [
-                    'header' => "Content-type: application/json\r\nAuthorization: Bearer " . $visioApiKey,
-                    'method' => 'POST',
-                    'content' => json_encode($visio)
-                ]
-            ];
-
-            $context = stream_context_create($options);
-            $result = file_get_contents($url, false, $context);
-
-            if ($result === false) {
+            if ($roomUrl === false) {
                 $responseVisio = [
                     'code' => 0,
                     'message' => 'Erreur lors de la création de la room visio',
                 ];
                 echo json_encode($responseVisio);
                 return;
-            } else {
-                $responseVisio = json_decode($result, true);
-                $roomUrl = $responseVisio['url'];
             }
-            error_log("enregistrement en base de données.");
 
             //DATABASE
-            $idEvent = $createdEvent->getId();
-            // ✅ BONNE PRATIQUE: Stocker en UTC + timezone utilisateur
             $eventDatabase = new EntitieEvent([
                 'idEvent' => $idEvent,
                 'userId' => $userId,

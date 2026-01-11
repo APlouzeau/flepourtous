@@ -31,9 +31,9 @@ first-install: check-pnpm network ## Installation complète pour nouveau projet
 	@echo "📦 Installation des dépendances frontend avec pnpm..."
 	cd $(FRONTEND_DIR) && pnpm install
 	@echo "🔨 Build des images Docker..."
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
+	docker compose -f $(COMPOSE_PREPROD_FILE) build
 	@echo "📦 Installation des dépendances backend via Docker..."
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) run --rm backend composer install
+	docker compose -f $(COMPOSE_PREPROD_FILE) run --rm api composer install
 	make preprod
 
 # Setup pour la préprod
@@ -42,9 +42,9 @@ first-install-preprod: check-pnpm network ## Installation pour environnement pr�
 	@echo "📦 Installation des dépendances frontend avec pnpm..."
 	cd $(FRONTEND_DIR) && pnpm install
 	@echo "🔨 Build des images Docker..."
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
+	docker compose -f $(COMPOSE_PREPROD_FILE) build
 	@echo "📦 Installation des dépendances backend via Docker..."
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) run --rm backend composer install
+	docker compose -f $(COMPOSE_PREPROD_FILE) run --rm api composer install
 	make preprod
 
 # Développement
@@ -65,7 +65,7 @@ build: ## Build les images Docker
 	docker compose -f $(COMPOSE_FILE) build
 
 build-preprod: ## Build les images Docker pour préprod
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
+	docker compose -f $(COMPOSE_PREPROD_FILE) build
 
 build-prod: ## Build les images Docker pour production
 	docker compose -f $(COMPOSE_PROD_FILE) build
@@ -85,21 +85,12 @@ dev: network build ## Lance l'environnement de développement
 	@echo "🗃️  PhpMyAdmin: http://localhost:8081"
 	@echo "🗄️  Database: localhost:3307 (pour connexions externes)"
 
-staging: network build-staging ## Lance l'environnement staging (debug avec hot reload)
-	@echo "🔥 Démarrage de l'environnement staging..."
-	@echo "📌 Branche actuelle: $$(git branch --show-current)"
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) up -d
-	@echo "✅ Environnement staging prêt avec HOT RELOAD !"
-	@echo "📱 Frontend: https://staging.flepourtous.plouzor.fr"
-	@echo "🔧 Backend: https://api-staging.flepourtous.plouzor.fr"
-	@echo "💡 Les modifications de code sont appliquées en temps réel"
-
 preprod: network build-preprod ## Lance l'environnement de préprod
 	@echo "🔥 Démarrage de l'environnement de préprod..."
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) up -d
+	docker compose -f $(COMPOSE_PREPROD_FILE) up -d
 	@echo "✅ Environnement préprod prêt !"
-	@echo "📱 Frontend: https://flepourtous.plouzor.fr"
-	@echo "🔧 Backend: https://api.flepourtous.plouzor.fr"
+	@echo "📱 Frontend: https://preprod.flepourtous.fr"
+	@echo "🔧 Backend: https://api.preprod.flepourtous.fr"
 
 prod: network ## Lance l'environnement de production
 	@echo "🔥 Démarrage de l'environnement de production..."
@@ -112,7 +103,7 @@ up: ## Démarre les services (sans rebuild)
 	docker compose -f $(COMPOSE_FILE) up -d
 
 up-preprod: ## Démarre les services préprod (sans rebuild)
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) up -d
+	docker compose -f $(COMPOSE_PREPROD_FILE) up -d
 
 up-staging: ## Démarre les services staging (sans rebuild)
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) up -d
@@ -124,7 +115,7 @@ down-prod: ## Arrête les services production
 	docker compose -f $(COMPOSE_PROD_FILE) down
 
 down-preprod: ## Arrête les services préprod
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) down
+	docker compose -f $(COMPOSE_PREPROD_FILE) down
 
 down-staging: ## Arrête les services staging
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) down
@@ -151,7 +142,7 @@ logs-staging: ## Logs de l'environnement staging
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) logs -f
 
 logs-preprod: ## Logs de l'environnement preprod
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) logs -f
+	docker compose -f $(COMPOSE_PREPROD_FILE) logs -f
 
 logs-prod: ## Logs de l'environnement production
 	docker compose -f $(COMPOSE_PROD_FILE) logs -f
