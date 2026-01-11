@@ -4,6 +4,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+define("CORS", getenv('CORS'));
+
 define("DB_HOST", getenv('DB_HOST'));
 define("DB_NAME", getenv('DB_NAME'));
 define("DB_USER", getenv('DB_USER'));
