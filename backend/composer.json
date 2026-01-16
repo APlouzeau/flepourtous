@@ -13,5 +13,8 @@
         "google/apiclient-services": [
             "Calendar"
         ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^12.5"
     }
 }

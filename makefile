@@ -64,17 +64,11 @@ dependencies-npm: ## Fallback : installe avec npm si problème pnpm
 build: ## Build les images Docker
 	docker compose -f $(COMPOSE_FILE) build
 
-build-preprod: ## Build les images Docker pour préprod
-	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
-
 build-prod: ## Build les images Docker pour production
 	docker compose -f $(COMPOSE_PROD_FILE) build
 
 build-staging: ## Build les images Docker pour staging
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) build
-
-network: ## Crée le réseau web s'il n'existe pas
-	@docker network inspect web >/dev/null 2>&1 || docker network create web
 
 dev: network build ## Lance l'environnement de développement
 	@echo "🔥 Démarrage de l'environnement de développement..."
@@ -84,6 +78,12 @@ dev: network build ## Lance l'environnement de développement
 	@echo "🔧 Backend: http://localhost:8000"
 	@echo "🗃️  PhpMyAdmin: http://localhost:8081"
 	@echo "🗄️  Database: localhost:3307 (pour connexions externes)"
+
+build-preprod: ## Build les images Docker pour préprod
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
+
+network: ## Crée le réseau web s'il n'existe pas
+	@docker network inspect web >/dev/null 2>&1 || docker network create web
 
 preprod: network build-preprod ## Lance l'environnement de préprod
 	@echo "🔥 Démarrage de l'environnement de préprod..."
