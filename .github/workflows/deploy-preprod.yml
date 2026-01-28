@@ -70,4 +70,4 @@ jobs:
 
                       echo "✅ Deployment complete!"
                       echo "📊 Container status:"
-                      docker compose -f docker-compose.yml -f docker-compose.preprod.yml ps
+                      docker compose -f docker-compose.preprod.yml ps

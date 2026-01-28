@@ -1,11 +1,16 @@
 <?php
 
+define("APP_PATH", __DIR__ . "/../");
+define("BASE_URL", "/");
+
+require_once __DIR__ . '/../vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..', null, true); // 'true' enables overload mode
+$dotenv->load();
+
+require_once APP_PATH . "config/config.php";
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$allowedOrigins = [
-    'http://localhost:3000',
-    'https://flepourtous.fr',
-];
+$allowedOrigins = [CORS];
 
 
 if ($origin && in_array($origin, $allowedOrigins, true)) {
@@ -22,14 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
-require_once __DIR__ . '/../vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..', null, true); // 'true' enables overload mode
-$dotenv->load();
 
-define("APP_PATH", __DIR__ . "/../");
-define("BASE_URL", "/");
-
-require_once APP_PATH . "config/config.php";
 
 session_set_cookie_params([
     'lifetime' => 0,

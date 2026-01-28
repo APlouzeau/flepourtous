@@ -3,10 +3,10 @@ name: Deploy to Prod (Docker)
 on:
     push:
         branches:
-            - prod # Se déclenche quand une PR est mergée vers prod
+            - main # Se déclenche quand une PR est mergée vers prod
     pull_request:
         branches:
-            - prod # Lint uniquement pour valider la PR avant merge
+            - main # Lint uniquement pour valider la PR avant merge
     workflow_dispatch:
 
 jobs:
@@ -58,9 +58,9 @@ jobs:
 
                       cd "$DEPLOY_PATH" || { echo "❌ Project directory not found"; exit 1; }
 
-                      echo "📥 Pulling latest changes from prod..."
-                      git fetch origin prod
-                      git reset --hard origin/prod
+                      echo "📥 Pulling latest changes from main..."
+                      git fetch origin main
+                      git reset --hard origin/main
 
                       echo " Building and restarting containers..."
                       make prod
@@ -69,4 +69,4 @@ jobs:
 
                       echo "✅ Deployment complete!"
                       echo "📊 Container status:"
-                      docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
+                      docker compose -f docker-compose.prod.yml ps
