@@ -14,6 +14,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
+    const [registering, setRegistering] = useState<boolean>(false);
     const [successTimeout, setSuccessTimeout] = useState<boolean>(false);
     const [userTimezone, setUserTimezone] = useState<string>("");
     const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
@@ -98,7 +99,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        setLoading(true);
+        setRegistering(true);
         setError(null);
         setSuccess(null);
 
@@ -108,18 +109,16 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
         } else {
             console.error("Aucun cours sélectionné pour envoyer l'idLesson");
             setError("Veuillez sélectionner un cours.");
-            setLoading(false);
+            setRegistering(false);
             return;
         }
         const response = await registerAppointment(formData);
-        setLoading(false);
+
         if (response.code === 1 || response.code === 10) {
-            setSuccess(response.message || "Rendez-vous enregistré avec succès !");
-            setSuccessTimeout(true);
-            setTimeout(() => {
-                router.push("/calendrier/nouveau-rendez-vous/paiement");
-            }, 2000);
+            // Garder registering = true jusqu'à la redirection
+            router.push("/calendrier/nouveau-rendez-vous/paiement");
         } else {
+            setRegistering(false);
             setError(response.message || "Une erreur s'est produite lors de l'enregistrement.");
         }
     };
@@ -313,16 +312,33 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                     <label htmlFor="startTime" className="text-base font-semibold text-gray-900">
                         Horaire
                     </label>
-                    {/* Debug info */}
-                    <div className="text-xs text-gray-500">
-                        {!date && "📅 Date manquante"}
-                        {!userTimezone && "🌍 Fuseau manquant"}
-                        {!selectedDuration && "⏱️ Durée manquante"}
-                        {loading && "🔄 Chargement..."}
-                    </div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    {loading && date && userTimezone && selectedDuration ? (
+                    {registering ? (
+                        <div className="flex items-center justify-center py-3">
+                            <svg
+                                className="animate-spin h-5 w-5 text-gray-500 mr-2"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                ></circle>
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
+                            </svg>
+                            <span className="text-gray-600">Réservation en cours...</span>
+                        </div>
+                    ) : loading && date && userTimezone && selectedDuration ? (
                         <div className="flex items-center justify-center py-3">
                             <svg
                                 className="animate-spin h-5 w-5 text-gray-500 mr-2"
@@ -351,7 +367,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             id="startTime"
                             name="startTime"
                             required
-                            disabled={timeSlots.length === 0 || loading}
+                            disabled={timeSlots.length === 0 || loading || registering}
                             className="w-full bg-white border-gray-300 rounded-lg shadow-sm p-3 disabled:bg-gray-100 disabled:text-gray-400"
                             style={{ "--ring-color": "#1D1E1C", "--border-color": "#1D1E1C" } as React.CSSProperties}
                             onFocus={(e) => {
@@ -447,7 +463,12 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                 <Button
                     type="submit"
                     disabled={
-                        loading || successTimeout || error !== null || timeSlots.length === 0 || !selectedLesson || !selectedDuration
+                        loading ||
+                        successTimeout ||
+                        error !== null ||
+                        timeSlots.length === 0 ||
+                        !selectedLesson ||
+                        !selectedDuration
                     }
                     className="w-full inline-flex items-center justify-center px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-white shadow-lg hover:shadow-xl"
                     style={{

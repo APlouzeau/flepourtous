@@ -64,7 +64,6 @@ class ControllerGoogle
                     $channelToStop->setId($oldChannelData['canalId']);
                     $channelToStop->setResourceId($oldChannelData['resourceId']);
                     $service->channels->stop($channelToStop);
-                    error_log("[Cron Google] Ancien canal de notification arrêté avec succès : " .  $oldChannelData['canalId']);
                 } catch (Exception $e) {
                     error_log("[Cron Google] Avertissement lors de l'arrêt de l'ancien canal (ce n'est probablement pas une erreur grave) : " . $e->getMessage());
                 }
@@ -297,7 +296,6 @@ class ControllerGoogle
 
         try {
             $this->modelEvent->createEvent($newEvent);
-            error_log("Événement Google ID: " . $idEvent . " créé avec succès en BDD.");
         } catch (Exception $e) {
             error_log("Erreur lors de la création de l'événement Google ID: " . $idEvent . " - " . $e->getMessage());
         }

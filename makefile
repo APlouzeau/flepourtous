@@ -73,9 +73,6 @@ build-prod: ## Build les images Docker pour production
 build-staging: ## Build les images Docker pour staging
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) build
 
-network: ## Crée le réseau web s'il n'existe pas
-	@docker network inspect web >/dev/null 2>&1 || docker network create web
-
 dev: network build ## Lance l'environnement de développement
 	@echo "🔥 Démarrage de l'environnement de développement..."
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev up -d
@@ -84,6 +81,12 @@ dev: network build ## Lance l'environnement de développement
 	@echo "🔧 Backend: http://localhost:8000"
 	@echo "🗃️  PhpMyAdmin: http://localhost:8081"
 	@echo "🗄️  Database: localhost:3307 (pour connexions externes)"
+
+build-preprod: ## Build les images Docker pour préprod
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_PREPROD_FILE) build
+
+network: ## Crée le réseau web s'il n'existe pas
+	@docker network inspect web >/dev/null 2>&1 || docker network create web
 
 preprod: network build-preprod ## Lance l'environnement de préprod
 	@echo "🔥 Démarrage de l'environnement de préprod..."
@@ -132,6 +135,15 @@ restart-prod: down-prod prod ## Redémarre complètement l'environnement product
 logs: ## Affiche les logs de tous les services
 	docker compose -f $(COMPOSE_FILE) logs -f
 
+logs-dev: ## Logs de l'environnement dev
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) logs -f
+
+logs-dev-backend: ## Logs du backend dev uniquement
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) logs api -f
+
+logs-dev-frontend: ## Logs du frontend dev uniquement
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) logs app -f
+
 logs-backend: ## Logs du backend uniquement
 	docker logs flepourtous-prod-api -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f api
 
@@ -149,6 +161,9 @@ logs-prod: ## Logs de l'environnement production
 
 logs-db: ## Logs de la base de données uniquement
 	docker compose -f $(COMPOSE_FILE) logs -f db
+
+logs-db-dev: ## Logs de la base de données dev uniquement
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) logs db -f
 
 # Nettoyage
 clean: ## Nettoie les containers et volumes

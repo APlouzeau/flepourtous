@@ -23,7 +23,6 @@ export async function registerAppointment(formData: FormData) {
             },
             withCredentials: true,
         });
-        console.log("Response from registerAppointment:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error during registration:", error);
@@ -112,7 +111,6 @@ export async function deleteAppointment(idEvent: string, code: number) {
 export async function getAvailableTimeSlots(date: string, userTimeZone: string, selectedDuration: string) {
     const cookie = await getCookieBackend();
     try {
-        console.log("Fetching available time slots with:", { date, userTimeZone, selectedDuration });
         const response = await apiClient.post(
             "/api/getAvailableTimeSlots",
             { date, userTimeZone, selectedDuration },
@@ -124,7 +122,6 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
                 withCredentials: true,
             }
         );
-        console.log("Available time slots response:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error during fetching available time slots:", error);

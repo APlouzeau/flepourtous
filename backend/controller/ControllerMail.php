@@ -10,12 +10,18 @@ class ControllerMail
 {
     private $mailer;
     private $controllerError;
+    private $modelUser;
+    private $modelEvent;
+    private $modelPrices;
     const MAIL_LOG_FILE = "mail";
 
     public function __construct()
     {
         $this->mailer = new PHPMailer(true);
         $this->controllerError = new ControllerError();
+        $this->modelUser = new ModelUser();
+        $this->modelEvent = new ModelEvent();
+        $this->modelPrices = new ModelPrices();
 
         try {
 
@@ -39,7 +45,6 @@ class ControllerMail
 
     public function sendMailToRegister(EntitieUser $user, $verificationToken)
     {
-        error_log("Sending registration email to: " . $user->getMail());
         try {
             $this->mailer->addAddress($user->getMail());
             $this->mailer->isHTML(true);
@@ -67,10 +72,8 @@ class ControllerMail
 
     public function sendMailToAlertForNextAppointment()
     {
-        $this->controllerError->debug("Verifying if there are upcoming events in the next hour...");
 
         $apiKey = $_SERVER['HTTP_API_KEY'] ?? null;
-        $this->controllerError->debug("Received API Key: " . ($apiKey ?? 'none'));
         if ($apiKey !== CRON_KEY) {
             error_log("Unauthorized attempt to access sendMailToAlertForNextAppointment. IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
             http_response_code(403); // Forbidden
@@ -104,12 +107,12 @@ class ControllerMail
         if ($event['mail'] == TEACHER_MAIL) {
             return;
         }
-            $eventDateTimeUtc = new DateTime($event['startDateTime']);
-            $eventDateTimeUserTimezone = $eventDateTimeUtc->setTimezone(new DateTimeZone($event['timezone']));
+        $eventDateTimeUtc = new DateTime($event['startDateTime']);
+        $eventDateTimeUserTimezone = $eventDateTimeUtc->setTimezone(new DateTimeZone($event['timezone']));
 
-            // Formatage en français avec IntlDateFormatter
-            $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::LONG, IntlDateFormatter::NONE);
-            $eventHour = $eventDateTimeUserTimezone->format('G\hi');       // 14h30
+        // Formatage en français avec IntlDateFormatter
+        $formatter = new IntlDateFormatter('fr_FR', IntlDateFormatter::LONG, IntlDateFormatter::NONE);
+        $eventHour = $eventDateTimeUserTimezone->format('G\hi');       // 14h30
 
         $this->mailer->addAddress($event['mail']);
         $this->mailer->isHTML(true);
@@ -215,7 +218,8 @@ class ControllerMail
             $this->controllerError->logs(
                 "Password reset email fail ",
                 [$this->mailer->ErrorInfo, $e->getMessage()],
-                self::MAIL_LOG_FILE);
+                self::MAIL_LOG_FILE
+            );
             return false;
         } finally {
             if ($this->mailer) {
@@ -244,16 +248,24 @@ class ControllerMail
 
             $user = $modelUser->getUser(new EntitieUser(['idUser' => $user]));
             $userMail = $user['mail'];
-            error_log("Sending registration email to: " . $user['firstName'] . " " . $user['lastName'] . " at " . $userMail);
 
             $eventDateTimeUtc = new DateTime($event['startDateTime']);
             $eventDateTimeUserTimezone = $eventDateTimeUtc->setTimezone(new DateTimeZone($event['timezone']));
 
             // Formatage en français - Traduction manuelle des mois
             $moisFr = [
-                1 => 'janvier', 2 => 'février', 3 => 'mars', 4 => 'avril',
-                5 => 'mai', 6 => 'juin', 7 => 'juillet', 8 => 'août',
-                9 => 'septembre', 10 => 'octobre', 11 => 'novembre', 12 => 'décembre'
+                1 => 'janvier',
+                2 => 'février',
+                3 => 'mars',
+                4 => 'avril',
+                5 => 'mai',
+                6 => 'juin',
+                7 => 'juillet',
+                8 => 'août',
+                9 => 'septembre',
+                10 => 'octobre',
+                11 => 'novembre',
+                12 => 'décembre'
             ];
             $jour = $eventDateTimeUserTimezone->format('j');
             $mois = $moisFr[(int)$eventDateTimeUserTimezone->format('n')];
@@ -277,6 +289,7 @@ class ControllerMail
                 "Email sent to: " . $userMail,
                 "Event ID: " . $eventId
             ], self::MAIL_LOG_FILE);
+
             return true;
         } catch (Exception $e) {
             $this->controllerError->logs("Payment success email fail", [
@@ -365,7 +378,73 @@ class ControllerMail
         }
     }
 
-    public function sendMailToConfirmCancelAppointment(EntitieEvent $event, bool $paid) {}
+    public function sendMailToConfirmAppointment(string $idEvent, int $idUser)
+    {
+        if (!defined('TEACHER_MAIL') || TEACHER_MAIL == '') {
+            return;
+        }
+
+        try {
+            $user = $this->modelUser->getUser(new EntitieUser(['idUser' => $idUser]));
+            $event = $this->modelEvent->getEventById($idEvent);
+            $amount = $this->modelPrices->getPriceByEventId($idEvent);
+
+            // Convertir startDateTime string en DateTime
+            $eventDateTimeUtc = new DateTime($event['startDateTime']);
+            $eventDateTimeUserTimezone = $eventDateTimeUtc->setTimezone(new DateTimeZone($event['timezone']));
+
+            // Formatage en français - Traduction manuelle des mois
+            $moisFr = [
+                1 => 'janvier',
+                2 => 'février',
+                3 => 'mars',
+                4 => 'avril',
+                5 => 'mai',
+                6 => 'juin',
+                7 => 'juillet',
+                8 => 'août',
+                9 => 'septembre',
+                10 => 'octobre',
+                11 => 'novembre',
+                12 => 'décembre'
+            ];
+            $jour = $eventDateTimeUserTimezone->format('j');
+            $mois = $moisFr[(int)$eventDateTimeUserTimezone->format('n')];
+            $year = $eventDateTimeUserTimezone->format('Y');
+            $eventDate = "$jour $mois $year";    // 16 octobre 2025
+            $eventHour = $eventDateTimeUserTimezone->format('G\hi');       // 14h30
+
+
+            $this->mailer->addAddress(TEACHER_MAIL);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = "Nouveau rendez-vous prit pour " . htmlspecialchars($user['firstName'] . " " . $user['lastName']);
+            $emailBody = "Bonjour,<br><br>";
+            $emailBody .= "Nous vous informons que " . htmlspecialchars($user['firstName'] . " " . $user['lastName']) . " a pris un nouveau rendez-vous prévu le " . htmlspecialchars($eventDate) . " à " . htmlspecialchars($eventHour) . ".<br><br>";
+            $emailBody .= "Le montant de " . htmlspecialchars($amount['price']) . " € a été réglé.<br><br><br>";
+            $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
+            $this->mailer->Body = $emailBody;
+            $this->mailer->send();
+            $this->controllerError->logs("Teacher confirmation email sent", [
+                "Email sent to: " . TEACHER_MAIL,
+                "Event DateTime: " . $eventDate . " " . $eventHour,
+                "Amount paid: " . $amount['price']
+            ], self::MAIL_LOG_FILE);
+            return true;
+        } catch (Exception $e) {
+            error_log("❌ Error in sendMailToConfirmAppointment: " . $e->getMessage());
+            $this->controllerError->logs("Error in sendMailToConfirmAppointment", [
+                "Error: " . $e->getMessage(),
+                "Event ID: " . $idEvent,
+                "User ID: " . $idUser
+            ], self::MAIL_LOG_FILE);
+            return false;
+        } finally {
+            if ($this->mailer) {
+                $this->mailer->clearAddresses(); // Clear addresses after sending
+                $this->mailer->clearAttachments(); // Clear attachments if any
+            }
+        }
+    }
     public function sendMailToAlertEventDeleteByAdmin($userId, $startDateTime, $timezone, $amount)
     {
         $modelUser = new ModelUser();
@@ -377,6 +456,7 @@ class ControllerMail
         setlocale(LC_TIME, 'fr_FR.UTF-8', 'fr_FR', 'french'); // Pour les noms français
         $appointmentDate = $appointmentDateTime->format('j F Y'); // "4 octobre 2025"
         $appointmentHour = $appointmentDateTime->format('G\hi'); // "14h30" au lieu de "14:30"
+
 
 
         $this->mailer->addAddress($userInformations['mail']);
