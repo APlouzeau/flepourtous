@@ -122,9 +122,9 @@ class ModelPrices extends  ClassDatabase
             WHERE e.idEvent = :idEvent AND e.duration = d.duration
         ');
         $req->execute([':idEvent' => $idEvent]);
-        error_log($req->debugDumpParams() . " with idEvent=" . $idEvent . " executed in " . __FILE__ . " at line " . __LINE__);
+
         $data = $req->fetch();
-        error_log("Fetched price data: " . print_r($data, true) . " in " . __FILE__ . " at line " . __LINE__);
+
         if ($data) {
             return [
                 'price' => $data['price'],

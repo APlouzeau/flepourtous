@@ -132,6 +132,15 @@ restart-prod: down-prod prod ## Redémarre complètement l'environnement product
 logs: ## Affiche les logs de tous les services
 	docker compose -f $(COMPOSE_FILE) logs -f
 
+logs-dev: ## Logs de l'environnement dev
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) logs -f
+
+logs-dev-backend: ## Logs du backend dev uniquement
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) logs api -f
+
+logs-dev-frontend: ## Logs du frontend dev uniquement
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) logs app -f
+
 logs-backend: ## Logs du backend uniquement
 	docker logs flepourtous-prod-api -f 2>/dev/null || docker compose -f $(COMPOSE_FILE) logs -f api
 
@@ -149,6 +158,9 @@ logs-prod: ## Logs de l'environnement production
 
 logs-db: ## Logs de la base de données uniquement
 	docker compose -f $(COMPOSE_FILE) logs -f db
+
+logs-db-dev: ## Logs de la base de données dev uniquement
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) logs db -f
 
 # Nettoyage
 clean: ## Nettoie les containers et volumes

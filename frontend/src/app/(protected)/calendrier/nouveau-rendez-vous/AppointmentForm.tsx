@@ -447,7 +447,12 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                 <Button
                     type="submit"
                     disabled={
-                        loading || successTimeout || error !== null || timeSlots.length === 0 || !selectedLesson || !selectedDuration
+                        loading ||
+                        successTimeout ||
+                        error !== null ||
+                        timeSlots.length === 0 ||
+                        !selectedLesson ||
+                        !selectedDuration
                     }
                     className="w-full inline-flex items-center justify-center px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-white shadow-lg hover:shadow-xl"
                     style={{

@@ -14,9 +14,9 @@ class ControllerVisio
             error_log("Événement dans le passé (start: $startDateTimeUnix, now: $now). Pas de création de room visio.");
             return null; // Retourner null au lieu d'une erreur
         }
-        
+
         $durationInSeconds = $duration * 60; // Convertir la durée en secondes
-        
+
         // Créer un nom de room unique en combinant eventId et timestamp
         $uniqueRoomName = 'flepourtous-' . $eventId . '-' . time();
 
@@ -58,7 +58,7 @@ class ControllerVisio
         }
 
         $responseVisio = json_decode($result, true);
-        
+
         if ($responseVisio === null) {
             error_log("Erreur de décodage JSON de la réponse Daily.co: " . $result);
             return null;
@@ -66,26 +66,28 @@ class ControllerVisio
 
         if (isset($responseVisio['error'])) {
             // Si la room existe déjà, essayer avec un nom encore plus unique
-            if ($responseVisio['error'] === 'invalid-request-error' && 
-                strpos($responseVisio['info'], 'already exists') !== false) {
-                
+            if (
+                $responseVisio['error'] === 'invalid-request-error' &&
+                strpos($responseVisio['info'], 'already exists') !== false
+            ) {
+
                 error_log("Room existante détectée, tentative avec un nom différent...");
-                
+
                 // Générer un nom encore plus unique avec microtime
                 $uniqueRoomName = 'flepourtous-' . $eventId . '-' . time() . '-' . substr(microtime(), 2, 6);
                 $visio['name'] = $uniqueRoomName;
-                
+
                 $options['http']['content'] = json_encode($visio);
                 $context = stream_context_create($options);
                 $result = file_get_contents($this->url, false, $context);
-                
+
                 if ($result === false) {
                     error_log("Erreur lors du second appel API Daily.co");
                     return null;
                 }
-                
+
                 $responseVisio = json_decode($result, true);
-                
+
                 if (isset($responseVisio['error'])) {
                     error_log("Erreur API Daily.co (second essai): " . json_encode($responseVisio));
                     return null;
@@ -102,7 +104,6 @@ class ControllerVisio
         }
 
         $roomUrl = $responseVisio['url'];
-        error_log("Room visio créée avec succès: " . $roomUrl);
         return $roomUrl;
     }
 
