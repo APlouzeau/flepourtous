@@ -69,9 +69,14 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
                 }
             );
             const data = response.data;
+
+            // Paiement via wallet - redirection immédiate
             if (data.code == 1 && data.payment_method === "wallet") {
                 router.push("/retour-paiement?status=success&method=wallet");
+                return ""; // Retourner immédiatement après la redirection
             }
+
+            // Paiement Stripe - vérifier le clientSecret
             if (!response.data || response.data.error || !response.data.clientSecret) {
                 console.error("[PaymentForm] fetchClientSecret: Erreur backend ou clientSecret manquant:", data?.error);
                 return "";
@@ -81,8 +86,6 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
             console.error("[PaymentForm] fetchClientSecret: Erreur pendant l'appel Axios:", error);
             return "";
         }
-        // Always return a string to satisfy the return type
-        return "";
     }, [cookie, router]);
 
     if (serverError) {

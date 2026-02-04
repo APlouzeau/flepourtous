@@ -141,7 +141,21 @@ class ControllerOrder
             $modelEvent = new ModelEvent();
             $this->modelUser->updateWallet($idUser, $remainingAmount);
             $modelEvent->setEventStatusPaid($eventId);
-            $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
+
+            // Envoi des emails avec gestion d'erreur
+            try {
+                $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
+                $this->controllerMail->sendMailToConfirmAppointment($eventId, $idUser);
+            } catch (Exception $e) {
+                error_log("❌ Error sending emails after payment: " . $e->getMessage());
+                $this->controllerError->logs("Error sending emails after payment", [
+                    "Error: " . $e->getMessage(),
+                    "User ID: " . $idUser,
+                    "Event ID: " . $eventId
+                ], self::ORDER_LOG_FILE);
+                // Ne pas bloquer le paiement si les emails échouent
+            }
+
             echo json_encode([
                 'code' => 1,
                 'payment_method' => 'wallet',
@@ -271,11 +285,22 @@ class ControllerOrder
                 ];
 
                 // Envoyer l'email approprié selon le type de paiement
-                if ($eventId != 0) {
-                    $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
-                } else {
-                    $amount = $session->amount_total / 100;
-                    $this->controllerMail->sendMailForPackPurchase($idUser, $amount);
+                try {
+                    if ($eventId != 0) {
+                        $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
+                        $this->controllerMail->sendMailToConfirmAppointment($eventId, $idUser);
+                    } else {
+                        $amount = $session->amount_total / 100;
+                        $this->controllerMail->sendMailForPackPurchase($idUser, $amount);
+                    }
+                } catch (Exception $e) {
+                    error_log("❌ Error sending emails after Stripe payment: " . $e->getMessage());
+                    $this->controllerError->logs("Error sending emails after Stripe payment", [
+                        "Error: " . $e->getMessage(),
+                        "User ID: " . $idUser,
+                        "Event ID: " . $eventId
+                    ], self::ORDER_LOG_FILE);
+                    // Ne pas bloquer le paiement si les emails échouent
                 }
 
                 echo json_encode([

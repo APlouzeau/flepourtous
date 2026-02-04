@@ -33,3 +33,4 @@ define("MAIL_PORT", getenv('MAIL_PORT'));
 define("TEACHER_MAIL", getenv('TEACHER_MAIL'));
 
 define("STRIPE_SECRET_KEY", getenv('STRIPE_SECRET_KEY'));
+

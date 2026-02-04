@@ -25,7 +25,6 @@ export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
                 withCredentials: true,
             }
         );
-           console.log("Response from /api/listEvents:", response);     
         if (response.data && Array.isArray(response.data.data)) {
             const appointments = response.data.data;
 
@@ -90,8 +89,8 @@ export async function setInvoiced(idEvent: string) {
             }
         );
         if (response.data && response.data.code === 1) {
-            return response.data;
             alert(`Rendez-vous facturé avec succès`);
+            return response.data;
         }
     } catch (error) {
         console.error("Error setting invoiced status:", error);
