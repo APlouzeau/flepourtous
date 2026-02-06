@@ -15,7 +15,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
     const [success, setSuccess] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [registering, setRegistering] = useState<boolean>(false);
-    const [successTimeout, setSuccessTimeout] = useState<boolean>(false);
+    const [successTimeout] = useState<boolean>(false);
     const [userTimezone, setUserTimezone] = useState<string>("");
     const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
     const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);

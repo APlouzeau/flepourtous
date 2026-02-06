@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function EchecPage() {
     return (
         <div className="flex h-screen items-center justify-center">
@@ -6,12 +8,12 @@ export default function EchecPage() {
                 <p className="text-lg">Votre adresse n a pas pu être vérifiée.</p>
                 
                 <div className="mt-8">
-                    <a
+                    <Link
                         href="/connexion"
                         className="inline-block px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                         >
                         Retour à la connexion
-                    </a>
+                    </Link>
                 </div>
             </div>  
         </div>        

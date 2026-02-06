@@ -1,13 +1,14 @@
+import { getI18n } from "@/locales/server";
 import { LessonWithPrice } from "../types/lessons";
 import FormulaCard from "./front/FormulaCard";
 import ScrollSection from "./scrollSection";
 
-export default function PricesSection({
+export default async function PricesSection({
     lessons,
 }: {
     lessons: LessonWithPrice[];
 }) {
-    
+    const trad = await getI18n();
     // Ce composant serveur ne nécessite pas d'être client car il n'utilise aucun hook client
     // Ce composant est parent de <ScrollSection> qui est client
     
@@ -18,12 +19,12 @@ export default function PricesSection({
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-8 sm:mb-12">
                     <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                        Présentation des différentes{" "}
-                        <span className="text-red-600">formules</span>
+                        {trad("homePage.PricesSection.title")}{" "}
+                        <span className="text-red-600">{trad("homePage.PricesSection.span")}</span>
                     </h2>
                     <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-                        Choisissez le cours qui vous convient le mieux suivant vos
-                        objectifs et la durée que vous préférez.
+                        {trad("homePage.PricesSection.description")}
+
                     </p>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">

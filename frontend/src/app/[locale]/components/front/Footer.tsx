@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useI18n } from "@/locales/client";
 
 export default function Footer() {
+    const trad = useI18n();
     return (
         <div className="w-full px-[5%] py-8">
             <footer className="bg-[#1D1E1C]  text-white w-full rounded-[50px]">
@@ -25,7 +29,7 @@ export default function Footer() {
                         {/* Navigation principale */}
                         <div>
                             <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                                NAVIGATION
+                                {trad("footer.navigation.title")}
                             </h4>
                             <ul className="space-y-3">
                                 <li>
@@ -33,7 +37,7 @@ export default function Footer() {
                                         href="/"
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
-                                        Accueil
+                                        {trad("footer.navigation.home")}
                                     </Link>
                                 </li>
                                 <li>
@@ -41,7 +45,7 @@ export default function Footer() {
                                         href="/offre-de-cours"
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
-                                        Offre de cours
+                                        {trad("footer.navigation.courses")}
                                     </Link>
                                 </li>
                                 <li>
@@ -49,7 +53,7 @@ export default function Footer() {
                                         href="/ressources-utilisees"
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
-                                        Ressources utilisées
+                                        {trad("footer.navigation.resourcesUsed")}
                                     </Link>
                                 </li>
                             </ul>
@@ -58,7 +62,7 @@ export default function Footer() {
                         {/* Liens utilisateur */}
                         <div>
                             <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                                COMPTE
+                                {trad("footer.account.title")}
                             </h4>
                             <ul className="space-y-3">
                                 <li>
@@ -66,7 +70,7 @@ export default function Footer() {
                                         href="/profil"
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
-                                        Profil
+                                        {trad("footer.account.profile")}
                                     </Link>
                                 </li>
                                 <li>
@@ -74,7 +78,7 @@ export default function Footer() {
                                         href="/calendrier"
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
-                                        Calendrier
+                                        {trad("footer.account.calendar")}
                                     </Link>
                                 </li>
                             </ul>
@@ -83,7 +87,7 @@ export default function Footer() {
                         {/* Contact et légal */}
                         <div>
                             <h4 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
-                                SUPPORT
+                                {trad("footer.support.title")}
                             </h4>
                             <ul className="space-y-3">
                                 <li>
@@ -91,7 +95,7 @@ export default function Footer() {
                                         href="mailto:flepourtous.online@gmail.com?subject=Demande%20d'information&body=Bonjour,%0D%0A%0D%0AJe%20souhaiterais%20obtenir%20plus%20d'informations%20sur%20vos%20cours%20de%20français.%0D%0A%0D%0AMerci."
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
-                                        Me contacter
+                                        {trad("footer.support.contact")}
                                     </a>
                                 </li>
                                 <li>
@@ -99,7 +103,7 @@ export default function Footer() {
                                         href="/cgv"
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
-                                        CGV
+                                        {trad("footer.support.cgv")}
                                     </Link>
                                 </li>
                                 <li>
@@ -107,7 +111,7 @@ export default function Footer() {
                                         href="/reglement-interieur"
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
-                                        Règlement intérieur
+                                        {trad("footer.support.rules")}
                                     </Link>
                                 </li>
                                 <li>
@@ -115,7 +119,7 @@ export default function Footer() {
                                         href="/rgpd"
                                         className="text-gray-300 hover:text-white transition-colors duration-200"
                                     >
-                                        RGPD
+                                        {trad("footer.support.rgpd")}
                                     </Link>
                                 </li>
                             </ul>
@@ -125,25 +129,25 @@ export default function Footer() {
                     {/* Ligne de séparation */}
                     <div className="border-t border-gray-700 mt-8 pt-8">
                         <div className="flex flex-col md:flex-row justify-between items-center">
-                            <div className="text-gray-400 text-sm">© 2025 FLE pour tous. Tous droits réservés.</div>
+                            <div className="text-gray-400 text-sm">©{trad("footer.out.copyright")}</div>
                             <div className="flex space-x-6 mt-4 md:mt-0">
                                 <Link
                                     href="/politique-confidentialite"
                                     className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
                                 >
-                                    Politique de confidentialité
+                                    {trad("footer.out.confidentiality")}
                                 </Link>
                                 <Link
                                     href="/conditions-utilisation"
                                     className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
                                 >
-                                    Conditions d&apos;utilisation
+                                    {trad("footer.out.termsOfUse")}
                                 </Link>
                                 <Link
                                     href="/cookies"
                                     className="text-gray-400 hover:text-white text-sm transition-colors duration-200"
                                 >
-                                    Paramètres des cookies
+                                    {trad("footer.out.cookie")}
                                 </Link>
                             </div>
                         </div>

@@ -31,9 +31,9 @@ first-install: check-pnpm network ## Installation complète pour nouveau projet
 	@echo "📦 Installation des dépendances frontend avec pnpm..."
 	cd $(FRONTEND_DIR) && pnpm install
 	@echo "🔨 Build des images Docker..."
-	docker compose -f $(COMPOSE_PREPROD_FILE) build
+	docker compose -f $(COMPOSE_DEV_FILE) build
 	@echo "📦 Installation des dépendances backend via Docker..."
-	docker compose -f $(COMPOSE_PREPROD_FILE) run --rm api composer install
+	docker compose -f $(COMPOSE_DEV_FILE) run --rm api composer install
 	make preprod
 
 # Setup pour la préprod

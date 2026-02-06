@@ -74,19 +74,19 @@ export default function Header({ isLoggedIn }: HeaderProps) {
                                         href="/offre-de-cours/francais-general"
                                         className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
                                     >
-                                        Français général
+                                        {trad("header.lessonOffer.general")}
                                     </Link>
                                     <Link
                                         href="/offre-de-cours/cours-de-conversation"
                                         className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
                                     >
-                                        Cours de conversation
+                                        {trad("header.lessonOffer.conversation")}
                                     </Link>
                                     <Link
                                         href="/offre-de-cours/delf-tcf-tef"
                                         className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
                                     >
-                                        Préparation aux examens
+                                        {trad("header.lessonOffer.examPreparation")}
                                     </Link>
                                 </div>
                             </div>
@@ -95,7 +95,7 @@ export default function Header({ isLoggedIn }: HeaderProps) {
                             href="/ressources-utilisees"
                             className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base"
                         >
-                            Ressources utilisées
+                            {trad("header.resourcesUsed.menu")}
                         </Link>
 
                         {/* Sélecteur de langue */}
@@ -110,21 +110,21 @@ export default function Header({ isLoggedIn }: HeaderProps) {
                                         href="/profil"
                                         className="text-xs xl:text-sm px-3 !py-1 xl:px-4"
                                     >
-                                        Profil
+                                        {trad("common.buttons.profile")}
                                     </Button>
                                     <Button
                                         variant="white"
                                         href="/calendrier"
                                         className="text-xs xl:text-sm px-3 !py-1 xl:px-4"
                                     >
-                                        Calendrier
+                                        {trad("common.buttons.calendar")}
                                     </Button>
                                     <Button
                                         variant="black"
                                         onClick={handleLogout}
                                         className="text-xs xl:text-sm px-3 !py-1 xl:px-4"
                                     >
-                                        Déconnexion
+                                        {trad("common.buttons.logout")}
                                     </Button>
                                 </div>
                             ) : (
@@ -134,14 +134,14 @@ export default function Header({ isLoggedIn }: HeaderProps) {
                                         href="/inscription"
                                         className="text-xs  xl:text-sm px-3 !py-1 xl:px-4"
                                     >
-                                        Inscription
+                                        {trad("common.buttons.register")}
                                     </Button>
                                     <Button
                                         variant="black"
                                         href="/connexion"
                                         className="text-xs xl:text-sm px-3 !py-1 xl:px-4"
                                     >
-                                        Connexion
+                                        {trad("common.buttons.login")}
                                     </Button>
                                 </>
                             )}

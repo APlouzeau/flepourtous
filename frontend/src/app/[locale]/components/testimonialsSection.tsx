@@ -1,29 +1,31 @@
 import TestimonialsSlider from "./front/TestimonialsSlider";
 import ScrollSection from "./scrollSection";
+import { getI18n } from "@/locales/server";
 
-const testimonials = [
+export default async function TestimonialsSection() {
+    const trad = await getI18n();
+    const testimonials = [
     {
-        quote: "Ludivine est incroyablement gentille et très facile à aborder. Son professionnalisme est admirable, et elle fait toujours preuve de bienveillance envers ses élèves, faisant preuve d’une grande patience face aux défis que représente l’apprentissage d’une nouvelle langue. Elle adapte ses méthodes d’enseignement à la personnalité de chacun, ce qui permet à chaque élève de progresser à son propre rythme. De plus, elle crée une atmosphère bienveillante où les élèves se sentent à l’aise de faire des erreurs et de poser des questions. Elle fournit également des retours constructifs qui nous aident à améliorer nos compétences. En outre, elle a un très bel accent, ce qui rend l’apprentissage encore plus agréable. Je recommande vivement ses cours à toute personne souhaitant apprendre le français dans un environnement amical et encourageant.",
-        author: "Vladislava",
-        nationality: "Russe",
+        quote: trad("homePage.testimonial.vladislava.comment"),
+        author: trad("homePage.testimonial.vladislava.name"),
+        nationality: trad("homePage.testimonial.vladislava.nationality"),
         bgColor: "bg-orange-200",
     },
     {
-        quote: "En tant qu’introverti ayant grandi dans une famille française sans jamais avoir réellement appris la langue, j’ai toujours eu très peur de parler français : trop inquiet de faire des erreurs ou de paraître ridicule. Depuis que j’ai commencé les cours avec Ludivine, je sens que cela change peu à peu. Elle est incroyablement patiente, à l’écoute, et crée un espace où je ne me sens jamais jugé. En seulement quelques mois, j’ai parlé plus français que durant toute ma vie, et je commence enfin à gagner en confiance grâce à ses cours. Je ne peux que la recommander chaleureusement.",
-        author: "August",
-        nationality: "Américain-Français",
+        quote: trad("homePage.testimonial.august.comment"),
+        author: trad("homePage.testimonial.august.name"),
+        nationality: trad("homePage.testimonial.august.nationality"),
         bgColor: "bg-gray-200",
     },
     {
-        quote: 'Je dois dire qu’au moment de m’inscrire, j’étais terrifié à l’idée de devoir vraiment parler français. Ludivine est incroyable, elle sait mettre à l’aise immédiatement. J’apprends à parler français en tant que grand débutant, et elle est la personne la plus patiente du monde. Elle supporte mon accent affreux et ma grammaire approximative, et me corrige toujours avec douceur. Elle a un don pour faire couler le français naturellement. Elle parle lentement et clairement. Elle est vraiment formidable. Merci Ludivine, tu es très gentille et tu es une professeure exceptionnelle."',
-        author: "Graham",
-        nationality: "Anglais",
+        quote: trad("homePage.testimonial.graham.comment"),
+        author: trad("homePage.testimonial.graham.name"),
+        nationality: trad("homePage.testimonial.graham.nationality"),
         bgColor: "bg-pink-200",
     },
 ];
 
-export default function TestimonialsSection() {
-    return (
+return (
         <ScrollSection className="bg-gray-50 py-12 sm:py-16 px-4 scroll-animate">
             <div className="max-w-6xl mx-auto">
                 <div className="text-center mb-8 sm:mb-12">

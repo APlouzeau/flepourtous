@@ -19,14 +19,14 @@ export default async function HeroSection() {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 sm:gap-0">
                             <Link href="/calendrier/nouveau-rendez-vous">
-                                <Button variant="black">Prendre rendez-vous</Button>
+                                <Button variant="black">{trad("common.buttons.makeAppointment")}</Button>
                             </Link>
                         </div>
                     </div>
                     <div className="relative order-1 md:order-2">
                         <div className="relative h-64 sm:h-80 md:h-96 rounded-lg overflow-hidden">
                             <Image
-                                src="/images/cloitre.jpg"
+                                src="/images/Chenonceau.webp"
                                 alt="Apprentissage du français"
                                 fill
                                 className="object-cover"

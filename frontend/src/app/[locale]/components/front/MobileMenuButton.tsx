@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface MobileMenuButtonProps {
     isLoggedIn: boolean;
@@ -12,12 +12,22 @@ interface MobileMenuButtonProps {
 export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuButtonProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
         // Empêcher le scroll du body quand le menu est ouvert
         document.body.style.overflow = !isMenuOpen ? 'hidden' : 'unset';
     };
+
+    useEffect(() => {
+        // Restaurer la position de scroll après le changement de langue
+        const savedPosition = sessionStorage.getItem('scrollPosition');
+        if (savedPosition) {
+            window.scrollTo(0, parseInt(savedPosition));
+            sessionStorage.removeItem('scrollPosition');
+        }
+    }, []);
 
     const currentLocale = pathname?.split("/")[1] || "fr";
     const getPathForLocale = (newLocale: string) => {
@@ -31,6 +41,15 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
         { code: "fr", name: "Français", flag: "🇫🇷" },
         { code: "en", name: "English", flag: "🇬🇧" },
     ];
+
+    const handleLanguageChange = (langCode: string) => {
+        // Sauvegarder la position actuelle avant le changement
+        sessionStorage.setItem('scrollPosition', window.scrollY.toString());
+        const newPath = getPathForLocale(langCode);
+        setIsMenuOpen(false);
+        document.body.style.overflow = 'unset';
+        router.push(newPath);
+    };
 
     return (
         <>
@@ -100,19 +119,18 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
                             <h3 className="text-white text-sm font-semibold mb-3 px-4">Langue</h3>
                             <div className="space-y-2">
                                 {languages.map((lang) => (
-                                    <Link
+                                    <button
                                         key={lang.code}
-                                        href={getPathForLocale(lang.code)}
-                                        className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${
+                                        onClick={() => handleLanguageChange(lang.code)}
+                                        className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors w-full text-left ${
                                             currentLocale === lang.code
                                                 ? "bg-red-600 text-white font-semibold"
                                                 : "text-white hover:bg-red-700"
                                         }`}
-                                        onClick={toggleMenu}
                                     >
                                         <span className="text-2xl">{lang.flag}</span>
                                         <span className="text-lg">{lang.name}</span>
-                                    </Link>
+                                    </button>
                                 ))}
                             </div>
                         </div>
