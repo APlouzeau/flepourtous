@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, generateRefreshedToken } from "./lib/session";
+import { createI18nMiddleware } from "next-international/middleware";
 
+const I18nMiddleware = createI18nMiddleware({
+    locales: ["en", "fr"],
+    defaultLocale: "en",
+});
 const isProtectedRoute = [
     "/calendrier",
     "/profil",
@@ -16,7 +21,7 @@ const REFRESH_IF_OLDER_THAN_MS = ONE_HOUR_IN_MS / 2;
 
 export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    
+
     // Bloquer les tentatives d'injection de commandes malveillantes
     const url = request.url;
     const suspiciousPatterns = [
@@ -27,15 +32,23 @@ export async function middleware(request: NextRequest) {
         /\/bin\/(sh|bash)/i,
         /\$\(.*\)/,
     ];
-    
-    if (suspiciousPatterns.some(pattern => pattern.test(url))) {
-        const clientIp = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'IP inconnue';
+
+    if (suspiciousPatterns.some((pattern) => pattern.test(url))) {
+        const clientIp = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "IP inconnue";
         console.warn(`🚨 Tentative d'attaque bloquée depuis ${clientIp}: ${pathname}`);
         return new NextResponse("Forbidden", { status: 403 });
     }
-    
-    // Commencer par une réponse par défaut qui continue la chaîne des middlewares
-    const response = NextResponse.next();
+
+    // Appliquer le middleware i18n en premier pour gérer la locale
+    const i18nResponse = I18nMiddleware(request);
+
+    // Si le middleware i18n redirige (changement de locale), on retourne sa réponse
+    if (i18nResponse.status === 307 || i18nResponse.status === 308) {
+        return i18nResponse;
+    }
+
+    // Sinon, on continue avec notre logique d'auth
+    const response = i18nResponse;
 
     if (isProtectedRoute.includes(pathname)) {
         const sessionCookie = request.cookies.get("session");
