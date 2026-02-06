@@ -4,7 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "./Button";
 import MobileMenuButton from "./MobileMenuButton";
+import LanguageSelector from "./LanguageSelector";
 import { logout } from "@/lib/session";
+import { useI18n } from "@/locales/client";
 
 interface HeaderProps {
     readonly isLoggedIn: boolean;
@@ -13,6 +15,7 @@ interface HeaderProps {
 // 2. On retire "async" de la signature de la fonction.
 export default function Header({ isLoggedIn }: HeaderProps) {
     // 3. La fonction handleLogout reste ici, car c'est une action initiée par le client.
+    const trad = useI18n();
     const handleLogout = async () => {
         try {
             // On appelle la Server Action 'logout'
@@ -53,7 +56,7 @@ export default function Header({ isLoggedIn }: HeaderProps) {
                                 href="/offre-de-cours"
                                 className="text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base flex items-center"
                             >
-                                Offre de cours
+                                {trad("header.lessonOffer.menu")}
                                 <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path
                                         strokeLinecap="round"
@@ -94,6 +97,9 @@ export default function Header({ isLoggedIn }: HeaderProps) {
                         >
                             Ressources utilisées
                         </Link>
+
+                        {/* Sélecteur de langue */}
+                        <LanguageSelector />
 
                         {/* Boutons d'action Desktop */}
                         <div className="flex items-center space-x-2 ml-4 xl:ml-6">

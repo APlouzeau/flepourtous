@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface MobileMenuButtonProps {
     isLoggedIn: boolean;
@@ -10,12 +11,26 @@ interface MobileMenuButtonProps {
 
 export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuButtonProps) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const pathname = usePathname();
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
         // Empêcher le scroll du body quand le menu est ouvert
         document.body.style.overflow = !isMenuOpen ? 'hidden' : 'unset';
     };
+
+    const currentLocale = pathname?.split("/")[1] || "fr";
+    const getPathForLocale = (newLocale: string) => {
+        if (!pathname) return `/${newLocale}`;
+        const segments = pathname.split("/");
+        segments[1] = newLocale;
+        return segments.join("/");
+    };
+
+    const languages = [
+        { code: "fr", name: "Français", flag: "🇫🇷" },
+        { code: "en", name: "English", flag: "🇬🇧" },
+    ];
 
     return (
         <>
@@ -78,6 +93,28 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
                             >
                                 Ressources utilisées
                             </Link>
+                        </div>
+
+                        {/* Sélecteur de langue mobile */}
+                        <div className="mt-6 pt-6 border-t border-gray-700">
+                            <h3 className="text-white text-sm font-semibold mb-3 px-4">Langue</h3>
+                            <div className="space-y-2">
+                                {languages.map((lang) => (
+                                    <Link
+                                        key={lang.code}
+                                        href={getPathForLocale(lang.code)}
+                                        className={`flex items-center space-x-3 px-4 py-3 rounded-md transition-colors ${
+                                            currentLocale === lang.code
+                                                ? "bg-red-600 text-white font-semibold"
+                                                : "text-white hover:bg-red-700"
+                                        }`}
+                                        onClick={toggleMenu}
+                                    >
+                                        <span className="text-2xl">{lang.flag}</span>
+                                        <span className="text-lg">{lang.name}</span>
+                                    </Link>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Boutons d'action */}
