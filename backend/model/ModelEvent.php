@@ -39,8 +39,12 @@ class ModelEvent extends  ClassDatabase
     public function getEventsUser(int $idUser)
     {
         $req = $this->conn->prepare('
-        SELECT idEvent, userId, description, duration, createdAt, updatedAt, status, visioLink, startDateTime, timezone, title FROM event LEFT JOIN lesson l ON event.id_lesson = l.idLesson
-        WHERE userId = :idUser');
+        SELECT 
+            idEvent, userId, description, duration, createdAt, updatedAt, status, visioLink, startDateTime, timezone, title 
+        FROM 
+            event LEFT JOIN lesson l ON event.id_lesson = l.idLesson
+        WHERE 
+            userId = :idUser');
         $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
         $req->execute();
         $datas = $req->fetchAll();
@@ -158,9 +162,11 @@ class ModelEvent extends  ClassDatabase
     public function getAllEvents()
     {
         $req = $this->conn->prepare('
-            SELECT e.idEvent, e.description, e.duration, e.status, e.visioLink, u.firstName, u.lastName, e.startDateTime, l.title FROM event e
+            SELECT e.idEvent, e.description, e.duration, e.status, e.visioLink, u.firstName, u.lastName, e.startDateTime, lt.title FROM event e
             INNER JOIN users u ON e.userId = u.idUser
             INNER JOIN lesson l ON e.id_lesson = l.idLesson
+            INNER JOIN lesson_translation lt ON l.idLesson = lt.idLesson
+            WHERE lt.locale = "fr"
             ORDER BY e.startDateTime;');
         $req->execute();
         $datas = $req->fetchAll();

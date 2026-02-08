@@ -249,3 +249,7 @@ google-tunnel: ## Lance cloudflared tunnel pour le backend
 	@pkill cloudflared 2>/dev/null || true
 	@sleep 1
 	@cloudflared tunnel --url http://localhost:8000
+
+test: ## Lancer les tests unitaires
+	@echo "🧪 Lancement des tests unitaires..."
+	docker exec flepourtous-backend-dev vendor/bin/phpunit
