@@ -9,7 +9,7 @@ import AdminDashboard from "./AdminDashboard";
 export default async function CalendarPage() {
     const role = await getRole();
     const appointments = await appointmentList();
-
+    console.log("Rendez-vous récupérés :", appointments); // ✅ Log pour vérifier les données
     const invoiceList = role === "admin" ? await listInvoices() : [];
 
     const isAdmin = role === "admin";

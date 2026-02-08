@@ -158,9 +158,10 @@ class ModelEvent extends  ClassDatabase
     public function getAllEvents()
     {
         $req = $this->conn->prepare('
-            SELECT idEvent, description, duration, status, visioLink, firstName, lastName, startDateTime FROM event
-            INNER JOIN users ON event.userId = users.idUser
-            ORDER BY startDateTime;');
+            SELECT e.idEvent, e.description, e.duration, e.status, e.visioLink, u.firstName, u.lastName, e.startDateTime, l.title FROM event e
+            INNER JOIN users u ON e.userId = u.idUser
+            INNER JOIN lesson l ON e.id_lesson = l.idLesson
+            ORDER BY e.startDateTime;');
         $req->execute();
         $datas = $req->fetchAll();
         if (count($datas) == 0) {
@@ -175,6 +176,7 @@ class ModelEvent extends  ClassDatabase
                     'status' => $data['status'],
                     'visioLink' => $data['visioLink'],
                     'startDateTime' => $data['startDateTime'],
+                    'title' => $data['title'],
                 ];
             }
         }
