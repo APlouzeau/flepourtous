@@ -4,7 +4,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * PLAN DE TEST - ModelDuration
- * 
  * Objectif : Tester les méthodes de récupération des durées avec la vraie BDD
  * Cas testés :
  * - getAllDurations : Récupère toutes les durées
@@ -18,7 +17,6 @@ class ModelEntitieDurationTest extends TestCase
 
     protected function setUp(): void
     {
-        // Utilise la vraie connexion à la base de données
         $this->modelDuration = new ModelDuration();
     }
 
