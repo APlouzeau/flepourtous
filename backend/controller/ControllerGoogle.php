@@ -54,7 +54,6 @@ class ControllerGoogle
             $modelGoogle = new ModelGoogle();
 
             $modelGoogleSync = new ModelGoogleSync();
-            error_log("[Cron Google] Ancien syncToken pour le calendrier " . $calendarId . " supprimé pour forcer la resynchronisation.");
 
             $oldChannelData = $modelGoogle->findChannelByCalendarId($calendarId);
             if ($oldChannelData && isset($oldChannelData['canalId']) && isset($oldChannelData['resourceId'])) {
@@ -135,6 +134,9 @@ class ControllerGoogle
     do {
         $eventsResults = $service->events->listEvents($calendarId, $params);
         foreach ($eventsResults->getItems() as $event) {
+            if ($this->isBlockedEvent($event)) {
+                continue;
+            }
             $this->updateCalendar($event);
         }
         $params = ['pageToken' => $eventsResults->getNextPageToken()];
@@ -164,7 +166,7 @@ class ControllerGoogle
                 $this->controllerError->debug("Evenements recuperes : ", $events);
 
                 foreach ($events as $event) {
-                    if (strtolower($event->getSummary()) === 'pause' || strtolower($event->getSummary()) === 'absent' || strtolower($event->getSummary()) === 'ab' || strtolower($event->getSummary()) === 'abs') {
+                    if ($this->isBlockedEvent($event)) {
                         continue;
                     }
                     $this->updateCalendar($event);
@@ -418,5 +420,11 @@ class ControllerGoogle
         $googleEventDuration = ($googleEventEnd->getTimestamp() - $googleEventStart->getTimestamp()) / 60;
 
         return $localEventStart == $googleEventStart && $localEventDuration == $googleEventDuration;
+    }
+
+    private function isBlockedEvent($event): bool
+    {
+        $summary = strtolower($event->getSummary() ?? '');
+        return in_array($summary, ['pause', 'absent', 'ab', 'abs']);
     }
 }
