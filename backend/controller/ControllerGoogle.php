@@ -54,7 +54,6 @@ class ControllerGoogle
             $modelGoogle = new ModelGoogle();
 
             $modelGoogleSync = new ModelGoogleSync();
-            $modelGoogleSync->deleteSyncTokenForCalendar($calendarId);
             error_log("[Cron Google] Ancien syncToken pour le calendrier " . $calendarId . " supprimé pour forcer la resynchronisation.");
 
             $oldChannelData = $modelGoogle->findChannelByCalendarId($calendarId);
@@ -132,17 +131,20 @@ class ControllerGoogle
         $service = new \Google\Service\Calendar($client);
         $calendarId = GOOGLE_CALENDAR_ID;
 
-        $eventsResults = $service->events->listEvents($calendarId);
-        $events = $eventsResults->getItems();
-        $nextSyncToken = $eventsResults->getNextSyncToken();
-
-        if ($nextSyncToken) {
-            $modelGoogleSync = new ModelGoogleSync();
-            $modelGoogleSync->saveNextSyncToken($calendarId, $nextSyncToken);
-        }
-        foreach ($events as $event) {
+    $params = [];
+    do {
+        $eventsResults = $service->events->listEvents($calendarId, $params);
+        foreach ($eventsResults->getItems() as $event) {
             $this->updateCalendar($event);
         }
+        $params = ['pageToken' => $eventsResults->getNextPageToken()];
+    } while ($eventsResults->getNextPageToken());
+
+    $nextSyncToken = $eventsResults->getNextSyncToken();
+    if ($nextSyncToken) {
+        $modelGoogleSync = new ModelGoogleSync();
+        $modelGoogleSync->saveNextSyncToken($calendarId, $nextSyncToken);
+    }
     }
 
     public function getEventsExists()
