@@ -134,9 +134,6 @@ class ControllerGoogle
     do {
         $eventsResults = $service->events->listEvents($calendarId, $params);
         foreach ($eventsResults->getItems() as $event) {
-            if ($this->isBlockedEvent($event)) {
-                continue;
-            }
             $this->updateCalendar($event);
         }
         $params = ['pageToken' => $eventsResults->getNextPageToken()];
@@ -166,9 +163,6 @@ class ControllerGoogle
                 $this->controllerError->debug("Evenements recuperes : ", $events);
 
                 foreach ($events as $event) {
-                    if ($this->isBlockedEvent($event)) {
-                        continue;
-                    }
                     $this->updateCalendar($event);
                 }
 
@@ -194,6 +188,11 @@ class ControllerGoogle
         if ($event->getStatus() == 'cancelled') {
             $this->controllerError->debug("Événement annulé Google ID: ", $idEvent);
             $this->googleEventStatusCancelled($idEvent);
+            return;
+        }
+
+        if ($this->isBlockedEvent($event)) {
+            $this->controllerError->debug("Événement Google ignoré car bloqué (summary: ", $event->getSummary(), ")");
             return;
         }
 
@@ -240,10 +239,8 @@ class ControllerGoogle
             error_log("L'événement Google ID: " . $idEvent . " existe déjà en BDD. Mise à jour en cours.");
             $this->updateExistingEvent($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone);
         } else {
-            if (!$eventExist) {
-                error_log("L'événement Google ID: " . $idEvent . " n'existe pas en BDD. Création en cours.");
-                $this->createNewEventFromGoogle($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone);
-            }
+            error_log("L'événement Google ID: " . $idEvent . " n'existe pas en BDD. Création en cours.");
+            $this->createNewEventFromGoogle($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone);
         }
     }
 
