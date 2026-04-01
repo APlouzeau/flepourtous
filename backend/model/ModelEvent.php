@@ -246,7 +246,7 @@ class ModelEvent extends  ClassDatabase
         $req = $this->conn->prepare('
         SELECT u.firstName, u.lastName, u.mail, e.description, e.startDateTime, e.visioLink, e.timezone
         FROM event e INNER JOIN users u ON e.userId = u.idUser
-        WHERE e.status LIKE '%ANNULE%'
+        WHERE NOT e.status LIKE '%ANNULE%'
         AND startDateTime >= DATE_ADD(NOW(), INTERVAL 55 minute)
         AND startDateTime <= DATE_ADD(NOW(), INTERVAL 65 minute);');
 
