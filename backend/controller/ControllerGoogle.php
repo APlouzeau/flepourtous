@@ -54,8 +54,6 @@ class ControllerGoogle
             $modelGoogle = new ModelGoogle();
 
             $modelGoogleSync = new ModelGoogleSync();
-            $modelGoogleSync->deleteSyncTokenForCalendar($calendarId);
-            error_log("[Cron Google] Ancien syncToken pour le calendrier " . $calendarId . " supprimé pour forcer la resynchronisation.");
 
             $oldChannelData = $modelGoogle->findChannelByCalendarId($calendarId);
             if ($oldChannelData && isset($oldChannelData['canalId']) && isset($oldChannelData['resourceId'])) {
@@ -132,17 +130,20 @@ class ControllerGoogle
         $service = new \Google\Service\Calendar($client);
         $calendarId = GOOGLE_CALENDAR_ID;
 
-        $eventsResults = $service->events->listEvents($calendarId);
-        $events = $eventsResults->getItems();
-        $nextSyncToken = $eventsResults->getNextSyncToken();
-
-        if ($nextSyncToken) {
-            $modelGoogleSync = new ModelGoogleSync();
-            $modelGoogleSync->saveNextSyncToken($calendarId, $nextSyncToken);
-        }
-        foreach ($events as $event) {
+    $params = [];
+    do {
+        $eventsResults = $service->events->listEvents($calendarId, $params);
+        foreach ($eventsResults->getItems() as $event) {
             $this->updateCalendar($event);
         }
+        $params = ['pageToken' => $eventsResults->getNextPageToken()];
+    } while ($eventsResults->getNextPageToken());
+
+    $nextSyncToken = $eventsResults->getNextSyncToken();
+    if ($nextSyncToken) {
+        $modelGoogleSync = new ModelGoogleSync();
+        $modelGoogleSync->saveNextSyncToken($calendarId, $nextSyncToken);
+    }
     }
 
     public function getEventsExists()
@@ -162,9 +163,6 @@ class ControllerGoogle
                 $this->controllerError->debug("Evenements recuperes : ", $events);
 
                 foreach ($events as $event) {
-                    if (strtolower($event->getSummary()) === 'pause' || strtolower($event->getSummary()) === 'absent' || strtolower($event->getSummary()) === 'ab' || strtolower($event->getSummary()) === 'abs') {
-                        continue;
-                    }
                     $this->updateCalendar($event);
                 }
 
@@ -190,6 +188,11 @@ class ControllerGoogle
         if ($event->getStatus() == 'cancelled') {
             $this->controllerError->debug("Événement annulé Google ID: ", $idEvent);
             $this->googleEventStatusCancelled($idEvent);
+            return;
+        }
+
+        if ($this->isBlockedEvent($event)) {
+            $this->controllerError->debug("Événement Google ignoré car bloqué (summary: ", $event->getSummary(), ")");
             return;
         }
 
@@ -236,10 +239,8 @@ class ControllerGoogle
             error_log("L'événement Google ID: " . $idEvent . " existe déjà en BDD. Mise à jour en cours.");
             $this->updateExistingEvent($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone);
         } else {
-            if (!$eventExist) {
-                error_log("L'événement Google ID: " . $idEvent . " n'existe pas en BDD. Création en cours.");
-                $this->createNewEventFromGoogle($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone);
-            }
+            error_log("L'événement Google ID: " . $idEvent . " n'existe pas en BDD. Création en cours.");
+            $this->createNewEventFromGoogle($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone);
         }
     }
 
@@ -416,5 +417,11 @@ class ControllerGoogle
         $googleEventDuration = ($googleEventEnd->getTimestamp() - $googleEventStart->getTimestamp()) / 60;
 
         return $localEventStart == $googleEventStart && $localEventDuration == $googleEventDuration;
+    }
+
+    private function isBlockedEvent($event): bool
+    {
+        $summary = strtolower($event->getSummary() ?? '');
+        return in_array($summary, ['pause', 'absent', 'ab', 'abs']);
     }
 }

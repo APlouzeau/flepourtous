@@ -47,14 +47,4 @@ class ModelGoogleSync extends ClassDatabase
         $req->execute();
     }
 
-    /**
-     * Supprime le syncToken pour un calendrier spécifique.
-     * (Utilisé par le cron pour forcer une resynchronisation complète).
-     */
-    public function deleteSyncTokenForCalendar($calendarId)
-    {
-        $req = $this->conn->prepare('DELETE FROM googleSync WHERE idCalendar = :calendarId');
-        $req->bindValue(':calendarId', $calendarId, PDO::PARAM_STR);
-        $req->execute();
-    }
 }
