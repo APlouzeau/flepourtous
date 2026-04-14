@@ -1,4 +1,4 @@
-"use client"; // 1. On ajoute "use client" pour le déclarer comme composant client.
+"use client";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -7,18 +7,18 @@ import MobileMenuButton from "./MobileMenuButton";
 import LanguageSelector from "./LanguageSelector";
 import { logout } from "@/lib/session";
 import { useI18n } from "@/locales/client";
+import { Slugs } from "../../types/lessons";
 
 interface HeaderProps {
     readonly isLoggedIn: boolean;
+    readonly slugs: Slugs;
 }
 
-// 2. On retire "async" de la signature de la fonction.
-export default function Header({ isLoggedIn }: HeaderProps) {
-    // 3. La fonction handleLogout reste ici, car c'est une action initiée par le client.
+export default function Header({ isLoggedIn, slugs }: HeaderProps) {
     const trad = useI18n();
+    console.log("Slugs passed to Header:", slugs); // Log pour vérifier les slugs reçus dans le Header-
     const handleLogout = async () => {
         try {
-            // On appelle la Server Action 'logout'
             await logout();
         } catch (error) {
             console.error("Erreur lors de la déconnexion:", error);
@@ -70,24 +70,15 @@ export default function Header({ isLoggedIn }: HeaderProps) {
                             {/* Dropdown menu */}
                             <div className="absolute left-0 mt-2 w-64 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 <div className="py-2">
-                                    <Link
-                                        href="/offre-de-cours/francais-general"
-                                        className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                    >
-                                        {trad("header.lessonOffer.general")}
-                                    </Link>
-                                    <Link
-                                        href="/offre-de-cours/cours-de-conversation"
-                                        className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                    >
-                                        {trad("header.lessonOffer.conversation")}
-                                    </Link>
-                                    <Link
-                                        href="/offre-de-cours/delf-tcf-tef"
-                                        className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
-                                    >
-                                        {trad("header.lessonOffer.examPreparation")}
-                                    </Link>
+                                    {slugs.map((slug) => (
+                                        <Link
+                                            key={slug.slug}
+                                            href={`/offre-de-cours/${slug.slug}`}
+                                            className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
+                                        >
+                                            {slug.title}
+                                        </Link>
+                                    ))}
                                 </div>
                             </div>
                         </div>

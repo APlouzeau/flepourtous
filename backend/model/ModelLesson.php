@@ -4,6 +4,13 @@ require_once APP_PATH . "/class/ClassDatabase.php";
 
 class ModelLesson extends  ClassDatabase
 {
+    private $controllerError;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->controllerError = new ControllerError();
+    }
     public function getAllLessons()
     {
         file_put_contents('/tmp/model_lesson.log', 'Début appel getAllLessonsWithPrices\n', FILE_APPEND);
@@ -13,10 +20,10 @@ class ModelLesson extends  ClassDatabase
         foreach ($datas as $data) {
             $lesson =
                 [
-                    'idLesson' => $data['idLesson'],
+                    'id_lesson' => $data['id_lesson'],
                     'title' => $data['title'],
-                    'shortDescription' => $data['shortDescription'],
-                    'imagePath' => $data['imagePath'],
+                    'short_description' => $data['short_description'],
+                    'image_path' => $data['image_path'],
                     'slug' => $data['slug']
                 ];
             $lessons[] = $lesson;
@@ -24,40 +31,45 @@ class ModelLesson extends  ClassDatabase
         return $lessons;
     }
 
-    public function getLessonByName($slug)
+    public function getLessonByName($slug, $locale)
     {
+        $this->controllerError->debug("Début appel getLessonByName dans le modèle", ['slug' => $slug, 'locale' => $locale]);
         $req = $this->conn->prepare('
         SELECT
-        l.title,
-        l.shortDescription,
-        l.fullDescription_1,
-        l.fullDescription_2,
-        l.fullDescription_3,
-        l.imagePath,
-        l.introduction,
-        l.subtitle_1,
-        l.text_1,
-        l.subtitle_2,
-        l.text_2,
-        l.subtitle_3,
-        l.text_3,
-        l.subtitle_4,
-        l.text_4,
-        l.subtitle_5,
-        l.text_5,
-        l.subtitle_6,
-        l.text_6,
+        lt.title,
+        lt.short_description,
+        lt.full_description_1,
+        lt.full_description_2,
+        lt.full_description_3,
+        l.image_path,
+        lt.introduction,
+        lt.subtitle_1,
+        lt.text_1,
+        lt.subtitle_2,
+        lt.text_2,
+        lt.subtitle_3,
+        lt.text_3,
+        lt.subtitle_4,
+        lt.text_4,
+        lt.subtitle_5,
+        lt.text_5,
+        lt.subtitle_6,
+        lt.text_6,
         p.price,
         d.duration
-        FROM lesson l
-        INNER JOIN lessonPrices lp ON lp.id_lesson = l.idLesson
-        INNER JOIN prices p ON lp.id_price = p.idPrice
-        INNER JOIN duration d ON lp.id_duration = d.idDuration
-        WHERE l.slug = :slug');
+        FROM lesson_translations lt
+        INNER JOIN lessons l ON l.id_lesson = lt.id_lesson
+        INNER JOIN lesson_price lp ON lp.id_lesson = l.id_lesson
+        INNER JOIN prices p ON lp.id_price = p.id_price
+        INNER JOIN durations d ON lp.id_duration = d.id_duration
+        WHERE lt.locale = :locale
+        AND lt.slug = :slug');
+        $req->bindValue(':locale', $locale, PDO::PARAM_STR);
         $req->bindValue(':slug', $slug, PDO::PARAM_STR);
         $req->execute();
         $datas = $req->fetchAll();
         $times = [];
+        $this->controllerError->debug("Résultat de la requête getLessonByName", ['datas' => $datas[0]]);
         foreach ($datas as $data) {
             $price =
                 [
@@ -68,11 +80,11 @@ class ModelLesson extends  ClassDatabase
         }
         return [
             'title' => $datas[0]['title'],
-            'shortDescription' => $datas[0]['shortDescription'],
-            'fullDescription_1' => $datas[0]['fullDescription_1'],
-            'fullDescription_2' => $datas[0]['fullDescription_2'],
-            'fullDescription_3' => $datas[0]['fullDescription_3'],
-            'imagePath' => $datas[0]['imagePath'],
+            'shortDescription' => $datas[0]['short_description'],
+            'fullDescription_1' => $datas[0]['full_description_1'],
+            'fullDescription_2' => $datas[0]['full_description_2'],
+            'fullDescription_3' => $datas[0]['full_description_3'],
+            'imagePath' => $datas[0]['image_path'],
             'introduction' => $datas[0]['introduction'],
             'subtitle_1' => $datas[0]['subtitle_1'],
             'text_1' => $datas[0]['text_1'],
@@ -90,29 +102,34 @@ class ModelLesson extends  ClassDatabase
         ];
     }
 
-    public function getAllLessonsWithPrices()
+    public function getAllLessonsWithPrices($locale)
     {
-        $req = $this->conn->query('
-        SELECT lesson.idLesson, lesson.title, lesson.shortDescription, lesson.imagePath, prices.price, duration.duration, lesson.slug
-        FROM lesson
-        INNER JOIN lessonPrices ON lessonPrices.id_lesson = lesson.idLesson
-        INNER JOIN prices ON lessonPrices.id_price = prices.idPrice
-        INNER JOIN duration ON lessonPrices.id_duration = duration.idDuration');
+        $this->controllerError->debug("Début appel getAllLessonsWithPrices dans le modèle", ['locale' => $locale]);
+        $req = $this->conn->prepare('
+        SELECT l.id_lesson, l.image_path, lt.title, lt.short_description,lt.slug, p.price, d.duration
+        FROM lessons l
+        INNER JOIN lesson_translations lt ON lt.id_lesson = l.id_lesson
+        INNER JOIN lesson_price lp ON lp.id_lesson = l.id_lesson
+        INNER JOIN prices p ON lp.id_price = p.id_price
+        INNER JOIN durations d ON lp.id_duration = d.id_duration
+        WHERE lt.locale = :locale');
+        $req->bindValue(':locale', $locale, PDO::PARAM_STR);
+        $req->execute();
 
         $datas = $req->fetchAll();
         $lessons = [];
         foreach ($datas as $data) {
-            if (isset($lessons[$data['idLesson']])) {
-                $lessons[$data['idLesson']]['price'][] = [
+            if (isset($lessons[$data['id_lesson']])) {
+                $lessons[$data['id_lesson']]['price'][] = [
                     'price' => $data['price'],
                     'duration' => $data['duration']
                 ];
             } else {
-                $lessons[$data['idLesson']] = [
-                    'idLesson' => $data['idLesson'],
+                $lessons[$data['id_lesson']] = [
+                    'id_lesson' => $data['id_lesson'],
                     'title' => $data['title'],
-                    'shortDescription' => $data['shortDescription'],
-                    'imagePath' => $data['imagePath'],
+                    'shortDescription' => $data['short_description'],
+                    'image_path' => $data['image_path'],
                     'slug' => $data['slug'],
                     'price' => [
                         [
@@ -126,21 +143,36 @@ class ModelLesson extends  ClassDatabase
         return $lessons;
     }
 
-    public function getLessonById($idLesson)
+    public function getLessonById($id_lesson)
     {
-        $req = $this->conn->prepare('SELECT * FROM lesson WHERE idLesson = :idLesson');
-        $req->bindValue(':idLesson', $idLesson, PDO::PARAM_INT);
+        $req = $this->conn->prepare('SELECT * FROM lesson WHERE id_lesson = :id_lesson');
+        $req->bindValue(':id_lesson', $id_lesson, PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
         if ($data) {
             return [
-                'idLesson' => $data['idLesson'],
+                'id_lesson' => $data['id_lesson'],
                 'title' => $data['title'],
-                'shortDescription' => $data['shortDescription'],
-                'imagePath' => $data['imagePath'],
+                'short_description' => $data['short_description'],
+                'image_path' => $data['image_path'],
                 'slug' => $data['slug']
             ];
         }
         return null;
+    }
+    public function getSlugsByLocale($locale)
+    {
+        $req = $this->conn->prepare('SELECT slug, title FROM lesson_translations WHERE locale = :locale');
+        $req->bindValue(':locale', $locale, PDO::PARAM_STR);
+        $req->execute();
+        $datas = $req->fetchAll();
+        $slugs = [];
+        foreach ($datas as $data) {
+            $slugs[] = [
+                'slug' => $data['slug'],
+                'title' => $data['title']
+            ];
+        }
+        return $slugs;
     }
 }

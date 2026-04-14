@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { getSession } from "@/lib/session";
 import LayoutWrapper from "./LayoutWrapper";
 import { Providers } from "./providers";
+import { getSlugs } from "@/lib/lessons";
 
 export const metadata: Metadata = {
     title: "FLE pour tous",
@@ -29,6 +30,7 @@ export default async function RootLayout({
     const session = await getSession();
     const isLoggedIn = !!session.get("session")?.value;
     const { locale } = await params;
+    const slugs = await getSlugs();
 
     return (
         <html lang="fr">
@@ -37,7 +39,9 @@ export default async function RootLayout({
                 suppressHydrationWarning={true}
             >
                 <Providers locale={locale}>
-                    <LayoutWrapper isLoggedIn={isLoggedIn}>{children}</LayoutWrapper>
+                    <LayoutWrapper isLoggedIn={isLoggedIn} slugs={slugs}>
+                        {children}
+                    </LayoutWrapper>
                 </Providers>
             </body>
         </html>
