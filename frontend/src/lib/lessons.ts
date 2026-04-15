@@ -17,8 +17,9 @@ export async function getLessonsWithPrices() {
 export async function getLessons(slug: string) {
     try {
         const locale = await getCurrentLocale();
-        console.log(`Fetching lesson with slug: ${slug} for locale: ${locale}`); // Log the slug and locale for debugging
-        const response = await apiClient.get(`/api/offre-de-cours/${slug}/${locale}`, {});
+        const decodedSlug = decodeURIComponent(slug);
+        console.log(`Fetching lesson with slug: ${decodedSlug} for locale: ${locale}`); // Log the slug and locale for debugging
+        const response = await apiClient.get(`/api/offre-de-cours/${decodedSlug}/${locale}`, {});
         console.log("Fetched lesson data:", response.data); // Log the fetched data for debugging
         return response.data;
     } catch (error) {

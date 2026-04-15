@@ -8,6 +8,7 @@ import { useSlugStore } from "@/store/useSlugStore";
 const routeSegments: Record<string, string> = {
     fr: "offre-de-cours",
     en: "courses-offer",
+    ja: "コースの提供",
 };
 
 export default function LanguageSelector() {
@@ -22,7 +23,7 @@ export default function LanguageSelector() {
     useEffect(() => {
         // Extraire la locale du pathname
         const locale = pathname?.split("/")[1];
-        if (locale === "en" || locale === "fr") {
+        if (locale === "en" || locale === "fr" || locale === "ja") {
             setCurrentLocale(locale);
         }
     }, [pathname]);
@@ -30,17 +31,33 @@ export default function LanguageSelector() {
     const getPathForLocale = (newLocale: string) => {
         if (!pathname) return `/${newLocale}`;
 
-        // Remplacer la locale dans le pathname
-        const segments = pathname.split("/");
+        const segments = pathname.split("/"); // Sur "/fr" -> ["", "fr"]
+
+        // Si on est juste à la racine (ex: /fr)
+        if (segments.length === 2 && segments[1].length === 2) {
+            return `/${newLocale}`;
+        }
+
+        // 1. Remplacer la langue (toujours à l'index 1)
         segments[1] = newLocale;
 
+        // 2. Remplacer le segment de route si on est dessus
+        // On vérifie que la route est assez longue ET que c'est une route traduisible
+        if (segments.length >= 3 && routeSegments[newLocale]) {
+            // Ex: si on est sur /fr/offre-de-cours/... on remplace l'index 2
+            // Mais attention, il faut vérifier qu'on était bien sur une route traduite !
+            const oldSegments = Object.values(routeSegments); // ["offre-de-cours", "courses-offer"]
+            if (oldSegments.includes(segments[2])) {
+                segments[2] = routeSegments[newLocale];
+            }
+        }
+
+        // 3. Remplacer le slug si on en a un
         const translatedSlug = slugs[newLocale];
         if (translatedSlug && segments.length >= 4) {
             segments[segments.length - 1] = translatedSlug;
         }
-        if (segments[2] && routeSegments[newLocale]) {
-            segments[2] = routeSegments[newLocale];
-        }
+
         return segments.join("/");
     };
 
@@ -54,6 +71,11 @@ export default function LanguageSelector() {
             code: "en",
             name: "English",
             flag: "/images/flag/uk.png",
+        },
+        {
+            code: "ja",
+            name: "日本語",
+            flag: "/images/flag/japan.png",
         },
     ];
 

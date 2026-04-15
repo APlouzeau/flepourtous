@@ -22,8 +22,8 @@ class ModelLesson extends  ClassDatabase
                 [
                     'id_lesson' => $data['id_lesson'],
                     'title' => $data['title'],
-                    'short_description' => $data['short_description'],
-                    'image_path' => $data['image_path'],
+                    'shortDescription' => $data['short_description'],
+                    'imagePath' => $data['image_path'],
                     'slug' => $data['slug']
                 ];
             $lessons[] = $lesson;
@@ -140,7 +140,7 @@ class ModelLesson extends  ClassDatabase
                     'id_lesson' => $data['id_lesson'],
                     'title' => $data['title'],
                     'shortDescription' => $data['short_description'],
-                    'image_path' => $data['image_path'],
+                    'imagePath' => $data['image_path'],
                     'slug' => $data['slug'],
                     'price' => [
                         [
@@ -164,8 +164,8 @@ class ModelLesson extends  ClassDatabase
             return [
                 'id_lesson' => $data['id_lesson'],
                 'title' => $data['title'],
-                'short_description' => $data['short_description'],
-                'image_path' => $data['image_path'],
+                'shortDescription' => $data['short_description'],
+                'imagePath' => $data['image_path'],
                 'slug' => $data['slug']
             ];
         }

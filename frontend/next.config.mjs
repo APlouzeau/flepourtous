@@ -16,6 +16,17 @@ const nextConfig = {
             {
                 source: "/en/courses-offer/:slug",
                 destination: "/en/offre-de-cours/:slug",
+            },            {
+                source: "/en/courses-offer",
+                destination: "/en/offre-de-cours",
+            },
+            {
+                source: "/ja/コースの提供/:slug",
+                destination: "/ja/offre-de-cours/:slug",
+            },
+            {
+                source: "/ja/コースの提供",
+                destination: "/ja/offre-de-cours",
             },
         ];
     },
