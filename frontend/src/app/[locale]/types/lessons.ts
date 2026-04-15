@@ -33,6 +33,7 @@ export interface Lesson {
             price: number;
         },
     ];
+    slugs: Record<string, string>;
 }
 export type allLessons = Lesson[];
 

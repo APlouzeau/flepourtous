@@ -21,6 +21,7 @@ class ControllerLesson
     {
         $modelLesson = new ModelLesson();
         $lesson = $modelLesson->getLessonByName($slug, $locale);
+        $this->controllerError->debug("Leçon récupérée dans le controller", ['lesson' => $lesson]);
         echo json_encode($lesson);
     }
     public function getAllLessonsWithPrices($locale)

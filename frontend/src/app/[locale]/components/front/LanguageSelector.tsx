@@ -3,11 +3,21 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { useSlugStore } from "@/store/useSlugStore";
+
+const routeSegments: Record<string, string> = {
+    fr: "offre-de-cours",
+    en: "courses-offer",
+};
 
 export default function LanguageSelector() {
     const pathname = usePathname();
     const router = useRouter();
     const [currentLocale, setCurrentLocale] = useState<string>("fr");
+    const slugs = useSlugStore((state) => state.slugs);
+
+    console.log("slugs reçus dans LanguageSelector :", slugs);
+    console.log("pathname actuel :", pathname);
 
     useEffect(() => {
         // Extraire la locale du pathname
@@ -19,10 +29,18 @@ export default function LanguageSelector() {
 
     const getPathForLocale = (newLocale: string) => {
         if (!pathname) return `/${newLocale}`;
-        
+
         // Remplacer la locale dans le pathname
         const segments = pathname.split("/");
         segments[1] = newLocale;
+
+        const translatedSlug = slugs[newLocale];
+        if (translatedSlug && segments.length >= 4) {
+            segments[segments.length - 1] = translatedSlug;
+        }
+        if (segments[2] && routeSegments[newLocale]) {
+            segments[2] = routeSegments[newLocale];
+        }
         return segments.join("/");
     };
 
@@ -43,16 +61,15 @@ export default function LanguageSelector() {
 
     useEffect(() => {
         // Restaurer la position de scroll après le changement de langue
-        const savedPosition = sessionStorage.getItem('scrollPosition');
+        const savedPosition = sessionStorage.getItem("scrollPosition");
         if (savedPosition) {
             window.scrollTo(0, parseInt(savedPosition));
-            sessionStorage.removeItem('scrollPosition');
+            sessionStorage.removeItem("scrollPosition");
         }
     }, []);
 
     const handleLanguageChange = (langCode: string) => {
-        // Sauvegarder la position actuelle avant le changement
-        sessionStorage.setItem('scrollPosition', window.scrollY.toString());
+        sessionStorage.setItem("scrollPosition", window.scrollY.toString());
         const newPath = getPathForLocale(langCode);
         router.push(newPath);
     };
@@ -61,11 +78,7 @@ export default function LanguageSelector() {
         <div className="relative group">
             <button className="flex items-center space-x-2 text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base">
                 <div className="bg-color-white w-full h-full">
-                    <Image
-                    src={currentLanguage.flag}
-                    alt={currentLanguage.name}
-                    width={36}
-                    height={24} />
+                    <Image src={currentLanguage.flag} alt={currentLanguage.name} width={36} height={24} />
                 </div>
                 <span className="hidden xl:inline">{currentLanguage.name}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,12 +97,7 @@ export default function LanguageSelector() {
                                 currentLocale === lang.code ? "bg-red-50 text-red-600 font-semibold" : ""
                             }`}
                         >
-                            <Image
-                                alt={lang.name}
-                                src={lang.flag}
-                                width={24}
-                                height={18}
-                            />
+                            <Image alt={lang.name} src={lang.flag} width={24} height={18} />
                             <span>{lang.name}</span>
                         </button>
                     ))}

@@ -36,6 +36,7 @@ class ModelLesson extends  ClassDatabase
         $this->controllerError->debug("Début appel getLessonByName dans le modèle", ['slug' => $slug, 'locale' => $locale]);
         $req = $this->conn->prepare('
         SELECT
+        l.id_lesson,
         lt.title,
         lt.short_description,
         lt.full_description_1,
@@ -78,7 +79,16 @@ class ModelLesson extends  ClassDatabase
                 ];
             $times[] = $price;
         }
+        $stmtSlugs = $this->conn->prepare('
+        SELECT locale, slug 
+        FROM lesson_translations 
+        WHERE id_lesson = :id_lesson
+    ');
+        $stmtSlugs->execute(['id_lesson' => $datas[0]['id_lesson']]);
+        $slugs = $stmtSlugs->fetchAll(PDO::FETCH_KEY_PAIR);
+
         return [
+            'id_lesson' => $datas[0]['id_lesson'],
             'title' => $datas[0]['title'],
             'shortDescription' => $datas[0]['short_description'],
             'fullDescription_1' => $datas[0]['full_description_1'],
@@ -98,7 +108,8 @@ class ModelLesson extends  ClassDatabase
             'text_5' => $datas[0]['text_5'],
             'subtitle_6' => $datas[0]['subtitle_6'],
             'text_6' => $datas[0]['text_6'],
-            'times' => $times
+            'times' => $times,
+            'slugs' => $slugs
         ];
     }
 

@@ -11,6 +11,14 @@ const nextConfig = {
         ],
     },
     output: process.env.OUTPUT ? "export" : undefined,
+    async rewrites() {
+        return [
+            {
+                source: "/en/courses-offer/:slug",
+                destination: "/en/offre-de-cours/:slug",
+            },
+        ];
+    },
 };
 
 export default nextConfig;

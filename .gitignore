@@ -87,3 +87,5 @@ flepourtous-prod.sql
 
 #logs
 logs/
+
+./pnpm-store
