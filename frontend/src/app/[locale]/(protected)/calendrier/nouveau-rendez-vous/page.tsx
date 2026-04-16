@@ -2,10 +2,12 @@ import { LessonsWithPrices } from "@/app/[locale]/types/lessons";
 import { getAllLessonsWithPrices } from "./AppointmentAction";
 import NewAppointmentForm from "./AppointmentForm";
 import { getWallet } from "@/lib/session";
+import { getI18n } from "@/locales/server";
 
 export default async function NewAppointmentPage() {
     const lessons: LessonsWithPrices = await getAllLessonsWithPrices();
     const wallet = await getWallet();
+    const trad = await getI18n();
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
             {/* Header avec solde */}
@@ -16,7 +18,9 @@ export default async function NewAppointmentPage() {
                             <div className="flex-shrink-0">
                                 <div className="flex items-center space-x-3">
                                     <div>
-                                        <p className="text-sm font-medium text-gray-600">Solde disponible</p>
+                                        <p className="text-sm font-medium text-gray-600">
+                                            {trad("profile.informations.walletAvailable")}
+                                        </p>
                                         <p className="text-2xl font-bold text-gray-900">
                                             {wallet ? `${wallet} €` : "Chargement..."}
                                         </p>
@@ -45,17 +49,15 @@ export default async function NewAppointmentPage() {
                             />
                         </svg>
                     </div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">Réserver un nouveau cours</h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Choisissez votre créneau idéal et réservez votre cours en quelques clics.
-                    </p>
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">{trad("common.buttons.reserveNewCourse")}</h1>
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">{trad("common.buttons.chooseYourSlot")}</p>
                 </div>
 
                 {/* Formulaire dans une carte */}
                 <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                     <div className="px-8 py-6" style={{ background: "linear-gradient(to right, #6B7280, #1D1E1C)" }}>
-                        <h2 className="text-2xl font-bold text-white">Détails de votre réservation</h2>
-                        <p className="text-gray-200 mt-1">Remplissez les informations ci-dessous</p>
+                        <h2 className="text-2xl font-bold text-white">{trad("common.buttons.reserveNewCourse")}</h2>
+                        <p className="text-gray-200 mt-1">{trad("common.buttons.chooseYourSlot")}</p>
                     </div>
                     <div className="p-8">
                         <NewAppointmentForm lessons={lessons} />

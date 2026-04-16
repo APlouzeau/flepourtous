@@ -1,3 +1,4 @@
+import { getI18n } from "@/locales/server";
 import PaymentReturn from "./PaymentReturn";
 import { getCookieBackend } from "@/lib/session";
 
@@ -13,14 +14,15 @@ export default async function PaymentReturnPage({
     const resolvedSearchParams = await searchParams;
     const sessionId = resolvedSearchParams.session_id || undefined;
     const method = resolvedSearchParams.method || null;
+    const trad = await getI18n();
 
     const cookie = await getCookieBackend();
 
     if (!sessionId && method !== "wallet") {
         return (
             <div className="p-4 md:p-8 text-center">
-                <h1 className="text-2xl font-bold mb-6 text-red-500">Erreur</h1>
-                <p>Informations de paiement non trouvées ou invalides.</p>
+                <h1 className="text-2xl font-bold mb-6 text-red-500">{trad("payment.error")}</h1>
+                <p>{trad("payment.paymentInformationsNotFound")}</p>
             </div>
         );
     }
@@ -29,8 +31,8 @@ export default async function PaymentReturnPage({
     if (!stripePublicKey) {
         return (
             <div className="p-4 md:p-8 text-center">
-                <h1 className="text-2xl font-bold mb-6 text-red-500">Erreur</h1>
-                <p>Configuration Stripe manquante.</p>
+                <h1 className="text-2xl font-bold mb-6 text-red-500">{trad("payment.error")}</h1>
+                <p>{trad("payment.missingPaymentInformations")}</p>
             </div>
         );
     }

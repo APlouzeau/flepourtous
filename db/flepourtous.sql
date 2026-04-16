@@ -126,20 +126,20 @@ INSERT INTO `lessons` (`id_lesson`, `image_path`) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table `lesson_price`
+-- Structure de la table `lesson_prices`
 --
 
-CREATE TABLE `lesson_price` (
+CREATE TABLE `lesson_prices` (
   `id_lesson` int(11) NOT NULL,
   `id_price` int(11) NOT NULL,
   `id_duration` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Déchargement des données de la table `lesson_price`
+-- Déchargement des données de la table `lesson_prices`
 --
 
-INSERT INTO `lesson_price` (`id_lesson`, `id_price`, `id_duration`) VALUES
+INSERT INTO `lesson_prices` (`id_lesson`, `id_price`, `id_duration`) VALUES
 (1, 1, 1),
 (1, 3, 2),
 (1, 5, 3),
@@ -291,9 +291,9 @@ ALTER TABLE `lessons`
   ADD PRIMARY KEY (`id_lesson`);
 
 --
--- Index pour la table `lesson_price`
+-- Index pour la table `lesson_prices`
 --
-ALTER TABLE `lesson_price`
+ALTER TABLE `lesson_prices`
   ADD PRIMARY KEY (`id_lesson`,`id_price`,`id_duration`),
   ADD KEY `id_duration` (`id_duration`),
   ADD KEY `id_price` (`id_price`);
@@ -366,12 +366,12 @@ ALTER TABLE `events`
   ADD CONSTRAINT `events_ibfk_3` FOREIGN KEY (`id_lesson`) REFERENCES `lessons` (`id_lesson`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Contraintes pour la table `lesson_price`
+-- Contraintes pour la table `lesson_prices`
 --
-ALTER TABLE `lesson_price`
-  ADD CONSTRAINT `lesson_price_ibfk_1` FOREIGN KEY (`id_price`) REFERENCES `prices` (`id_price`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `lesson_price_ibfk_3` FOREIGN KEY (`id_duration`) REFERENCES `durations` (`id_duration`),
-  ADD CONSTRAINT `lesson_price_ibfk_4` FOREIGN KEY (`id_lesson`) REFERENCES `lessons` (`id_lesson`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `lesson_prices`
+  ADD CONSTRAINT `lesson_prices_ibfk_1` FOREIGN KEY (`id_price`) REFERENCES `prices` (`id_price`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `lesson_prices_ibfk_3` FOREIGN KEY (`id_duration`) REFERENCES `durations` (`id_duration`),
+  ADD CONSTRAINT `lesson_prices_ibfk_4` FOREIGN KEY (`id_lesson`) REFERENCES `lessons` (`id_lesson`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Contraintes pour la table `lesson_translations`

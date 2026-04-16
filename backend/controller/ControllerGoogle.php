@@ -44,7 +44,6 @@ class ControllerGoogle
             if ($apiKey !== CRON_KEY) {
                 http_response_code(403);
                 echo "Clé API invalide.";
-                error_log("[Cron Google] Tentative d'accès avec une clé API invalide.");
                 return;
             }
 
@@ -63,7 +62,6 @@ class ControllerGoogle
                     $channelToStop->setResourceId($oldChannelData['resourceId']);
                     $service->channels->stop($channelToStop);
                 } catch (Exception $e) {
-                    error_log("[Cron Google] Avertissement lors de l'arrêt de l'ancien canal (ce n'est probablement pas une erreur grave) : " . $e->getMessage());
                 }
             }
 
@@ -81,14 +79,12 @@ class ControllerGoogle
             echo "Canal de notification reconfiguré. Nouvel ID: " . $watchResponse->getId() . " Expire le: " . date('Y-m-d H:i:s', $watchResponse->getExpiration() / 1000);
         } catch (Exception $e) {
             http_response_code(500);
-            error_log('Erreur critique lors de la création du canal : ' . $e->getMessage());
             echo 'Erreur critique lors de la création du canal : ' . $e->getMessage();
         }
     }
 
     public function handleGoogleNotification()
     {
-        error_log("Notification Google reçue.");
         $channelIdHeader = $_SERVER['HTTP_X_GOOG_CHANNEL_ID'] ?? null;
         $resourceStateHeader = $_SERVER['HTTP_X_GOOG_RESOURCE_STATE'] ?? null;
         $messageNumberHeader = $_SERVER['HTTP_X_GOOG_MESSAGE_NUMBER'] ?? null;
@@ -130,20 +126,20 @@ class ControllerGoogle
         $service = new \Google\Service\Calendar($client);
         $calendarId = GOOGLE_CALENDAR_ID;
 
-    $params = [];
-    do {
-        $eventsResults = $service->events->listEvents($calendarId, $params);
-        foreach ($eventsResults->getItems() as $event) {
-            $this->updateCalendar($event);
-        }
-        $params = ['pageToken' => $eventsResults->getNextPageToken()];
-    } while ($eventsResults->getNextPageToken());
+        $params = [];
+        do {
+            $eventsResults = $service->events->listEvents($calendarId, $params);
+            foreach ($eventsResults->getItems() as $event) {
+                $this->updateCalendar($event);
+            }
+            $params = ['pageToken' => $eventsResults->getNextPageToken()];
+        } while ($eventsResults->getNextPageToken());
 
-    $nextSyncToken = $eventsResults->getNextSyncToken();
-    if ($nextSyncToken) {
-        $modelGoogleSync = new ModelGoogleSync();
-        $modelGoogleSync->saveNextSyncToken($calendarId, $nextSyncToken);
-    }
+        $nextSyncToken = $eventsResults->getNextSyncToken();
+        if ($nextSyncToken) {
+            $modelGoogleSync = new ModelGoogleSync();
+            $modelGoogleSync->saveNextSyncToken($calendarId, $nextSyncToken);
+        }
     }
 
     public function getEventsExists()
@@ -160,7 +156,6 @@ class ControllerGoogle
             try {
                 $eventsResults = $service->events->listEvents($calendarId, ['syncToken' => $nextSyncToken]);
                 $events = $eventsResults->getItems();
-                $this->controllerError->debug("Evenements recuperes : ", $events);
 
                 foreach ($events as $event) {
                     $this->updateCalendar($event);
@@ -169,41 +164,33 @@ class ControllerGoogle
                 $newSyncToken = $eventsResults->getNextSyncToken();
                 if ($newSyncToken) {
                     $modelGoogleSync->saveNextSyncToken($calendarId, $newSyncToken);
-                    $this->controllerError->debug("Nouveau syncToken sauvegarde apres traitement des evenements existants.");
                 }
             } catch (Exception $e) {
-                $this->controllerError->debug('Erreur lors de la recuperation des evenements : ', $e->getMessage());
                 $modelGoogleSync->deleteNextSyncToken($nextSyncToken);
                 $this->getEventsOnSync();
             }
         } else {
-            $this->controllerError->debug('Aucun token de synchronisation trouve.');
         }
     }
 
     public function updateCalendar($event)
     {
-        $this->controllerError->debug("Mise a jour de l'evenement Google ID: ", $event->getId());
         $idEvent = $event->getId();
         if ($event->getStatus() == 'cancelled') {
-            $this->controllerError->debug("Événement annulé Google ID: ", $idEvent);
             $this->googleEventStatusCancelled($idEvent);
             return;
         }
 
         if ($this->isBlockedEvent($event)) {
-            $this->controllerError->debug("Événement Google ignoré car bloqué (summary: ", $event->getSummary(), ")");
             return;
         }
 
         $idEvent = $event->getId();
         $isAppEvent = strpos($event->getDescription(), 'Source:app') !== false;
         if ($isAppEvent && $this->checkSameEvent($event)) {
-            $this->controllerError->debug("Evenement Google ignoré car créé par l'appli (création initiale) :", $idEvent);
             return;
         }
 
-        $this->controllerError->debug("Traitement de l'evenement Google ID: ", $event->getId());
         $eventStart = $event->getStart();
         $eventEnd = $event->getEnd();
 
@@ -246,33 +233,22 @@ class ControllerGoogle
 
     public function googleEventStatusCancelled($idEvent)
     {
-        $this->controllerError->debug("Annulation en cours de l'evenement Google ID: ", $idEvent);
         $eventExist = $this->modelEvent->checkEvent($idEvent);
-        error_log("checkEvent retourné: " . var_export($eventExist, true));
-        error_log("Type de eventExist: " . gettype($eventExist));
         if ($eventExist) {
             // Si l'événement a déjà été annulé par l'app, on ignore la notification Google
             if (
                 strpos($eventExist['status'], 'Annulé') !== false ||
                 strpos($eventExist['status'], 'Annulé - Admin') !== false
             ) {
-                $this->controllerError->debug("Événement déjà annulé par l'app, ignoré: ", $idEvent);
                 return;
             }
-            $this->controllerError->debug("Événement Google ID: ", $idEvent);
-            $this->controllerError->debug(" annulé et existe en BDD. Suppression de la room visio et mise à jour de l'état.");
-            $this->controllerVisio->deleteRoom($idEvent);
             $this->markGoogleEventAsCancelled($idEvent, $eventExist);
         } else {
-            $this->controllerError->debug("Événement Google ID: ", $idEvent);
-            $this->controllerError->debug(" annulé mais n'existe pas en BDD. Ignoré.");
         }
-        $this->controllerError->debug("==================== FIN updateCalendar (cancelled) ====================");
     }
 
     private function createNewEventFromGoogle($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone)
     {
-        $this->controllerError->debug("Création d'un nouvel événement Google ID: ", $idEvent);
 
         $userId = $this->getAttendeeFromGoogleEvent($event);
 
@@ -332,7 +308,6 @@ class ControllerGoogle
         $googleUserId = $this->getAttendeeFromGoogleEvent($event);
 
         if ($localUserId != $googleUserId) {
-            error_log("Mise à jour de l'userId pour l'événement Google ID: " . $idEvent . " de " . $localUserId . " à " . $googleUserId);
             $userId = $localUserId;
         } else {
             $userId = $googleUserId;
@@ -353,7 +328,6 @@ class ControllerGoogle
 
     public function markGoogleEventAsCancelled($idEvent, $event)
     {
-        error_log("Marquage de l'événement Google ID: " . $idEvent . " comme annulé.");
         try {
             $price = null;  // ✅ Initialiser $price à null par défaut
 
@@ -396,8 +370,6 @@ class ControllerGoogle
             $calendarsData = $freebusyResponse->getCalendars();
             $calendarSpecificData = $calendarsData[$calendarId];
             $busySlots = $calendarSpecificData->getBusy();
-
-            error_log("Disponibilité récupérée pour la période du " . $startDateTime->format('Y-m-d H:i:s') . " au " . $endDateTime->format('Y-m-d H:i:s') . "\n");
 
             return $busySlots;
         } catch (Exception $e) {

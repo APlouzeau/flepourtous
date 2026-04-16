@@ -7,6 +7,7 @@ import { SelectNative } from "@/components/ui/select-native";
 import { LessonsWithPrices, LessonWithPrice } from "@/app/[locale]/types/lessons";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/locales/client";
 
 export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -20,6 +21,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
     const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
     const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);
     const router = useRouter();
+    const trad = useI18n();
 
     useEffect(() => {
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -57,27 +59,24 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                 setError(null);
                 setTimeSlots([]);
                 try {
-                    const availabledSlots = await getAvailableTimeSlots(date, userTimezone, selectedDuration);
+                    const availableSlots = await getAvailableTimeSlots(date, userTimezone, selectedDuration);
 
-                    if (availabledSlots.code == 0) {
-                        setError(availabledSlots.message || "Aucun créneau disponible pour cette date.");
+                    if (availableSlots.code == 0) {
+                        setError(availableSlots.message || trad("common.buttons.noAvailableSlots"));
                         setTimeSlots([]);
-                    } else if (availabledSlots.code == 1 && availabledSlots.data && availabledSlots.data.length > 0) {
+                    } else if (availableSlots.code == 1 && availableSlots.data && availableSlots.data.length > 0) {
                         setError(null);
-                        setTimeSlots(availabledSlots.data);
-                    } else if (
-                        availabledSlots.code == 1 &&
-                        (!availabledSlots.data || availabledSlots.data.length === 0)
-                    ) {
-                        setError("Aucun créneau disponible pour cette date.");
+                        setTimeSlots(availableSlots.data);
+                    } else if (availableSlots.code == 1 && (!availableSlots.data || availableSlots.data.length === 0)) {
+                        setError(trad("calendar.appointment.noAvailableSlots"));
                         setTimeSlots([]);
                     } else {
-                        setError("Erreur lors de la récupération des créneaux.");
+                        setError(trad("calendar.appointment.errorFetchingSlots"));
                         setTimeSlots([]);
                     }
                 } catch (error) {
                     console.error("💥 Erreur lors de la récupération des créneaux:", error);
-                    setError("Erreur de connexion lors de la récupération des créneaux.");
+                    setError(trad("calendar.appointment.errorFetchingSlots"));
                     setTimeSlots([]);
                 } finally {
                     setLoading(false);
@@ -95,31 +94,31 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [date, userTimezone, selectedDuration]);
+    }, [date, userTimezone, selectedDuration, trad]);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         setRegistering(true);
         setError(null);
         setSuccess(null);
 
         const formData = new FormData(e.currentTarget);
-        if (selectedLesson && selectedLesson.idLesson != null) {
-            formData.append("idLesson", selectedLesson.idLesson.toString());
+        if (selectedLesson && selectedLesson.id_lesson != null) {
+            formData.append("id_lesson", selectedLesson.id_lesson.toString());
         } else {
-            console.error("Aucun cours sélectionné pour envoyer l'idLesson");
-            setError("Veuillez sélectionner un cours.");
+            console.error("Aucun cours sélectionné pour envoyer l'id_lesson");
+            setError(trad("calendar.appointment.chooseLesson"));
             setRegistering(false);
             return;
         }
         const response = await registerAppointment(formData);
-
+        console.log("Response from registerAppointment:", response);
         if (response.code === 1 || response.code === 10) {
             // Garder registering = true jusqu'à la redirection
             router.push("/calendrier/nouveau-rendez-vous/paiement");
         } else {
             setRegistering(false);
-            setError(response.message || "Une erreur s'est produite lors de l'enregistrement.");
+            setError(response.message || trad("calendar.appointment.errorRegistering"));
         }
     };
 
@@ -138,7 +137,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             />
                         </svg>
                         <Label htmlFor={id} className="text-base font-semibold text-gray-900">
-                            Fuseau horaire
+                            {trad("calendar.table.timeZone")}
                         </Label>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -172,7 +171,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                         />
                     </svg>
                     <label htmlFor="startDate" className="text-base font-semibold text-gray-900">
-                        Date du cours
+                        {trad("calendar.table.date")}
                     </label>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -204,7 +203,9 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                         />
                     </svg>
-                    <label className="text-base font-semibold text-gray-900">Matière</label>
+                    <label className="text-base font-semibold text-gray-900">
+                        {trad("calendar.appointment.lesson")}
+                    </label>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                     <RadioGroup
@@ -212,10 +213,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             const lesson = lessons.find((l) => l.title === value);
                             if (lesson) {
                                 setSelectedLesson(lesson);
-                                setSelectedDuration(null);
-                                // Réinitialiser les créneaux quand on change de matière
-                                setTimeSlots([]);
-                                setError(null);
+                                console.log("Selected lesson:", lesson);
                             }
                         }}
                         name="lesson"
@@ -225,7 +223,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             lessons.length > 0 &&
                             lessons.map((lesson) => (
                                 <div
-                                    key={lesson.idLesson}
+                                    key={lesson.idLesson + lesson.slug}
                                     className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-400 transition-colors"
                                 >
                                     <RadioGroupItem
@@ -259,7 +257,9 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                             />
                         </svg>
-                        <label className="text-base font-semibold text-gray-900">Durée et tarif</label>
+                        <label className="text-base font-semibold text-gray-900">
+                            {trad("calendar.appointment.durationAndPrice")}
+                        </label>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                         <RadioGroup
@@ -310,7 +310,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                         />
                     </svg>
                     <label htmlFor="startTime" className="text-base font-semibold text-gray-900">
-                        Horaire
+                        {trad("calendar.appointment.hour")}
                     </label>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -379,10 +379,10 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                         >
                             <option value="">
                                 {!date || !userTimezone || !selectedDuration
-                                    ? "Veuillez d'abord sélectionner une matière et une durée"
+                                    ? trad("calendar.appointment.selectLessonAndDuration")
                                     : timeSlots.length === 0
-                                      ? "Aucun créneau disponible pour cette configuration"
-                                      : "Sélectionnez un horaire"}
+                                      ? trad("calendar.appointment.noAvailableSlots")
+                                      : trad("calendar.appointment.selectHour")}
                             </option>
                             {timeSlots.map((slot) => (
                                 <option key={slot} value={slot}>
@@ -406,7 +406,8 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                         />
                     </svg>
                     <label htmlFor="description" className="text-base font-semibold text-gray-900">
-                        Commentaire <span className="text-sm font-normal text-gray-500">(optionnel)</span>
+                        {trad("calendar.appointment.commentary")}{" "}
+                        <span className="text-sm font-normal text-gray-500">{trad("calendar.appointment.option")}</span>
                     </label>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -414,7 +415,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                         id="description"
                         name="description"
                         rows={4}
-                        placeholder="Ajoutez des détails ou des questions spécifiques pour votre cours..."
+                        placeholder={trad("calendar.appointment.addCommentary")}
                         className="w-full bg-white border-gray-300 rounded-lg shadow-sm p-3 resize-none"
                         disabled={loading}
                         style={{ "--ring-color": "#1D1E1C", "--border-color": "#1D1E1C" } as React.CSSProperties}
@@ -507,21 +508,21 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                 ></path>
                             </svg>
-                            Réservation en cours...
+                            {trad("calendar.appointment.bookingInProgress")}
                         </div>
                     ) : successTimeout ? (
                         <div className="flex items-center justify-center">
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            Redirection en cours...
+                            {trad("calendar.appointment.redirectingToPayment")}
                         </div>
                     ) : (
                         <>
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
-                            Réserver mon cours
+                            {trad("calendar.appointment.reserveMyCourse")}
                         </>
                     )}
                 </Button>

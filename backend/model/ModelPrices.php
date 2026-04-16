@@ -92,10 +92,10 @@ class ModelPrices extends  ClassDatabase
         $req = $this->conn->prepare('
             SELECT price
             FROM prices p
-            INNER JOIN lessonPrices lp ON p.id_price = lp.id_price
-            INNER JOIN lesson l ON lp.id_lesson = l.idLesson
-            INNER JOIN duration d ON lp.id_duration = d.idDuration
-            WHERE l.idLesson = :idLesson and d.duration = :durationValue
+            INNER JOIN lesson_prices lp ON p.id_price = lp.id_price
+            INNER JOIN lessons l ON lp.id_lesson = l.id_lesson
+            INNER JOIN durations d ON lp.id_duration = d.id_duration
+            WHERE l.id_lesson = :idLesson and d.duration = :durationValue
         ');
         $req->bindValue(':durationValue', $durationValue, PDO::PARAM_INT);
         $req->bindValue(':idLesson', $idLesson, PDO::PARAM_INT);
@@ -109,14 +109,13 @@ class ModelPrices extends  ClassDatabase
 
     public function getPriceByEventId(string $idEvent)
     {
-        error_log("Fetching price for event ID: " . $idEvent);
         $req = $this->conn->prepare('
             SELECT e.id_event, l.title, p.price
             FROM events e
-            INNER JOIN lesson l ON l.id_lesson = e.id_lesson
-            INNER JOIN lessonPrices lp ON lp.id_lesson = l.id_lesson
+            INNER JOIN lessons l ON l.id_lesson = e.id_lesson
+            INNER JOIN lesson_prices lp ON lp.id_lesson = l.id_lesson
             INNER JOIN prices p ON p.id_price = lp.id_price
-            INNER JOIN duration d ON d.id_duration = lp.id_duration
+            INNER JOIN durations d ON d.id_duration = lp.id_duration
             WHERE e.id_event = :id_event AND e.duration = d.duration
         ');
         $req->execute([':id_event' => $idEvent]);
@@ -137,8 +136,8 @@ class ModelPrices extends  ClassDatabase
         $req = $this->conn->prepare('
             SELECT p.price
             FROM prices p
-            INNER JOIN lessonPrices lp ON p.id_price = lp.id_price
-            INNER JOIN duration d ON lp.id_duration = d.id_duration
+            INNER JOIN lesson_prices lp ON p.id_price = lp.id_price
+            INNER JOIN durations d ON lp.id_duration = d.id_duration
             WHERE d.duration = :duration AND lp.id_lesson = :id_lesson
         ');
         $req->bindValue(':duration', $duration, PDO::PARAM_INT);

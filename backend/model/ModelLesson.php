@@ -33,7 +33,6 @@ class ModelLesson extends  ClassDatabase
 
     public function getLessonByName($slug, $locale)
     {
-        $this->controllerError->debug("Début appel getLessonByName dans le modèle", ['slug' => $slug, 'locale' => $locale]);
         $req = $this->conn->prepare('
         SELECT
         l.id_lesson,
@@ -70,7 +69,6 @@ class ModelLesson extends  ClassDatabase
         $req->execute();
         $datas = $req->fetchAll();
         $times = [];
-        $this->controllerError->debug("Résultat de la requête getLessonByName", ['datas' => $datas[0]]);
         foreach ($datas as $data) {
             $price =
                 [
@@ -115,7 +113,6 @@ class ModelLesson extends  ClassDatabase
 
     public function getAllLessonsWithPrices($locale)
     {
-        $this->controllerError->debug("Début appel getAllLessonsWithPrices dans le modèle", ['locale' => $locale]);
         $req = $this->conn->prepare('
         SELECT l.id_lesson, l.image_path, lt.title, lt.short_description,lt.slug, p.price, d.duration
         FROM lessons l
@@ -156,7 +153,11 @@ class ModelLesson extends  ClassDatabase
 
     public function getLessonById($id_lesson)
     {
-        $req = $this->conn->prepare('SELECT * FROM lesson WHERE id_lesson = :id_lesson');
+        $req = $this->conn->prepare('
+        SELECT lt.id_lesson, lt.title, lt.short_description, l.image_path, lt.slug
+        FROM lesson_translations lt
+        INNER JOIN lessons l ON lt.id_lesson = l.id_lesson
+        WHERE lt.id_lesson = :id_lesson');
         $req->bindValue(':id_lesson', $id_lesson, PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();

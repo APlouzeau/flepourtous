@@ -74,6 +74,17 @@ class ModelEvent extends  ClassDatabase
 
     public function createEvent(EntitieEvent $event)
     {
+        $this->controllerError->debug("Données de l'événement à enregistrer en base de données : " . json_encode([
+            'id_event' => $event->getIdEvent(),
+            'user_id' => $event->getUserId(),
+            'description' => $event->getDescription(),
+            'duration' => $event->getDuration(),
+            'start_date_time' => $event->getStartDateTime(),
+            'timezone' => $event->getTimezone(),
+            'visio_link' => $event->getVisioLink(),
+            'id_lesson' => $event->getId_lesson(),
+            'status' => $event->getStatus(),
+        ]));
         $baseReq = 'id_event, user_id, description, duration, start_date_time, visio_link, timezone';
         $baseValue = ':id_event, :user_id, :description, :duration, :start_date_time, :visio_link, :timezone';
 
@@ -97,9 +108,9 @@ class ModelEvent extends  ClassDatabase
             $req->bindValue(':user_id', $event->getUserId(), PDO::PARAM_INT);
             $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
             $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
-            $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
+            $req->bindValue(':start_date_time', $event->getStartDateTime(), PDO::PARAM_STR);
             $req->bindValue(':timezone', $event->getTimezone(), PDO::PARAM_STR);
-            $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
+            $req->bindValue(':visio_link', $event->getVisioLink(), PDO::PARAM_STR);
 
             if ($idLesson !== null && $idLesson !== '' && $idLesson !== 0) {
                 $req->bindValue(':id_lesson', $idLesson, PDO::PARAM_INT);
@@ -108,6 +119,7 @@ class ModelEvent extends  ClassDatabase
             if ($status !== null && $status !== '') {
                 $req->bindValue(':status', $status, PDO::PARAM_STR);
             }
+
 
             $result = $req->execute();
 
@@ -193,7 +205,6 @@ class ModelEvent extends  ClassDatabase
     public function checkEvent(string $idEvent)
     {
         try {
-            $this->controllerError->debug("Checking event: ", $idEvent);
             $req = $this->conn->prepare('SELECT * FROM events WHERE id_event = :id_event');
             $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
             $success = $req->execute();
@@ -251,7 +262,7 @@ class ModelEvent extends  ClassDatabase
 
     public function checkEventForNextHour()
     {
-        $this->controllerError->debug("Checking events for the next hour...");
+        ("Checking events for the next hour...");
         $req = $this->conn->prepare("
         SELECT u.first_name, u.last_name, u.mail, e.description, e.start_date_time, e.visio_link, e.timezone
         FROM events e INNER JOIN users u ON e.user_id = u.id_user
@@ -261,7 +272,6 @@ class ModelEvent extends  ClassDatabase
 
         $req->execute();
         $datas = $req->fetchAll();
-        $this->controllerError->debug("Found " . count($datas) . " events in the next hour.");
         if (count($datas) > 0) {
             $events = [];
             foreach ($datas as $data) {

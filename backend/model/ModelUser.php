@@ -118,7 +118,6 @@ extends ClassDatabase
         $req->execute();
         $data = $req->fetch(PDO::FETCH_ASSOC);
         if (!$data) {
-            error_log("Invalid verification token: " . $verifyToken);
             return false; // Token invalide
         }
         $query = "UPDATE users SET is_verified = 1 WHERE verify_token = :verify_token";
@@ -131,7 +130,6 @@ extends ClassDatabase
             $req->execute();
             return $data['id_user'];
         } else {
-            error_log("Email verification failed for link: " . $verifyToken);
             return false;
         }
     }
@@ -145,7 +143,6 @@ extends ClassDatabase
         if ($req->execute()) {
             return true;
         } else {
-            error_log("Failed to update wallet for user ID: " . $idUser);
             return false;
         }
     }
@@ -159,7 +156,6 @@ extends ClassDatabase
         if ($req->execute()) {
             return true;
         } else {
-            error_log("Failed to add to wallet for user ID: " . $idUser);
             return false;
         }
     }

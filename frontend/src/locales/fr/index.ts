@@ -6,6 +6,7 @@ import header from "./header";
 import homePage from "./homePage";
 import ressources from "./ressources";
 import cgv from "./cgv";
+import calendar from "./calendar";
 
 export default {
     ...common,
@@ -16,4 +17,5 @@ export default {
     ...coursesOffer,
     ...profile,
     ...cgv,
+    ...calendar,
 } as const;

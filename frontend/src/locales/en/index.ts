@@ -1,3 +1,4 @@
+import calendar from "./calendar";
 import cgv from "./cgv";
 import common from "./common";
 import coursesOffer from "./courses-offer";
@@ -16,4 +17,5 @@ export default {
     ...coursesOffer,
     ...profile,
     ...cgv,
+    ...calendar,
 } as const;

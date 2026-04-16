@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import CancelConfirmationModal from "@/components/CancelConfirmationModal";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/locales/client";
 
 interface AppointmentRowProps {
     listAppointments: showBasicAppointmentProps[];
@@ -33,6 +34,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
         isDeleting: false,
     });
     const router = useRouter();
+    const trad = useI18n();
 
     // Mettre à jour l'heure actuelle toutes les 30 secondes
     useEffect(() => {
@@ -243,14 +245,14 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
             <Table>
                 <TableHeader>
                     <TableRow className="hover:bg-transparent text-center">
-                        <TableHead>Cours</TableHead>
-                        <TableHead>Fuseau</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Heure</TableHead>
-                        <TableHead>Durée</TableHead>
-                        <TableHead>Statut Paiement</TableHead>
-                        <TableHead>Statut Visio</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>{trad("calendar.table.course")}</TableHead>
+                        <TableHead>{trad("calendar.table.timeZone")}</TableHead>
+                        <TableHead>{trad("calendar.table.date")}</TableHead>
+                        <TableHead>{trad("calendar.table.time")}</TableHead>
+                        <TableHead>{trad("calendar.table.duration")}</TableHead>
+                        <TableHead>{trad("calendar.table.paymentStatus")}</TableHead>
+                        <TableHead>{trad("calendar.table.visioStatus")}</TableHead>
+                        <TableHead>{trad("calendar.table.actions")}</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -283,7 +285,9 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                                 <TableCell>{item.timezone}</TableCell>
                                 <TableCell>{formattedDate}</TableCell>
                                 <TableCell>{formattedTime}</TableCell>
-                                <TableCell>{item.duration} mn</TableCell>
+                                <TableCell>
+                                    {item.duration} {trad("common.prices.mn")}
+                                </TableCell>
                                 <TableCell>
                                     {canPay ? (
                                         <Button
@@ -295,7 +299,9 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                                             variant="destructive"
                                             size="sm"
                                         >
-                                            {isRepaying === item.idEvent.toString() ? "..." : "Payer"}
+                                            {isRepaying === item.idEvent.toString()
+                                                ? "..."
+                                                : trad("common.buttons.pay")}
                                         </Button>
                                     ) : (
                                         getStatusBadge(item.status)
@@ -312,7 +318,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                                                 handleCancelClick(item.idEvent.toString(), item.title);
                                             }}
                                         >
-                                            Annuler
+                                            {trad("common.buttons.cancel")}
                                         </Button>
                                     ) : (
                                         <span className="text-gray-400">-</span>

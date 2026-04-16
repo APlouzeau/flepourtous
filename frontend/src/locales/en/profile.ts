@@ -14,6 +14,7 @@ export default {
             city: "City",
             country: "Country",
             modalName: "Edit my information",
+            walletAvailable: "Available balance",
         },
         password: {
             sectionName: "Password",
