@@ -14,14 +14,14 @@ class ModelEvent extends  ClassDatabase
 
     public function getOccupiedTimeSlots($date)
     {
-        $req = $this->conn->prepare('SELECT startDateTime, duration FROM event WHERE DATE(startDateTime) = :date');
+        $req = $this->conn->prepare('SELECT start_date_time, duration FROM events WHERE DATE(start_date_time) = :date');
         $req->bindValue(':date', $date, PDO::PARAM_STR);
         $req->execute();
         $datas = $req->fetchAll();
         $occupiedTimeSlot = [];
         if (count($datas) != 0) {
             foreach ($datas as $data) {
-                $currentSlotTime = new DateTime($data['startDateTime']);
+                $currentSlotTime = new DateTime($data['start_date_time']);
                 $numberOfSlots = ceil($data['duration'] / 15);
                 for ($i = 0; $i < $numberOfSlots; $i++) {
                     $occupiedTimeSlot[] = $currentSlotTime->format('Y-m-d H:i:s');
@@ -40,9 +40,10 @@ class ModelEvent extends  ClassDatabase
     {
         $req = $this->conn->prepare('
         SELECT 
-            idEvent, userId, description, duration, createdAt, updatedAt, status, visioLink, startDateTime, timezone, title 
+            id_event, user_id, description, duration, created_at, updated_at, status, visio_link, start_date_time, timezone, title 
         FROM 
-            event LEFT JOIN lesson l ON event.id_lesson = l.idLesson
+            events 
+        LEFT JOIN lessons l ON events.id_lesson = l.id_lesson
         WHERE 
             userId = :idUser');
         $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
@@ -53,15 +54,15 @@ class ModelEvent extends  ClassDatabase
         } else {
             foreach ($datas as $data) {
                 $events[] = [
-                    'idEvent' => $data['idEvent'],
-                    'userId' => $data['userId'],
+                    'idEvent' => $data['id_event'],
+                    'userId' => $data['user_id'],
                     'description' => $data['description'],
                     'duration' => $data['duration'],
-                    'createdAt' => $data['createdAt'],
-                    'updatedAt' => $data['updatedAt'],
+                    'createdAt' => $data['created_at'],
+                    'updatedAt' => $data['updated_at'],
                     'status' => $data['status'],
-                    'visioLink' => $data['visioLink'],
-                    'startDateTime' => $data['startDateTime'],
+                    'visioLink' => $data['visio_link'],
+                    'startDateTime' => $data['start_date_time'],
                     'timezone' => $data['timezone'],
                     'title' => $data['title'],
                 ];
@@ -73,8 +74,8 @@ class ModelEvent extends  ClassDatabase
 
     public function createEvent(EntitieEvent $event)
     {
-        $baseReq = 'idEvent, userId, description, duration, startDateTime, visioLink, timezone';
-        $baseValue = ':idEvent, :userId, :description, :duration, :startDateTime, :visioLink, :timezone';
+        $baseReq = 'id_event, user_id, description, duration, start_date_time, visio_link, timezone';
+        $baseValue = ':id_event, :user_id, :description, :duration, :start_date_time, :visio_link, :timezone';
 
         // Ajouter id_lesson si présent et non vide
         $idLesson = $event->getId_lesson();
@@ -90,10 +91,10 @@ class ModelEvent extends  ClassDatabase
         if ($status !== null && $status !== '') {
             $baseReq .= ', status';
             $baseValue .= ', :status';
-            $req = $this->conn->prepare('INSERT INTO event (' . $baseReq . ') VALUES (' . $baseValue . ')');
+            $req = $this->conn->prepare('INSERT INTO events (' . $baseReq . ') VALUES (' . $baseValue . ')');
 
-            $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
-            $req->bindValue(':userId', $event->getUserId(), PDO::PARAM_INT);
+            $req->bindValue(':id_event', $event->getIdEvent(), PDO::PARAM_STR);
+            $req->bindValue(':user_id', $event->getUserId(), PDO::PARAM_INT);
             $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
             $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
             $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
@@ -125,21 +126,21 @@ class ModelEvent extends  ClassDatabase
             $userId = $event->getUserId();
 
             if ($userId) {
-                $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink, userId = :userId WHERE idEvent = :idEvent');
-                $req->bindValue(':userId', $userId, PDO::PARAM_INT);
+                $req = $this->conn->prepare('UPDATE events SET description = :description, duration = :duration, start_date_time = :start_date_time, timezone = :timezone, visio_link = :visio_link, user_id = :user_id WHERE id_event = :id_event');
+                $req->bindValue(':user_id', $userId, PDO::PARAM_INT);
             } else {
-                $req = $this->conn->prepare('UPDATE event SET description = :description, duration = :duration, startDateTime = :startDateTime, timezone = :timezone, visioLink = :visioLink,  WHERE idEvent = :idEvent');
+                $req = $this->conn->prepare('UPDATE events SET description = :description, duration = :duration, start_date_time = :start_date_time, timezone = :timezone, visio_link = :visio_link WHERE id_event = :id_event');
             }
         } catch (Throwable $e) {
             error_log("Erreur dans updateEvent: " . $e->getMessage());
             throw $e;
         }
 
-        $req->bindValue(':idEvent', $event->getIdEvent(), PDO::PARAM_STR);
+        $req->bindValue(':id_event', $event->getIdEvent(), PDO::PARAM_STR);
         $req->bindValue(':description', $event->getDescription(), PDO::PARAM_STR);
         $req->bindValue(':duration', $event->getDuration(), PDO::PARAM_STR);
-        $req->bindValue(':visioLink', $event->getVisioLink(), PDO::PARAM_STR);
-        $req->bindValue(':startDateTime', $event->getStartDateTime(), PDO::PARAM_STR);
+        $req->bindValue(':visio_link', $event->getVisioLink(), PDO::PARAM_STR);
+        $req->bindValue(':start_date_time', $event->getStartDateTime(), PDO::PARAM_STR);
         $req->bindValue(':timezone', $event->getTimezone(), PDO::PARAM_STR);
 
         return $req->execute();
@@ -147,27 +148,27 @@ class ModelEvent extends  ClassDatabase
 
     public function deleteEvent(string $idEvent)
     {
-        $req = $this->conn->prepare('DELETE FROM event WHERE idEvent = :idEvent');
-        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req = $this->conn->prepare('DELETE FROM events WHERE id_event = :id_event');
+        $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
         return $req->execute();
     }
 
     public function cancelEvent(string $idEvent)
     {
-        $req = $this->conn->prepare('UPDATE event SET status = "Annulé - Remboursé" WHERE idEvent = :idEvent');
-        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req = $this->conn->prepare('UPDATE events SET status = "Annulé - Remboursé" WHERE id_event = :id_event');
+        $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
         return $req->execute();
     }
 
     public function getAllEvents()
     {
         $req = $this->conn->prepare('
-            SELECT e.idEvent, e.description, e.duration, e.status, e.visioLink, u.firstName, u.lastName, e.startDateTime, lt.title FROM event e
-            INNER JOIN users u ON e.userId = u.idUser
-            INNER JOIN lesson l ON e.id_lesson = l.idLesson
-            INNER JOIN lesson_translation lt ON l.idLesson = lt.idLesson
+            SELECT e.id_event, e.description, e.duration, e.status, e.visio_link, u.first_name, u.last_name, e.start_date_time, lt.title FROM events e
+            INNER JOIN users u ON e.user_id = u.id_user
+            INNER JOIN lesson l ON e.id_lesson = l.id_lesson
+            INNER JOIN lesson_translation lt ON l.id_lesson = lt.id_lesson
             WHERE lt.locale = "fr"
-            ORDER BY e.startDateTime;');
+            ORDER BY e.start_date_time;');
         $req->execute();
         $datas = $req->fetchAll();
         if (count($datas) == 0) {
@@ -175,13 +176,13 @@ class ModelEvent extends  ClassDatabase
         } else {
             foreach ($datas as $data) {
                 $events[] = [
-                    'idEvent' => $data['idEvent'],
-                    'studentName' => $data['firstName'] . ' ' . $data['lastName'],
+                    'idEvent' => $data['id_event'],
+                    'studentName' => $data['first_name'] . ' ' . $data['last_name'],
                     'description' => $data['description'],
                     'duration' => $data['duration'],
                     'status' => $data['status'],
-                    'visioLink' => $data['visioLink'],
-                    'startDateTime' => $data['startDateTime'],
+                    'visioLink' => $data['visio_link'],
+                    'startDateTime' => $data['start_date_time'],
                     'title' => $data['title'],
                 ];
             }
@@ -193,8 +194,8 @@ class ModelEvent extends  ClassDatabase
     {
         try {
             $this->controllerError->debug("Checking event: ", $idEvent);
-            $req = $this->conn->prepare('SELECT * FROM event WHERE idEvent = :idEvent');
-            $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+            $req = $this->conn->prepare('SELECT * FROM events WHERE id_event = :id_event');
+            $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
             $success = $req->execute();
 
             if (!$success) {
@@ -214,19 +215,19 @@ class ModelEvent extends  ClassDatabase
 
     public function getEventById(string $idEvent)
     {
-        $req = $this->conn->prepare('SELECT * FROM event WHERE idEvent = :idEvent');
-        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req = $this->conn->prepare('SELECT * FROM events WHERE id_event = :id_event');
+        $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
         $req->execute();
         $data = $req->fetch();
         if ($data) {
             $event = [
-                'idEvent' => $data['idEvent'],
-                'userId' => $data['userId'],
+                'idEvent' => $data['id_event'],
+                'userId' => $data['user_id'],
                 'description' => $data['description'],
                 'duration' => $data['duration'],
-                'startDateTime' => $data['startDateTime'],
+                'startDateTime' => $data['start_date_time'],
                 'timezone' => $data['timezone'],
-                'visioLink' => $data['visioLink'],
+                'visioLink' => $data['visio_link'],
                 'status' => $data['status'],
 
             ];
@@ -241,22 +242,22 @@ class ModelEvent extends  ClassDatabase
 
     public function getUserIdByEventId(string $idEvent)
     {
-        $req = $this->conn->prepare('SELECT userId FROM event WHERE idEvent = :idEvent');
-        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req = $this->conn->prepare('SELECT user_id FROM events WHERE id_event = :id_event');
+        $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
         $req->execute();
         $data = $req->fetch();
-        return $data ? $data['userId'] : null;
+        return $data ? $data['user_id'] : null;
     }
 
     public function checkEventForNextHour()
     {
         $this->controllerError->debug("Checking events for the next hour...");
         $req = $this->conn->prepare("
-        SELECT u.firstName, u.lastName, u.mail, e.description, e.startDateTime, e.visioLink, e.timezone
-        FROM event e INNER JOIN users u ON e.userId = u.idUser
+        SELECT u.first_name, u.last_name, u.mail, e.description, e.start_date_time, e.visio_link, e.timezone
+        FROM events e INNER JOIN users u ON e.user_id = u.id_user
         WHERE NOT e.status LIKE '%ANNULE%'
-        AND startDateTime >= DATE_ADD(NOW(), INTERVAL 55 minute)
-        AND startDateTime <= DATE_ADD(NOW(), INTERVAL 65 minute);");
+        AND e.start_date_time >= DATE_ADD(NOW(), INTERVAL 55 minute)
+        AND e.start_date_time <= DATE_ADD(NOW(), INTERVAL 65 minute);");
 
         $req->execute();
         $datas = $req->fetchAll();
@@ -265,12 +266,12 @@ class ModelEvent extends  ClassDatabase
             $events = [];
             foreach ($datas as $data) {
                 $events[] = [
-                    'firstName' => $data['firstName'],
-                    'lastName' => $data['lastName'],
+                    'firstName' => $data['first_name'],
+                    'lastName' => $data['last_name'],
                     'mail' => $data['mail'],
                     'description' => $data['description'],
-                    'startDateTime' => $data['startDateTime'],
-                    'visioLink' => $data['visioLink'],
+                    'startDateTime' => $data['start_date_time'],
+                    'visioLink' => $data['visio_link'],
                     'timezone' => $data['timezone'],
                 ];
             }
@@ -282,34 +283,34 @@ class ModelEvent extends  ClassDatabase
 
     public function setEventStatusPaid(string $idEvent)
     {
-        $req = $this->conn->prepare('UPDATE event SET status = "Payé" WHERE idEvent = :idEvent');
-        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req = $this->conn->prepare('UPDATE events SET status = "Payé" WHERE id_event = :id_event');
+        $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
         return $req->execute();
     }
 
     public function updateEventStatus(string $idEvent, string $status): bool
     {
-        $req = $this->conn->prepare('UPDATE event SET status = :status WHERE idEvent = :idEvent');
-        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req = $this->conn->prepare('UPDATE events SET status = :status WHERE id_event = :id_event');
+        $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
         $req->bindValue(':status', $status, PDO::PARAM_STR);
         return $req->execute();
     }
 
     public function deleteWaitingEvent()
     {
-        $condition = 'WHERE createdAt < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 8 HOUR) AND status = "En attente"';
+        $condition = 'WHERE created_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 8 HOUR) AND status = "En attente"';
 
         $this->conn->beginTransaction();
 
-        $selectReq = $this->conn->prepare("SELECT userId, startDateTime FROM event {$condition}");
+        $selectReq = $this->conn->prepare("SELECT user_id, start_date_time FROM events {$condition}");
         $selectReq->execute();
         $datas = $selectReq->fetchAll();
 
         if (!empty($datas)) {
             $datasToAlert = [];
             foreach ($datas as $data) {
-                $userId = $data['userId'];
-                $startDateTime = $data['startDateTime'];
+                $userId = $data['user_id'];
+                $startDateTime = $data['start_date_time'];
                 $eventData = [
                     'userId' => $userId,
                     'startDateTime' => $startDateTime,
@@ -325,8 +326,8 @@ class ModelEvent extends  ClassDatabase
 
     public function deleteVisioLink(string $idEvent): bool
     {
-        $req = $this->conn->prepare('UPDATE event SET visioLink = NULL WHERE idEvent = :idEvent');
-        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req = $this->conn->prepare('UPDATE events SET visio_link = NULL WHERE id_event = :id_event');
+        $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
         return $req->execute();
     }
 }
