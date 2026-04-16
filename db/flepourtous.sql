@@ -72,10 +72,10 @@ CREATE TABLE `google` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `googleSync`
+-- Structure de la table `google_sync`
 --
 
-CREATE TABLE `googleSync` (
+CREATE TABLE `google_sync` (
   `id_calendar` varchar(90) NOT NULL,
   `next_sync_token` varchar(90) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
