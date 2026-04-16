@@ -19,7 +19,7 @@ const ONE_HOUR_IN_MS = 1 * 60 * 60 * 1000;
 // Rafraîchir si le token a plus de 30 minutes (la moitié de sa durée de vie de 1h)
 const REFRESH_IF_OLDER_THAN_MS = ONE_HOUR_IN_MS / 2;
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Bloquer les tentatives d'injection de commandes malveillantes
