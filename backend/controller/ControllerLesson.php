@@ -31,6 +31,7 @@ class ControllerLesson
         $this->controllerError->debug("Début appel getAllLessonsWithPrices dans le controller", ['locale' => $locale]);
         $modelLesson = new ModelLesson();
         $lessons = $modelLesson->getAllLessonsWithPrices($locale);
+        $this->controllerError->debug("Leçons récupérées dans le controller", ['lessons' => $lessons]);
         echo json_encode(array_values($lessons));
     }
 

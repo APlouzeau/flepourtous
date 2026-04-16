@@ -96,7 +96,6 @@ export default async function LessonPage(props: { params: tParams }) {
 
     // ✅ Variable pour simplifier les conditions
     const isConversationCourse = title === "Cours de conversation";
-    console.log("lesson.slug dans page.tsx :", lesson.slug);
     return (
         <>
             <SlugInitializer slugs={slugs} />

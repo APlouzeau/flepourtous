@@ -16,7 +16,6 @@ interface HeaderProps {
 
 export default function Header({ isLoggedIn, slugs }: HeaderProps) {
     const trad = useI18n();
-    console.log("Slugs passed to Header:", slugs); // Log pour vérifier les slugs reçus dans le Header-
     const handleLogout = async () => {
         try {
             await logout();

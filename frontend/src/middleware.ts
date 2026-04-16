@@ -3,7 +3,7 @@ import { verifyToken, generateRefreshedToken } from "./lib/session";
 import { createI18nMiddleware } from "next-international/middleware";
 
 const I18nMiddleware = createI18nMiddleware({
-    locales: ["en", "fr", "ja"],
+    locales: ["en", "fr"],
     defaultLocale: "en",
 });
 const isProtectedRoute = [

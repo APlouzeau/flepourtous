@@ -1,4 +1,5 @@
 import common from "./common";
+import coursesOffer from "./courses-offer";
 import footer from "./footer";
 import header from "./header";
 import homePage from "./homePage";
@@ -10,4 +11,5 @@ export default {
     ...header,
     ...homePage,
     ...ressources,
+    ...coursesOffer,
 } as const;

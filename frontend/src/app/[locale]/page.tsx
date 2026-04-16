@@ -11,7 +11,6 @@ export default async function Home() {
     // Cette page doit toujours rester server pour récupérer les données server side et hydrater les sous-composants qui peuvent être client. C'est le Server Side Rendering (SSR).
 
     const lessons = await getLessonsWithPrices();
-    console.log("Lessons with prices:", lessons); // Debug: vérifier les données récupérées
 
     return (
         <div className="min-h-screen">

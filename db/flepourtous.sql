@@ -119,9 +119,9 @@ CREATE TABLE `lessons` (
 --
 
 INSERT INTO `lessons` (`id_lesson`, `image_path`) VALUES
-(1, ''),
-(2, ''),
-(3, '');
+(1, 'images/conv.jpg'),
+(2, '/images/exam.png'),
+(3, '/images/enfant.jpg');
 
 -- --------------------------------------------------------
 
