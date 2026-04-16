@@ -8,22 +8,22 @@ extends ClassDatabase
 
     public function register(EntitieUser $user)
     {
-        $query = "INSERT INTO users (firstName, lastName, mail, nickName, password, verifyToken) VALUES (:firstName, :lastName, :mail, :nickName, :password, :verifyToken)";
+        $query = "INSERT INTO users (first_name, last_name, mail, nick_name, password, verify_token) VALUES (:first_name, :last_name, :mail, :nick_name, :password, :verify_token)";
 
         $req = $this->conn->prepare($query);
-        $req->bindValue(":firstName", $user->getFirstName());
-        $req->bindValue(":lastName", $user->getLastName());
+        $req->bindValue(":first_name", $user->getFirstName());
+        $req->bindValue(":last_name", $user->getLastName());
         $req->bindValue(":mail", $user->getMail());
-        $req->bindValue(":nickName", $user->getNickName());
+        $req->bindValue(":nick_name", $user->getNickName());
         $req->bindValue(":password", $user->getPassword());
-        $req->bindValue(":verifyToken", $user->getVerifyToken());
+        $req->bindValue(":verify_token", $user->getVerifyToken());
 
         return $req->execute();
     }
 
     public function getAllUsers()
     {
-        $req = $this->conn->query('SELECT idUser, nickName, firstName, mail FROM users ORDER BY nickName');
+        $req = $this->conn->query('SELECT id_user, nick_name, first_name, mail FROM users ORDER BY nick_name');
         $datas = $req->fetchAll();
         $users = [];
         foreach ($datas as $data) {
@@ -44,15 +44,15 @@ extends ClassDatabase
         if (!$data || !password_verify($password, $data['password'])) {
             return null;
         }
-        if ($data['isVerified'] == 0) {
+        if ($data['is_verified'] == 0) {
             return ['isVerified' => false];
         } else {
             $user =
                 [
-                    'idUser' => $data['idUser'],
-                    'nickName' => $data['nickName'],
-                    'firstName' => $data['firstName'],
-                    'lastName' => $data['lastName'],
+                    'idUser' => $data['id_user'],
+                    'nickName' => $data['nick_name'],
+                    'firstName' => $data['first_name'],
+                    'lastName' => $data['last_name'],
                     'mail' => $data['mail'],
                     'role' => $data['role'],
                 ];
@@ -63,17 +63,17 @@ extends ClassDatabase
 
     public function getUser(EntitieUser $user)
     {
-        $req = $this->conn->prepare('SELECT idUser, nickName, firstName, lastName, mail, role, address, address_2, address_3, zip, city, country FROM users WHERE idUser = :idUser');
-        $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
+        $req = $this->conn->prepare('SELECT id_user, nick_name, first_name, last_name, mail, role, address, address_2, address_3, zip, city, country FROM users WHERE id_user = :id_user');
+        $req->bindValue(":id_user", $user->getIdUser(), PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
         if ($data) {
             $user =
                 [
-                    'idUser' => $data['idUser'],
-                    'nickName' => $data['nickName'],
-                    'firstName' => $data['firstName'],
-                    'lastName' => $data['lastName'],
+                    'idUser' => $data['id_user'],
+                    'nickName' => $data['nick_name'],
+                    'firstName' => $data['first_name'],
+                    'lastName' => $data['last_name'],
                     'mail' => $data['mail'],
                     'address' => $data['address'] ?? null,
                     'address2' => $data['address_2'] ?? null,
@@ -91,20 +91,20 @@ extends ClassDatabase
 
     public function deleteUser(EntitieUser $user)
     {
-        $req = $this->conn->prepare('DELETE FROM users WHERE idUser = :idUser');
-        $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
+        $req = $this->conn->prepare('DELETE FROM users WHERE id_user = :id_user');
+        $req->bindValue(":id_user", $user->getIdUser(), PDO::PARAM_INT);
         return $req->execute();
     }
 
     public function checkMail(string $mail)
     {
-        $query = "SELECT idUser FROM users WHERE mail = :mail";
+        $query = "SELECT id_user FROM users WHERE mail = :mail";
         $req = $this->conn->prepare($query);
         $req->bindValue(":mail", $mail);
         $req->execute();
         $data = $req->fetch(PDO::FETCH_ASSOC);
         if ($data) {
-            $idUser = $data['idUser'];
+            $idUser = $data['id_user'];
             return $idUser;
         } else {
             return false;
@@ -113,23 +113,23 @@ extends ClassDatabase
 
     public function verifyEmail(string $verifyToken)
     {
-        $req = $this->conn->prepare("SELECT idUser FROM users WHERE verifyToken = :verifyToken");
-        $req->bindValue(":verifyToken", $verifyToken);
+        $req = $this->conn->prepare("SELECT id_user FROM users WHERE verify_token = :verify_token");
+        $req->bindValue(":verify_token", $verifyToken);
         $req->execute();
         $data = $req->fetch(PDO::FETCH_ASSOC);
         if (!$data) {
             error_log("Invalid verification token: " . $verifyToken);
             return false; // Token invalide
         }
-        $query = "UPDATE users SET isVerified = 1 WHERE verifyToken = :verifyToken";
+        $query = "UPDATE users SET is_verified = 1 WHERE verify_token = :verify_token";
         $req = $this->conn->prepare($query);
-        $req->bindValue(":verifyToken", $verifyToken);
+        $req->bindValue(":verify_token", $verifyToken);
         if ($req->execute()) {
-            $query = "UPDATE users SET verifyToken = NULL WHERE verifyToken = :verifyToken";
+            $query = "UPDATE users SET verify_token = NULL WHERE verify_token = :verify_token";
             $req = $this->conn->prepare($query);
-            $req->bindValue(":verifyToken", $verifyToken);
+            $req->bindValue(":verify_token", $verifyToken);
             $req->execute();
-            return $data['idUser'];
+            return $data['id_user'];
         } else {
             error_log("Email verification failed for link: " . $verifyToken);
             return false;
@@ -138,10 +138,10 @@ extends ClassDatabase
 
     public function updateWallet(int $idUser, float $amount)
     {
-        $query = "UPDATE users SET wallet = :amount WHERE idUser = :idUser";
+        $query = "UPDATE users SET wallet = :amount WHERE id_user = :id_user";
         $req = $this->conn->prepare($query);
         $req->bindValue(":amount", $amount, PDO::PARAM_STR);
-        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        $req->bindValue(":id_user", $idUser, PDO::PARAM_INT);
         if ($req->execute()) {
             return true;
         } else {
@@ -152,10 +152,10 @@ extends ClassDatabase
 
     public function addToWallet(int $idUser, float $amount)
     {
-        $query = "UPDATE users SET wallet = wallet + :amount WHERE idUser = :idUser";
+        $query = "UPDATE users SET wallet = wallet + :amount WHERE id_user = :id_user";
         $req = $this->conn->prepare($query);
         $req->bindValue(":amount", $amount, PDO::PARAM_STR);
-        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        $req->bindValue(":id_user", $idUser, PDO::PARAM_INT);
         if ($req->execute()) {
             return true;
         } else {
@@ -169,8 +169,8 @@ extends ClassDatabase
         $req = $this->conn->prepare('
         SELECT wallet
         FROM users
-        WHERE idUser = :idUser');
-        $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
+        WHERE id_user = :id_user');
+        $req->bindValue(':id_user', $idUser, PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
         if ($data && $data['wallet'] !== null) {
@@ -182,18 +182,18 @@ extends ClassDatabase
 
     public function updateUser(EntitieUser $user)
     {
-        $query = "UPDATE users SET firstName = :firstName, lastName = :lastName, mail = :mail";
+        $query = "UPDATE users SET first_name = :first_name, last_name = :last_name, mail = :mail";
         $params = [
-            ':firstName' => $user->getFirstName(),
-            ':lastName' => $user->getLastName(),
+            ':first_name' => $user->getFirstName(),
+            ':last_name' => $user->getLastName(),
             ':mail' => $user->getMail(),
-            ':idUser' => $user->getIdUser()
+            ':id_user' => $user->getIdUser()
         ];
 
         // Ajouter le surnom si il est fourni
         if ($user->getNickName() !== null) {
-            $query .= ", nickName = :nickName";
-            $params[':nickName'] = $user->getNickName();
+            $query .= ", nick_name = :nick_name";
+            $params[':nick_name'] = $user->getNickName();
         }
 
         // Ajouter l'adresse si elle est fournie
@@ -203,13 +203,13 @@ extends ClassDatabase
         }
         // Ajouter l'adresse 2 si elle est fournie
         if ($user->getAddress2() !== null) {
-            $query .= ", address_2 = :address2";
-            $params[':address2'] = $user->getAddress2();
+            $query .= ", address_2 = :address_2";
+            $params[':address_2'] = $user->getAddress2();
         }
         // Ajouter l'adresse 3 si elle est fournie
         if ($user->getAddress3() !== null) {
-            $query .= ", address_3 = :address3";
-            $params[':address3'] = $user->getAddress3();
+            $query .= ", address_3 = :address_3";
+            $params[':address_3'] = $user->getAddress3();
         }
 
         // Ajouter le code postal si il est fourni
@@ -230,7 +230,7 @@ extends ClassDatabase
             $params[':country'] = $user->getCountry();
         }
 
-        $query .= " WHERE idUser = :idUser";
+        $query .= " WHERE id_user = :id_user";
 
         $req = $this->conn->prepare($query);
 
@@ -243,9 +243,9 @@ extends ClassDatabase
 
     public function checkPassword(int $idUser, string $password)
     {
-        $query = "SELECT password FROM users WHERE idUser = :idUser";
+        $query = "SELECT password FROM users WHERE id_user = :id_user";
         $req = $this->conn->prepare($query);
-        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        $req->bindValue(":id_user", $idUser, PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch(PDO::FETCH_ASSOC);
         return $data && password_verify($password, $data['password']) ? true : false;
@@ -253,27 +253,27 @@ extends ClassDatabase
 
     public function updateUserPassword(EntitieUser $user)
     {
-        $query = "UPDATE users SET password = :password WHERE idUser = :idUser";
+        $query = "UPDATE users SET password = :password WHERE id_user = :id_user";
         $req = $this->conn->prepare($query);
         $req->bindValue(":password", $user->getPassword(), PDO::PARAM_STR);
-        $req->bindValue(":idUser", $user->getIdUser(), PDO::PARAM_INT);
+        $req->bindValue(":id_user", $user->getIdUser(), PDO::PARAM_INT);
         return $req->execute();
     }
 
     public function setNewToken(int $idUser, string $token)
     {
-        $query = "UPDATE users SET verifyToken = :verifyToken WHERE idUser = :idUser";
+        $query = "UPDATE users SET verifyToken = :verifyToken WHERE id_user = :id_user";
         $req = $this->conn->prepare($query);
         $req->bindValue(":verifyToken", $token, PDO::PARAM_STR);
-        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        $req->bindValue(":id_user", $idUser, PDO::PARAM_INT);
         return $req->execute();
     }
 
     public function updatePassword(int $idUser, string $password)
     {
-        $query = "UPDATE users SET password = :password WHERE idUser = :idUser";
+        $query = "UPDATE users SET password = :password WHERE id_user = :id_user";
         $req = $this->conn->prepare($query);
-        $req->bindValue(":idUser", $idUser, PDO::PARAM_INT);
+        $req->bindValue(":id_user", $idUser, PDO::PARAM_INT);
         $req->bindValue(":password", $password,  PDO::PARAM_STR);
         return $req->execute();
     }

@@ -241,14 +241,14 @@ CREATE TABLE `users` (
   `country` varchar(50) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `is_verified` int(1) NOT NULL DEFAULT 0,
-  `verifyToken` varchar(64) DEFAULT NULL
+  `verify_token` varchar(64) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Déchargement des données de la table `users`
 --
 
-INSERT INTO `users` (`id_user`, `first_name`, `last_name`, `role`, `mail`, `nick_name`, `password`, `wallet`, `address`, `address_2`, `address_3`, `zip`, `city`, `country`, `created_at`, `is_verified`, `verifyToken`) VALUES
+INSERT INTO `users` (`id_user`, `first_name`, `last_name`, `role`, `mail`, `nick_name`, `password`, `wallet`, `address`, `address_2`, `address_3`, `zip`, `city`, `country`, `created_at`, `is_verified`, `verify_token`) VALUES
 (1, 'Alexandre', 'Plouzeau', 'user', 'eyola@live.fr', 'Eyo', '$2y$12$X9baMPUou.1gTIMffUttXupxHsv4Mnwn766Sa1AbquSJ7oyrjXdnC', 368.50, NULL, NULL, NULL, NULL, NULL, NULL, '2025-07-18 23:40:31', 1, '830999bce58e3c57415d1028247535bac27fae52192af566f90737ca854364c6'),
 (3, 'Ludivine', 'Plouzeau', 'admin', 'flepourtous.dev@gmail.com', 'Lulu', '$2y$12$9HihvTfGVjK0ejnJtbQ/jOaXVCGbHg54VMzks3LyZNLw/0tTGGhVO', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-04 17:28:49', 1, '79fd01a7ea72aab8184748664d435f946951214f6fb006752f99a377e5e74734'),
 (4, 'Duncan', 'Gaubert', 'user', 'egaube0494@gmail.com', 'Dunky', '$2y$12$GoKzGwx.9PKbfUVIMgrHPuqWh1YMLtjmoeyADFTDUluiN7vpw4w4C', 0.00, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-04 17:33:22', 1, '6efeeeabbf0638028cb2906e3ac36e861e9e8759a75837f935280060cb9d0ee3');
