@@ -1,3 +1,4 @@
+import cgv from "./cgv";
 import common from "./common";
 import coursesOffer from "./courses-offer";
 import footer from "./footer";
@@ -14,4 +15,5 @@ export default {
     ...ressources,
     ...coursesOffer,
     ...profile,
+    ...cgv,
 } as const;
