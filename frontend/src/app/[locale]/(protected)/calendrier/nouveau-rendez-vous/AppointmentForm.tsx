@@ -62,7 +62,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                     const availableSlots = await getAvailableTimeSlots(date, userTimezone, selectedDuration);
 
                     if (availableSlots.code == 0) {
-                        setError(availableSlots.message || trad("common.buttons.noAvailableSlots"));
+                        setError(availableSlots.message || trad("calendar.appointment.noAvailableSlots"));
                         setTimeSlots([]);
                     } else if (availableSlots.code == 1 && availableSlots.data && availableSlots.data.length > 0) {
                         setError(null);
@@ -103,8 +103,8 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
         setSuccess(null);
 
         const formData = new FormData(e.currentTarget);
-        if (selectedLesson && selectedLesson.id_lesson != null) {
-            formData.append("id_lesson", selectedLesson.id_lesson.toString());
+        if (selectedLesson && selectedLesson.idLesson != null) {
+            formData.append("id_lesson", selectedLesson.idLesson.toString());
         } else {
             console.error("Aucun cours sélectionné pour envoyer l'id_lesson");
             setError(trad("calendar.appointment.chooseLesson"));

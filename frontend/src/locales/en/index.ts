@@ -18,4 +18,5 @@ export default {
     ...profile,
     ...cgv,
     ...calendar,
+    ...payment,
 } as const;
