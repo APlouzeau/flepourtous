@@ -10,6 +10,9 @@ export default {
             makeAppointment: "Make an appointment",
             learnMore: "Learn more",
             joinUs: "Join us",
+            inscriptionToReserve: "Register to reserve",
+            showPrices: "See prices",
+            reserveThisCourse: "Reserve this course",
         },
         prices: {
             from: "From",

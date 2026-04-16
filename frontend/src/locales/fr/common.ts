@@ -10,6 +10,9 @@ export default {
             makeAppointment: "Prendre rendez-vous",
             learnMore: "En savoir plus",
             joinUs: "Rejoignez-nous",
+            inscriptionToReserve: "S'inscrire pour réserver",
+            showPrices: "Voir les tarifs",
+            reserveThisCourse: "Réserver ce cours",
         },
         prices: {
             from: "À partir de",

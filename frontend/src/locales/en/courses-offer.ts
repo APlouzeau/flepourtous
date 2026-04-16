@@ -32,4 +32,14 @@ export default {
             satisfaction: "99% satisfaction",
         },
     },
+    courses: {
+        prices: {
+            ourPrices: "Our Prices",
+            description: "Choose the duration that suits you best",
+            individual: "Individual lesson",
+            gear: "Included materials",
+            follow: "Personalized follow-up",
+            recommended: "Recommended",
+        },
+    },
 } as const;

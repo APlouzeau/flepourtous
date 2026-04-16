@@ -30,7 +30,16 @@ export default {
             beginButton: "Commencez maintenant",
             contact: "Nous contacter",
             satisfaction: "99% de satisfaction",
-            
+        },
+    },
+    courses: {
+        prices: {
+            ourPrices: "Nos tarifs",
+            description: "Choisissez la durée qui vous convient le mieux",
+            individual: "Cours individuel",
+            gear: "Matériel inclus",
+            follow: "Suivi personnalisé",
+            recommended: "Recommended",
         },
     },
 } as const;
