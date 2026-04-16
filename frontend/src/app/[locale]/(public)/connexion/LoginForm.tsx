@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { useState } from "react";
 import Button from "../../components/front/Button";
 import ShowPassword from "@/app/[locale]/components/front/showPassword";
+import { useI18n } from "@/locales/client";
 
 export default function LoginForm() {
     const [mail, setMail] = useState("");
@@ -14,8 +15,9 @@ export default function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const isValidForm = mail && password;
+    const trad = useI18n();
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setIsLoading(true);
         await apiClient
@@ -48,7 +50,7 @@ export default function LoginForm() {
             <div>
                 <input
                     type="email"
-                    placeholder="Adresse email"
+                    placeholder={trad("profile.informations.email")}
                     name="mail"
                     value={mail}
                     onChange={(e) => setMail(e.target.value)}
@@ -60,7 +62,7 @@ export default function LoginForm() {
                 <input
                     type={showPassword ? "text" : "password"}
                     name="password"
-                    placeholder="Mot de passe"
+                    placeholder={trad("profile.password.sectionName")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -72,13 +74,13 @@ export default function LoginForm() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs sm:text-sm">
                 <label className="flex items-center cursor-pointer">
                     <input type="checkbox" className="mr-2 rounded accent-black" />
-                    <span className="text-gray-600 select-none">Se souvenir de moi</span>
+                    <span className="text-gray-600 select-none">{trad("profile.auth.rememberMe")}</span>
                 </label>
                 <Link
                     href="/mot-de-passe-oublie"
                     className="text-red-600 hover:text-red-700 font-medium transition-colors text-center sm:text-left"
                 >
-                    Mot de passe oublié ?
+                    {trad("profile.auth.forgotPassword")}
                 </Link>
             </div>
 
@@ -94,7 +96,7 @@ export default function LoginForm() {
                 className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold"
                 disabled={isLoading || !isValidForm}
             >
-                Connexion
+                {trad("common.buttons.login")}
             </Button>
         </form>
     );

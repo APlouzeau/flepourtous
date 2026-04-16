@@ -40,5 +40,26 @@ export default {
             wallet: "Solde disponible",
             noTransaction: "Aucune transaction pour le moment",
         },
+        auth: {
+            sectionName: "Authentification",
+            nice: "Content de vous retrouver",
+            logout: "Se déconnecter",
+            deleteAccount: "Supprimer mon compte",
+            deleteAccountConfirmation:
+                "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
+            noAccount: "Vous n'avez pas de compte ?",
+            createAccount: "Créer votre compte",
+            rememberMe: "Se souvenir de moi",
+            forgotPassword: "Mot de passe oublié ?",
+            returnToHome: "Retour à la page d'accueil",
+            return: "Retour",
+        },
+        alerts: {
+            profileUpdateSuccess: "Profil mis à jour avec succès !",
+            profileUpdateError: "Erreur lors de la mise à jour du profil",
+            passwordUpdateSuccess: "Mot de passe mis à jour avec succès !",
+            passwordUpdateError: "Erreur lors de la mise à jour du mot de passe",
+            isSaving: "Enregistrement en cours...",
+        },
     },
 } as const;
