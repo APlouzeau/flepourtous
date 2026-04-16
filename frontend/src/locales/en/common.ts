@@ -13,6 +13,9 @@ export default {
             inscriptionToReserve: "Register to reserve",
             showPrices: "See prices",
             reserveThisCourse: "Reserve this course",
+            save: "Save",
+            cancel: "Cancel",
+            modify: "Modify",
         },
         prices: {
             from: "From",
@@ -27,6 +30,12 @@ export default {
             experience: "8+",
             years: "years of experience",
             yearsString: " years",
+        },
+        miscellaneous: {
+            notProvided: "Not provided",
+        },
+        alerts: {
+            isSaving: "Saving...",
         },
     },
 } as const;

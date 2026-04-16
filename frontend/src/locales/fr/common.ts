@@ -13,6 +13,9 @@ export default {
             inscriptionToReserve: "S'inscrire pour réserver",
             showPrices: "Voir les tarifs",
             reserveThisCourse: "Réserver ce cours",
+            save: "Sauvegarder",
+            cancel: "Annuler",
+            modify: "Modifier",
         },
         prices: {
             from: "À partir de",
@@ -26,6 +29,12 @@ export default {
             coursesString: "cours",
             experience: "8+",
             years: "années d'expérience",
+        },
+        miscellaneous: {
+            notProvided: "Non renseigné",
+        },
+        alerts: {
+            isSaving: "Enregistrement...",
         },
     },
 } as const;

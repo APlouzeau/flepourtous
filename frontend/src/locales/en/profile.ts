@@ -1,0 +1,51 @@
+export default {
+    profile: {
+        informations: {
+            sectionName: "Information",
+            personalInformations: "Personal information",
+            nickName: "Nickname",
+            firstName: "First name",
+            lastName: "Last name",
+            email: "Email",
+            address: "Address",
+            address2: "Address 2",
+            address3: "Address 3",
+            zip: "Postal code",
+            city: "City",
+            country: "Country",
+            modalName: "Edit my information",
+        },
+        password: {
+            sectionName: "Password",
+            oldPassword: "Old password",
+            newPassword: "New password",
+            confirmNewPassword: "Confirm password",
+            modalName: "Edit my password",
+            clue: {
+                description: "The password must contain:",
+                minLength: "At least 8 characters",
+                uppercase: "At least one uppercase letter (A-Z)",
+                lowercase: "At least one lowercase letter (a-z)",
+                number: "At least one number (0-9)",
+                special: "At least one special character (!@#$%^&*)",
+            },
+        },
+        planning: {
+            sectionName: "Schedule",
+            noAppointments: "No upcoming appointments",
+        },
+        payments: {
+            sectionName: "Payments",
+            history: "Payment history",
+            wallet: "Available balance",
+            noTransaction: "No transactions at the moment",
+        },
+        alerts: {
+            profileUpdateSuccess: "Profile updated successfully !",
+            profileUpdateError: "Error updating profile",
+            passwordUpdateSuccess: "Password updated successfully !",
+            passwordUpdateError: "Error updating password",
+            isSaving: "Saving...",
+        },
+    },
+} as const;

@@ -2,45 +2,19 @@
 
 import { useContext, useState } from "react";
 import { Context } from "./profileContext";
-import Button from "../../components/front/Button";
 import { InformationTab } from "./InformationTab";
 import { PasswordModify } from "./PasswordModify";
+import { useI18n } from "@/locales/client";
 
 export default function DisplayUserprofil() {
     const { dataUser } = useContext(Context);
     const [activeTab, setActiveTab] = useState("informations");
+    const trad = useI18n();
 
-    /*const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState("");
-         const [editedUser, setEditedUser] = useState({
-        idUser: typeof dataUser?.idUser === "number" ? dataUser.idUser : 0,
-        nickName: dataUser?.nickName || "",
-        firstName: dataUser?.firstName || "",
-        lastName: dataUser?.lastName || "",
-        role: dataUser?.role || "",
-        wallet: typeof dataUser?.wallet === "number" ? dataUser.wallet : 0,
-        mail: dataUser?.mail || "",
-        address: dataUser?.address || "",
-        address2: dataUser?.address2 || "",
-        address3: dataUser?.address3 || "",
-        zip: dataUser?.zip || "",
-        city: dataUser?.city || "",
-        country: dataUser?.country || "",
-        password: "",
-    }); */
     const [settings, setSettings] = useState({
         emailNotifications: true,
         courseReminders: true,
     });
-    //const [modalError, setModalError] = useState("");
-
-    /*     const handleInputChange = (field: string, value: string) => {
-        setEditedUser((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
-        if (error) setError("");
-    }; */
 
     const toggleSetting = (setting: string) => {
         setSettings((prev) => ({
@@ -90,11 +64,11 @@ export default function DisplayUserprofil() {
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
                     <nav className="flex space-x-0 overflow-x-auto">
                         {[
-                            { id: "informations", label: "Informations", icon: "👤" },
-                            { id: "Mot de passe", label: "Mot de passe", icon: "📚" },
-                            { id: "planning", label: "Planning", icon: "📅" },
-                            { id: "paiements", label: "Paiements", icon: "💳" },
-                            { id: "parametres", label: "Paramètres", icon: "⚙️" },
+                            { id: "informations", label: trad("profile.informations.sectionName"), icon: "👤" },
+                            { id: "Mot de passe", label: trad("profile.password.sectionName"), icon: "📚" },
+                            //{ id: "planning", label: "Planning", icon: "📅" },
+                            //{ id: "paiements", label: "Paiements", icon: "💳" },
+                            //{ id: "parametres", label: "Paramètres", icon: "⚙️" },
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -117,7 +91,7 @@ export default function DisplayUserprofil() {
                     {activeTab === "informations" && dataUser && <InformationTab dataUser={dataUser} />}
 
                     {activeTab === "Mot de passe" && <PasswordModify />}
-
+                    {/* 
                     {activeTab === "planning" && (
                         <div className="space-y-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-4">Mon planning</h2>
@@ -133,13 +107,12 @@ export default function DisplayUserprofil() {
                                 </Button>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
-                    {activeTab === "paiements" && (
+                    {/*{activeTab === "paiements" && (
                         <div className="space-y-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-4">Historique des paiements</h2>
 
-                            {/* Wallet Balance */}
                             <div className="bg-gradient-to-r from-[#1D1E1C] to-gray-800 rounded-xl p-6 text-white">
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -157,9 +130,9 @@ export default function DisplayUserprofil() {
                                 <p className="text-gray-500 text-lg">Aucune transaction pour le moment</p>
                             </div>
                         </div>
-                    )}
+                    )} */}
 
-                    {activeTab === "parametres" && (
+                    {/*{activeTab === "parametres" && (
                         <div className="space-y-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-4">Paramètres du compte</h2>
 
@@ -219,7 +192,7 @@ export default function DisplayUserprofil() {
                                     onClick={() => {
                                         if (
                                             confirm(
-                                                "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible."
+                                                "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
                                             )
                                         ) {
                                             alert("Fonctionnalité de suppression à implémenter");
@@ -232,7 +205,7 @@ export default function DisplayUserprofil() {
                                 </Button>
                             </div>
                         </div>
-                    )}
+                    )*/}
                 </div>
             </div>
         </div>

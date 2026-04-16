@@ -1,0 +1,44 @@
+export default {
+    profile: {
+        informations: {
+            sectionName: "Informations",
+            personalInformations: "Informations personnelles",
+            nickName: "Surnom",
+            firstName: "Prénom",
+            lastName: "Nom",
+            email: "Email",
+            address: "Adresse",
+            address2: "Adresse 2",
+            address3: "Adresse 3",
+            zip: "Code postal",
+            city: "Ville",
+            country: "Pays",
+            modalName: "Modifier mes informations",
+        },
+        password: {
+            sectionName: "Mot de passe",
+            oldPassword: "Ancien mot de passe",
+            newPassword: "Nouveau mot de passe",
+            confirmNewPassword: "Confirmer le mot de passe",
+            modalName: "Modifier mon mot de passe",
+            clue: {
+                description: "Le mot de passe doit contenir :",
+                minLength: "Au moins 8 caractères",
+                uppercase: "Au moins une majuscule (A-Z)",
+                lowercase: "Au moins une minuscule (a-z)",
+                number: "Au moins un chiffre (0-9)",
+                special: "Au moins un caractère spécial (!@#$%^&*)",
+            },
+        },
+        planning: {
+            sectionName: "Planning",
+            noAppointments: "Aucun rendez-vous à venir",
+        },
+        payments: {
+            sectionName: "Paiements",
+            history: "Historique des paiements",
+            wallet: "Solde disponible",
+            noTransaction: "Aucune transaction pour le moment",
+        },
+    },
+} as const;
