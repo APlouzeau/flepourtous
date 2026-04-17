@@ -1,18 +1,47 @@
 export default {
     common: {
-        buttons : {
-            contactUs : "Contact Us",
-            register : "Register",
-            login : "Login",
-            profile : "Profile",
-            calendar : "Calendar",
-            logout : "Logout",
-            makeAppointment : "Make an appointment",
-            learnMore : "Learn more",
-            joinUs : "Join us",
+        buttons: {
+            contactUs: "Contact Us",
+            register: "Register",
+            login: "Login",
+            profile: "Profile",
+            calendar: "Calendar",
+            logout: "Logout",
+            makeAppointment: "Make an appointment",
+            newAppointment: "New appointment",
+            pack: "Pack",
+            learnMore: "Learn more",
+            joinUs: "Join us",
+            inscriptionToReserve: "Register to reserve",
+            showPrices: "See prices",
+            reserveThisCourse: "Reserve this course",
+            reserveNewCourse: "Reserve a new course",
+            chooseYourSlot: "Choose your ideal slot and book your course in a few clicks.",
+            save: "Save",
+            cancel: "Cancel",
+            modify: "Modify",
+            pay: "Pay",
+            commandPack: "Order a pack",
         },
-        prices : {
-            from : "From",
-        }
+        prices: {
+            from: "From",
+            mn: "min",
+            for: "for",
+        },
+        stats: {
+            students: "800+",
+            studentsString: "students",
+            courses: "2000+",
+            coursesString: "courses",
+            experience: "8+",
+            years: "years of experience",
+            yearsString: " years",
+        },
+        miscellaneous: {
+            notProvided: "Not provided",
+        },
+        alerts: {
+            isSaving: "Saving...",
+        },
     },
 } as const;

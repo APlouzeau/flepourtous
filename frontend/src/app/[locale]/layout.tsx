@@ -1,3 +1,4 @@
+// app/[locale]/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -5,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { getSession } from "@/lib/session";
 import LayoutWrapper from "./LayoutWrapper";
 import { Providers } from "./providers";
+import { getSlugs } from "@/lib/lessons";
+import { getMessages } from "next-intl/server"; // 👈 ajout
 
 export const metadata: Metadata = {
     title: "FLE pour tous",
@@ -21,23 +24,26 @@ export default async function RootLayout({
     params,
 }: {
     children: React.ReactNode;
-    params: Promise<{
-        locale: string;
-    }>;
+    params: Promise<{ locale: string }>;
 }) {
-    // Récupération de la session côté serveur
     const session = await getSession();
     const isLoggedIn = !!session.get("session")?.value;
     const { locale } = await params;
+    const slugs = await getSlugs();
+    const messages = await getMessages(); // 👈 ajout — charge les fichiers JSON de traduction
 
     return (
-        <html lang="fr">
+        <html lang={locale}>
             <body
                 className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}
                 suppressHydrationWarning={true}
             >
-                <Providers locale={locale}>
-                    <LayoutWrapper isLoggedIn={isLoggedIn}>{children}</LayoutWrapper>
+                <Providers locale={locale} messages={messages}>
+                    {" "}
+                    {/* 👈 messages passé en prop */}
+                    <LayoutWrapper isLoggedIn={isLoggedIn} slugs={slugs}>
+                        {children}
+                    </LayoutWrapper>
                 </Providers>
             </body>
         </html>

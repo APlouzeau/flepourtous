@@ -1,10 +1,10 @@
 import FeatureCard from "./front/FeatureCard";
 import ScrollSection from "./scrollSection";
 import ScrollDiv from "./scrollSectionDiv";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 
 export default async function WhyChooseFleSection() {
-   const trad = await getI18n();
+    const trad = await getTranslations();
     return (
         <ScrollSection className="bg-gray-50 py-12 sm:py-16 px-4 scroll-animate">
             <div className="max-w-7xl mx-auto">
@@ -35,7 +35,9 @@ export default async function WhyChooseFleSection() {
                             icon="👨‍🏫"
                             title={trad("homePage.WhyChooseFleSection.features.2.personalizedApproach.title")}
                             subtitle={trad("homePage.WhyChooseFleSection.features.2.personalizedApproach.subtitle")}
-                            description={trad("homePage.WhyChooseFleSection.features.2.personalizedApproach.description")}
+                            description={trad(
+                                "homePage.WhyChooseFleSection.features.2.personalizedApproach.description",
+                            )}
                         />
                     </ScrollDiv>
                 </div>

@@ -20,10 +20,7 @@ export default function ScrollSection(props: ScrollSectionProps) {
 
     return (
         <Provider scrollRef={scrollRef}>
-            <section
-                ref={scrollRef.elementRef}
-                className={cn(scrollRef.isVisible && "visible", className)}
-            >
+            <section ref={scrollRef.elementRef} className={cn(scrollRef.isVisible && "visible", className)}>
                 {children}
             </section>
         </Provider>

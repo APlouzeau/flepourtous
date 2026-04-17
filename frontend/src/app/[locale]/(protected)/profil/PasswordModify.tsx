@@ -1,6 +1,7 @@
 import Button from "@/app/[locale]/components/front/Button";
 import { useState } from "react";
 import { changeUserPassword } from "./profileAction";
+import { useTranslations } from "@/locales/client";
 
 export function PasswordModify() {
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -12,8 +13,9 @@ export function PasswordModify() {
         newPassword: "",
         confirmNewPassword: "",
     });
+    const trad = useTranslations();
 
-    const handlePasswordChange = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handlePasswordChange = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault(); // Empêche le rechargement de la page
 
         try {
@@ -32,14 +34,14 @@ export function PasswordModify() {
                     confirmNewPassword: "",
                 });
                 setShowPasswordModal(false);
-                alert(response.message || "Profil mis à jour avec succès !");
+                alert(response.message || trad("profile.alerts.passwordUpdateSuccess"));
                 window.location.reload();
             } else {
                 setModalError(response.message);
             }
         } catch (err) {
             console.error("Erreur lors de la modification du mot de passe :", err);
-            setModalError("Une erreur s'est produite lors de la modification du mot de passe.");
+            setModalError(trad("profile.alerts.passwordUpdateError"));
         } finally {
             setIsLoading(false);
         }
@@ -60,16 +62,16 @@ export function PasswordModify() {
     return (
         <>
             <div className="space-y-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Mot de passe</h2>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">{trad("profile.password.sectionName")}</h2>
                 <div className="text-center py-12">
                     <div className="text-4xl mb-4">📚</div>
-                    <p className="text-gray-500 text-lg mb-4">Modifier le mot de passe</p>
+                    <p className="text-gray-500 text-lg mb-4">{trad("profile.password.modalName")}</p>
                     <Button
                         onClick={() => setShowPasswordModal(true)}
                         variant="black"
                         className="text-sm px-6 py-3 !bg-[#1D1E1C] hover:!bg-gray-800"
                     >
-                        Modifier
+                        {trad("common.buttons.modify")}
                     </Button>
                 </div>
             </div>
@@ -79,7 +81,9 @@ export function PasswordModify() {
                     <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-semibold text-gray-900">Modifier mon mot de passe</h2>
+                                <h2 className="text-xl font-semibold text-gray-900">
+                                    {trad("profile.password.modalName")}
+                                </h2>
                                 <button
                                     onClick={handleCloseModal}
                                     className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -110,13 +114,13 @@ export function PasswordModify() {
                                             htmlFor="oldPassword"
                                             className="block text-sm font-medium text-gray-700 mb-1"
                                         >
-                                            Ancien mot de passe *
+                                            {trad("profile.password.oldPassword")} *
                                         </label>
                                         <input
                                             type="password"
                                             onChange={(e) => handleInputChange("oldPassword", e.target.value)}
                                             pattern="((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,60})"
-                                            placeholder="Entrez votre ancien mot de passe"
+                                            placeholder={trad("profile.password.oldPassword")}
                                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
                                             required
                                             disabled={isLoading}
@@ -128,13 +132,13 @@ export function PasswordModify() {
                                             htmlFor="newPassword"
                                             className="block text-sm font-medium text-gray-700 mb-1"
                                         >
-                                            Nouveau mot de passe *
+                                            {trad("profile.password.newPassword")} *
                                         </label>
                                         <input
                                             type="password"
                                             onChange={(e) => handleInputChange("newPassword", e.target.value)}
                                             pattern="((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,60})"
-                                            placeholder="Entrez votre nouveau mot de passe"
+                                            placeholder={trad("profile.password.newPassword")}
                                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
                                             required
                                             disabled={isLoading}
@@ -146,13 +150,13 @@ export function PasswordModify() {
                                             htmlFor="confirmNewPassword"
                                             className="block text-sm font-medium text-gray-700 mb-1"
                                         >
-                                            Confirmer le mot de passe *
+                                            {trad("profile.password.confirmNewPassword")} *
                                         </label>
                                         <input
                                             type="password"
                                             onChange={(e) => handleInputChange("confirmNewPassword", e.target.value)}
                                             pattern="((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).{8,60})"
-                                            placeholder="confirmez votre nouveau mot de passe"
+                                            placeholder={trad("profile.password.confirmNewPassword")}
                                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D1E1C] focus:border-[#1D1E1C] transition-colors"
                                             required
                                             disabled={isLoading}
@@ -165,13 +169,13 @@ export function PasswordModify() {
                                                 <span className="text-sm font-bold text-gray-600">?</span>
                                             </div>
                                             <div className="absolute bottom-full right-0 mb-2 w-max max-w-xs p-3 bg-black text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                                                Le mot de passe doit contenir :
+                                                {trad("profile.password.clue.description")}
                                                 <ul className="list-disc list-inside mt-1">
-                                                    <li>Au moins 8 caractères</li>
-                                                    <li>Une lettre majuscule (A-Z)</li>
-                                                    <li>Une lettre minuscule (a-z)</li>
-                                                    <li>Un chiffre (0-9)</li>
-                                                    <li>Un caractère spécial (par exemple : !@#$%^&*)</li>
+                                                    <li>{trad("profile.password.clue.minLength")}</li>
+                                                    <li>{trad("profile.password.clue.uppercase")}</li>
+                                                    <li>{trad("profile.password.clue.lowercase")}</li>
+                                                    <li>{trad("profile.password.clue.number")}</li>
+                                                    <li>{trad("profile.password.clue.special")}</li>
                                                 </ul>
                                             </div>
                                         </div>
@@ -192,7 +196,7 @@ export function PasswordModify() {
                                         disabled={isLoading}
                                         type="button"
                                     >
-                                        Annuler
+                                        {trad("common.buttons.cancel")}
                                     </Button>
                                     <Button
                                         variant="black"
@@ -205,7 +209,7 @@ export function PasswordModify() {
                                             !editedPassword.confirmNewPassword
                                         }
                                     >
-                                        {isLoading ? "Sauvegarde..." : "Sauvegarder"}
+                                        {isLoading ? trad("common.alerts.isSaving") : trad("common.buttons.save")}
                                     </Button>
                                 </div>
                             </form>

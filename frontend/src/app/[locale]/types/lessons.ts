@@ -31,8 +31,9 @@ export interface Lesson {
         {
             duration: number;
             price: number;
-        }
+        },
     ];
+    slugs: Record<string, string>;
 }
 export type allLessons = Lesson[];
 
@@ -57,3 +58,9 @@ export interface DetailedOffer {
     popular: boolean;
 }
 export type detailedOffers = DetailedOffer[];
+
+export interface Slug {
+    slug: string;
+    title: string;
+}
+export type Slugs = Slug[];

@@ -54,22 +54,22 @@ class ControllerError
 
     public function debug(string $text, $data = null)
     {
-    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
-    if (is_array($data)) {
-        error_log($text);
-        foreach ($data as $key => $value) {
-            error_log($key . ' => ' . print_r($value, true));
+        if (is_array($data)) {
+            error_log($text);
+            foreach ($data as $key => $value) {
+                error_log($key . ' => ' . print_r($value, true) . "\n");
+            }
+        } else {
+            error_log($text . print_r($data, true) . "\n");
         }
-    } else {
-        error_log($text . print_r($data, true));
-    }
 
-    foreach ($trace as $frame) {
-        if (basename($frame['file']) !== 'index.php') {
-            error_log('Appel depuis : ' . $frame['file']);
-            error_log('Ligne ' . $frame['line']);
-            break;
+        foreach ($trace as $frame) {
+            if (basename($frame['file']) !== 'index.php') {
+                error_log('Appel depuis : ' . $frame['file'] . "\n");
+                error_log('Ligne ' . $frame['line'] . "\n");
+                break;
             }
         }
     }
@@ -84,7 +84,7 @@ class ControllerError
         }
 
         $timestamp = date('Y-m-d H:i:s');
-        
+
         $logContent = "[{$timestamp}] {$title}\n";
         foreach ($messages as $message) {
             $logContent .= "  - {$message}\n";

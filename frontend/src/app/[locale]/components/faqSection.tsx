@@ -1,4 +1,4 @@
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 import FAQItem from "./front/FAQItem";
 import ScrollSection from "./scrollSection";
 import ScrollDiv from "./scrollSectionDiv";
@@ -8,17 +8,17 @@ import frTranslations from "@/locales/fr/homePage";
 import enTranslations from "@/locales/en/homePage";
 
 export default async function FaqSection() {
-    const trad = await getI18n();
-    
+    const trad = await getTranslations();
+
     // Récupérer la locale en français ou anglais selon le contexte
     // On détecte simplement en testant une traduction connue
     const isFrench = trad("homePage.faqSection.title") === "Votre feuille de route";
-    
+
     // Récupérer le bon tableau de questions
-    const questions = isFrench 
-        ? frTranslations.homePage.faqSection.questions 
+    const questions = isFrench
+        ? frTranslations.homePage.faqSection.questions
         : enTranslations.homePage.faqSection.questions;
-    
+
     return (
         <ScrollSection className="bg-white py-12 sm:py-16 px-4 scroll-animate">
             <div className="max-w-4xl mx-auto">
@@ -33,10 +33,7 @@ export default async function FaqSection() {
                 <div className="space-y-3 sm:space-y-4">
                     {questions.map((item, index) => (
                         <ScrollDiv key={index} className="scroll-animate scroll-animate-delay-1">
-                            <FAQItem
-                                question={item.question}
-                                answer={item.answer}
-                            />
+                            <FAQItem question={item.question} answer={item.answer} />
                         </ScrollDiv>
                     ))}
                 </div>

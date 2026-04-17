@@ -82,3 +82,10 @@ db_data
 
 flepourtous.zip
 Flepourtous.zip.env.staging
+
+flepourtous-prod.sql
+
+#logs
+logs/
+
+./pnpm-store

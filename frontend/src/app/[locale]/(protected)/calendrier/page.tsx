@@ -5,12 +5,13 @@ import InstantVisioButton from "./InstantVisioButton";
 import { appointmentList, listInvoices } from "./listEventsActions"; // ✅ Import de la fonction
 import Badge from "@/app/[locale]/components/front/badge";
 import AdminDashboard from "./AdminDashboard";
+import { getTranslations } from "@/locales/server";
 
 export default async function CalendarPage() {
     const role = await getRole();
     const appointments = await appointmentList();
-
     const invoiceList = role === "admin" ? await listInvoices() : [];
+    const trad = await getTranslations();
 
     const isAdmin = role === "admin";
 
@@ -20,12 +21,12 @@ export default async function CalendarPage() {
                 {/* En-tête moderne */}
                 <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                        {isAdmin ? "Tableau de bord admin" : "Mon calendrier"}
+                        {isAdmin ? "Tableau de bord admin" : trad("calendar.myCalendar")}
                     </h1>
                     <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                         {isAdmin
                             ? "Gérez tous les rendez-vous et créez des salons visio instantanés"
-                            : "Consultez vos rendez-vous à venir et rejoignez vos cours en visio"}
+                            : trad("calendar.description")}
                     </p>
                 </div>
 
@@ -43,7 +44,7 @@ export default async function CalendarPage() {
                                 d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                             />
                         </svg>
-                        Nouveau rendez-vous
+                        {trad("common.buttons.newAppointment")}
                     </Link>
                     {!isAdmin && (
                         <Link
@@ -58,7 +59,7 @@ export default async function CalendarPage() {
                                     d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                 />
                             </svg>
-                            Pack
+                            {trad("common.buttons.pack")}
                         </Link>
                     )}
 
@@ -177,12 +178,12 @@ export default async function CalendarPage() {
                                         d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                                     />
                                 </svg>
-                                Mes rendez-vous
+                                {trad("calendar.myAppointments")}
                             </h2>
                             <p className="text-sm text-gray-600 mt-1">
                                 {appointments.length > 0
-                                    ? `${appointments.length} rendez-vous planifiés`
-                                    : "Aucun rendez-vous pour le moment"}
+                                    ? `${appointments.length} ${trad("calendar.myAppointments")}`
+                                    : trad("calendar.noAppointments")}
                             </p>
                         </div>
 

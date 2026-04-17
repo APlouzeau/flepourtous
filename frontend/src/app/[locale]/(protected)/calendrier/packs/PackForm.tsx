@@ -6,6 +6,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import React, { useEffect, useState } from "react";
 import { orderPacks } from "./PacksAction";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "@/locales/client";
 
 export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
     const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);
@@ -16,6 +17,7 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
     const [success, setSuccess] = useState<string | null>(null);
     const router = useRouter();
     const [price, setPrice] = useState<number | null>(null);
+    const trad = useTranslations();
 
     useEffect(() => {
         if (selectedLesson && selectedDuration && selectedPack) {
@@ -31,33 +33,35 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
         }
     }, [selectedLesson, selectedDuration, selectedPack]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setError(null);
 
         if (!selectedLesson) {
-            setError("Veuillez sélectionner une matière.");
+            setError(trad("payment.pack.errorMessage.lesson"));
             return;
         }
         if (!selectedDuration) {
-            setError("Veuillez sélectionner une durée.");
+            setError(trad("payment.pack.errorMessage.duration"));
             return;
         }
         if (!selectedPack) {
-            setError("Veuillez sélectionner un pack.");
+            setError(trad("payment.pack.errorMessage.pack"));
             return;
         }
 
         setLoading(true);
         try {
             const response = await orderPacks(selectedLesson.idLesson.toString(), selectedDuration, selectedPack);
-            setSuccess(response.message || "Rendez-vous enregistré avec succès !");
-            setTimeout(() => {
-                router.push("/calendrier/nouveau-rendez-vous/paiement");
-            }, 2000);
+            if (response && response.code == 1) {
+                setSuccess(trad("payment.pack.successMessage"));
+                setTimeout(() => {
+                    router.push("/calendrier/nouveau-rendez-vous/paiement");
+                }, 2000);
+            }
         } catch (error) {
             console.error("Erreur lors de la création du pack :", error);
-            setError("Une erreur s'est produite lors de la création du pack.");
+            setError(trad("payment.pack.errorMessage.pack"));
         }
     };
 
@@ -74,7 +78,9 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                 d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                             />
                         </svg>
-                        <label className="text-base font-semibold text-gray-900">Matière</label>
+                        <label className="text-base font-semibold text-gray-900">
+                            {trad("calendar.appointment.lesson")}
+                        </label>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                         <RadioGroup
@@ -129,7 +135,9 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                         d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                                     />
                                 </svg>
-                                <label className="text-base font-semibold text-gray-900">Durée</label>
+                                <label className="text-base font-semibold text-gray-900">
+                                    {trad("calendar.table.duration")}
+                                </label>
                             </div>
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <RadioGroup
@@ -158,7 +166,7 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                                     className="cursor-pointer"
                                                 >
                                                     <div className="font-medium text-gray-900">
-                                                        {durationPriceOption.duration} minutes
+                                                        {durationPriceOption.duration} {trad("common.prices.mn")}
                                                     </div>
                                                 </Label>
                                             </div>
@@ -190,7 +198,9 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                         d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
                                     />
                                 </svg>
-                                <label className="text-base font-semibold text-gray-900">Pack</label>
+                                <label className="text-base font-semibold text-gray-900">
+                                    {trad("payment.pack.pack")}
+                                </label>
                             </div>
                             <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <RadioGroup
@@ -214,7 +224,9 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                                 style={{ "--primary": "#1D1E1C" } as React.CSSProperties}
                                             />
                                             <Label htmlFor="pack-5" className="cursor-pointer">
-                                                <div className="font-medium text-gray-900">5 cours</div>
+                                                <div className="font-medium text-gray-900">
+                                                    5 {trad("calendar.table.course")}
+                                                </div>
                                             </Label>
                                         </div>
                                     </div>
@@ -227,7 +239,9 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                                 style={{ "--primary": "#1D1E1C" } as React.CSSProperties}
                                             />
                                             <Label htmlFor="pack-10" className="cursor-pointer">
-                                                <div className="font-medium text-gray-900">10 cours</div>
+                                                <div className="font-medium text-gray-900">
+                                                    10 {trad("calendar.table.course")}
+                                                </div>
                                             </Label>
                                         </div>
                                     </div>
@@ -255,7 +269,7 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
                                 />
                             </svg>
-                            <span className="text-sm font-medium text-blue-900">Prix total du pack :</span>
+                            <span className="text-sm font-medium text-blue-900">{trad("payment.pack.total")}</span>
                         </div>
                         <span className="text-xl font-bold text-blue-900">{price}€</span>
                     </div>
@@ -270,7 +284,7 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
                     disabled={loading}
                     className="w-full inline-flex items-center justify-center px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-white shadow-lg hover:shadow-xl"
                 >
-                    Commander un pack
+                    {trad("payment.finish")}
                 </Button>
             </div>
         </form>

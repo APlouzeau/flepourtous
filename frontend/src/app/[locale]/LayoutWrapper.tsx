@@ -3,13 +3,15 @@
 import { usePathname } from "next/navigation";
 import Header from "./components/front/Header";
 import Footer from "./components/front/Footer";
+import { Slugs } from "./types/lessons";
 
 interface LayoutWrapperProps {
     children: React.ReactNode;
     isLoggedIn: boolean;
+    slugs: Slugs;
 }
 
-export default function LayoutWrapper({ children, isLoggedIn }: LayoutWrapperProps) {
+export default function LayoutWrapper({ children, isLoggedIn, slugs }: LayoutWrapperProps) {
     const pathname = usePathname();
 
     // Routes publiques où on ne veut pas afficher le Header et Footer
@@ -20,7 +22,7 @@ export default function LayoutWrapper({ children, isLoggedIn }: LayoutWrapperPro
 
     return (
         <>
-            {!isPublicRoute && <Header isLoggedIn={isLoggedIn} />}
+            {!isPublicRoute && <Header isLoggedIn={isLoggedIn} slugs={slugs} />}
             <main className={isPublicRoute ? "" : ""}>{children}</main>
             {!isPublicRoute && <Footer />}
         </>

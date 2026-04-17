@@ -12,15 +12,15 @@ class ModelGoogleSync extends ClassDatabase
     public function saveNextSyncToken(string $idGoogleCalendar, string $nextSyncToken)
     {
         $sql = "
-            INSERT INTO googleSync (idCalendar, nextSyncToken)
-            VALUES (:idCalendar, :nextSyncToken)
+            INSERT INTO google_sync (id_calendar, next_sync_token)
+            VALUES (:id_calendar, :next_sync_token)
             ON DUPLICATE KEY UPDATE
-                nextSyncToken = VALUES(nextSyncToken)
+                next_sync_token = VALUES(next_sync_token)
         ";
 
         $req = $this->conn->prepare($sql);
-        $req->bindValue(':idCalendar', $idGoogleCalendar, PDO::PARAM_STR);
-        $req->bindValue(':nextSyncToken', $nextSyncToken, PDO::PARAM_STR);
+        $req->bindValue(':id_calendar', $idGoogleCalendar, PDO::PARAM_STR);
+        $req->bindValue(':next_sync_token', $nextSyncToken, PDO::PARAM_STR);
         $req->execute();
     }
 
@@ -29,11 +29,11 @@ class ModelGoogleSync extends ClassDatabase
      */
     public function getNextSyncToken($calendarId)
     {
-        $req = $this->conn->prepare('SELECT nextSyncToken FROM googleSync WHERE idCalendar = :calendarId');
-        $req->bindValue(':calendarId', $calendarId, PDO::PARAM_STR);
+        $req = $this->conn->prepare('SELECT next_sync_token FROM google_sync WHERE id_calendar = :id_calendar');
+        $req->bindValue(':id_calendar', $calendarId, PDO::PARAM_STR);
         $req->execute();
         $data = $req->fetch(PDO::FETCH_ASSOC);
-        return $data ? $data['nextSyncToken'] : null;
+        return $data ? $data['next_sync_token'] : null;
     }
 
     /**
@@ -42,19 +42,8 @@ class ModelGoogleSync extends ClassDatabase
      */
     public function deleteNextSyncToken($nextSyncToken)
     {
-        $req = $this->conn->prepare('DELETE FROM googleSync WHERE nextSyncToken = :nextSyncToken');
-        $req->bindValue(':nextSyncToken', $nextSyncToken, PDO::PARAM_STR);
-        $req->execute();
-    }
-
-    /**
-     * Supprime le syncToken pour un calendrier spécifique.
-     * (Utilisé par le cron pour forcer une resynchronisation complète).
-     */
-    public function deleteSyncTokenForCalendar($calendarId)
-    {
-        $req = $this->conn->prepare('DELETE FROM googleSync WHERE idCalendar = :calendarId');
-        $req->bindValue(':calendarId', $calendarId, PDO::PARAM_STR);
+        $req = $this->conn->prepare('DELETE FROM google_sync WHERE next_sync_token = :next_sync_token');
+        $req->bindValue(':next_sync_token', $nextSyncToken, PDO::PARAM_STR);
         $req->execute();
     }
 }

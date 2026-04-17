@@ -15,7 +15,7 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError("");

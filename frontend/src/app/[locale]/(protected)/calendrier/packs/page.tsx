@@ -1,9 +1,11 @@
 import { LessonsWithPrices } from "@/app/[locale]/types/lessons";
 import { getAllLessonsWithPrices } from "../nouveau-rendez-vous/AppointmentAction";
 import PackForm from "./PackForm";
+import { getTranslations } from "@/locales/server";
 
 export default async function PacksPage() {
     const lessons: LessonsWithPrices = await getAllLessonsWithPrices();
+    const trad = await getTranslations();
     return (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             {/* En-tête de la section */}
@@ -21,19 +23,17 @@ export default async function PacksPage() {
                         />
                     </svg>
                 </div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">Choisissez un pack</h1>
-                <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                    Choisissez le pack qui correspond le mieux à vos besoins et commencez à apprendre.
-                </p>
+                <h1 className="text-4xl font-bold text-gray-900 mb-4">{trad("payment.pack.title")}</h1>
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto">{trad("payment.pack.description")}</p>
             </div>
 
             {/* Formulaire dans une carte */}
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                 <div className="px-8 py-6" style={{ background: "linear-gradient(to right, #6B7280, #1D1E1C)" }}>
-                    <h2 className="text-2xl font-bold text-white">Détails de votre réservation</h2>
-                    <p className="text-gray-200 mt-1">Remplissez les informations ci-dessous</p>
-                    <p className="text-gray-200 mt-1">Le montant de votre pack sera ajouté à votre porte-monnaie.</p>
-                    <p className="text-gray-200 mt-1">Vous pourrez l&apos;utiliser pour réserver vos cours.</p>
+                    <h2 className="text-2xl font-bold text-white">{trad("payment.pack.details")}</h2>
+                    <p className="text-gray-200 mt-1">{trad("payment.pack.lines.1")}</p>
+                    <p className="text-gray-200 mt-1">{trad("payment.pack.lines.2")}</p>
+                    <p className="text-gray-200 mt-1">{trad("payment.pack.lines.3")}</p>
                 </div>
                 <div className="p-8">
                     <PackForm lessons={lessons} />

@@ -2,10 +2,10 @@ import Link from "next/link";
 import Button from "./front/Button";
 import Image from "next/image";
 import ScrollSection from "./scrollSection";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 
 export default async function HeroSection() {
-    const trad = await getI18n();
+    const trad = await getTranslations();
     return (
         <ScrollSection className="bg-white py-8 sm:py-12 md:py-16 px-4 scroll-animate-left">
             <div className="max-w-7xl mx-auto">

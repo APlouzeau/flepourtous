@@ -4,6 +4,7 @@ import { getCookieBackend } from "@/lib/session";
 import apiClient from "@/lib/axios";
 import { revalidatePath } from "next/cache";
 import axios from "axios";
+import { getLocale } from "@/locales/server";
 
 export async function registerAppointment(formData: FormData) {
     const cookie = await getCookieBackend();
@@ -13,8 +14,10 @@ export async function registerAppointment(formData: FormData) {
         startTime: formData.get("startTime"),
         duration: formData.get("duration"),
         userTimeZone: formData.get("userTimeZone"),
-        idLesson: formData.get("idLesson"),
+        id_lesson: formData.get("idLesson"),
     };
+
+    console.log("Received form data:", data);
     try {
         const response = await apiClient.post("/api/createEvent", data, {
             headers: {
@@ -23,10 +26,12 @@ export async function registerAppointment(formData: FormData) {
             },
             withCredentials: true,
         });
+        console.log("Registering appointment with data:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error during registration:", error);
         if (axios.isAxiosError(error) && error.response && error.response.data) {
+            console.error("Error response data:", error.response.data);
             return error.response.data;
         }
         return { code: 0, message: "Une erreur s'est produite lors de l'enregistrement." };
@@ -45,7 +50,7 @@ export async function prepareRepaymentAction(eventId: string) {
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,
-            }
+            },
         );
         return response.data;
     } catch (error) {
@@ -94,7 +99,7 @@ export async function deleteAppointment(idEvent: string, code: number) {
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,
-            }
+            },
         );
         revalidatePath("/calendrier");
         return response.data;
@@ -120,7 +125,7 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,
-            }
+            },
         );
         return response.data;
     } catch (error) {
@@ -131,18 +136,15 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
 
 export async function getAllLessonsWithPrices() {
     const cookie = await getCookieBackend();
+    const locale = await getLocale();
     try {
-        const response = await apiClient.post(
-            "/api/getAllLessonsWithPrices",
-            {},
-            {
-                headers: {
-                    Cookie: `PHPSESSID=${cookie}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            }
-        );
+        const response = await apiClient.post(`/api/getAllLessonsWithPrices/${locale}`, {
+            headers: {
+                Cookie: `PHPSESSID=${cookie}`,
+                "Content-Type": "application/json",
+            },
+            withCredentials: true,
+        });
         return response.data;
     } catch (error) {
         console.error("Error fetching lessons information:", error);

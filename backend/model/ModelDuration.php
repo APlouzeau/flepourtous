@@ -6,12 +6,12 @@ class ModelDuration extends  ClassDatabase
 {
     public function getAllDurations()
     {
-        $req = $this->conn->query('SELECT * FROM duration ');
+        $req = $this->conn->query('SELECT * FROM durations');
         $datas = $req->fetchAll();
         $durations = [];
         foreach ($datas as $data) {
             $duration = [
-                'idDuration' => $data['idDuration'],
+                'idDuration' => $data['id_duration'],
                 'duration' => $data['duration']
             ];
             $durations[] = $duration;
@@ -21,13 +21,13 @@ class ModelDuration extends  ClassDatabase
 
     public function getDurationById(int $idDuration)
     {
-        $req = $this->conn->prepare('SELECT * FROM duration WHERE idDuration = :idDuration');
+        $req = $this->conn->prepare('SELECT * FROM durations WHERE id_duration = :idDuration');
         $req->bindValue(':idDuration', $idDuration, PDO::PARAM_INT);
         $req->execute();
         $data = $req->fetch();
         if ($data) {
             return [
-                'idDuration' => $data['idDuration'],
+                'idDuration' => $data['id_duration'],
                 'duration' => $data['duration']
             ];
         }
@@ -36,23 +36,38 @@ class ModelDuration extends  ClassDatabase
 
     public function createDuration(EntitieDuration $duration)
     {
-        $req = $this->conn->prepare('INSERT INTO duration (duration) VALUES (:duration)');
+        $req = $this->conn->prepare('INSERT INTO durations (duration) VALUES (:duration)');
         $req->bindValue(':duration', $duration->getDuration(), PDO::PARAM_INT);
         return $req->execute();
     }
 
-    public function updateDuration(EntitieDuration $duration)
+    public function getDurationByDuration(int $duration)
     {
-        $req = $this->conn->prepare('UPDATE duration SET duration = :duration WHERE idDuration = :idDuration');
-        $req->bindValue(':duration', $duration->getDuration(), PDO::PARAM_INT);
-        $req->bindValue(':idDuration', $duration->getIdDuration(), PDO::PARAM_INT);
+        $req = $this->conn->prepare('SELECT * FROM durations WHERE duration = :duration');
+        $req->bindValue(':duration', $duration, PDO::PARAM_INT);
+        $req->execute();
+        $data = $req->fetch();
+        if ($data) {
+            return [
+                'idDuration' => $data['id_duration'],
+                'duration' => $data['duration']
+            ];
+        }
+        return null;
+    }
+
+    public function updateDurationFromDuration(EntitieDuration $duration, $newDuration)
+    {
+        $req = $this->conn->prepare('UPDATE durations SET duration = :duration WHERE duration = :oldDuration');
+        $req->bindValue(':duration', $newDuration, PDO::PARAM_INT);
+        $req->bindValue(':oldDuration', $duration->getDuration(), PDO::PARAM_INT);
         return $req->execute();
     }
 
-    public function deleteDuration(int $idDuration)
+    public function deleteDurationFromDuration(int $duration)
     {
-        $req = $this->conn->prepare('DELETE FROM duration WHERE idDuration = :idDuration');
-        $req->bindValue(':idDuration', $idDuration, PDO::PARAM_INT);
+        $req = $this->conn->prepare('DELETE FROM durations WHERE duration = :duration');
+        $req->bindValue(':duration', $duration, PDO::PARAM_INT);
         return $req->execute();
     }
 }

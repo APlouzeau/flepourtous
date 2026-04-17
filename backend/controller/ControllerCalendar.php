@@ -38,7 +38,6 @@ class ControllerCalendar
     public function listEvents()
     {
         $this->controllerUser->verifyConnectBack();
-        error_log("Récupération des événements pour l'utilisateur ID: " . $_SESSION['idUser']);
 
         if ($_SESSION['role'] != 'admin') {
 
@@ -86,7 +85,9 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['idLesson'])) {
+        $this->controllerError->debug("Received data for createEvent: " . print_r($data, true));
+
+        if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['id_lesson'])) {
             http_response_code(400); // Bad Request
             $response = [
                 'code' => 0,
@@ -129,7 +130,7 @@ class ControllerCalendar
             exit();
         }
 
-        $idLesson = (int)$data['idLesson'];
+        $idLesson = (int)$data['id_lesson'];
         $userId = $_SESSION['idUser'];
         $description = $data['description'];
         $duration = $data['duration'];
@@ -208,7 +209,8 @@ class ControllerCalendar
             }
 
             $idEvent = $createdEvent->getId();
-            //Visio
+
+            //Visioconférence
             $roomUrl = $this->controllerVisio->createRoom($duration, $userStartDateTimeUTCToString, $idEvent);
 
             if ($roomUrl === false) {
@@ -242,6 +244,10 @@ class ControllerCalendar
             $_SESSION['lesson_name'] = $lesson['title'];
             $_SESSION['event_id'] = $idEvent;
 
+            $this->controllerError->debug("lesson_price : " . $_SESSION['lesson_price']);
+            $this->controllerError->debug("lesson_name : " . $_SESSION['lesson_name']);
+            $this->controllerError->debug("event_id : " . $_SESSION['event_id']);
+
             if (!$createdEvent) {
                 $response = [
                     'code' => 10,
@@ -270,7 +276,10 @@ class ControllerCalendar
     public function listEventsUser()
     {
         $this->controllerUser->verifyConnectBack();
-        $events = $this->modelEvent->getEventsUser($_SESSION['idUser']);
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+        $locale = isset($data['locale']) ? $data['locale'] : 'en';
+        $events = $this->modelEvent->getEventsUser($_SESSION['idUser'], $locale);
         if (count($events) == 0) {
             $response = [
                 'code' => 0,
@@ -301,7 +310,6 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
-        error_log("data received : " . print_r($data, true));
 
         $timeRemaining = (new DateTime($event['startDateTime']))->getTimestamp() - (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
 
@@ -333,7 +341,6 @@ class ControllerCalendar
         $this->controllerUser->verifyConnectBack();
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
-        error_log("Début de la suppression de l'événement : " . print_r($data, true));
 
         if (!$data || !isset($data['idEvent']) || !isset($data['code'])) {
             $response = [
@@ -362,7 +369,6 @@ class ControllerCalendar
             echo json_encode($response);
             return;
         }
-        $this->controllerError->debug("Suppression de l'evenement : ", $event);
 
         if ($event['status'] != 'Payé' && $event['status'] != 'Google') {
             $response = [
@@ -457,7 +463,6 @@ class ControllerCalendar
         $controllerGoogle = new ControllerGoogle();
         $events = $controllerGoogle->getOccupiedSlotsOnGoogleCalendar($startTime, $endTime);
 
-        error_log("Google Busy Periods (pour le jour demandé): " . print_r($events, true));
 
         $interval = new DateInterval('PT15M'); // Intervalle de 15 minutes
         $occupiedTimeSlots = [];
@@ -514,7 +519,6 @@ class ControllerCalendar
         if (empty($finalAvailableTimeSlots)) {
             $response = [
                 'code' => 0,
-                'message' => 'Aucun créneau disponible pour cette date.',
             ];
             echo json_encode($response);
             return;
@@ -575,12 +579,10 @@ class ControllerCalendar
         }
 
         if ($userId === null) {
-            error_log("Aucun utilisateur correspondant trouvé pour l'événement Google ID: " . $idEvent . ". Utilisation de l'admin par défaut.");
             $adminUserId = $this->modelUser->checkMail(TEACHER_MAIL);
             if ($adminUserId) {
                 $userId = $adminUserId;
             } else {
-                error_log("Erreur : L'utilisateur admin par défaut n'a pas été trouvé. L'événement Google ID: " . $idEvent . " ne peut pas être créé en base de données.");
                 return;
             }
         }

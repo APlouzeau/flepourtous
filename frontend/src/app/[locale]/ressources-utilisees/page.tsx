@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { getTranslations } from "@/locales/server";
 
-export default function ResourcesPage() {
+export default async function ResourcesPage() {
+    const trad = await getTranslations();
     return (
         <div className="min-h-screen bg-gray-50">
             <section className="relative py-16 px-4 overflow-hidden bg-white">
@@ -10,7 +12,7 @@ export default function ResourcesPage() {
                         <div className="space-y-8">
                             <div className="space-y-4">
                                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-gray-900">
-                                    Ressources utilisées
+                                    {trad("ressources.title")}
                                 </h1>
                             </div>
                         </div>
@@ -29,42 +31,23 @@ export default function ResourcesPage() {
                 </div>
             </section>
             <section className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
-                <p>
-                    Pour proposer des cours dynamiques, variés et adaptés aux besoins de chaque apprenant, j’utilise un
-                    large éventail de ressources pédagogiques.
-                </p>
-                <h3 className="text-2xl font-bold mb-2 mt-4">Documents personnalisés</h3>
-                <p>
-                    Je conçois moi-même de nombreux supports (fiches de vocabulaire, activités de grammaire, jeux, mises
-                    en situation, etc.) afin de m’adapter au niveau, aux centres d’intérêt et aux objectifs de chaque
-                    élève. Ces documents sont pensés pour favoriser l’interaction, l’autonomie et le plaisir
-                    d’apprendre.
-                </p>
-                <h3 className="text-2xl font-bold mb-2 mt-4">Ressources en ligne</h3>
-                <p>
-                    Des extraits d’articles, des vidéos, des podcasts, des images ou des documents issus de la vie
-                    quotidienne (menus, publicités, horaires, formulaires...) viennent enrichir les cours pour une
-                    immersion dans le français réel et vivant.
-                </p>
-                <h3 className="text-2xl font-bold mb-2 mt-4">Manuels et ouvrages de référence</h3>
-                <p>
-                    Je m’appuie sur des manuels de référence reconnus pour la qualité de leur contenu et leur efficacité
-                    pédagogique. Ces ressources sont sélectionnées avec soin pour garantir des cours de qualité, riches
-                    et stimulants, quel que soit le niveau.
-                </p>
+                <p>{trad("ressources.introduction")}</p>
+                <h3 className="text-2xl font-bold mb-2 mt-4">{trad("ressources.subTtitle1")}</h3>
+                <p>{trad("ressources.content1")}</p>
+                <h3 className="text-2xl font-bold mb-2 mt-4">{trad("ressources.subTtitle2")}</h3>
+                <p>{trad("ressources.content2")}</p>
+                <h3 className="text-2xl font-bold mb-2 mt-4">{trad("ressources.subTtitle3")}</h3>
+                <p>{trad("ressources.content3")}</p>
             </section>
 
             <section className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
-                <h4 className="text-2xl font-bold mb-2 mt-4">
-                    Voici quelques-uns des ouvrages que j’utilise régulièrement en fonction du niveau et des objectifs
-                    des apprenants :
-                </h4>
+                <h4 className="text-2xl font-bold mb-2 mt-4">{trad("ressources.bookSection.title")}</h4>
                 <div>
                     <ul className="list-disc list-inside space-y-2">
                         <li className="flex items-center">
                             <p>
-                                <strong>Édito</strong> (Édition Didier) : une méthode actuelle, idéale pour développer
-                                les compétences générales tout en explorant la culture francophone.
+                                <strong>{trad("ressources.bookSection.books.0.title")}</strong>
+                                {trad("ressources.bookSection.books.0.description")}
                             </p>
                             <Link
                                 href="https://didierfle.com/produit/edito-b1-edition-2022-2024-livre-didierfle-app/"
@@ -95,16 +78,14 @@ export default function ResourcesPage() {
                                 />
                             </Link>
                             <p className="ml-4">
-                                <strong>La série &quot;Progressive&quot;</strong> (CLE International) : des ouvrages
-                                progressifs par niveau pour travailler la grammaire, le vocabulaire, la conjugaison, la
-                                compréhension écrite/orale, etc.
+                                <strong>{trad("ressources.bookSection.books.1.title")}</strong>
+                                {trad("ressources.bookSection.books.1.description")}
                             </p>
                         </li>
                         <li className="flex items-center">
                             <p>
-                                <strong>Les 100% DELF</strong> (Édition Didier) : pour s’entraîner de manière intensive
-                                et ciblée à chaque épreuve du DELF, avec des stratégies et des mises en situation
-                                proches des examens officiels.
+                                <strong>{trad("ressources.bookSection.books.2.title")}</strong>{" "}
+                                {trad("ressources.bookSection.books.2.description")}
                             </p>
                             <Link
                                 href="https://didierfle.com/produit/le-delf-b2-100-reussite-edition-2021-2022-livre-didierfle-app/"
@@ -135,9 +116,8 @@ export default function ResourcesPage() {
                                 />
                             </Link>
                             <p className="ml-4">
-                                <strong>Les ABC DELF</strong> (Éditions Nathan) : pour se préparer efficacement aux
-                                examens du DELF avec des explications claires, des conseils méthodologiques et des
-                                exercices corrigés.
+                                <strong>{trad("ressources.bookSection.books.3.title")}</strong>{" "}
+                                {trad("ressources.bookSection.books.3.description")}
                             </p>
                         </li>
                     </ul>

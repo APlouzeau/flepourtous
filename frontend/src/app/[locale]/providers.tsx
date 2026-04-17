@@ -1,8 +1,13 @@
+// providers.tsx
 "use client";
 
-import { I18nProviderClient } from "@/locales/client";
+import { NextIntlClientProvider } from "next-intl";
 import { PropsWithChildren } from "react";
 
-export const Providers = (props: PropsWithChildren<{ locale: string }>) => {
-    return <I18nProviderClient locale={props.locale}>{props.children}</I18nProviderClient>;
+export const Providers = (props: PropsWithChildren<{ locale: string; messages: Record<string, unknown> }>) => {
+    return (
+        <NextIntlClientProvider locale={props.locale} messages={props.messages}>
+            {props.children}
+        </NextIntlClientProvider>
+    );
 };

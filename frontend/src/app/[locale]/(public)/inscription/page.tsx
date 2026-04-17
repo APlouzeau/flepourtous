@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "../../components/front/Button";
 import ShowPassword from "@/app/[locale]/components/front/showPassword";
+import { useTranslations } from "@/locales/client";
 
 export default function RegisterPage() {
     const [nickName, setNickName] = useState("");
@@ -18,8 +19,9 @@ export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [disabled, setDisabled] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
+    const trad = useTranslations();
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
@@ -84,7 +86,9 @@ export default function RegisterPage() {
                     </div>
                     <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800">FLE pour tous</h3>
                 </Link>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">Créer votre compte</h2>
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800">
+                    {trad("profile.auth.createAccount")}
+                </h2>
             </div>
 
             {!success && (
@@ -92,7 +96,7 @@ export default function RegisterPage() {
                     <div>
                         <input
                             type="text"
-                            placeholder="Pseudo"
+                            placeholder={trad("profile.informations.nickName")}
                             value={nickName}
                             onChange={(e) => setNickName(e.target.value)}
                             required
@@ -103,7 +107,7 @@ export default function RegisterPage() {
                     <div>
                         <input
                             type="text"
-                            placeholder="Prénom"
+                            placeholder={trad("profile.informations.firstName")}
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                             required
@@ -114,7 +118,7 @@ export default function RegisterPage() {
                     <div>
                         <input
                             type="text"
-                            placeholder="Nom de famille"
+                            placeholder={trad("profile.informations.lastName")}
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                             required
@@ -125,7 +129,7 @@ export default function RegisterPage() {
                     <div>
                         <input
                             type="email"
-                            placeholder="Adresse email"
+                            placeholder={trad("profile.informations.email")}
                             value={mail}
                             onChange={(e) => setMail(e.target.value)}
                             required
@@ -135,7 +139,7 @@ export default function RegisterPage() {
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Mot de passe"
+                            placeholder={trad("profile.password.sectionName")}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
@@ -149,13 +153,13 @@ export default function RegisterPage() {
                                 <span className="text-sm font-bold text-gray-600">?</span>
                             </div>
                             <div className="absolute bottom-full right-0 mb-2 w-max max-w-xs p-3 bg-black text-white text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10">
-                                Le mot de passe doit contenir :
+                                {trad("profile.password.clue.description")}
                                 <ul className="list-disc list-inside mt-1">
-                                    <li>Au moins 8 caractères</li>
-                                    <li>Une lettre majuscule (A-Z)</li>
-                                    <li>Une lettre minuscule (a-z)</li>
-                                    <li>Un chiffre (0-9)</li>
-                                    <li>Un caractère spécial (par exemple : !@#$%^&*)</li>
+                                    <li>{trad("profile.password.clue.minLength")}</li>
+                                    <li>{trad("profile.password.clue.uppercase")}</li>
+                                    <li>{trad("profile.password.clue.lowercase")}</li>
+                                    <li>{trad("profile.password.clue.number")}</li>
+                                    <li>{trad("profile.password.clue.special")}</li>
                                 </ul>
                             </div>
                         </div>
@@ -163,7 +167,7 @@ export default function RegisterPage() {
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Confirmer le mot de passe"
+                            placeholder={trad("profile.password.confirmNewPassword")}
                             value={passwordConfirm}
                             onChange={(e) => setPasswordConfirm(e.target.value)}
                             required
@@ -183,7 +187,7 @@ export default function RegisterPage() {
                         className="w-full py-3 sm:py-4 text-sm sm:text-base font-semibold"
                         disabled={isLoading || disabled}
                     >
-                        Inscription
+                        {trad("common.buttons.register")}
                     </Button>
                 </form>
             )}
@@ -195,12 +199,12 @@ export default function RegisterPage() {
             )}
             <div className="mt-4 sm:mt-6 text-center">
                 <p className="text-xs sm:text-sm lg:text-base text-gray-600">
-                    Vous avez déjà un compte ?{" "}
+                    {trad("profile.auth.alreadyRegistered")}{" "}
                     <Link
                         href="/connexion"
                         className="text-red-600 hover:text-red-700 font-medium transition-colors underline decoration-red-600/30 hover:decoration-red-600"
                     >
-                        Se connecter
+                        {trad("common.buttons.login")}
                     </Link>
                 </p>
             </div>

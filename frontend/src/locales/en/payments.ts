@@ -1,0 +1,40 @@
+export default {
+    payment: {
+        title: "Payment",
+        description: "Complete your payment to confirm your reservation.",
+        successMessage: "Your payment was successful! Your reservation is now confirmed.",
+        successMessageWallet: "Payment successful with your wallet! Your reservation is now confirmed.",
+        errorMessage:
+            "There was an issue with your payment. Please try again or contact support if the problem persists.",
+        processingMessage: "Processing your payment, please wait...",
+        error: "Error",
+        paymentInformationsNotFound: "Payment information not found.",
+        missingPaymentInformations: "Missing payment information. Please try again.",
+        returnToCalendar: "Return to my calendar",
+        successFullPayment: "Successful payment !",
+        missingCheck: "Error during payment verification.",
+        processing: "Processing your payment, please wait...",
+        redirectToCalendar: "Redirecting to calendar in a few seconds...",
+        retryPayment: "Retry payment",
+        pack: {
+            title: "Choose a pack",
+            description: "Choose the pack that best suits your needs and start learning.",
+            details: "Details of your reservation",
+            lines: {
+                1: "Fill in the information below",
+                2: "The amount of your pack will be added to your wallet",
+                3: "You can then use your wallet to book courses at your convenience",
+            },
+            errorMessage: {
+                lesson: "Please select a lesson.",
+                duration: "Please select a duration.",
+                pack: "Please select a pack.",
+                generic: "An error occurred while creating the pack.",
+            },
+            pack: "Pack",
+            successMessage: "Your pack has been successfully ordered! The amount has been added to your wallet.",
+            total: "Total price of the pack:",
+        },
+        finish: "Finalize payment",
+    },
+} as const;

@@ -3,5 +3,6 @@
     "sonarlint.connectedMode.project": {
         "connectionId": "eyonexis",
         "projectKey": "APlouzeau_flepourtous"
-    }
+    },
+    "commentTranslate.targetLanguage": "ja"
 }

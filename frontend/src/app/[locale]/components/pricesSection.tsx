@@ -1,18 +1,10 @@
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 import { LessonWithPrice } from "../types/lessons";
 import FormulaCard from "./front/FormulaCard";
 import ScrollSection from "./scrollSection";
 
-export default async function PricesSection({
-    lessons,
-}: {
-    lessons: LessonWithPrice[];
-}) {
-    const trad = await getI18n();
-    // Ce composant serveur ne nécessite pas d'être client car il n'utilise aucun hook client
-    // Ce composant est parent de <ScrollSection> qui est client
-    
-    // C'est un composant serveur qui rend un composant client qui "wrap" le contenu serveur : la magie de Next.js
+export default async function PricesSection({ lessons }: { lessons: LessonWithPrice[] }) {
+    const trad = await getTranslations();
 
     return (
         <ScrollSection className="bg-white py-12 sm:py-16 px-4 scroll-animate">
@@ -24,7 +16,6 @@ export default async function PricesSection({
                     </h2>
                     <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
                         {trad("homePage.PricesSection.description")}
-
                     </p>
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
