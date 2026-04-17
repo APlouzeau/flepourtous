@@ -8,7 +8,7 @@ import { useSlugStore } from "@/store/useSlugStore";
 const routeSegments: Record<string, string> = {
     fr: "offre-de-cours",
     en: "courses-offer",
-    //ja: "コースの提供",
+    ja: "コースの提供",
 };
 
 export default function LanguageSelector() {
@@ -69,11 +69,11 @@ export default function LanguageSelector() {
             name: "English",
             flag: "/images/flag/uk.png",
         },
-        /*         {
+        {
             code: "ja",
             name: "日本語",
             flag: "/images/flag/japan.png",
-        }, */
+        },
     ];
 
     const currentLanguage = languages.find((lang) => lang.code === currentLocale) || languages[0];
