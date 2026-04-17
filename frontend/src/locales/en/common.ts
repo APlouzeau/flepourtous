@@ -21,6 +21,7 @@ export default {
             cancel: "Cancel",
             modify: "Modify",
             pay: "Pay",
+            commandPack: "Order a pack",
         },
         prices: {
             from: "From",

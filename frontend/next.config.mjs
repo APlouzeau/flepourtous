@@ -1,6 +1,7 @@
 import createNextIntlPlugin from "next-intl/plugin";
+import { localizedRoutes } from "./src/i18n/routes.ts";
 
-const withNextIntl = createNextIntlPlugin("src/i18n/request.ts");
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -13,26 +14,6 @@ const nextConfig = {
                 pathname: "/images/**",
             },
         ],
-    },
-    output: process.env.OUTPUT ? "export" : undefined,
-    async rewrites() {
-        return [
-            {
-                source: "/en/courses-offer/:slug",
-                destination: "/en/offre-de-cours/:slug",
-            },            {
-                source: "/en/courses-offer",
-                destination: "/en/offre-de-cours",
-            },
-            {
-                source: "/ja/コースの提供/:slug",
-                destination: "/ja/offre-de-cours/:slug",
-            },
-            {
-                source: "/ja/コースの提供",
-                destination: "/ja/offre-de-cours",
-            },
-        ];
     },
 };
 

@@ -53,7 +53,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
 
                 if (result.payment_status === "paid" || result.status === "already_processed") {
                     setStatus("success");
-                    setMessage(result.message || trad("payment.successFullPayment"));
+                    setMessage(trad("payment.successFullPayment"));
                     setTimeout(() => router.push("/calendrier"), 3000);
                 } else {
                     setStatus("error");

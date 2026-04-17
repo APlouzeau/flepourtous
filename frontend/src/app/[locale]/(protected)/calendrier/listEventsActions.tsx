@@ -1,6 +1,7 @@
 import apiClient from "@/lib/axios";
 import { showBasicAppointmentProps, showInvoicableAppointmentProps } from "@/app/[locale]/types/appointments";
 import { getCookieBackend } from "@/lib/session";
+import { getLocale } from "@/locales/server";
 
 interface filtersProps {
     begin_period?: string;
@@ -13,10 +14,10 @@ interface filtersProps {
 export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
     try {
         const cookie = await getCookieBackend();
-
+        const locale = await getLocale();
         const response = await apiClient.post(
             "/api/listEvents",
-            {},
+            { locale },
             {
                 headers: {
                     Cookie: `PHPSESSID=${cookie}`,
@@ -25,6 +26,7 @@ export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
                 withCredentials: true,
             },
         );
+        console.log("Response from listEvents API:", response.data);
         if (response.data && Array.isArray(response.data.data)) {
             const appointments = response.data.data;
 

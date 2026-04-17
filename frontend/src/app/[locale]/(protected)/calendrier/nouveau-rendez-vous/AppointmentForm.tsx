@@ -103,8 +103,10 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
         setSuccess(null);
 
         const formData = new FormData(e.currentTarget);
+        console.log("FormData entries:" + selectedLesson?.idLesson);
+
         if (selectedLesson && selectedLesson.idLesson != null) {
-            formData.append("id_lesson", selectedLesson.idLesson.toString());
+            formData.append("idLesson", selectedLesson.idLesson.toString());
         } else {
             console.error("Aucun cours sélectionné pour envoyer l'id_lesson");
             setError(trad("calendar.appointment.chooseLesson"));
@@ -213,7 +215,6 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             const lesson = lessons.find((l) => l.title === value);
                             if (lesson) {
                                 setSelectedLesson(lesson);
-                                console.log("Selected lesson:", lesson);
                             }
                         }}
                         name="lesson"

@@ -1,53 +1,22 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useSlugStore } from "@/store/useSlugStore";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { useParams } from "next/navigation"; // ← useParams de next/navigation, pas next-intl
 
 export default function LanguageSelector() {
     const pathname = usePathname();
     const router = useRouter();
+    const params = useParams();
     const [currentLocale, setCurrentLocale] = useState<string>("fr");
-    const slugs = useSlugStore((state) => state.slugs);
 
     useEffect(() => {
-        const locale = pathname?.split("/")[1];
+        const locale = params?.locale as string;
         if (locale === "en" || locale === "fr" || locale === "ja") {
             setCurrentLocale(locale);
         }
-    }, [pathname]);
-
-    const getPathForLocale = (newLocale: string) => {
-        if (!pathname) return `/${newLocale}`;
-
-        const segments = pathname.split("/");
-
-        if (segments.length === 1) {
-            return `/${newLocale}`;
-        }
-
-        // 1. translateFullPath gère le remplacement du locale ET des segments de route
-        let newPath = translateFullPath(pathname, newLocale);
-
-        // 2. Remplacer le slug si on en a un traduit (ta logique existante, inchangée)
-        const translatedSlug = slugs[newLocale];
-        if (translatedSlug) {
-            const pathSegments = newPath.split("/");
-            pathSegments[pathSegments.length - 1] = translatedSlug;
-            newPath = pathSegments.join("/");
-        }
-
-        return newPath;
-    };
-
-    const languages = [
-        { code: "fr", name: "Français", flag: "/images/flag/france.png" },
-        { code: "en", name: "English", flag: "/images/flag/uk.png" },
-        { code: "ja", name: "日本語", flag: "/images/flag/japan.png" },
-    ];
-
-    const currentLanguage = languages.find((lang) => lang.code === currentLocale) || languages[0];
+    }, [params]);
 
     useEffect(() => {
         const savedPosition = sessionStorage.getItem("scrollPosition");
@@ -59,9 +28,21 @@ export default function LanguageSelector() {
 
     const handleLanguageChange = (langCode: string) => {
         sessionStorage.setItem("scrollPosition", window.scrollY.toString());
-        const newPath = getPathForLocale(langCode);
-        router.push(newPath);
+        // ✅ On passe params pour résoudre le [slug] dynamique
+        router.replace(
+            // @ts-expect-error — params correspond toujours au pathname actuel
+            { pathname, params },
+            { locale: langCode },
+        );
     };
+
+    const languages = [
+        { code: "fr", name: "Français", flag: "/images/flag/france.png" },
+        { code: "en", name: "English", flag: "/images/flag/uk.png" },
+        { code: "ja", name: "日本語", flag: "/images/flag/japan.png" },
+    ];
+
+    const currentLanguage = languages.find((lang) => lang.code === currentLocale) || languages[0];
 
     return (
         <div className="relative group">

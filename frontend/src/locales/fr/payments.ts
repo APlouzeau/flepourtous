@@ -16,5 +16,26 @@ export default {
         processing: "Traitement de votre paiement, veuillez patienter...",
         redirectToCalendar: "Redirection vers le calendrier dans quelques secondes...",
         retryPayment: "Réessayer le paiement",
+        pack: {
+            title: "Choisissez un pack",
+            description: "Choisissez le pack qui correspond le mieux à vos besoins et commencez à apprendre.",
+            details: "Détails de votre réservation",
+            lines: {
+                1: "Remplissez les informations ci-dessous",
+                2: "Le montant de votre pack sera ajouté à votre porte-monnaie",
+                3: "Vous pourrez ensuite utiliser votre porte-monnaie pour réserver des cours à votre convenance",
+            },
+            errorMessage: {
+                lesson: "Veuillez sélectionner une leçon.",
+                duration: "Veuillez sélectionner une durée.",
+                pack: "Veuillez sélectionner un pack.",
+                generic: "Une erreur s'est produite lors de la création du pack.",
+            },
+            pack: "Pack",
+            successMessage: "Votre pack a été commandé avec succès ! Le montant a été ajouté à votre porte-monnaie.",
+            total: "Prix total du pack :",
+            successDemand: "Demande de pack réussie !",
+        },
+        finish: "Finaliser le paiement",
     },
 } as const;

@@ -4,7 +4,7 @@ import { getCookieBackend } from "@/lib/session";
 import apiClient from "@/lib/axios";
 import { revalidatePath } from "next/cache";
 import axios from "axios";
-import { getCurrentLocale } from "@/locales/server";
+import { getLocale } from "@/locales/server";
 
 export async function registerAppointment(formData: FormData) {
     const cookie = await getCookieBackend();
@@ -14,8 +14,10 @@ export async function registerAppointment(formData: FormData) {
         startTime: formData.get("startTime"),
         duration: formData.get("duration"),
         userTimeZone: formData.get("userTimeZone"),
-        id_lesson: formData.get("id_lesson"),
+        id_lesson: formData.get("idLesson"),
     };
+
+    console.log("Received form data:", data);
     try {
         const response = await apiClient.post("/api/createEvent", data, {
             headers: {
@@ -29,6 +31,7 @@ export async function registerAppointment(formData: FormData) {
     } catch (error) {
         console.error("Error during registration:", error);
         if (axios.isAxiosError(error) && error.response && error.response.data) {
+            console.error("Error response data:", error.response.data);
             return error.response.data;
         }
         return { code: 0, message: "Une erreur s'est produite lors de l'enregistrement." };
@@ -133,7 +136,7 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
 
 export async function getAllLessonsWithPrices() {
     const cookie = await getCookieBackend();
-    const locale = await await getLocale();
+    const locale = await getLocale();
     try {
         const response = await apiClient.post(`/api/getAllLessonsWithPrices/${locale}`, {
             headers: {

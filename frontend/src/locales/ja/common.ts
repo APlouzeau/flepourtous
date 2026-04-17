@@ -17,10 +17,11 @@ export default {
             reserveThisCourse: "このコースを予約する",
             reserveNewCourse: "新しいコースを予約する",
             chooseYourSlot: "理想的なスロットを選択し、数回クリックするだけでコースを予約します。",
-            save: "守るために",
+            save: "保存",
             cancel: "キャンセル",
-            modify: "修飾子",
-            pay: "支払者",
+            modify: "修正",
+            pay: "支払う",
+            commandPack: "パックを注文する",
         },
         prices: {
             from: "から",
@@ -37,10 +38,10 @@ export default {
             yearsString: " 年",
         },
         miscellaneous: {
-            notProvided: "認識されない",
+            notProvided: "未提供",
         },
         alerts: {
-            isSaving: "登録...",
+            isSaving: "保存中...",
         },
     },
 } as const;

@@ -1,25 +1,26 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import Button from "./Button";
 import MobileMenuButton from "./MobileMenuButton";
 import LanguageSelector from "./LanguageSelector";
 import { logout } from "@/lib/session";
-import { useTranslations } from "@/locales/client";
-import { Slugs } from "../../types/lessons";
-import { useParams } from "next/navigation";
-import { pathnames } from "@/i18n/routing";
+import { useLocale, useTranslations } from "@/locales/client";
+import { translatePath } from "@/lib/translatePath";
+import { usePathname } from "next/dist/client/components/navigation";
 interface HeaderProps {
     readonly isLoggedIn: boolean;
-    readonly slugs: Slugs;
+    readonly slugs: { slug: string; title: string }[]; // pour le map
+    readonly localizedSlugs?: Record<string, string>; // pour translatePath
 }
 
 export default function Header({ isLoggedIn, slugs }: HeaderProps) {
     const trad = useTranslations();
-    const params = useParams();
-    const locale = (params?.locale as string) ?? "en";
-    const courseRouteSegment = pathnames["offre-de-cours"][locale] ?? "offre-de-cours";
+    const locale = useLocale();
+    const pathname = usePathname();
+    const slugsRecord = Object.fromEntries(slugs.map((s) => [s.slug, s.title]));
+    const courseRouteSegment = translatePath(pathname, locale, slugsRecord);
 
     const handleLogout = async () => {
         try {
@@ -77,7 +78,7 @@ export default function Header({ isLoggedIn, slugs }: HeaderProps) {
                                     {slugs.map((slug) => (
                                         <Link
                                             key={slug.slug}
-                                            href={`/${courseRouteSegment}/${slug.slug}`}
+                                            href={`/offre-de-cours/${slug.slug}`}
                                             className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
                                         >
                                             {slug.title}

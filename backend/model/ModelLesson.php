@@ -134,7 +134,7 @@ class ModelLesson extends  ClassDatabase
                 ];
             } else {
                 $lessons[$data['id_lesson']] = [
-                    'id_lesson' => $data['id_lesson'],
+                    'idLesson' => $data['id_lesson'],
                     'title' => $data['title'],
                     'shortDescription' => $data['short_description'],
                     'imagePath' => $data['image_path'],

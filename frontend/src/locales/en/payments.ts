@@ -16,5 +16,25 @@ export default {
         processing: "Processing your payment, please wait...",
         redirectToCalendar: "Redirecting to calendar in a few seconds...",
         retryPayment: "Retry payment",
+        pack: {
+            title: "Choose a pack",
+            description: "Choose the pack that best suits your needs and start learning.",
+            details: "Details of your reservation",
+            lines: {
+                1: "Fill in the information below",
+                2: "The amount of your pack will be added to your wallet",
+                3: "You can then use your wallet to book courses at your convenience",
+            },
+            errorMessage: {
+                lesson: "Please select a lesson.",
+                duration: "Please select a duration.",
+                pack: "Please select a pack.",
+                generic: "An error occurred while creating the pack.",
+            },
+            pack: "Pack",
+            successMessage: "Your pack has been successfully ordered! The amount has been added to your wallet.",
+            total: "Total price of the pack:",
+        },
+        finish: "Finalize payment",
     },
 } as const;

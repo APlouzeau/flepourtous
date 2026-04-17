@@ -85,6 +85,8 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
+        $this->controllerError->debug("Received data for createEvent: " . print_r($data, true));
+
         if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['id_lesson'])) {
             http_response_code(400); // Bad Request
             $response = [
@@ -274,7 +276,10 @@ class ControllerCalendar
     public function listEventsUser()
     {
         $this->controllerUser->verifyConnectBack();
-        $events = $this->modelEvent->getEventsUser($_SESSION['idUser']);
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+        $locale = isset($data['locale']) ? $data['locale'] : 'en';
+        $events = $this->modelEvent->getEventsUser($_SESSION['idUser'], $locale);
         if (count($events) == 0) {
             $response = [
                 'code' => 0,

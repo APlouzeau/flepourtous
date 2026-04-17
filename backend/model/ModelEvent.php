@@ -36,17 +36,22 @@ class ModelEvent extends  ClassDatabase
         }
     }
 
-    public function getEventsUser(int $idUser)
+    public function getEventsUser(int $idUser, string $locale = 'fr')
     {
         $req = $this->conn->prepare('
         SELECT 
-            id_event, user_id, description, duration, created_at, updated_at, status, visio_link, start_date_time, timezone, title 
+            e.id_event, e.user_id, e.description, e.duration, e.created_at, e.updated_at, e.status, e.visio_link, e.start_date_time, e.timezone, lt.title 
         FROM 
-            events 
-        LEFT JOIN lessons l ON events.id_lesson = l.id_lesson
+            events e
+        INNER JOIN lessons l ON e.id_lesson = l.id_lesson
+        INNER JOIN lesson_translations lt ON l.id_lesson = lt.id_lesson
         WHERE 
-            userId = :idUser');
+            e.user_id = :idUser
+        AND lt.locale = :locale');
         $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
+        $req->bindValue(':locale', $locale, PDO::PARAM_STR);
+        $this->controllerError->debug("Exécution de la requête pour récupérer les événements de l'utilisateur avec ID: $idUser et locale: $locale");
+        $this->controllerError->debug("Requête SQL: " . $req->queryString);
         $req->execute();
         $datas = $req->fetchAll();
         if (count($datas) == 0) {
