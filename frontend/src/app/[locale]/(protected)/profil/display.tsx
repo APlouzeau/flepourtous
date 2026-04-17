@@ -11,18 +11,6 @@ export default function DisplayUserprofil() {
     const [activeTab, setActiveTab] = useState("informations");
     const trad = useTranslations();
 
-    const [settings, setSettings] = useState({
-        emailNotifications: true,
-        courseReminders: true,
-    });
-
-    const toggleSetting = (setting: string) => {
-        setSettings((prev) => ({
-            ...prev,
-            [setting]: !prev[setting as keyof typeof prev],
-        }));
-    };
-
     return (
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

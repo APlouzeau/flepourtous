@@ -10,7 +10,7 @@ export default function ForgetedPasswordForm() {
     const isValidForm = mail.trim() !== "" && mail.includes("@");
     const [emailSent, setEmailSent] = useState(false);
 
-    function handleSubmit(e: React.FormEvent): void {
+    function handleSubmit(e: React.SubmitEvent): void {
         e.preventDefault();
         if (!isValidForm) return;
         setIsLoading(true);

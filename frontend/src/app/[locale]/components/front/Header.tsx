@@ -7,7 +7,6 @@ import MobileMenuButton from "./MobileMenuButton";
 import LanguageSelector from "./LanguageSelector";
 import { logout } from "@/lib/session";
 import { useLocale, useTranslations } from "@/locales/client";
-import { translatePath } from "@/lib/translatePath";
 import { usePathname } from "next/dist/client/components/navigation";
 interface HeaderProps {
     readonly isLoggedIn: boolean;
@@ -20,7 +19,6 @@ export default function Header({ isLoggedIn, slugs }: HeaderProps) {
     const locale = useLocale();
     const pathname = usePathname();
     const slugsRecord = Object.fromEntries(slugs.map((s) => [s.slug, s.title]));
-    const courseRouteSegment = translatePath(pathname, locale, slugsRecord);
 
     const handleLogout = async () => {
         try {
