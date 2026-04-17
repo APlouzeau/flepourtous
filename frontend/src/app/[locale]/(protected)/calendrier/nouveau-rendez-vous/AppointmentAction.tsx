@@ -133,7 +133,7 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
 
 export async function getAllLessonsWithPrices() {
     const cookie = await getCookieBackend();
-    const locale = await getCurrentLocale();
+    const locale = await await getLocale();
     try {
         const response = await apiClient.post(`/api/getAllLessonsWithPrices/${locale}`, {
             headers: {

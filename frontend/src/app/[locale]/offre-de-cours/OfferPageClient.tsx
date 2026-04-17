@@ -4,7 +4,9 @@ import Button from "@/app/[locale]/components/front/Button";
 import { useScrollAnimation } from "@/lib/useScrollAnimation";
 import Image from "next/image";
 import { LessonsWithPrices } from "../types/lessons";
-import { useI18n } from "@/locales/client";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl"; // 👈 import direct next-intl
+import { routing } from "../../../i18n/routing";
 
 interface OfferPageClientProps {
     lessons: Readonly<LessonsWithPrices>;
@@ -14,7 +16,11 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
     // Hooks pour les animations
     const offersSection = useScrollAnimation();
     const detailsSection = useScrollAnimation();
-    const trad = useI18n();
+    const trad = useTranslations();
+    const params = useParams();
+    const locale = (params?.locale as string) ?? "en";
+    const coursePathnames = routing.pathnames["/offre-de-cours"] as Record<string, string>;
+    const courseRouteSegment = coursePathnames[locale]?.replace("/", "") ?? "offre-de-cours";
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -133,7 +139,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
 
                                         <Button
                                             variant="black"
-                                            href={`offre-de-cours/${offer.slug}`}
+                                            href={`/${courseRouteSegment}/${offer.slug}`}
                                             className="w-full justify-center text-lg py-3 px-6 rounded-xl font-semibold transition-all duration-300 hover:scale-105 mt-auto"
                                         >
                                             {trad("common.buttons.learnMore")}

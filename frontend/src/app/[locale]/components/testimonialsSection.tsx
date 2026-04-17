@@ -1,9 +1,9 @@
 import TestimonialsSlider from "./front/TestimonialsSlider";
 import ScrollSection from "./scrollSection";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 
 export default async function TestimonialsSection() {
-    const trad = await getI18n();
+    const trad = await getTranslations();
     const testimonials = [
         {
             quote: trad("homePage.testimonial.vladislava.comment"),

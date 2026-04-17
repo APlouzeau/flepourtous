@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { useState } from "react";
 import Button from "../../components/front/Button";
 import ShowPassword from "@/app/[locale]/components/front/showPassword";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 export default function LoginForm() {
     const [mail, setMail] = useState("");
@@ -15,7 +15,7 @@ export default function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const isValidForm = mail && password;
-    const trad = useI18n();
+    const trad = useTranslations();
 
     const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();

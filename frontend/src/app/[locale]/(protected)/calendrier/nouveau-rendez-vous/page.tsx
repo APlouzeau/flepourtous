@@ -2,12 +2,12 @@ import { LessonsWithPrices } from "@/app/[locale]/types/lessons";
 import { getAllLessonsWithPrices } from "./AppointmentAction";
 import NewAppointmentForm from "./AppointmentForm";
 import { getWallet } from "@/lib/session";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 
 export default async function NewAppointmentPage() {
     const lessons: LessonsWithPrices = await getAllLessonsWithPrices();
     const wallet = await getWallet();
-    const trad = await getI18n();
+    const trad = await getTranslations();
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
             {/* Header avec solde */}

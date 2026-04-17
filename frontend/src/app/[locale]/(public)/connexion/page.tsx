@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import LoginForm from "./LoginForm";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 
 export default async function ConnexionPage() {
-    const trad = await getI18n();
+    const trad = await getTranslations();
     return (
         <div className="w-full">
             <div className="text-center mb-6 sm:mb-8">

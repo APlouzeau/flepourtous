@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 export default function Footer() {
-    const trad = useI18n();
+    const trad = useTranslations();
     return (
         <div className="w-full px-[5%] py-8">
             <footer className="bg-[#1D1E1C]  text-white w-full rounded-[50px]">

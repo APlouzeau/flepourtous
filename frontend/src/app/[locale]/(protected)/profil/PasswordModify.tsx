@@ -1,7 +1,7 @@
 import Button from "@/app/[locale]/components/front/Button";
 import { useState } from "react";
 import { changeUserPassword } from "./profileAction";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 export function PasswordModify() {
     const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -13,7 +13,7 @@ export function PasswordModify() {
         newPassword: "",
         confirmNewPassword: "",
     });
-    const trad = useI18n();
+    const trad = useTranslations();
 
     const handlePasswordChange = async (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault(); // Empêche le rechargement de la page

@@ -1,9 +1,9 @@
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 import Button from "./front/Button";
 import ScrollSection from "./scrollSection";
 
 export default async function CtaSection() {
-    const trad = await getI18n();
+    const trad = await getTranslations();
     return (
         <ScrollSection className="bg-white py-12 sm:py-16 px-4 scroll-animate-scale">
             <div className="max-w-4xl mx-auto text-center">

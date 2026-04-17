@@ -4,12 +4,12 @@ import { useContext, useState } from "react";
 import { Context } from "./profileContext";
 import { InformationTab } from "./InformationTab";
 import { PasswordModify } from "./PasswordModify";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 export default function DisplayUserprofil() {
     const { dataUser } = useContext(Context);
     const [activeTab, setActiveTab] = useState("informations");
-    const trad = useI18n();
+    const trad = useTranslations();
 
     const [settings, setSettings] = useState({
         emailNotifications: true,

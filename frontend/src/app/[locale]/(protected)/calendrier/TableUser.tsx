@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import CancelConfirmationModal from "@/components/CancelConfirmationModal";
 import { cn } from "@/lib/utils";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 interface AppointmentRowProps {
     listAppointments: showBasicAppointmentProps[];
@@ -34,7 +34,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
         isDeleting: false,
     });
     const router = useRouter();
-    const trad = useI18n();
+    const trad = useTranslations();
 
     // Mettre à jour l'heure actuelle toutes les 30 secondes
     useEffect(() => {

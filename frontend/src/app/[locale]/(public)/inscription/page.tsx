@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "../../components/front/Button";
 import ShowPassword from "@/app/[locale]/components/front/showPassword";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 export default function RegisterPage() {
     const [nickName, setNickName] = useState("");
@@ -19,7 +19,7 @@ export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [disabled, setDisabled] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
-    const trad = useI18n();
+    const trad = useTranslations();
 
     const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();

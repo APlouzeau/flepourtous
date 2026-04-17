@@ -2,11 +2,11 @@ import Button from "@/app/[locale]/components/front/Button";
 import { UserDataProps } from "@/app/[locale]/types/userData";
 import { useState } from "react";
 import { EditUserModal } from "./EditUserModal";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 export function InformationTab({ dataUser }: { dataUser: UserDataProps }) {
     const [showEditModal, setShowEditModal] = useState(false);
-    const trad = useI18n(); // Récupère les traductions spécifiques à la section "informations"
+    const trad = useTranslations(); // Récupère les traductions spécifiques à la section "informations"
 
     return (
         <div className="space-y-6">

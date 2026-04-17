@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 
 export default async function ResourcesPage() {
-    const trad = await getI18n();
+    const trad = await getTranslations();
     return (
         <div className="min-h-screen bg-gray-50">
             <section className="relative py-16 px-4 overflow-hidden bg-white">

@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getCookieBackend } from "@/lib/session";
 import { SlugInitializer } from "../../components/SlugInitializer";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 import ReadySection from "../../components/readySection";
 import { ClockIcon } from "../../components/icons";
 
@@ -19,7 +19,7 @@ type tParams = Promise<{ slug: string }>;
 
 export default async function LessonPage(props: { params: tParams }) {
     const { slug } = await props.params;
-    const trad = await getI18n();
+    const trad = await getTranslations();
 
     const lesson: Lesson = await getLessons(slug);
     const {

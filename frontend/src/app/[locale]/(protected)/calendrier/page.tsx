@@ -5,13 +5,13 @@ import InstantVisioButton from "./InstantVisioButton";
 import { appointmentList, listInvoices } from "./listEventsActions"; // ✅ Import de la fonction
 import Badge from "@/app/[locale]/components/front/badge";
 import AdminDashboard from "./AdminDashboard";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 
 export default async function CalendarPage() {
     const role = await getRole();
     const appointments = await appointmentList();
     const invoiceList = role === "admin" ? await listInvoices() : [];
-    const trad = await getI18n();
+    const trad = await getTranslations();
 
     const isAdmin = role === "admin";
 

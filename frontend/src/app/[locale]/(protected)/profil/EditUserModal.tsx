@@ -3,7 +3,7 @@ import Button from "@/app/[locale]/components/front/Button";
 import { UserDataProps } from "@/app/[locale]/types/userData";
 import { useState } from "react";
 import { changeUserProfile } from "./profileAction";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 export function EditUserModal({
     editedUser: initialUser,
@@ -16,7 +16,7 @@ export function EditUserModal({
     const [isLoading, setIsLoading] = useState(false);
     const [editedUser, setEditedUser] = useState<UserDataProps>(initialUser);
     const [modalError, setModalError] = useState("");
-    const trad = useI18n(); // Récupère les traductions spécifiques à la section "informations"
+    const trad = useTranslations(); // Récupère les traductions spécifiques à la section "informations"
 
     const handleCloseModal = () => {
         onClose();

@@ -1,10 +1,10 @@
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 import { LessonWithPrice } from "../types/lessons";
 import FormulaCard from "./front/FormulaCard";
 import ScrollSection from "./scrollSection";
 
 export default async function PricesSection({ lessons }: { lessons: LessonWithPrice[] }) {
-    const trad = await getI18n();
+    const trad = await getTranslations();
 
     return (
         <ScrollSection className="bg-white py-12 sm:py-16 px-4 scroll-animate">

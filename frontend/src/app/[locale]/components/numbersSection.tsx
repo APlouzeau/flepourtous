@@ -1,10 +1,10 @@
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 import StatCard from "./front/StatCard";
 import ScrollSection from "./scrollSection";
 import ScrollDiv from "./scrollSectionDiv";
 
 export default async function NumbersSection() {
-    const trad = await getI18n();
+    const trad = await getTranslations();
     return (
         <ScrollSection className="bg-[#1D1E1C] py-16 sm:py-24 md:py-32 lg:py-36 px-4 scroll-animate">
             <div className="max-w-6xl mx-auto">
@@ -18,7 +18,10 @@ export default async function NumbersSection() {
                         <StatCard number="2000+" description={trad("homePage.numbersSection.stats.courses")} />
                     </ScrollDiv>
                     <ScrollDiv className="scroll-animate scroll-animate-delay-2">
-                        <StatCard number={`8 ${trad("homePage.numbersSection.stats.years")}`} description={trad("homePage.numbersSection.stats.experience")} />
+                        <StatCard
+                            number={`8 ${trad("homePage.numbersSection.stats.years")}`}
+                            description={trad("homePage.numbersSection.stats.experience")}
+                        />
                     </ScrollDiv>
                     <ScrollDiv className="scroll-animate scroll-animate-delay-3">
                         <StatCard number="800+" description={trad("homePage.numbersSection.stats.happyStudents")} />

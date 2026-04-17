@@ -1,10 +1,10 @@
 "use client";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
-    const trad = useI18n();
+    const trad = useTranslations();
     return (
         <div className="min-h-screen bg-gray-100">
             {/* Layout Mobile - Portrait & Paysage */}

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Button from "./Button";
 import Link from "next/link";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 
 interface FormulaCardProps {
     image: string;
@@ -13,7 +13,7 @@ interface FormulaCardProps {
 }
 
 export default async function FormulaCard({ image, title, description, price, duration, link }: FormulaCardProps) {
-    const trad = await getI18n();
+    const trad = await getTranslations();
     return (
         <div className="flex flex-col bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ">
             <div className="relative h-48">

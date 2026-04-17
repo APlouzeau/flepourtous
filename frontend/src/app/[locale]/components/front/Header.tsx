@@ -6,16 +6,21 @@ import Button from "./Button";
 import MobileMenuButton from "./MobileMenuButton";
 import LanguageSelector from "./LanguageSelector";
 import { logout } from "@/lib/session";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 import { Slugs } from "../../types/lessons";
-
+import { useParams } from "next/navigation";
+import { pathnames } from "@/i18n/routing";
 interface HeaderProps {
     readonly isLoggedIn: boolean;
     readonly slugs: Slugs;
 }
 
 export default function Header({ isLoggedIn, slugs }: HeaderProps) {
-    const trad = useI18n();
+    const trad = useTranslations();
+    const params = useParams();
+    const locale = (params?.locale as string) ?? "en";
+    const courseRouteSegment = pathnames["offre-de-cours"][locale] ?? "offre-de-cours";
+
     const handleLogout = async () => {
         try {
             await logout();
@@ -72,7 +77,7 @@ export default function Header({ isLoggedIn, slugs }: HeaderProps) {
                                     {slugs.map((slug) => (
                                         <Link
                                             key={slug.slug}
-                                            href={`/offre-de-cours/${slug.slug}`}
+                                            href={`/${courseRouteSegment}/${slug.slug}`}
                                             className="block px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors"
                                         >
                                             {slug.title}

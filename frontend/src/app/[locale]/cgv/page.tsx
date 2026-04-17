@@ -1,7 +1,7 @@
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 
 export default async function CGVPage() {
-    const trad = await getI18n();
+    const trad = await getTranslations();
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Hero Section */}

@@ -1,4 +1,4 @@
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 import PaymentReturn from "./PaymentReturn";
 import { getCookieBackend } from "@/lib/session";
 
@@ -14,7 +14,7 @@ export default async function PaymentReturnPage({
     const resolvedSearchParams = await searchParams;
     const sessionId = resolvedSearchParams.session_id || undefined;
     const method = resolvedSearchParams.method || null;
-    const trad = await getI18n();
+    const trad = await getTranslations();
 
     const cookie = await getCookieBackend();
 

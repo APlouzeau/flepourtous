@@ -1,9 +1,9 @@
 import { getCookieBackend } from "@/lib/session";
-import { getI18n } from "@/locales/server";
+import { getTranslations } from "@/locales/server";
 import Button from "./front/Button";
 
 export default async function ReadySection() {
-    const trad = await getI18n();
+    const trad = await getTranslations();
     const isAuthenticated = await getCookieBackend();
 
     return (

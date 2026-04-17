@@ -7,7 +7,7 @@ import { SelectNative } from "@/components/ui/select-native";
 import { LessonsWithPrices, LessonWithPrice } from "@/app/[locale]/types/lessons";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -21,7 +21,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
     const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
     const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);
     const router = useRouter();
-    const trad = useI18n();
+    const trad = useTranslations();
 
     useEffect(() => {
         const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;

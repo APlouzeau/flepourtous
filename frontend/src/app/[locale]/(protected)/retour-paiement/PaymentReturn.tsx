@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import apiClient from "@/lib/axios";
-import { useI18n } from "@/locales/client";
+import { useTranslations } from "@/locales/client";
 
 interface PaymentReturnProps {
     sessionId?: string;
@@ -16,7 +16,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
     const [hasChecked, setHasChecked] = useState(false); // ← État pour éviter les appels multiples
     const router = useRouter();
     const searchParams = useSearchParams();
-    const trad = useI18n();
+    const trad = useTranslations();
 
     useEffect(() => {
         // ✅ Éviter les appels multiples
