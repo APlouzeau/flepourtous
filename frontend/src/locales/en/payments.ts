@@ -16,6 +16,5 @@ export default {
         processing: "Processing your payment, please wait...",
         redirectToCalendar: "Redirecting to calendar in a few seconds...",
         retryPayment: "Retry payment",
-        returnToCalendar: "Return to calendar",
     },
 } as const;

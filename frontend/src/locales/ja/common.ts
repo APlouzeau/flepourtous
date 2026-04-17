@@ -1,20 +1,46 @@
-
 export default {
     common: {
-        buttons : {
-            contactUs : "Contactez-nous",
-            register : "Inscription",
-            login : "Connexion",
-            profile : "Profil",
-            calendar : "Calendrier",
-            logout : "Déconnexion",
-            makeAppointment : "Prendre rendez-vous",
-            learnMore : "En savoir plus",
-            joinUs : "Rejoignez-nous",
+        buttons: {
+            contactUs: "お問い合わせ",
+            register: "碑文",
+            login: "接続",
+            profile: "プロフィール",
+            calendar: "カレンダー",
+            logout: "切断する",
+            makeAppointment: "予約をする",
+            newAppointment: "新しい予定",
+            pack: "パック",
+            learnMore: "もっと詳しく知る",
+            joinUs: "参加しませんか",
+            inscriptionToReserve: "登録して予約する",
+            showPrices: "価格を見る",
+            reserveThisCourse: "このコースを予約する",
+            reserveNewCourse: "新しいコースを予約する",
+            chooseYourSlot: "理想的なスロットを選択し、数回クリックするだけでコースを予約します。",
+            save: "守るために",
+            cancel: "キャンセル",
+            modify: "修飾子",
+            pay: "支払者",
         },
-        prices : {
-            from : "À partir de",
-        }
-        // Ajoutez ici vos traductions communes
+        prices: {
+            from: "から",
+            mn: "分",
+            for: "のために",
+        },
+        stats: {
+            students: "800+",
+            studentsString: "学生",
+            courses: "2000+",
+            coursesString: "コース",
+            experience: "8+",
+            years: "長年の経験",
+            yearsString: " 年",
+        },
+        miscellaneous: {
+            notProvided: "認識されない",
+        },
+        alerts: {
+            isSaving: "登録...",
+        },
     },
 } as const;

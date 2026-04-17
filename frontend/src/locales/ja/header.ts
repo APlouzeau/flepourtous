@@ -1,13 +1,13 @@
 export default {
     header: {
-        lessonOffer : {
-            menu : "Offre de cours",
-            general : "Français général",
-            conversation : "Cours de conversation",
-            examPreparation : "Préparation aux examens",
+        lessonOffer: {
+            menu: "コースの提供",
+            general: "一般フランス語",
+            conversation: "会話レッスン",
+            examPreparation: "試験の準備",
         },
-        resourcesUsed : {
-            menu : "Ressources utilisées",
+        resourcesUsed: {
+            menu: "使用されるリソース",
         },
     },
 } as const;

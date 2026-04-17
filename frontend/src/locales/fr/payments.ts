@@ -16,6 +16,5 @@ export default {
         processing: "Traitement de votre paiement, veuillez patienter...",
         redirectToCalendar: "Redirection vers le calendrier dans quelques secondes...",
         retryPayment: "Réessayer le paiement",
-        returnToCalendar: "Retour au calendrier",
     },
 } as const;

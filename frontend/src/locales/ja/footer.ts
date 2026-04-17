@@ -1,28 +1,28 @@
 export default {
     footer: {
-        navigation : {
-            title : "Navigation",
-            home : "Accueil",
-            courses : "Offre de cours",
-            resourcesUsed : "Ressources utilisées",
+        navigation: {
+            title: "ナビゲーション",
+            home: "いらっしゃいませ",
+            courses: "コースの提供",
+            resourcesUsed: "使用されるリソース",
         },
-        account : {
-            title : "Compte",
-            profile : "Profil",
-            calendar : "Calendrier",
+        account: {
+            title: "アカウント",
+            profile: "プロフィール",
+            calendar: "カレンダー",
         },
         support: {
-            title : "Support",
-            contact : "Me contacter",
-            cgv : "CGV",
-            rules : "Règlement intérieur",
-            rgpd : "RGPD",
+            title: "サポート",
+            contact: "連絡してください",
+            cgv: "CCV",
+            rules: "社内規程",
+            rgpd: "GDPR",
         },
-        out : {
-            confidentiality : "Politique de confidentialité",
-            termsOfUse : "Conditions d'utilisation",
-            cookie : "Paramètres des cookies",
-            copyright: "© 2026 FLE pour tous. Tous droits réservés.",
-        }
+        out: {
+            confidentiality: "プライバシーポリシー",
+            termsOfUse: "利用規約",
+            cookie: "クッキーの設定",
+            copyright: "© 2026 みんなのFLE。無断転載を禁じます。",
+        },
     },
 } as const;

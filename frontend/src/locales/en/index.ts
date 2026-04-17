@@ -5,6 +5,7 @@ import coursesOffer from "./courses-offer";
 import footer from "./footer";
 import header from "./header";
 import homePage from "./homePage";
+import payments from "./payments";
 import profile from "./profile";
 import ressources from "./ressources";
 
@@ -18,5 +19,5 @@ export default {
     ...profile,
     ...cgv,
     ...calendar,
-    ...payment,
+    ...payments,
 } as const;

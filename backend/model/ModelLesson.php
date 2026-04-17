@@ -59,7 +59,7 @@ class ModelLesson extends  ClassDatabase
         d.duration
         FROM lesson_translations lt
         INNER JOIN lessons l ON l.id_lesson = lt.id_lesson
-        INNER JOIN lesson_price lp ON lp.id_lesson = l.id_lesson
+        INNER JOIN lesson_prices lp ON lp.id_lesson = l.id_lesson
         INNER JOIN prices p ON lp.id_price = p.id_price
         INNER JOIN durations d ON lp.id_duration = d.id_duration
         WHERE lt.locale = :locale
@@ -117,7 +117,7 @@ class ModelLesson extends  ClassDatabase
         SELECT l.id_lesson, l.image_path, lt.title, lt.short_description,lt.slug, p.price, d.duration
         FROM lessons l
         INNER JOIN lesson_translations lt ON lt.id_lesson = l.id_lesson
-        INNER JOIN lesson_price lp ON lp.id_lesson = l.id_lesson
+        INNER JOIN lesson_prices lp ON lp.id_lesson = l.id_lesson
         INNER JOIN prices p ON lp.id_price = p.id_price
         INNER JOIN durations d ON lp.id_duration = d.id_duration
         WHERE lt.locale = :locale');

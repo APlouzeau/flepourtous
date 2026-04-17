@@ -1,84 +1,112 @@
-
 export default {
     homePage: {
-        title: "Améliorez votre niveau de français avec Ludivine de FlePourTous",
-        subtitle: "Développez vos connaissances avec FLE Pour Tous, votre partenaire de cours de français en ligne avec des méthodes efficaces et des cours personnalisés pour atteindre vos objectifs.",
+        title: "FlePourTous の Ludivine でフランス語のレベルを向上させましょう",
+        subtitle:
+            "目標を達成するための効果的なメソッドとパーソナライズされたコースを備えたオンラインフランス語コースパートナーである FLE Pour Tous で知識を深めましょう。",
         WhyChooseFleSection: {
-            title: "Pourquoi choisir FLE pour tous ?",
+            title: "誰にとっても FLE を選ぶ理由は何ですか?",
             features: [
                 {
                     flexibleSchedule: {
-                        title: "Emploi du temps flexible",
-                        subtitle: "Apprenez à votre rythme, où que vous soyez.",
-                        description: "Je propose des horaires adaptables selon votre fuseau horaire, vos disponibilités et votre rythme d’apprentissage. Cours du matin, du soir ou le samedi : c’est vous qui choisissez ! En cas d’imprévu, vous pouvez reporter le cours facilement si vous me prévenez à l’avance."
-                    }
+                        title: "柔軟なスケジュール",
+                        subtitle: "どこにいても自分のペースで学習できます。",
+                        description:
+                            "あなたのタイムゾーン、空き状況、学習ペースに応じて、柔軟なスケジュールを提供します。朝、夕方、土曜日のクラス：選択はあなた次第です！不測の事態が発生した場合は、事前にご連絡いただければ、コースを延期することができます。",
+                    },
                 },
                 {
                     transparentPricing: {
-                        title: "Prix transparents",
-                        subtitle: "Pas de frais cachés, juste des tarifs simples et accessibles.",
-                        description: "Vous connaissez le prix dès le départ : que vous preniez un cours à l’unité ou un forfait, tout est clairement indiqué. Le rapport qualité-prix est pensé pour que chacun puisse progresser à son rythme, sans se ruiner."
-                    }
+                        title: "透明性のある価格",
+                        subtitle: "隠れた手数料はなく、シンプルでアクセスしやすい価格です。",
+                        description:
+                            "料金は最初からわかります。単一コースを受講する場合でも、パッケージを受講する場合でも、すべてが明確に表示されます。品質と価格の比率は、誰もが大金を掛けずに自分のペースで進められるように設計されています。",
+                    },
                 },
                 {
                     personalizedApproach: {
-                        title: "Approche personnalisée et humaine",
-                        subtitle: "Des cours adaptés à vos besoins, vos envies et votre niveau.",
-                        description: "Chaque leçon est conçue en fonction de votre niveau, de vos objectifs (voyage, travail, examen…) et de vos centres d’intérêt. J’écoute vos besoins et j’adapte le contenu pour que l’apprentissage soit vivant, efficace et motivant."
-                    }
+                        title: "パーソナライズされた人間的なアプローチ",
+                        subtitle: "あなたのニーズ、希望、レベルに合わせたコース。",
+                        description:
+                            "各レッスンは、あなたのレベル、目的（旅行、仕事、試験など）、興味に応じて設計されています。私はあなたのニーズに耳を傾け、学習が活発で効果的でやる気を起こさせるように内容を調整します。",
+                    },
                 },
-            ]
+            ],
         },
-            PricesSection: {
-            title: "Présentation des différentes ",
-            span: "formules",
-            description: "Choisissez le cours qui vous convient le mieux suivant vos objectifs et la durée que vous préférez.",
-    },
+        PricesSection: {
+            title: "さまざまなプレゼンテーション ",
+            span: "数式",
+            description: "目的やご希望の期間に応じて、最適なコースをお選びください。",
+        },
         numbersSection: {
             stats: {
-                title : "Les stats parlent d'elles-mêmes",
-                courses : "Cours",
-                experience : "d'expérience",
-                happyStudents : "D'heureux élèves",
-                pedagogical : "Pédagogique",
-                years: "ans",
-            }
-},
-        testimonial : {
-            title : "What my students say about me",
-            vladislava : {
-                name : "Vladislava",
-                nationality : "Russian",
-                comment : "Ludivine est incroyablement gentille et très facile à aborder. Son professionnalisme est admirable, et elle fait toujours preuve de bienveillance envers ses élèves, faisant preuve d’une grande patience face aux défis que représente l’apprentissage d’une nouvelle langue. Elle adapte ses méthodes d’enseignement à la personnalité de chacun, ce qui permet à chaque élève de progresser à son propre rythme. De plus, elle crée une atmosphère bienveillante où les élèves se sentent à l’aise de faire des erreurs et de poser des questions. Elle fournit également des retours constructifs qui nous aident à améliorer nos compétences. En outre, elle a un très bel accent, ce qui rend l’apprentissage encore plus agréable. Je recommande vivement ses cours à toute personne souhaitant apprendre le français dans un environnement amical et encourageant."
+                title: "統計がすべてを物語っている",
+                courses: "コース",
+                experience: "経験から",
+                happyStudents: "幸せな生徒たち",
+                pedagogical: "教育的",
+                years: "年",
+            },
         },
-        august : {
-            name : "August",
-            nationality : "American-French",
-            comment : "En tant qu’introverti ayant grandi dans une famille française sans jamais avoir réellement appris la langue, j’ai toujours eu très peur de parler français : trop inquiet de faire des erreurs ou de paraître ridicule. Depuis que j’ai commencé les cours avec Ludivine, je sens que cela change peu à peu. Elle est incroyablement patiente, à l’écoute, et crée un espace où je ne me sens jamais jugé. En seulement quelques mois, j’ai parlé plus français que durant toute ma vie, et je commence enfin à gagner en confiance grâce à ses cours. Je ne peux que la recommander chaleureusement.",
+        testimonial: {
+            title: "生徒たちが私について言ったこと",
+            vladislava: {
+                name: "ウラジスラヴァ",
+                nationality: "ロシア",
+                comment:
+                    "Ludivine さんはとても親切で、とても話しやすいです。彼女のプロフェッショナリズムは称賛に値し、生徒たちに対して常に優しさを示し、新しい言語を学ぶという課題に直面したときも非常に忍耐強く取り組んでいます。彼女は各生徒の個性に合わせて指導方法を調整し、各生徒が自分のペースで上達できるようにしています。さらに、学生が間違いを犯したり質問したりすることを安心できるような思いやりのある雰囲気を作り出します。また、スキルの向上に役立つ建設的なフィードバックも提供します。さらに、彼女は非常に美しいアクセントを持っているので、学習がさらに楽しくなります。フレンドリーで励みになる環境でフランス語を学びたい人には彼女のクラスを強くお勧めします。",
+            },
+            august: {
+                name: "8月",
+                nationality: "アメリカ系フランス人",
+                comment:
+                    "フランス人の家庭で育ち、言語を本格的に学ばずに育った内向的な私は、フランス語を話すことを常に非常に恐れていました。間違いを犯したり、滑稽に思われるのではないかと心配しすぎていました。 Ludivineでクラスを始めてから、少しずつ変わってきていると感じています。彼女は信じられないほど忍耐強く、気配りがあり、私が決して批判されていると感じない空間を作り出してくれます。わずか数か月で、私はこれまでの人生で一番フランス語を話せるようになり、彼のレッスンのおかげでようやく自信を持ち始めています。温かくお勧めすることしかできません。",
+            },
+            graham: {
+                name: "グラハム",
+                nationality: "英語",
+                comment:
+                    "登録したとき、実際にフランス語を話さなければならないのが怖かったと言わざるを得ません。ルディヴィーヌは素晴らしいです、彼女は人々をすぐに安心させる方法を知っています。私は全くの初心者としてフランス語を学んでいますが、彼女は世界で一番忍耐強い人です。彼女は私のひどい訛りと文法が悪いのに我慢して、いつも優しく正してくれました。彼女にはフランス語を自然に流せる才能があります。彼女はゆっくりとはっきりと話します。彼女は本当に素晴らしいです。ありがとう、Ludivine あなたはとても親切で、素晴らしい先生です。",
+            },
         },
-        graham : {
-            name : "Graham",
-            nationality : "English",
-            comment : "Je dois dire qu’au moment de m’inscrire, j’étais terrifié à l’idée de devoir vraiment parler français. Ludivine est incroyable, elle sait mettre à l’aise immédiatement. J’apprends à parler français en tant que grand débutant, et elle est la personne la plus patiente du monde. Elle supporte mon accent affreux et ma grammaire approximative, et me corrige toujours avec douceur. Elle a un don pour faire couler le français naturellement. Elle parle lentement et clairement. Elle est vraiment formidable. merci Ludevine tu es tres gentille et tu es un excellent professeur."
-        }
+        faqSection: {
+            title: "あなたのロードマップ",
+            description: "よくある質問",
+            questions: [
+                {
+                    question: "あなたは誰ですか ？",
+                    answer: "私の名前はリュディヴィーヌ、フランス人です。 FLEで修士号を取得し、数年間日本に住んでフランス語を教えていました。私は教育学の修士号と日本語の修士号を取得しています。私はフランスでさまざまな聴衆に主にフランス語で教えてきましたが、英語でも教え、初心者には日本語も教えてきました。",
+                },
+                {
+                    question: "あなたのコースは誰を対象としていますか?",
+                    answer: "このコースは 10 歳以上のフランス語学習者を対象としています。フランス在住でも海外でも、初心者でも上級者でも大歓迎です！",
+                },
+                {
+                    question: "コースのトピックは選択できますか?",
+                    answer: "コースは「アラカルト」、つまりお客様のニーズに完全に対応します。方法だけでなく、取り上げるテーマも一緒に決めていきます。",
+                },
+                {
+                    question: "推奨されるクラス頻度はどれくらいですか?",
+                    answer: "それはあなたの目標によって異なります。フランス語を練習するには、週に 1 回のセッションが完全に合理的です。ただし、試験の準備をしている場合、または集中的にコースを受講したい場合は、言語にできるだけ集中するために、週に 2 ～ 3 回のセッションを受講することをお勧めします。",
+                },
+                {
+                    question: "コースを受講するには何が必要ですか?",
+                    answer: "良好な接続が必要です。コンピューター、タブレット、または携帯電話でコースをフォローできます (コースを見やすくするためにコンピューターを推奨します)。ソフトウェアやアプリケーションをダウンロードする必要はなく、ビデオツールに直接接続できます。",
+                },
+                {
+                    question: "到着が遅れた場合はどうなりますか?",
+                    answer: "遅刻すると時間をロスし、今度は取り返しがつかなくなり、授業時間は予定時間で終了となります。詳しくは販売条件をご覧ください。",
+                },
+                {
+                    question: "コースをキャンセルまたは延期することはできますか?",
+                    answer: "コースの24時間前まではコースを延期またはキャンセルできます。コース開始の 24 時間前までにキャンセルまたは延期を希望する場合、コースは期限切れとみなされ、返金されません。詳しくは販売条件をご覧ください。",
+                },
+            ],
+        },
+        CtaSection: {
+            title: "瞬間を捉えましょう",
+            subtitle: "参加しませんか！",
+            description:
+                "毎日が進歩の機会です。 FLEpourtous で今すぐ自分の将来に投資してください。フランス語の優秀さは待ってくれません。それは今、コースごとに構築されます。",
+        },
     },
-    faqSection: {
-        title: "Votre feuille de route",
-        description: "Questions fréquemment posées",
-        questions: [
-            { question: "Qui êtes-vous ?", answer: "Je m'appelle Ludivine et je suis française. Diplômée d'un master de FLE, j'ai vécu au Japon plusieurs années où j'ai enseigné le français. J'ai un master de didactique et une maîtrise de japonais. J'ai enseigné en France à des publics très variés, principalement en français, mais aussi en anglais et j'ai aussi enseigné le japonais à des débutants." },
-            { question: "À qui s’adressent vos cours ?", answer: "Les cours s’adressent aux apprenants de français à partir de 10 ans. Que vous habitiez en France ou à l’étranger, totalement débutant ou avancé, vous êtes le bienvenu !" },
-            { question: "Puis-je choisir les sujets des cours ?", answer: "Les cours sont “à la carte”, c’est-à-dire qu’ils sont complètement adaptés à vos besoins. Ensemble, nous déciderons non seulement de la méthode, mais aussi des sujets à aborder." },
-            { question: "Quelle est la fréquence recommandée pour les cours ?", answer: "Cela dépend de vos objectifs. Pour pratiquer son français, une séance par semaine est tout à fait raisonnable. Cependant, si vous préparez un examen ou que vous voulez suivre des cours de manière intensive, il est recommandé de faire 2 à 3 séances par semaine, afin de se concentrer un maximum sur la langue." },
-            { question: "De quoi ai-je besoin pour suivre un cours ?", answer: "Il vous faut une bonne connexion. Vous pouvez suivre le cours sur ordinateur, tablette ou téléphone (l’ordinateur est recommandé pour la visibilité du cours). Vous n’avez pas besoin de télécharger de logiciel ou d’application, vous pouvez vous connecter à l’outil de visio directement !" },
-            { question: "Que se passe-t-il si j’arrive en retard ?", answer: "Si vous arrivez en retard, le temps est perdu, vous ne pourrez pas récupérer ce temps, l’heure du cours finira à l’heure prévue. Pour plus d’informations, veuillez lire les conditions de vente." },
-            { question: "Puis-je annuler ou reporter un cours ?", answer: "Vous pouvez reporter ou annuler un cours jusqu’à 24h avant le cours. Si vous voulez annuler ou reporter dans les 24h avant le cours, le cours sera considéré comme dû et ne sera pas remboursé. Pour plus d’informations, veuillez lire les conditions de vente."}
-        ]
-    },
-    CtaSection : {
-        title: "Saisissez le moment",
-        subtitle : "Rejoignez-nous !",
-        description : "Chaque journée est une occasion de progresser. Investissez dans votre avenir dès aujourd'hui avec FLEpourtous. L'excellence en français n'attend pas – elle se construit maintenant, un cours après l'autre."
-    }
-    }
 } as const;

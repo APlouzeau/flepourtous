@@ -49,6 +49,7 @@ export default {
             deleteAccountConfirmation:
                 "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
             noAccount: "Vous n'avez pas de compte ?",
+            alreadyRegistered: "Vous avez déjà un compte ?",
             createAccount: "Créer votre compte",
             rememberMe: "Se souvenir de moi",
             forgotPassword: "Mot de passe oublié ?",

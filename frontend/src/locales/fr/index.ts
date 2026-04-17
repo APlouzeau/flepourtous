@@ -7,6 +7,7 @@ import homePage from "./homePage";
 import ressources from "./ressources";
 import cgv from "./cgv";
 import calendar from "./calendar";
+import payments from "./payments";
 
 export default {
     ...common,
@@ -18,5 +19,5 @@ export default {
     ...profile,
     ...cgv,
     ...calendar,
-    ...payment,
+    ...payments,
 } as const;
