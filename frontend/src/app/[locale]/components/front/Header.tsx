@@ -6,8 +6,7 @@ import Button from "./Button";
 import MobileMenuButton from "./MobileMenuButton";
 import LanguageSelector from "./LanguageSelector";
 import { logout } from "@/lib/session";
-import { useLocale, useTranslations } from "@/locales/client";
-import { usePathname } from "next/dist/client/components/navigation";
+import { useTranslations } from "@/locales/client";
 interface HeaderProps {
     readonly isLoggedIn: boolean;
     readonly slugs: { slug: string; title: string }[]; // pour le map
@@ -16,9 +15,6 @@ interface HeaderProps {
 
 export default function Header({ isLoggedIn, slugs }: HeaderProps) {
     const trad = useTranslations();
-    const locale = useLocale();
-    const pathname = usePathname();
-    const slugsRecord = Object.fromEntries(slugs.map((s) => [s.slug, s.title]));
 
     const handleLogout = async () => {
         try {

@@ -62,7 +62,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                     const availableSlots = await getAvailableTimeSlots(date, userTimezone, selectedDuration);
 
                     if (availableSlots.code == 0) {
-                        setError(availableSlots.message || trad("calendar.appointment.noAvailableSlots"));
+                        setError(trad("calendar.appointment.noAvailableSlots"));
                         setTimeSlots([]);
                     } else if (availableSlots.code == 1 && availableSlots.data && availableSlots.data.length > 0) {
                         setError(null);
@@ -176,7 +176,12 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                         {trad("calendar.table.date")}
                     </label>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+
+                {/* ✅ onClick sur la div → ouvre le picker natif */}
+                <div
+                    className="bg-gray-50 rounded-lg p-4 border border-gray-200 cursor-pointer"
+                    onClick={() => (document.getElementById("startDate") as HTMLInputElement)?.showPicker()}
+                >
                     <input
                         type="date"
                         id="startDate"
@@ -184,7 +189,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                         onChange={(e) => setDate(e.target.value)}
                         value={date}
                         required
-                        className="w-full bg-white border-gray-300 rounded-lg shadow-sm p-3"
+                        className="w-full bg-white border-gray-300 rounded-lg shadow-sm p-3 cursor-pointer"
                         style={{ "--ring-color": "#1D1E1C", "--border-color": "#1D1E1C" } as React.CSSProperties}
                         onFocus={(e) => {
                             e.target.style.borderColor = "#1D1E1C";

@@ -519,7 +519,6 @@ class ControllerCalendar
         if (empty($finalAvailableTimeSlots)) {
             $response = [
                 'code' => 0,
-                'message' => 'Aucun créneau disponible pour cette date.',
             ];
             echo json_encode($response);
             return;
