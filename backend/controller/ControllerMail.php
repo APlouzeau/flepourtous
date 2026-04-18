@@ -417,7 +417,7 @@ class ControllerMail
 
             $this->mailer->addAddress(TEACHER_MAIL);
             $this->mailer->isHTML(true);
-            $this->mailer->Subject = "Nouveau rendez-vous prit pour " . htmlspecialchars($user['firstName'] . " " . $user['lastName']);
+            $this->mailer->Subject = "Nouveau rendez-vous pris pour " . htmlspecialchars($user['firstName'] . " " . $user['lastName']);
             $emailBody = "Bonjour,<br><br>";
             $emailBody .= "Nous vous informons que " . htmlspecialchars($user['firstName'] . " " . $user['lastName']) . " a pris un nouveau rendez-vous prévu le " . htmlspecialchars($eventDate) . " à " . htmlspecialchars($eventHour) . ".<br><br>";
             $emailBody .= "Le montant de " . htmlspecialchars($amount['price']) . " € a été réglé.<br><br><br>";

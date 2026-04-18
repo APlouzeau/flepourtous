@@ -180,10 +180,11 @@ class ModelEvent extends  ClassDatabase
     public function getAllEvents()
     {
         $req = $this->conn->prepare('
-            SELECT e.id_event, e.description, e.duration, e.status, e.visio_link, u.first_name, u.last_name, e.start_date_time, lt.title FROM events e
+            SELECT e.id_event, e.description, e.duration, e.status, e.visio_link, u.first_name, u.last_name, e.start_date_time, lt.title 
+            FROM events e
             INNER JOIN users u ON e.user_id = u.id_user
-            INNER JOIN lesson l ON e.id_lesson = l.id_lesson
-            INNER JOIN lesson_translation lt ON l.id_lesson = lt.id_lesson
+            INNER JOIN lessons l ON e.id_lesson = l.id_lesson
+            INNER JOIN lesson_translations lt ON l.id_lesson = lt.id_lesson
             WHERE lt.locale = "fr"
             ORDER BY e.start_date_time;');
         $req->execute();
