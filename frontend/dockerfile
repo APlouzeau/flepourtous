@@ -1,11 +1,11 @@
 # --- BASE
 # A clean image target for Next.js applications
-FROM node:lts-alpine3.22 AS base
+FROM node:24-alpine3.24 AS base
 
 WORKDIR /app
 
 # Installation de pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@10.33.2
 
 # --- DEV-DEPENDENCIES
 # A target that'll have dev-dependencies installed
