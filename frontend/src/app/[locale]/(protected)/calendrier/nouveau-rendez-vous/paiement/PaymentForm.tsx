@@ -15,7 +15,7 @@ interface PaymentFormProps {
 
 export default function PaymentForm({ stripePublicKey, cookie, serverError }: PaymentFormProps) {
     const [stripeInstance, setStripeInstance] = useState<Stripe | null>(null);
-    const [stripeUserError, setStripeUserError] = useState<string | null>(null);
+    const [asyncStripeError, setAsyncStripeError] = useState<string | null>(null);
     const router = useRouter();
     const trad = useTranslations();
 
@@ -26,15 +26,14 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
         return null;
     }, [stripePublicKey]);
 
-    useEffect(() => {
-        if (!stripePromise) {
-            if (!stripePublicKey) {
-                setStripeUserError(trad("payments.errorMessage"));
-            }
-            return;
-        }
+    // Calculée directement pendant le rendu, pas besoin d'effet
+    const configError = !stripePublicKey ? "Clé publique Stripe non configurée pour le chargement client." : null;
 
-        setStripeUserError(null);
+    // On combine l'erreur de config (synchrone) et l'erreur async (chargement Stripe)
+    const stripeUserError = configError ?? asyncStripeError;
+
+    useEffect(() => {
+        if (!stripePromise) return;
 
         stripePromise
             .then((resolvedStripe) => {
@@ -44,14 +43,16 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
                     console.error(
                         "[PaymentForm] ERREUR CLIENT: stripePromise s'est résolue à null. Vérifiez la clé publique et la console réseau.",
                     );
-                    setStripeUserError(trad("payments.errorMessage"));
+                    setAsyncStripeError(
+                        "L'initialisation de Stripe a échoué côté client (la clé publique pourrait être incorrecte ou le script Stripe n'a pas pu se charger).",
+                    );
                 }
             })
             .catch((error) => {
                 console.error("[PaymentForm] ERREUR CLIENT: stripePromise a été rejetée:", error);
-                setStripeUserError(trad("payments.errorMessage"));
+                setAsyncStripeError("Une erreur critique est survenue lors du chargement de Stripe côté client.");
             });
-    }, [stripePromise, stripePublicKey, trad]);
+    }, [stripePromise]);
 
     const fetchClientSecret = useCallback(async (): Promise<string> => {
         if (!cookie) {

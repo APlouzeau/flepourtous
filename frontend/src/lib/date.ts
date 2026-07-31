@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function formatDateInUserTimezone(utcDateTimeString: string | undefined, userTimezone: string | undefined) {
     if (!utcDateTimeString || !userTimezone) {
@@ -34,20 +34,8 @@ export function formatDateInUserTimezone(utcDateTimeString: string | undefined, 
 }
 
 export function useUserTimezone() {
-    const [userTimezone, setUserTimezone] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        try {
-            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            setUserTimezone(timezone);
-        } catch (error) {
-            console.error("Error detecting user timezone:", error);
-            setUserTimezone("UTC");
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+    const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const [isLoading] = useState(true);
 
     return { userTimezone, isLoading };
 }

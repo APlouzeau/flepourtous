@@ -15,7 +15,7 @@ export function PasswordModify() {
     });
     const trad = useTranslations();
 
-    const handlePasswordChange = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+    const handlePasswordChange = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault(); // Empêche le rechargement de la page
 
         try {

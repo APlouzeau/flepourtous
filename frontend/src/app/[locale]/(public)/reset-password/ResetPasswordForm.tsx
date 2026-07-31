@@ -20,7 +20,7 @@ export default function ResetPasswordForm() {
         }));
     };
 
-    const handlePasswordChange = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handlePasswordChange = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         setIsLoading(true);
