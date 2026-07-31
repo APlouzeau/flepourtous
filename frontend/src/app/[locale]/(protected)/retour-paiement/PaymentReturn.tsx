@@ -24,19 +24,12 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
     const trad = useTranslations();
 
     useEffect(() => {
-        // ✅ Éviter les appels multiples
-        if (hasChecked) return;
-
-        const paymentMethod = searchParams.get("method");
-        const paymentStatus = searchParams.get("status");
-
-        if (paymentStatus === "success" && paymentMethod === "wallet") {
-            setStatus("success");
-            setMessage(trad("payment.successMessageWallet"));
-            setHasChecked(true);
-            setTimeout(() => router.push("/calendrier"), 3000);
-            return;
+        if (isWalletSuccess) {
+            const timeoutId = setTimeout(() => router.push("/calendrier"), 3000);
+            return () => clearTimeout(timeoutId);
         }
+
+        if (hasChecked || !sessionId) return;
 
         const checkPaymentStatus = async () => {
             try {
@@ -51,7 +44,6 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
                             "Content-Type": "application/json",
                         },
                         withCredentials: true,
-                    },
                     },
                 );
 
@@ -73,7 +65,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
         };
 
         checkPaymentStatus();
-    }, [isWalletSuccess, hasChecked, sessionId, router, cookie, trad]);
+    }, [isWalletSuccess, hasChecked, sessionId, router, cookie, trad, searchParams]);
 
     return (
         <div className="p-4 md:p-8 text-center max-w-md mx-auto">

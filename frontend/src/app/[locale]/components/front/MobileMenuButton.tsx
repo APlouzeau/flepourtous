@@ -16,8 +16,8 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const pathname = usePathname();
     const router = useRouter();
-    const trad = useTranslations(); // 👈 était manquant
-    const slugs = useSlugStore((state) => state.slugs); // 👈 pour les slugs traduits
+    const trad = useTranslations();
+    const slugs = useSlugStore((state) => state.slugs);
 
     const params = useParams();
     const locale = (params?.locale as string) ?? "fr";
@@ -29,8 +29,11 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
-        document.body.style.overflow = !isMenuOpen ? "hidden" : "unset";
     };
+
+    useEffect(() => {
+        document.body.style.overflow = isMenuOpen ? "hidden" : "unset";
+    }, [isMenuOpen]);
 
     useEffect(() => {
         const savedPosition = sessionStorage.getItem("scrollPosition");
@@ -74,7 +77,6 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
         }
 
         setIsMenuOpen(false);
-        document.body.style.overflow = "unset";
         router.push("/" + translated.join("/"));
     };
 

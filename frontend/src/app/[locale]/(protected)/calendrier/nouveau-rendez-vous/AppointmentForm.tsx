@@ -1,13 +1,13 @@
 "use client";
 import { getAvailableTimeSlots, registerAppointment } from "./AppointmentAction";
 import { SubmitEventHandler, useEffect, useId, useMemo, useState } from "react";
+import { useTranslations } from "@/locales/client";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SelectNative } from "@/components/ui/select-native";
 import { LessonsWithPrices, LessonWithPrice } from "@/app/[locale]/types/lessons";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "@/locales/client";
 
 export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -23,7 +23,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
         () => Intl.DateTimeFormat().resolvedOptions().timeZone,
     );
     const router = useRouter();
-
+    const trad = useTranslations();
     const id = useId();
 
     const timezones = Intl.supportedValuesOf("timeZone");
@@ -63,13 +63,16 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                 try {
                     const availabledSlots = await getAvailableTimeSlots(date, selectedTimezone, selectedDuration);
 
-                    if (availableSlots.code == 0) {
+                    if (availabledSlots.code == 0) {
                         setError(trad("calendar.appointment.noAvailableSlots"));
                         setTimeSlots([]);
-                    } else if (availableSlots.code == 1 && availableSlots.data && availableSlots.data.length > 0) {
+                    } else if (availabledSlots.code == 1 && availabledSlots.data && availabledSlots.data.length > 0) {
                         setError(null);
-                        setTimeSlots(availableSlots.data);
-                    } else if (availableSlots.code == 1 && (!availableSlots.data || availableSlots.data.length === 0)) {
+                        setTimeSlots(availabledSlots.data);
+                    } else if (
+                        availabledSlots.code == 1 &&
+                        (!availabledSlots.data || availabledSlots.data.length === 0)
+                    ) {
                         setError(trad("calendar.appointment.noAvailableSlots"));
                         setTimeSlots([]);
                     } else {
@@ -96,7 +99,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [date, selectedTimezone, selectedDuration]);
+    }, [date, selectedTimezone, selectedDuration, trad]);
 
     const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();

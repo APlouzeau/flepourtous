@@ -1,2 +1,11 @@
+allowBuilds:
+    "@parcel/watcher": true
+    "@swc/core": true
+    sharp: true
+    unrs-resolver: true
 ignoredBuiltDependencies:
-  - '@clerk/shared'
+    - "@clerk/shared"
+
+overrides:
+    "@types/react": "19.2.17"
+    "@types/react-dom": "19.2.3"
