@@ -17,13 +17,11 @@ export default function ScrollSection(props: ScrollSectionProps) {
     const { className, children } = props;
 
     const scrollRef = useScrollAnimation();
+    const { elementRef, isVisible } = scrollRef;
 
     return (
         <Provider scrollRef={scrollRef}>
-            <section
-                ref={scrollRef.elementRef}
-                className={cn(scrollRef.isVisible && "visible", className)}
-            >
+            <section ref={elementRef} className={cn(isVisible && "visible", className)}>
                 {children}
             </section>
         </Provider>

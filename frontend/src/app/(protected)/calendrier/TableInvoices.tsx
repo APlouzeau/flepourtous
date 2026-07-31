@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatDateInUserTimezone, useUserTimezone } from "@/lib/date";
 import { setInvoiced } from "./listEventsActions";
@@ -14,13 +14,14 @@ interface TableInvoicesProps {
 export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
     const { userTimezone, isLoading: timezoneLoading } = useUserTimezone();
     const [invoices, setInvoices] = useState(invoiceList);
+    const [prevInvoiceList, setPrevInvoiceList] = useState(invoiceList);
     const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
     const [error, setError] = useState<string | null>(null);
 
-    // Synchroniser le state local avec les nouvelles données du parent
-    useEffect(() => {
+    if (invoiceList !== prevInvoiceList) {
+        setPrevInvoiceList(invoiceList);
         setInvoices(invoiceList);
-    }, [invoiceList]);
+    }
 
     const handleSetInvoiced = async (eventId: string) => {
         setLoadingItems((prev) => new Set([...prev, eventId]));
@@ -32,8 +33,8 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
             if (success) {
                 setInvoices((prevInvoices) =>
                     prevInvoices.map((invoice) =>
-                        invoice.idEvent === eventId ? { ...invoice, isInvoiced: 1 } : invoice
-                    )
+                        invoice.idEvent === eventId ? { ...invoice, isInvoiced: 1 } : invoice,
+                    ),
                 );
             } else {
                 setError("Erreur lors de la facturation"); // ← Utiliser setError au lieu d'alert
@@ -197,7 +198,7 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
                                 .map((item) => {
                                     const { date: localDate } = formatDateInUserTimezone(
                                         item.startDateTime,
-                                        userTimezone || "UTC"
+                                        userTimezone || "UTC",
                                     );
                                     const isLoading = loadingItems.has(item.idEvent);
                                     const isInvoiced = item.isInvoiced === 1;

@@ -13,7 +13,7 @@ interface PaymentFormProps {
 
 export default function PaymentForm({ stripePublicKey, cookie, serverError }: PaymentFormProps) {
     const [stripeInstance, setStripeInstance] = useState<Stripe | null>(null);
-    const [stripeUserError, setStripeUserError] = useState<string | null>(null);
+    const [asyncStripeError, setAsyncStripeError] = useState<string | null>(null);
     const router = useRouter();
 
     const stripePromise = useMemo(() => {
@@ -23,15 +23,14 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
         return null;
     }, [stripePublicKey]);
 
-    useEffect(() => {
-        if (!stripePromise) {
-            if (!stripePublicKey) {
-                setStripeUserError("Clé publique Stripe non configurée pour le chargement client.");
-            }
-            return;
-        }
+    // Calculée directement pendant le rendu, pas besoin d'effet
+    const configError = !stripePublicKey ? "Clé publique Stripe non configurée pour le chargement client." : null;
 
-        setStripeUserError(null);
+    // On combine l'erreur de config (synchrone) et l'erreur async (chargement Stripe)
+    const stripeUserError = configError ?? asyncStripeError;
+
+    useEffect(() => {
+        if (!stripePromise) return;
 
         stripePromise
             .then((resolvedStripe) => {
@@ -39,18 +38,18 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
                     setStripeInstance(resolvedStripe);
                 } else {
                     console.error(
-                        "[PaymentForm] ERREUR CLIENT: stripePromise s'est résolue à null. Vérifiez la clé publique et la console réseau."
+                        "[PaymentForm] ERREUR CLIENT: stripePromise s'est résolue à null. Vérifiez la clé publique et la console réseau.",
                     );
-                    setStripeUserError(
-                        "L'initialisation de Stripe a échoué côté client (la clé publique pourrait être incorrecte ou le script Stripe n'a pas pu se charger)."
+                    setAsyncStripeError(
+                        "L'initialisation de Stripe a échoué côté client (la clé publique pourrait être incorrecte ou le script Stripe n'a pas pu se charger).",
                     );
                 }
             })
             .catch((error) => {
                 console.error("[PaymentForm] ERREUR CLIENT: stripePromise a été rejetée:", error);
-                setStripeUserError("Une erreur critique est survenue lors du chargement de Stripe côté client.");
+                setAsyncStripeError("Une erreur critique est survenue lors du chargement de Stripe côté client.");
             });
-    }, [stripePromise, stripePublicKey]);
+    }, [stripePromise]);
 
     const fetchClientSecret = useCallback(async (): Promise<string> => {
         if (!cookie) {
@@ -66,7 +65,7 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
                         "Content-Type": "application/json",
                     },
                     withCredentials: true,
-                }
+                },
             );
             const data = response.data;
 

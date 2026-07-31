@@ -10,30 +10,28 @@ interface PaymentReturnProps {
 }
 
 export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps) {
-    const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-    const [message, setMessage] = useState<string>("");
-    const [hasChecked, setHasChecked] = useState(false); // ← État pour éviter les appels multiples
     const router = useRouter();
     const searchParams = useSearchParams();
 
+    const paymentMethod = searchParams.get("method");
+    const paymentStatus = searchParams.get("status");
+    const isWalletSuccess = paymentStatus === "success" && paymentMethod === "wallet";
+
+    const [status, setStatus] = useState<"loading" | "success" | "error">(isWalletSuccess ? "success" : "loading");
+    const [message, setMessage] = useState<string>(isWalletSuccess ? "Paiement réussi avec votre portefeuille !" : "");
+    const [hasChecked, setHasChecked] = useState(isWalletSuccess);
+
     useEffect(() => {
-        // ✅ Éviter les appels multiples
-        if (hasChecked) return;
-
-        const paymentMethod = searchParams.get("method");
-        const paymentStatus = searchParams.get("status");
-
-        if (paymentStatus === "success" && paymentMethod === "wallet") {
-            setStatus("success");
-            setMessage("Paiement réussi avec votre portefeuille !");
-            setHasChecked(true);
-            setTimeout(() => router.push("/calendrier"), 3000);
-            return;
+        if (isWalletSuccess) {
+            const timeoutId = setTimeout(() => router.push("/calendrier"), 3000);
+            return () => clearTimeout(timeoutId);
         }
+
+        if (hasChecked || !sessionId) return;
 
         const checkPaymentStatus = async () => {
             try {
-                setHasChecked(true); // ← Marquer comme vérifié AVANT l'appel
+                setHasChecked(true);
 
                 const response = await apiClient.post(
                     "/api/payment-status",
@@ -44,7 +42,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
                             "Content-Type": "application/json",
                         },
                         withCredentials: true,
-                    }
+                    },
                 );
 
                 const result = response.data;
@@ -64,10 +62,8 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
             }
         };
 
-        if (sessionId) {
-            checkPaymentStatus();
-        }
-    }, [sessionId, router, cookie, searchParams, hasChecked]); // ← Ajouter hasChecked
+        checkPaymentStatus();
+    }, [isWalletSuccess, hasChecked, sessionId, router, cookie]);
 
     return (
         <div className="p-4 md:p-8 text-center max-w-md mx-auto">

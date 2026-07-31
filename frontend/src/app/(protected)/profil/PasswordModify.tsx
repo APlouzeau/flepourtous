@@ -13,7 +13,7 @@ export function PasswordModify() {
         confirmNewPassword: "",
     });
 
-    const handlePasswordChange = async (e: React.FormEvent<HTMLFormElement>) => {
+    const handlePasswordChange = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault(); // Empêche le rechargement de la page
 
         try {
@@ -21,7 +21,7 @@ export function PasswordModify() {
             const response = await changeUserPassword(
                 editedPassword.oldPassword,
                 editedPassword.newPassword,
-                editedPassword.confirmNewPassword
+                editedPassword.confirmNewPassword,
             );
 
             if (response.code === 1) {

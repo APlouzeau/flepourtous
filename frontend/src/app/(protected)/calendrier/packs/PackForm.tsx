@@ -3,7 +3,7 @@ import Button from "@/app/components/front/Button";
 import { LessonsWithPrices, LessonWithPrice } from "@/app/types/lessons";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import React, { useEffect, useState } from "react";
+import React, { SubmitEventHandler, useState } from "react";
 import { orderPacks } from "./PacksAction";
 import { useRouter } from "next/navigation";
 
@@ -17,21 +17,19 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
     const router = useRouter();
     const [price, setPrice] = useState<number | null>(null);
 
-    useEffect(() => {
-        if (selectedLesson && selectedDuration && selectedPack) {
-            // ✅ Trouver le prix de la durée sélectionnée
-            const priceForDuration =
-                selectedLesson.price?.find((p) => p.duration.toString() === selectedDuration)?.price || 0;
+    if (selectedLesson && selectedDuration && selectedPack) {
+        // ✅ Trouver le prix de la durée sélectionnée
+        const priceForDuration =
+            selectedLesson.price?.find((p) => p.duration.toString() === selectedDuration)?.price || 0;
 
-            // ✅ Multiplier par le nombre de cours du pack
-            const packQuantity = parseInt(selectedPack); // "5" → 5 ou "10" → 10
-            setPrice(priceForDuration * packQuantity);
-        } else {
-            setPrice(null);
-        }
-    }, [selectedLesson, selectedDuration, selectedPack]);
+        // ✅ Multiplier par le nombre de cours du pack
+        const packQuantity = parseInt(selectedPack); // "5" → 5 ou "10" → 10
+        setPrice(priceForDuration * packQuantity);
+    } else {
+        setPrice(null);
+    }
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         setError(null);
 

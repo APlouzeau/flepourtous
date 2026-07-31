@@ -15,7 +15,7 @@ export default function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const isValidForm = mail && password;
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault();
         setIsLoading(true);
         await apiClient
@@ -30,7 +30,7 @@ export default function LoginForm() {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                }
+                },
             )
             .then(async (response) => {
                 if (response.data.code == 1) {
@@ -66,10 +66,7 @@ export default function LoginForm() {
                     required
                     className="w-full p-3 sm:p-4 pr-12 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                 />
-                <ShowPassword 
-                    showPassword={showPassword}
-                    setShowPassword={setShowPassword}
-                />
+                <ShowPassword showPassword={showPassword} setShowPassword={setShowPassword} />
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs sm:text-sm">

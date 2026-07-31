@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import apiClient from "@/lib/axios";
 import Link from "next/link";
 import Image from "next/image";
 import Button from "../../components/front/Button";
 import ShowPassword from "@/app/components/front/showPassword";
+import type { SubmitEventHandler } from "react";
 
 export default function RegisterPage() {
     const [nickName, setNickName] = useState("");
@@ -16,10 +17,9 @@ export default function RegisterPage() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [disabled, setDisabled] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
@@ -48,23 +48,17 @@ export default function RegisterPage() {
             });
     };
 
-    useEffect(() => {
-        const allFieldsFilled =
-            nickName.trim() !== "" &&
-            firstName.trim() !== "" &&
-            lastName.trim() !== "" &&
-            mail.trim() !== "" &&
-            password.trim() !== "" &&
-            passwordConfirm.trim() !== "";
+    const allFieldsFilled =
+        nickName.trim() !== "" &&
+        firstName.trim() !== "" &&
+        lastName.trim() !== "" &&
+        mail.trim() !== "" &&
+        password.trim() !== "" &&
+        passwordConfirm.trim() !== "";
 
-        const passwordsMatch = password === passwordConfirm;
+    const passwordsMatch = password === passwordConfirm;
 
-        if (allFieldsFilled && passwordsMatch) {
-            setDisabled(false);
-        } else {
-            setDisabled(true);
-        }
-    }, [nickName, firstName, lastName, mail, password, passwordConfirm]); // 3. La liste des variables à surveiller
+    const disabled = !(allFieldsFilled && passwordsMatch);
 
     return (
         <div className="w-full">
@@ -169,10 +163,7 @@ export default function RegisterPage() {
                             required
                             className="w-full p-3 sm:p-4 pr-12 text-sm sm:text-base border border-gray-300 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all duration-200 placeholder:text-gray-500"
                         />
-                        <ShowPassword 
-                            showPassword={showPassword}
-                            setShowPassword={setShowPassword}
-                        />
+                        <ShowPassword showPassword={showPassword} setShowPassword={setShowPassword} />
                     </div>
 
                     {error && (

@@ -10,9 +10,8 @@ interface OfferPageClientProps {
 }
 
 export default function OfferPageClient({ lessons }: Readonly<OfferPageClientProps>) {
-    // Hooks pour les animations
-    const offersSection = useScrollAnimation();
-    const detailsSection = useScrollAnimation();
+    const { elementRef: offersRef, isVisible: offersVisible } = useScrollAnimation();
+    const { elementRef: detailsRef, isVisible: detailsVisible } = useScrollAnimation();
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -43,10 +42,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
             </section>
 
             {/* Section Offres Principales */}
-            <section
-                ref={offersSection.elementRef}
-                className={`py-16 px-4 scroll-animate ${offersSection.isVisible ? "visible" : ""}`}
-            >
+            <section ref={offersRef} className={`py-16 px-4 scroll-animate ${offersVisible ? "visible" : ""}`}>
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -63,7 +59,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                             <div
                                 key={offer.title}
                                 className={`scroll-animate-scale scroll-animate-delay-${index + 1} ${
-                                    offersSection.isVisible ? "visible" : ""
+                                    offersVisible ? "visible" : ""
                                 }`}
                             >
                                 <div
@@ -142,10 +138,8 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
             </section>
 
             {/* Section Avantages */}
-            <section
-                ref={detailsSection.elementRef}
-                className={`py-16 px-4 scroll-animate ${detailsSection.isVisible ? "visible" : ""}`}
-            >
+
+            <section ref={detailsRef} className={`py-16 px-4 scroll-animate ${detailsVisible ? "visible" : ""}`}>
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -243,7 +237,7 @@ export default function OfferPageClient({ lessons }: Readonly<OfferPageClientPro
                             </Button>
                             <Button
                                 variant="white"
-                                 href="mailto:flepourtous.online@gmail.com?subject=Demande%20d'information&body=Bonjour,%0D%0A%0D%0AJe%20souhaiterais%20obtenir%20plus%20d'informations%20sur%20vos%20cours%20de%20français.%0D%0A%0D%0AMerci."
+                                href="mailto:flepourtous.online@gmail.com?subject=Demande%20d'information&body=Bonjour,%0D%0A%0D%0AJe%20souhaiterais%20obtenir%20plus%20d'informations%20sur%20vos%20cours%20de%20français.%0D%0A%0D%0AMerci."
                                 className="text-lg py-3 px-6 rounded-xl font-semibold hover:scale-105 transition-all duration-300"
                             >
                                 Nous contacter
