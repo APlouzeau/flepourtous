@@ -6,8 +6,10 @@ import footer from "./footer";
 import header from "./header";
 import homePage from "./homePage";
 import payments from "./payments";
+import privacy from "./privacy";
 import profile from "./profile";
 import ressources from "./ressources";
+import rules from "./rules";
 
 export default {
     ...common,
@@ -20,4 +22,6 @@ export default {
     ...cgv,
     ...calendar,
     ...payments,
+    ...rules,
+    ...privacy,
 } as const;
