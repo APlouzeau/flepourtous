@@ -4,11 +4,13 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation"; // ← useParams de next/navigation, pas next-intl
+import { useSlugStore } from "@/store/useSlugStore"; // 👈 nécessaire pour les slugs traduits
 
 export default function LanguageSelector() {
     const pathname = usePathname();
     const router = useRouter();
     const params = useParams();
+    const slugs = useSlugStore((state) => state.slugs);
 
     const locale = params?.locale as string;
 
@@ -22,10 +24,12 @@ export default function LanguageSelector() {
 
     const handleLanguageChange = (langCode: string) => {
         sessionStorage.setItem("scrollPosition", window.scrollY.toString());
-        // ✅ On passe params pour résoudre le [slug] dynamique
+        // Traduit le slug (params.slug) dans la nouvelle langue si disponible, sinon le conserve tel quel
+        const translatedSlug = slugs[langCode];
+        const newParams = translatedSlug ? { ...params, slug: translatedSlug } : params;
         router.replace(
             // @ts-expect-error — params correspond toujours au pathname actuel
-            { pathname, params },
+            { pathname, params: newParams },
             { locale: langCode },
         );
     };

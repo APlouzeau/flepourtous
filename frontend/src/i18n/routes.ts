@@ -9,4 +9,4 @@ export const localizedRoutes = [
     { fr: "connexion", en: "login", ja: "ログイン" },
     { fr: "reglement-interieur", en: "internal-regulations", ja: "内部規則" },
     { fr: "calendrier/packs", en: "calendar/packs", ja: "カレンダー/パック" },
-] as const;
+];

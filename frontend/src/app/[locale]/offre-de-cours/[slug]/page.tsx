@@ -19,6 +19,7 @@ type tParams = Promise<{ slug: string }>;
 
 export default async function LessonPage(props: { params: tParams }) {
     const { slug } = await props.params;
+    console.log(slug);
     const trad = await getTranslations();
 
     const lesson: Lesson = await getLessons(slug);

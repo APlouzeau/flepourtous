@@ -17,6 +17,7 @@ export async function getLessons(slug: string) {
     try {
         const locale = await getLocale();
         const decodedSlug = decodeURIComponent(slug);
+        console.log("url : " + locale + " " + decodedSlug);
         const response = await apiClient.get(`/api/offre-de-cours/${decodedSlug}/${locale}`, {});
         console.log("Fetched lesson:", response.data);
         return response.data;
