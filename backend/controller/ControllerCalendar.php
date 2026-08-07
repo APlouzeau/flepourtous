@@ -400,13 +400,16 @@ class ControllerCalendar
 
         if ($invoiced == 2) {
             $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], 'Annulé - non remboursé');
+
         }
 
         if ($invoiced == 3) {
             $this->modelUser->addToWallet($event['userId'], $lessonPrice['price']);
-            $this->controllerMail->sendMailToAlertEventDeleteByAdmin($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price']);
             $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Admin');
-        }
+            }
+        $this->controllerMail->sendMailToAlertEventDeleteByAdmin($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price']);
+
+        $this->controllerError->log("Résultat de la mise à jour du statut de l'événement : " . ($deleteEventSuccess ? "Succès" : "Échec"));
 
         $client = $this->getClient();
         $service = new Google\Service\Calendar($client);
@@ -454,10 +457,10 @@ class ControllerCalendar
 
         $userDate = $data['date']; // La date demandée par l'utilisateur
 
-        $startTime = new DateTime($userDate . ' 08:00:00', $frenchTimeZone); // Crée un objet DateTime pour 8h00 (heure minimum de rendez-vous)
+        $startTime = new DateTime($userDate . ' 08:30:00', $frenchTimeZone); // Crée un objet DateTime pour 8h00 (heure minimum de rendez-vous)
         $startTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
 
-        $endTime = new DateTime($userDate . ' 22:00:00', $frenchTimeZone); // Crée un objet DateTime pour 22h00 (heure de maximale de fin de journée)
+        $endTime = new DateTime($userDate . ' 21:30:00', $frenchTimeZone); // Crée un objet DateTime pour 22h00 (heure de maximale de fin de journée)
         $endTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
 
         $controllerGoogle = new ControllerGoogle();
