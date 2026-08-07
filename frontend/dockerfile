@@ -4,8 +4,8 @@ FROM node:lts-alpine3.22 AS base
 
 WORKDIR /app
 
-# Installation de pnpm
-RUN npm install -g pnpm
+# Installation de pnpm (version figée pour éviter les changements de comportement inattendus)
+RUN npm install -g pnpm@10.34.5
 
 # --- DEV-DEPENDENCIES
 # A target that'll have dev-dependencies installed
