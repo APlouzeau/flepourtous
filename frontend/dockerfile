@@ -19,7 +19,7 @@ RUN pnpm install
 # A target that'll have only production dependencies installed
 FROM base AS prod-dependencies
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 RUN pnpm install --production
 
