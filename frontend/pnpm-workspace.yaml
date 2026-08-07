@@ -1,2 +1,7 @@
 ignoredBuiltDependencies:
   - '@clerk/shared'
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - sharp
