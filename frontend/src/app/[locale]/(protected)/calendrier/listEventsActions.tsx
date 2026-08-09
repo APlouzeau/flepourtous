@@ -1,3 +1,5 @@
+"use server";
+
 import apiClient from "@/lib/axios";
 import { showBasicAppointmentProps, showInvoicableAppointmentProps } from "@/app/[locale]/types/appointments";
 import { getCookieBackend } from "@/lib/session";
@@ -49,12 +51,15 @@ export async function listInvoices(filters?: filtersProps): Promise<showInvoicab
     const cookie = await getCookieBackend();
 
     try {
+        console.log("Filters envoyés à /api/getInvoices:", JSON.stringify(filters));
         const response = await apiClient.post("/api/getInvoices", filters || {}, {
             headers: {
                 Cookie: `PHPSESSID=${cookie}`,
                 "Content-Type": "application/json",
             },
         });
+
+        console.log("Response from /api/getInvoices:", response.data);
 
         if (response.data && Array.isArray(response.data.data)) {
             const invoiceList = response.data.data;

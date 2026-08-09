@@ -6,6 +6,7 @@ import { formatDateInUserTimezone, useUserTimezone } from "@/lib/date";
 import { setInvoiced } from "./listEventsActions";
 import { Button } from "@/components/ui/button";
 import { showInvoicableAppointmentProps } from "@/app/[locale]/types/appointments";
+import { useLocale } from "@/locales/client";
 
 interface TableInvoicesProps {
     invoiceList: showInvoicableAppointmentProps[];
@@ -17,6 +18,7 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
     const [prevInvoiceList, setPrevInvoiceList] = useState(invoiceList);
     const [loadingItems, setLoadingItems] = useState<Set<string>>(new Set());
     const [error, setError] = useState<string | null>(null);
+    const locale = useLocale();
 
     if (invoiceList !== prevInvoiceList) {
         setPrevInvoiceList(invoiceList);
@@ -199,6 +201,7 @@ export default function TableInvoices({ invoiceList }: TableInvoicesProps) {
                                     const { date: localDate } = formatDateInUserTimezone(
                                         item.startDateTime,
                                         userTimezone || "UTC",
+                                        locale, // ← Passer le locale ici
                                     );
                                     const isLoading = loadingItems.has(item.idEvent);
                                     const isInvoiced = item.isInvoiced === 1;

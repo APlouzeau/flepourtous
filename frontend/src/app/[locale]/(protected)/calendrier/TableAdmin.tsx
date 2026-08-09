@@ -42,7 +42,7 @@ export default function TableAdmin({ listAppointments }: TableAdminProps) {
 
         return { badgeColor, textColor, bgColor };
     };
-
+    console.log(timezoneLoading);
     if (timezoneLoading) {
         return (
             <div className="flex items-center justify-center py-12">

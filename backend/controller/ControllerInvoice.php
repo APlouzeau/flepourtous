@@ -94,17 +94,17 @@ class ControllerInvoice
         error_log("🔍 filterToSql received: " . json_encode($filters)); // ← DEBUG
 
         if (isset($filters['beginPeriod'])) {
-            $sqlParts[] = 'startDateTime >= :beginPeriod';
+            $sqlParts[] = 'start_date_time >= :beginPeriod';
             $params[':beginPeriod'] = $filters['beginPeriod'];
         }
 
         if (isset($filters['endPeriod'])) {
-            $sqlParts[] = 'startDateTime <= :endPeriod';
+            $sqlParts[] = 'start_date_time <= :endPeriod';
             $params[':endPeriod'] = $filters['endPeriod'];
         }
 
         if (isset($filters['userId'])) {
-            $sqlParts[] = 'userId = :userId';
+            $sqlParts[] = 'user_id = :userId';
             $params[':userId'] = $filters['userId'];
         }
 
