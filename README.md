@@ -135,6 +135,7 @@ DB_PORT=3306
 # App URLs (configured for local development)
 URI=http://localhost:8000/
 URI_FRONT=http://localhost:3000/
+URI_MAIL=http://localhost:8000/
 COOKIE_DOMAIN=localhost
 
 # Google Calendar Integration (optional)

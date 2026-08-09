@@ -3,6 +3,14 @@
 
 class ControllerUser
 {
+
+    private $controllerError;
+
+    public function __construct()
+    {
+        $this->controllerError = new ControllerError();
+    }
+
     private $userNotConnected = [
         'code' => 0,
         'message' => 'Utilisateur non connecté'
@@ -515,6 +523,8 @@ class ControllerUser
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
+        $this->controllerError->debug("forgetedPassword - Request data", $data);
+
         if ($_SERVER['REQUEST_METHOD'] != 'POST') {
             echo json_encode([
                 'code' => 0,
@@ -533,6 +543,7 @@ class ControllerUser
         $modelUser = new ModelUser();
         $userId = $modelUser->checkMail($mail);
         if ($userId) {
+            $this->controllerError->debug("forgetedPassword - User ID found", $userId);
             $verificationToken = hash('sha256', $data['mail'] . CRON_KEY);
             $modelUser->setNewToken($userId, $verificationToken);
 

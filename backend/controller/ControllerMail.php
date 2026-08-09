@@ -201,7 +201,7 @@ class ControllerMail
 
             $emailBody = "Bonjour " . ",<br><br>";
             $emailBody .= "Nous avons reçu une demande de réinitialisation de votre mot de passe. Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe :<br>";
-            $emailBody .= "<a href=\"" . htmlspecialchars(URI . "api/reset-password/" . $token) . "\">" . "Lien de réinitialisation</a><br><br>";
+            $emailBody .= "<a href=\"" . htmlspecialchars(URI_MAIL . "api/reset-password/" . $token) . "\">" . "Lien de réinitialisation</a><br><br>";
             $emailBody .= "Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.<br><br>";
             $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
             $this->mailer->Body = $emailBody;
