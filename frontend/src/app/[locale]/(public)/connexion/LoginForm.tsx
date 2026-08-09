@@ -17,7 +17,7 @@ export default function LoginForm() {
     const isValidForm = mail && password;
     const trad = useTranslations();
 
-    const handleSubmit = async (e: React.SubmitEvent) => {
+    const handleSubmit = async (e: SubmitEvent) => {
         e.preventDefault();
         setIsLoading(true);
         await apiClient

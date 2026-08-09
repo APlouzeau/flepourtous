@@ -88,8 +88,8 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                             </div>
 
                             {/* Formulaire côté droit */}
-                            <div className="lg:col-span-1 xl:col-span-2 flex items-center justify-center p-8 xl:p-12 bg-white">
-                                <div className="w-full max-w-md">{children}</div>
+                            <div className="lg:col-span-1 xl:col-span-2 flex items-center justify-center bg-white p-6">
+                                <div className="w-full">{children}</div>
                             </div>
                         </div>
                     </div>

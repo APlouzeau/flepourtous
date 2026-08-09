@@ -8,6 +8,8 @@ import ressources from "./ressources";
 import cgv from "./cgv";
 import calendar from "./calendar";
 import payments from "./payments";
+import rules from "./rules";
+import privacy from "./privacy";
 
 export default {
     ...common,
@@ -20,4 +22,6 @@ export default {
     ...cgv,
     ...calendar,
     ...payments,
+    ...rules,
+    ...privacy,
 } as const;

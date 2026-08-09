@@ -6,6 +6,14 @@ class ModelUser
 extends ClassDatabase
 {
 
+    private $controllerError;
+
+    public function __construct()
+    {
+        parent::__construct(); // Initialise la connexion PDO
+        $this->controllerError = new ControllerError();
+    }
+
     public function register(EntitieUser $user)
     {
         $query = "INSERT INTO users (first_name, last_name, mail, nick_name, password, verify_token) VALUES (:first_name, :last_name, :mail, :nick_name, :password, :verify_token)";
@@ -98,8 +106,7 @@ extends ClassDatabase
 
     public function checkMail(string $mail)
     {
-        $query = "SELECT id_user FROM users WHERE mail = :mail";
-        $req = $this->conn->prepare($query);
+        $req = $this->conn->prepare('SELECT id_user FROM users WHERE mail = :mail');
         $req->bindValue(":mail", $mail);
         $req->execute();
         $data = $req->fetch(PDO::FETCH_ASSOC);
@@ -258,9 +265,9 @@ extends ClassDatabase
 
     public function setNewToken(int $idUser, string $token)
     {
-        $query = "UPDATE users SET verifyToken = :verifyToken WHERE id_user = :id_user";
+        $query = "UPDATE users SET verify_token = :verify_token WHERE id_user = :id_user";
         $req = $this->conn->prepare($query);
-        $req->bindValue(":verifyToken", $token, PDO::PARAM_STR);
+        $req->bindValue(":verify_token", $token, PDO::PARAM_STR);
         $req->bindValue(":id_user", $idUser, PDO::PARAM_INT);
         return $req->execute();
     }

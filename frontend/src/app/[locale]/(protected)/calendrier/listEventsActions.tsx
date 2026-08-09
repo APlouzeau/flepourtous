@@ -26,7 +26,6 @@ export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
                 withCredentials: true,
             },
         );
-        console.log("Response from listEvents API:", response.data);
         if (response.data && Array.isArray(response.data.data)) {
             const appointments = response.data.data;
 

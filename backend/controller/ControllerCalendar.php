@@ -1,6 +1,8 @@
 <?php
 
+use App\Enum\AppointmentStatus as EnumAppointmentStatus;
 use Google\Service\Adsense\TimeZone;
+use config\enum\AppointmentStatus;
 
 require_once APP_PATH . 'vendor/autoload.php';
 
@@ -21,6 +23,8 @@ class ControllerCalendar
     private $controllerLesson;
     private $controllerVisio;
     private $controllerError;
+
+    private const EVENT_LOG_FILE = 'event_log';
 
     public function __construct()
     {
@@ -85,7 +89,6 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        $this->controllerError->debug("Received data for createEvent: " . print_r($data, true));
 
         if (!$data || !isset($data['description']) || !isset($data['startDate']) || !isset($data['startTime']) || !isset($data['duration']) || !isset($data['id_lesson'])) {
             http_response_code(400); // Bad Request
@@ -244,10 +247,6 @@ class ControllerCalendar
             $_SESSION['lesson_name'] = $lesson['title'];
             $_SESSION['event_id'] = $idEvent;
 
-            $this->controllerError->debug("lesson_price : " . $_SESSION['lesson_price']);
-            $this->controllerError->debug("lesson_name : " . $_SESSION['lesson_name']);
-            $this->controllerError->debug("event_id : " . $_SESSION['event_id']);
-
             if (!$createdEvent) {
                 $response = [
                     'code' => 10,
@@ -342,6 +341,7 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
+
         if (!$data || !isset($data['idEvent']) || !isset($data['code'])) {
             $response = [
                 'code' => 0,
@@ -370,18 +370,16 @@ class ControllerCalendar
             return;
         }
 
-        if ($event['status'] != 'Payé' && $event['status'] != 'Google') {
+        if ($event['status'] != AppointmentStatus::PAID->value && $event['status'] != AppointmentStatus::GOOGLE->value) {
             $response = [
                 'code' => 0,
                 'message' => 'Seuls les rendez-vous payés ou pris par l\'enseignante peuvent être supprimés.',
             ];
-
             echo json_encode($response);
             return;
         }
 
-
-        if ($event['status'] == 'Annulé - Remboursé' || $event['status'] == 'Annulé - Non remboursé' || $event['status'] == 'Annulé - Admin') {
+        if ($event['status'] == AppointmentStatus::CANCELLED_REFUNDED->value || $event['status'] == AppointmentStatus::CANCELLED_NOT_REFUNDED->value || $event['status'] == AppointmentStatus::CANCELLED_ADMIN->value) {
             $response = [
                 'code' => 0,
                 'message' => 'Cet événement a déjà été annulé.',
@@ -395,27 +393,32 @@ class ControllerCalendar
         $lessonPrice = $this->modelPrice->getPriceByEventId($event['idEvent']);
         if ($invoiced == 1) {
             $this->modelUser->addToWallet($event['userId'], $lessonPrice['price']);
-            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Remboursé');
+            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], AppointmentStatus::CANCELLED_REFUNDED->value);
         }
 
         if ($invoiced == 2) {
-            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], 'Annulé - non remboursé');
-
+            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], AppointmentStatus::CANCELLED_NOT_REFUNDED->value);
         }
 
         if ($invoiced == 3) {
             $this->modelUser->addToWallet($event['userId'], $lessonPrice['price']);
-            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], 'Annulé - Admin');
-            }
-        $this->controllerMail->sendMailToAlertEventDeleteByAdmin($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price']);
+            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], AppointmentStatus::CANCELLED_ADMIN->value);
+        }
 
-        $this->controllerError->log("Résultat de la mise à jour du statut de l'événement : " . ($deleteEventSuccess ? "Succès" : "Échec"));
+        $this->controllerVisio->deleteRoom($data['idEvent']);
+        $this->modelEvent->deleteVisioLink($data['idEvent']);
+
+        $this->controllerMail->sendMailToAlertEventDelete($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price'], $invoiced);
+        $this->controllerMail->sendMailToAlertEventDeleteByUser($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price'], $invoiced);
+
+        $this->controllerError->logs("Résultat de la mise à jour du statut de l'événement " . $data['idEvent'] . " : ", $deleteEventSuccess ? [$deleteEventSuccess] : ['Error'], self::EVENT_LOG_FILE);
 
         $client = $this->getClient();
         $service = new Google\Service\Calendar($client);
-        $deletedEvent = $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
 
-        if (!$deletedEvent) {
+        try {
+            $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
+        } catch (Exception $e) {
             $response = [
                 'code' => 0,
                 'message' => 'Erreur lors de la suppression de l\'événement dans Google Calendar',

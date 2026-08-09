@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import apiClient from "@/lib/axios";
 import Link from "next/link";
 import Image from "next/image";
 import Button from "../../components/front/Button";
 import ShowPassword from "@/app/[locale]/components/front/showPassword";
+import type { SubmitEventHandler } from "react";
 import { useTranslations } from "@/locales/client";
 
 export default function RegisterPage() {
@@ -17,11 +18,10 @@ export default function RegisterPage() {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [disabled, setDisabled] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const trad = useTranslations();
 
-    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
         setError("");
         setIsLoading(true);
@@ -50,23 +50,17 @@ export default function RegisterPage() {
             });
     };
 
-    useEffect(() => {
-        const allFieldsFilled =
-            nickName.trim() !== "" &&
-            firstName.trim() !== "" &&
-            lastName.trim() !== "" &&
-            mail.trim() !== "" &&
-            password.trim() !== "" &&
-            passwordConfirm.trim() !== "";
+    const allFieldsFilled =
+        nickName.trim() !== "" &&
+        firstName.trim() !== "" &&
+        lastName.trim() !== "" &&
+        mail.trim() !== "" &&
+        password.trim() !== "" &&
+        passwordConfirm.trim() !== "";
 
-        const passwordsMatch = password === passwordConfirm;
+    const passwordsMatch = password === passwordConfirm;
 
-        if (allFieldsFilled && passwordsMatch) {
-            setDisabled(false);
-        } else {
-            setDisabled(true);
-        }
-    }, [nickName, firstName, lastName, mail, password, passwordConfirm]); // 3. La liste des variables à surveiller
+    const disabled = !(allFieldsFilled && passwordsMatch);
 
     return (
         <div className="w-full">

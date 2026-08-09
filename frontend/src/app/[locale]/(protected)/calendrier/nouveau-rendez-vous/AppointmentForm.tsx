@@ -1,13 +1,13 @@
 "use client";
 import { getAvailableTimeSlots, registerAppointment } from "./AppointmentAction";
-import { useEffect, useId, useMemo, useState } from "react";
+import { SubmitEventHandler, useEffect, useId, useMemo, useState } from "react";
+import { useTranslations } from "@/locales/client";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SelectNative } from "@/components/ui/select-native";
 import { LessonsWithPrices, LessonWithPrice } from "@/app/[locale]/types/lessons";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "@/locales/client";
 
 export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPrices }) {
     const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
@@ -17,17 +17,13 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
     const [loading, setLoading] = useState<boolean>(false);
     const [registering, setRegistering] = useState<boolean>(false);
     const [successTimeout] = useState<boolean>(false);
-    const [userTimezone, setUserTimezone] = useState<string>("");
     const [selectedDuration, setSelectedDuration] = useState<string | null>(null);
     const [selectedLesson, setSelectedLesson] = useState<LessonWithPrice | null>(null);
+    const [selectedTimezone, setSelectedTimezone] = useState<string>(
+        () => Intl.DateTimeFormat().resolvedOptions().timeZone,
+    );
     const router = useRouter();
     const trad = useTranslations();
-
-    useEffect(() => {
-        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        setUserTimezone(userTimezone);
-    }, []);
-
     const id = useId();
 
     const timezones = Intl.supportedValuesOf("timeZone");
@@ -54,20 +50,29 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
 
     useEffect(() => {
         const searchAvailableTimeSlots = async () => {
-            if (date && userTimezone && selectedDuration && selectedDuration !== "null" && selectedDuration !== null) {
+            if (
+                date &&
+                selectedTimezone &&
+                selectedDuration &&
+                selectedDuration !== "null" &&
+                selectedDuration !== null
+            ) {
                 setLoading(true);
                 setError(null);
                 setTimeSlots([]);
                 try {
-                    const availableSlots = await getAvailableTimeSlots(date, userTimezone, selectedDuration);
+                    const availabledSlots = await getAvailableTimeSlots(date, selectedTimezone, selectedDuration);
 
-                    if (availableSlots.code == 0) {
+                    if (availabledSlots.code == 0) {
                         setError(trad("calendar.appointment.noAvailableSlots"));
                         setTimeSlots([]);
-                    } else if (availableSlots.code == 1 && availableSlots.data && availableSlots.data.length > 0) {
+                    } else if (availabledSlots.code == 1 && availabledSlots.data && availabledSlots.data.length > 0) {
                         setError(null);
-                        setTimeSlots(availableSlots.data);
-                    } else if (availableSlots.code == 1 && (!availableSlots.data || availableSlots.data.length === 0)) {
+                        setTimeSlots(availabledSlots.data);
+                    } else if (
+                        availabledSlots.code == 1 &&
+                        (!availabledSlots.data || availabledSlots.data.length === 0)
+                    ) {
                         setError(trad("calendar.appointment.noAvailableSlots"));
                         setTimeSlots([]);
                     } else {
@@ -94,16 +99,15 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
         }, 300);
 
         return () => clearTimeout(timeoutId);
-    }, [date, userTimezone, selectedDuration, trad]);
+    }, [date, selectedTimezone, selectedDuration, trad]);
 
-    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         setRegistering(true);
         setError(null);
         setSuccess(null);
 
         const formData = new FormData(e.currentTarget);
-        console.log("FormData entries:" + selectedLesson?.idLesson);
 
         if (selectedLesson && selectedLesson.idLesson != null) {
             formData.append("idLesson", selectedLesson.idLesson.toString());
@@ -114,7 +118,6 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
             return;
         }
         const response = await registerAppointment(formData);
-        console.log("Response from registerAppointment:", response);
         if (response.code === 1 || response.code === 10) {
             // Garder registering = true jusqu'à la redirection
             router.push("/calendrier/nouveau-rendez-vous/paiement");
@@ -127,7 +130,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
     return (
         <form onSubmit={handleSubmit} method="POST" className="space-y-8">
             {/* 1. Fuseau horaire */}
-            {userTimezone && (
+            {selectedTimezone && (
                 <div className="space-y-3">
                     <div className="flex items-center space-x-2">
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,8 +149,8 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                         <SelectNative
                             id={id}
                             name="userTimeZone"
-                            value={userTimezone}
-                            onChange={(e) => setUserTimezone(e.target.value)}
+                            value={selectedTimezone}
+                            onChange={(e) => setSelectedTimezone(e.target.value)}
                             className="w-full bg-white border-gray-300 rounded-lg shadow-sm focus:border-gray-600 focus:ring-gray-600"
                             style={{ "--ring-color": "#1D1E1C", "--border-color": "#1D1E1C" } as React.CSSProperties}
                         >
@@ -344,7 +347,7 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             </svg>
                             <span className="text-gray-600">Réservation en cours...</span>
                         </div>
-                    ) : loading && date && userTimezone && selectedDuration ? (
+                    ) : loading && date && selectedTimezone && selectedDuration ? (
                         <div className="flex items-center justify-center py-3">
                             <svg
                                 className="animate-spin h-5 w-5 text-gray-500 mr-2"
@@ -384,11 +387,11 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             }}
                         >
                             <option value="">
-                                {!date || !userTimezone || !selectedDuration
-                                    ? trad("calendar.appointment.selectLessonAndDuration")
+                                {!date || !selectedTimezone || !selectedDuration
+                                    ? "Veuillez d'abord sélectionner une matière et une durée"
                                     : timeSlots.length === 0
-                                      ? trad("calendar.appointment.noAvailableSlots")
-                                      : trad("calendar.appointment.selectHour")}
+                                      ? "Aucun créneau disponible pour cette configuration"
+                                      : "Sélectionnez un horaire"}
                             </option>
                             {timeSlots.map((slot) => (
                                 <option key={slot} value={slot}>

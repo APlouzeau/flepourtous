@@ -20,7 +20,7 @@ export default function ResetPasswordForm() {
         }));
     };
 
-    const handlePasswordChange = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handlePasswordChange = async (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         setIsLoading(true);
@@ -49,7 +49,7 @@ export default function ResetPasswordForm() {
     // Affichage de succès
     if (success) {
         return (
-            <div className="w-full">
+            <div className="w-full p-6">
                 <div className="text-center mb-6 sm:mb-8">
                     <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2">
                         Mot de passe modifié !
@@ -70,7 +70,7 @@ export default function ResetPasswordForm() {
     }
 
     return (
-        <div className="w-full">
+        <div className="w-full p-6">
             <div className="text-center mb-6 sm:mb-8">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-2">Nouveau mot de passe</h2>
                 <p className="text-sm sm:text-base text-gray-600">Choisissez un nouveau mot de passe sécurisé</p>

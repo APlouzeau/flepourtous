@@ -1,22 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation"; // ← useParams de next/navigation, pas next-intl
+import { useSlugStore } from "@/store/useSlugStore"; // 👈 nécessaire pour les slugs traduits
 
 export default function LanguageSelector() {
     const pathname = usePathname();
     const router = useRouter();
     const params = useParams();
-    const [currentLocale, setCurrentLocale] = useState<string>("fr");
+    const slugs = useSlugStore((state) => state.slugs);
 
-    useEffect(() => {
-        const locale = params?.locale as string;
-        if (locale === "en" || locale === "fr" || locale === "ja") {
-            setCurrentLocale(locale);
-        }
-    }, [params]);
+    const locale = params?.locale as string;
 
     useEffect(() => {
         const savedPosition = sessionStorage.getItem("scrollPosition");
@@ -28,10 +24,12 @@ export default function LanguageSelector() {
 
     const handleLanguageChange = (langCode: string) => {
         sessionStorage.setItem("scrollPosition", window.scrollY.toString());
-        // ✅ On passe params pour résoudre le [slug] dynamique
+        // Traduit le slug (params.slug) dans la nouvelle langue si disponible, sinon le conserve tel quel
+        const translatedSlug = slugs[langCode];
+        const newParams = translatedSlug ? { ...params, slug: translatedSlug } : params;
         router.replace(
             // @ts-expect-error — params correspond toujours au pathname actuel
-            { pathname, params },
+            { pathname, params: newParams },
             { locale: langCode },
         );
     };
@@ -42,13 +40,13 @@ export default function LanguageSelector() {
         { code: "ja", name: "日本語", flag: "/images/flag/japan.png" },
     ];
 
-    const currentLanguage = languages.find((lang) => lang.code === currentLocale) || languages[0];
+    const currentLanguage = languages.find((lang) => lang.code === locale) || languages[0];
 
     return (
         <div className="relative group">
             <button className="flex items-center space-x-2 text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base">
                 <div className="bg-color-white w-full h-full">
-                    <Image src={currentLanguage.flag} alt={currentLanguage.name} width={36} height={24} />
+                    <Image src={currentLanguage.flag} alt={currentLanguage.name} width={24} height={24} />
                 </div>
                 <span className="hidden xl:inline">{currentLanguage.name}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +61,7 @@ export default function LanguageSelector() {
                             key={lang.code}
                             onClick={() => handleLanguageChange(lang.code)}
                             className={`flex items-center space-x-2 px-4 py-2 text-gray-800 hover:bg-red-50 hover:text-red-600 transition-colors w-full text-left ${
-                                currentLocale === lang.code ? "bg-red-50 text-red-600 font-semibold" : ""
+                                locale === lang.code ? "bg-red-50 text-red-600 font-semibold" : ""
                             }`}
                         >
                             <Image alt={lang.name} src={lang.flag} width={24} height={18} />

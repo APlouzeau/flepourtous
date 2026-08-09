@@ -50,12 +50,10 @@ class ModelEvent extends  ClassDatabase
         AND lt.locale = :locale');
         $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
         $req->bindValue(':locale', $locale, PDO::PARAM_STR);
-        $this->controllerError->debug("Exécution de la requête pour récupérer les événements de l'utilisateur avec ID: $idUser et locale: $locale");
-        $this->controllerError->debug("Requête SQL: " . $req->queryString);
         $req->execute();
         $datas = $req->fetchAll();
         if (count($datas) == 0) {
-            $events = [];
+            return $events = [];
         } else {
             foreach ($datas as $data) {
                 $events[] = [
@@ -180,7 +178,8 @@ class ModelEvent extends  ClassDatabase
     public function getAllEvents()
     {
         $req = $this->conn->prepare('
-            SELECT e.id_event, e.description, e.duration, e.status, e.visio_link, u.first_name, u.last_name, e.start_date_time, lt.title FROM events e
+            SELECT e.id_event, e.description, e.duration, e.status, e.visio_link, u.first_name, u.last_name, e.start_date_time, lt.title 
+            FROM events e
             INNER JOIN users u ON e.user_id = u.id_user
             INNER JOIN lessons l ON e.id_lesson = l.id_lesson
             INNER JOIN lesson_translations lt ON l.id_lesson = lt.id_lesson
