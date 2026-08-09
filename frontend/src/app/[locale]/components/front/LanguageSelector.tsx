@@ -46,7 +46,7 @@ export default function LanguageSelector() {
         <div className="relative group">
             <button className="flex items-center space-x-2 text-white hover:text-gray-200 transition-colors font-medium text-sm xl:text-base">
                 <div className="bg-color-white w-full h-full">
-                    <Image src={currentLanguage.flag} alt={currentLanguage.name} width={36} height={24} />
+                    <Image src={currentLanguage.flag} alt={currentLanguage.name} width={24} height={24} />
                 </div>
                 <span className="hidden xl:inline">{currentLanguage.name}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
