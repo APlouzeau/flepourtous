@@ -12,9 +12,9 @@ FlePourTous is a web application that allows users to book online French as a Fo
 
 Ensure you have the following tools installed:
 
--   [Docker](https://www.docker.com/products/docker-desktop/) & Docker Compose
--   [Git](https://git-scm.com/)
--   [Make](https://www.gnu.org/software/make/) (optional but recommended)
+- [Docker](https://www.docker.com/products/docker-desktop/) & Docker Compose
+- [Git](https://git-scm.com/)
+- [Make](https://www.gnu.org/software/make/) (optional but recommended)
 
 > **Windows Users**: We **strongly recommend** using [WSL2 for significantly better performance](#-windows-users-wsl2-setup-recommended) (5-10x faster builds and development experience).
 >
@@ -39,10 +39,10 @@ That's it! 🎉 Your development environment is ready.
 
 After `make first-install` completes successfully:
 
--   **Frontend**: [http://localhost:3000](http://localhost:3000) ⭐
--   **Backend API**: [http://localhost:8000](http://localhost:8000)
--   **PhpMyAdmin**: [http://localhost:8081](http://localhost:8081) 🗄️
--   **Database**: `localhost:3307` (for external connections)
+- **Frontend**: [http://localhost:3000](http://localhost:3000) ⭐
+- **Backend API**: [http://localhost:8000](http://localhost:8000)
+- **PhpMyAdmin**: [http://localhost:8081](http://localhost:8081) 🗄️
+- **Database**: `localhost:3307` (for external connections)
 
 ### Available Commands
 
@@ -156,8 +156,8 @@ STRIPE_SECRET_KEY=your_stripe_key
 
 For Google Calendar integration, add these files:
 
--   `backend/config/credentials.json` - Google OAuth credentials
--   `backend/config/service-account-key.json` - Service account key
+- `backend/config/credentials.json` - Google OAuth credentials
+- `backend/config/service-account-key.json` - Service account key
 
 ### Docker Network Setup
 
@@ -180,10 +180,10 @@ For Windows users, we **strongly recommend** using WSL2 for significantly better
 
 Docker on Windows native can be **5-10x slower** than WSL2, especially for:
 
--   Build times (minutes vs seconds)
--   File system operations
--   Hot reload responsiveness
--   Overall development workflow
+- Build times (minutes vs seconds)
+- File system operations
+- Hot reload responsiveness
+- Overall development workflow
 
 ### Complete WSL2 Setup Guide
 
@@ -230,10 +230,10 @@ make first-install
 
 #### 5. Access Your Application
 
--   **Frontend**: [http://localhost:3000](http://localhost:3000)
--   **Backend**: [http://localhost:8000](http://localhost:8000)
--   **PhpMyAdmin**: [http://localhost:8081](http://localhost:8081)
--   **Database**: `localhost:3307`
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Backend**: [http://localhost:8000](http://localhost:8000)
+- **PhpMyAdmin**: [http://localhost:8081](http://localhost:8081)
+- **Database**: `localhost:3307`
 
 ### WSL2 Performance Benefits
 
@@ -247,10 +247,10 @@ make first-install
 
 ### WSL2 Tips
 
--   **File location**: Keep your project files in WSL filesystem (`/home/username/`) for best performance
--   **RAM usage**: WSL2 uses RAM more efficiently than Docker Desktop alone
--   **Git credentials**: May need to set up Git credentials in WSL separately
--   **VS Code**: Use "Open Folder in WSL" for full integration
+- **File location**: Keep your project files in WSL filesystem (`/home/username/`) for best performance
+- **RAM usage**: WSL2 uses RAM more efficiently than Docker Desktop alone
+- **Git credentials**: May need to set up Git credentials in WSL separately
+- **VS Code**: Use "Open Folder in WSL" for full integration
 
 ---
 
@@ -279,17 +279,17 @@ cp backend/.env.example backend/.env
 
 **Important**: Edit `backend/.env` and fill in the required values, especially:
 
--   `MAIL_USERNAME` and `MAIL_PASSWORD` for email functionality (remember to quote passwords with spaces: `MAIL_PASSWORD="your password"`)
--   `STRIPE_SECRET_KEY` for payment processing
--   `GOOGLE_CALENDAR_ID` and `GOOGLE_TOKEN` for calendar integration
--   Database credentials (defaults should work for development)
+- `MAIL_USERNAME` and `MAIL_PASSWORD` for email functionality (remember to quote passwords with spaces: `MAIL_PASSWORD="your password"`)
+- `STRIPE_SECRET_KEY` for payment processing
+- `GOOGLE_CALENDAR_ID` and `GOOGLE_TOKEN` for calendar integration
+- Database credentials (defaults should work for development)
 
 #### Google Service Account Files (Required for Calendar Features)
 
 Add the following files to `backend/config/`:
 
--   `service-account-key.json` - Google service account credentials for calendar API
--   `credentials.json` - Google OAuth credentials
+- `service-account-key.json` - Google service account credentials for calendar API
+- `credentials.json` - Google OAuth credentials
 
 These files are required for the Google Calendar integration features.
 
@@ -303,9 +303,9 @@ cp frontend/.env.example frontend/.env
 
 **Important**: Edit `frontend/.env` and configure:
 
--   `NEXT_PUBLIC_API_URL` - Backend API URL (default: http://localhost:8000)
--   `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` - Stripe public key for payments
--   `JWT_SECRET` - JWT secret for authentication (should match backend)
+- `NEXT_PUBLIC_API_URL` - Backend API URL (default: http://localhost:8000)
+- `NEXT_PUBLIC_STRIPE_PUBLIC_KEY` - Stripe public key for payments
+- `JWT_SECRET` - JWT secret for authentication (should match backend)
 
 ### 3. Launch the Environment
 
@@ -338,13 +338,13 @@ The first time you run this, it may take a few minutes to download the base imag
 
 Your development environment is now accessible:
 
--   **Frontend (Next.js)**: [http://localhost:3000](http://localhost:3000)
--   **Backend (PHP API)**: [http://localhost:8000](http://localhost:8000)
--   **DB Management (PhpMyAdmin)**: [http://localhost:8081](http://localhost:8081)
--   **Database (Direct Connection)**: `localhost:3307`
-    -   Server: `db` (from containers) or `localhost:3307` (from host)
-    -   Username: `flepourtous`
-    -   Password: `1234`
+- **Frontend (Next.js)**: [http://localhost:3000](http://localhost:3000)
+- **Backend (PHP API)**: [http://localhost:8000](http://localhost:8000)
+- **DB Management (PhpMyAdmin)**: [http://localhost:8081](http://localhost:8081)
+- **Database (Direct Connection)**: `localhost:3307`
+    - Server: `db` (from containers) or `localhost:3307` (from host)
+    - Username: `flepourtous`
+    - Password: `1234`
 
 ## Development Workflow
 
@@ -406,13 +406,13 @@ Before running the project, ensure you have:
 
 ✅ **Backend**:
 
--   `backend/.env` (from `.env.example`)
--   `backend/config/service-account-key.json`
--   `backend/config/credentials.json`
+- `backend/.env` (from `.env.example`)
+- `backend/config/service-account-key.json`
+- `backend/config/credentials.json`
 
 ✅ **Frontend**:
 
--   `frontend/.env` (from `.env.example`) - recommended for full functionality
+- `frontend/.env` (from `.env.example`) - recommended for full functionality
 
 ## Troubleshooting
 
@@ -430,9 +430,9 @@ docker compose down && docker compose up -d
 
 If you see parsing errors like "Failed to parse dotenv file", check your `.env` file for:
 
--   **Passwords with spaces**: Must be quoted (`MAIL_PASSWORD="your password"`)
--   **Special characters**: May need quoting or escaping
--   **No empty lines**: Between variable definitions
+- **Passwords with spaces**: Must be quoted (`MAIL_PASSWORD="your password"`)
+- **Special characters**: May need quoting or escaping
+- **No empty lines**: Between variable definitions
 
 ### Missing Google Service Files
 
@@ -466,9 +466,9 @@ If you're experiencing slow performance:
 
 Our optimized setup installs dependencies during image build for faster startup:
 
--   Dependencies are pre-installed in Docker images
--   Local dependencies are only for IDE support
--   Hot reload works seamlessly
+- Dependencies are pre-installed in Docker images
+- Local dependencies are only for IDE support
+- Hot reload works seamlessly
 
 ### Clean Start
 
@@ -483,18 +483,18 @@ make first-install    # Fresh installation
 
 ### Services
 
--   **Frontend**: Next.js application with TypeScript and Tailwind CSS
--   **Backend**: PHP 8.4 with Apache, using Composer for dependencies
--   **Database**: MariaDB 10.6 with automatic schema import
--   **PhpMyAdmin**: Web interface for database management
+- **Frontend**: Next.js application with TypeScript and Tailwind CSS
+- **Backend**: PHP 8.4 with Apache, using Composer for dependencies
+- **Database**: MariaDB 10.6 with automatic schema import
+- **PhpMyAdmin**: Web interface for database management
 
 ### Optimization Features
 
--   ✅ **Fast Startup**: Dependencies pre-installed in Docker images
--   ✅ **Hot Reload**: Code changes reflected immediately
--   ✅ **IDE Support**: Local dependencies for IntelliSense
--   ✅ **Volume Protection**: Dependencies isolated from host filesystem
--   ✅ **Multi-stage Builds**: Optimized Docker images for dev/prod
+- ✅ **Fast Startup**: Dependencies pre-installed in Docker images
+- ✅ **Hot Reload**: Code changes reflected immediately
+- ✅ **IDE Support**: Local dependencies for IntelliSense
+- ✅ **Volume Protection**: Dependencies isolated from host filesystem
+- ✅ **Multi-stage Builds**: Optimized Docker images for dev/prod
 
 Happy coding! 🚀
 
