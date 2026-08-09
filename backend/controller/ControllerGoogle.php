@@ -1,5 +1,7 @@
 <?php
 
+use config\enum\AppointmentStatus;
+
 require_once APP_PATH . 'vendor/autoload.php';
 class ControllerGoogle
 {
@@ -341,10 +343,10 @@ class ControllerGoogle
 
             if ($userId != $teacherId && $price['price'] != null) {
                 $this->modelUser->addToWallet($userId, $price['price']);
-                $this->modelEvent->updateEventStatus($idEvent, 'Annulé Google - Remboursé');
+                $this->modelEvent->updateEventStatus($idEvent, AppointmentStatus::CANCELLED_GOOGLE_REFUNDED->value);
             } else {
                 error_log("Pas de remboursement (userId=" . $userId . ", teacherId=" . $teacherId . ", price=" . ($price['price'] ?? 'null') . ")");
-                $this->modelEvent->updateEventStatus($idEvent, 'Annulé Google - Non Remboursé');
+                $this->modelEvent->updateEventStatus($idEvent, AppointmentStatus::CANCELLED_GOOGLE_NOT_REFUNDED->value);
             }
         } catch (Exception $e) {
             error_log("Erreur dans markGoogleEventAsCancelled pour l'événement " . $idEvent . ": " . $e->getMessage());

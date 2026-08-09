@@ -207,6 +207,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
     };
 
     const handleConfirmCancel = async () => {
+        console.log("Annulation du rendez-vous avec ID:", cancelModal.eventId, "et code:", cancelModal.code);
         if (!cancelModal.eventId) return;
 
         setCancelModal((prev) => ({ ...prev, isDeleting: true }));

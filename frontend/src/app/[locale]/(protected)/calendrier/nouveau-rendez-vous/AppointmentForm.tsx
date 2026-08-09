@@ -108,7 +108,6 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
         setSuccess(null);
 
         const formData = new FormData(e.currentTarget);
-        console.log("FormData entries:" + selectedLesson?.idLesson);
 
         if (selectedLesson && selectedLesson.idLesson != null) {
             formData.append("idLesson", selectedLesson.idLesson.toString());
@@ -119,7 +118,6 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
             return;
         }
         const response = await registerAppointment(formData);
-        console.log("Response from registerAppointment:", response);
         if (response.code === 1 || response.code === 10) {
             // Garder registering = true jusqu'à la redirection
             router.push("/calendrier/nouveau-rendez-vous/paiement");

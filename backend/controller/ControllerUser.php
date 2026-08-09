@@ -523,7 +523,6 @@ class ControllerUser
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        $this->controllerError->debug("forgetedPassword - Request data", $data);
 
         if ($_SERVER['REQUEST_METHOD'] != 'POST') {
             echo json_encode([
@@ -543,7 +542,6 @@ class ControllerUser
         $modelUser = new ModelUser();
         $userId = $modelUser->checkMail($mail);
         if ($userId) {
-            $this->controllerError->debug("forgetedPassword - User ID found", $userId);
             $verificationToken = hash('sha256', $data['mail'] . CRON_KEY);
             $modelUser->setNewToken($userId, $verificationToken);
 

@@ -50,12 +50,10 @@ class ModelEvent extends  ClassDatabase
         AND lt.locale = :locale');
         $req->bindValue(':idUser', $idUser, PDO::PARAM_INT);
         $req->bindValue(':locale', $locale, PDO::PARAM_STR);
-        $this->controllerError->debug("Exécution de la requête pour récupérer les événements de l'utilisateur avec ID: $idUser et locale: $locale");
-        $this->controllerError->debug("Requête SQL: " . $req->queryString);
         $req->execute();
         $datas = $req->fetchAll();
         if (count($datas) == 0) {
-            $events = [];
+            return $events = [];
         } else {
             foreach ($datas as $data) {
                 $events[] = [

@@ -21,9 +21,7 @@ class ControllerLesson
     {
         $modelLesson = new ModelLesson();
         $slug = urldecode($slug);
-        $this->controllerError->debug("lesson slug", $slug);
         $lesson = $modelLesson->getLessonByName($slug, $locale);
-        $this->controllerError->debug("lessonGetBy8name", $lesson);
         echo json_encode($lesson);
     }
     public function getAllLessonsWithPrices($locale)

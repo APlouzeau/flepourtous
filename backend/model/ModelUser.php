@@ -106,7 +106,6 @@ extends ClassDatabase
 
     public function checkMail(string $mail)
     {
-        $this->controllerError->debug("checkMail - mail", $mail);
         $req = $this->conn->prepare('SELECT id_user FROM users WHERE mail = :mail');
         $req->bindValue(":mail", $mail);
         $req->execute();
@@ -121,7 +120,6 @@ extends ClassDatabase
 
     public function verifyEmail(string $verifyToken)
     {
-        $this->controllerError->debug("verifyEmail - verifyToken", $verifyToken);
         $req = $this->conn->prepare("SELECT id_user FROM users WHERE verify_token = :verify_token");
         $req->bindValue(":verify_token", $verifyToken);
         $req->execute();
@@ -129,7 +127,6 @@ extends ClassDatabase
         if (!$data) {
             return false; // Token invalide
         }
-        $this->controllerError->debug("verifyEmail - User ID found", $data['id_user']);
         $query = "UPDATE users SET is_verified = 1 WHERE verify_token = :verify_token";
         $req = $this->conn->prepare($query);
         $req->bindValue(":verify_token", $verifyToken);
@@ -268,7 +265,6 @@ extends ClassDatabase
 
     public function setNewToken(int $idUser, string $token)
     {
-        $this->controllerError->debug("setNewToken - idUser", $idUser);
         $query = "UPDATE users SET verify_token = :verify_token WHERE id_user = :id_user";
         $req = $this->conn->prepare($query);
         $req->bindValue(":verify_token", $token, PDO::PARAM_STR);

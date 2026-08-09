@@ -17,7 +17,6 @@ export async function registerAppointment(formData: FormData) {
         id_lesson: formData.get("idLesson"),
     };
 
-    console.log("Received form data:", data);
     try {
         const response = await apiClient.post("/api/createEvent", data, {
             headers: {
@@ -26,7 +25,6 @@ export async function registerAppointment(formData: FormData) {
             },
             withCredentials: true,
         });
-        console.log("Registering appointment with data:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error during registration:", error);
@@ -90,6 +88,7 @@ export async function checkDeleteEvent(idEvent: string, code?: number) {
 export async function deleteAppointment(idEvent: string, code: number) {
     const cookie = await getCookieBackend();
     try {
+        console.log("Attempting to delete appointment with ID:", idEvent, "and code:", code);
         const response = await apiClient.post(
             "/api/deleteEvent",
             { idEvent, code },

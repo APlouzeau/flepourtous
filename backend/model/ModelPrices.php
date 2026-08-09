@@ -110,12 +110,13 @@ class ModelPrices extends  ClassDatabase
     public function getPriceByEventId(string $idEvent)
     {
         $req = $this->conn->prepare('
-            SELECT e.id_event, l.title, p.price
+            SELECT e.id_event, lt.title, p.price
             FROM events e
             INNER JOIN lessons l ON l.id_lesson = e.id_lesson
             INNER JOIN lesson_prices lp ON lp.id_lesson = l.id_lesson
             INNER JOIN prices p ON p.id_price = lp.id_price
             INNER JOIN durations d ON d.id_duration = lp.id_duration
+            INNER JOIN lesson_translations lt ON lt.id_lesson = l.id_lesson
             WHERE e.id_event = :id_event AND e.duration = d.duration
         ');
         $req->execute([':id_event' => $idEvent]);
