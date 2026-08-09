@@ -4,6 +4,7 @@ import apiClient from "@/lib/axios";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { useState } from "react";
+import { SubmitEventHandler } from "react";
 import Button from "../../components/front/Button";
 import ShowPassword from "@/app/[locale]/components/front/showPassword";
 import { useTranslations } from "@/locales/client";
@@ -17,7 +18,7 @@ export default function LoginForm() {
     const isValidForm = mail && password;
     const trad = useTranslations();
 
-    const handleSubmit = async (e: SubmitEvent) => {
+    const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         await apiClient

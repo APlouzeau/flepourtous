@@ -4,14 +4,14 @@ FROM node:24-alpine3.24 AS base
 
 WORKDIR /app
 
-# Installation de pnpm (version figée pour éviter les changements de comportement inattendus)
-RUN npm install -g pnpm@10.34.5
+# Installation de pnpm (version figée, doit rester synchro avec "packageManager" dans package.json)
+RUN npm install -g pnpm@11.21.0
 
 # --- DEV-DEPENDENCIES
 # A target that'll have dev-dependencies installed
 FROM base AS dev-dependencies
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 RUN pnpm install
 

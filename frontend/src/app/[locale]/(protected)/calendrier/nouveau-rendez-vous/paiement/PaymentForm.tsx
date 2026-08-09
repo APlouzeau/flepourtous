@@ -81,13 +81,13 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
             // Paiement Stripe - vérifier le clientSecret
             if (!response.data || response.data.error || !response.data.clientSecret) {
                 console.error("[PaymentForm] fetchClientSecret: Erreur backend ou clientSecret manquant:", data?.error);
-                setStripeUserError(trad("payments.errorMessage"));
+                setAsyncStripeError(trad("payments.errorMessage"));
                 return "";
             }
             return response.data.clientSecret;
         } catch (error) {
             console.error("[PaymentForm] fetchClientSecret: Erreur pendant l'appel Axios:", error);
-            setStripeUserError(trad("payments.errorMessage"));
+            setAsyncStripeError(trad("payments.errorMessage"));
             return "";
         }
     }, [cookie, router, trad]);

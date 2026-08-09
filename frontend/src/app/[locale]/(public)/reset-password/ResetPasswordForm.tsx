@@ -2,7 +2,7 @@
 import Button from "@/app/[locale]/components/front/Button";
 import { resetPassword } from "@/lib/password";
 import Link from "next/link";
-import { useState } from "react";
+import { SubmitEventHandler, useState } from "react";
 
 export default function ResetPasswordForm() {
     const [error, setError] = useState("");
@@ -20,7 +20,7 @@ export default function ResetPasswordForm() {
         }));
     };
 
-    const handlePasswordChange = async (e: SubmitEvent<HTMLFormElement>) => {
+    const handlePasswordChange: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
 
         setIsLoading(true);
