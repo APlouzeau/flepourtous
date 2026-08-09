@@ -34,6 +34,13 @@
         "tailwindcss-animate": "^1.0.7",
         "zustand": "^5.0.8"
     },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "@parcel/watcher",
+            "@swc/core",
+            "sharp"
+        ]
+    },
     "devDependencies": {
         "@next/eslint-plugin-next": "16.2.11",
         "@types/node": "^20.19.13",
