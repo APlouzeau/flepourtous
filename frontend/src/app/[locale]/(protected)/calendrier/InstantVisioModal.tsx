@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { SubmitEventHandler, useState } from "react";
 import { Button } from "@/components/ui/button";
 import apiClient from "@/lib/axios";
 
@@ -15,7 +15,7 @@ export default function InstantVisioModal({ isOpen, onClose }: InstantVisioModal
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const handleSubmit = async (e: SubmitEvent) => {
+    const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         setIsLoading(true);
         setError("");

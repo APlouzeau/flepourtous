@@ -1,5 +1,5 @@
 import Button from "@/app/[locale]/components/front/Button";
-import { useState } from "react";
+import { SubmitEventHandler, useState } from "react";
 import { changeUserPassword } from "./profileAction";
 import { useTranslations } from "@/locales/client";
 
@@ -15,7 +15,7 @@ export function PasswordModify() {
     });
     const trad = useTranslations();
 
-    const handlePasswordChange = async (e: SubmitEvent<HTMLFormElement>) => {
+    const handlePasswordChange: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault(); // Empêche le rechargement de la page
 
         try {

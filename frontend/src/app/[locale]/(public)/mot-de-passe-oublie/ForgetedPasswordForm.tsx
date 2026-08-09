@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { SubmitEventHandler, useState } from "react";
 import Button from "@/app/[locale]/components/front/Button";
 import { forgetedPassword } from "@/lib/password";
 
@@ -10,7 +10,7 @@ export default function ForgetedPasswordForm() {
     const isValidForm = mail.trim() !== "" && mail.includes("@");
     const [emailSent, setEmailSent] = useState(false);
 
-    function handleSubmit(e: SubmitEvent): void {
+    const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
         if (!isValidForm) return;
         setIsLoading(true);
@@ -25,7 +25,7 @@ export default function ForgetedPasswordForm() {
             .finally(() => {
                 setIsLoading(false);
             });
-    }
+    };
 
     if (emailSent) {
         return (
