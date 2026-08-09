@@ -404,6 +404,10 @@ class ControllerCalendar
             $this->modelUser->addToWallet($event['userId'], $lessonPrice['price']);
             $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], AppointmentStatus::CANCELLED_ADMIN->value);
         }
+
+        $this->controllerVisio->deleteRoom($data['idEvent']);
+        $this->modelEvent->deleteVisioLink($data['idEvent']);
+
         $this->controllerMail->sendMailToAlertEventDelete($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price'], $invoiced);
         $this->controllerMail->sendMailToAlertEventDeleteByUser($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price'], $invoiced);
 
