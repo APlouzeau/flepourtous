@@ -36,7 +36,12 @@ export default function RegisterPage() {
             })
             .then((response) => {
                 if (response.data.code == 1) {
-                    setSuccess(response.data.message);
+                    console.log("Inscription réussie :", response.data);
+                    const messageToggle = trad("profile.auth.accountCreated")
+                        ? trad("profile.auth.accountCreated")
+                        : response.data.message;
+                    console.log("Message à afficher :", messageToggle);
+                    setSuccess(messageToggle);
                 } else {
                     setError(response.data.message);
                     setIsLoading(false);

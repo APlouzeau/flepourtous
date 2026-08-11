@@ -48,7 +48,7 @@ export default function LanguageSelector() {
                 <div className="bg-color-white w-full h-full">
                     <Image src={currentLanguage.flag} alt={currentLanguage.name} width={24} height={24} />
                 </div>
-                <span className="hidden xl:inline">{currentLanguage.name}</span>
+                <span className="hidden xl:inline whitespace-nowrap">{currentLanguage.name}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>

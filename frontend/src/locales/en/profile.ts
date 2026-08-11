@@ -54,6 +54,8 @@ export default {
             forgotPassword: "Forgot password?",
             returnToHome: "Return to home page",
             return: "Return",
+            accountCreated:
+                "Your account has been successfully created! You will receive an email to confirm your account. Please check your inbox and spam folder.",
         },
         alerts: {
             profileUpdateSuccess: "Profile updated successfully !",

@@ -16,22 +16,22 @@ export default {
             title: "学習者のレベルや目的に応じて、私が定期的に使用している書籍をいくつか紹介します。",
             books: [
                 {
-                    title: "Édito",
+                    title: "『Édito』",
                     description:
                         "(ディディエ社): 現在の方法で、フランス語圏の文化を探索しながら一般的なスキルを開発するのに理想的です。",
                 },
                 {
-                    title: "Progressive",
+                    title: "『Progressive』",
                     description:
                         " (CLEインターナショナル社): 文法、語彙、活用、書き/口頭理解などに取り組むレベル別の進歩的な作品。",
                 },
                 {
-                    title: "100% DELF",
+                    title: "『100% DELF』",
                     description:
                         "(ディディエ社): 公式試験と同様の戦略とシナリオを使用して、各 DELF 試験に向けて集中的にトレーニングします。",
                 },
                 {
-                    title: "ABC DELF",
+                    title: "『ABC DELF』",
                     description:
                         "(ナタン社): 明確な説明、方法論的なアドバイス、修正された演習により、DELF 試験の準備を効果的に行うことができます。",
                 },

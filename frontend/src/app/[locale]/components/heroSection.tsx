@@ -12,7 +12,13 @@ export default async function HeroSection() {
                 <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                     <div className="order-2 md:order-1">
                         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">
-                            {trad("homePage.title")}
+                            {trad("homePage.title1")}
+                            <span className="text-xl sm:text-2xl md:text-4xl font-semibold text-gray-900 leading-tight mb-4 sm:mb-6">
+                                {trad("homePage.title2")}
+                            </span>
+                        </h1>
+                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl  font-semibold text-gray-900 leading-tight mb-4 sm:mb-6">
+                            {trad("homePage.title3")}
                         </h1>
                         <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 leading-relaxed">
                             {trad("homePage.subtitle")}

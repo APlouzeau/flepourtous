@@ -55,6 +55,8 @@ export default {
             forgotPassword: "Mot de passe oublié ?",
             returnToHome: "Retour à la page d'accueil",
             return: "Retour",
+            accountCreated:
+                "Votre compte a été créé avec succès ! Vous recevrez un email pour confirmer votre compte. Veuillez vérifier votre boîte de réception et vos spams.",
         },
         alerts: {
             profileUpdateSuccess: "Profil mis à jour avec succès !",

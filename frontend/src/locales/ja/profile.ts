@@ -54,6 +54,8 @@ export default {
             forgotPassword: "パスワードをお忘れですか?",
             returnToHome: "ホームページに戻る",
             return: "戻る",
+            accountCreated:
+                "アカウントが正常に作成されました！アカウントを確認するためのメールが届きます。受信トレイと迷惑メールフォルダを確認してください。",
         },
         alerts: {
             profileUpdateSuccess: "プロフィールが正常に更新されました。",

@@ -1,6 +1,8 @@
 export default {
     homePage: {
-        title: "FlePourTous の Ludivine でフランス語のレベルを向上させましょう",
+        title1: "FlePourTous の Ludivine ",
+        title2: "(リュディヴィーヌ)",
+        title3: "でフランス語のレベルを向上させましょう",
         subtitle:
             "目標を達成するための効果的なメソッドとパーソナライズされたコースを備えたオンラインフランス語コースパートナーである FLE Pour Tous で知識を深めましょう。",
         WhyChooseFleSection: {

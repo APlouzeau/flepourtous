@@ -1,6 +1,8 @@
 export default {
     homePage: {
-        title: "Improve your French skills with Ludivine from FlePourTous",
+        title1: "Improve your French skills with Ludivine from FlePourTous",
+        title2: "",
+        title3: "",
         subtitle:
             "Develop your knowledge with FLE Pour Tous, your online French course partner with effective methods and personalized lessons to achieve your goals.",
         WhyChooseFleSection: {

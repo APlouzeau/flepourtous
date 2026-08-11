@@ -1,6 +1,8 @@
 export default {
     homePage: {
-        title: "Améliorez votre niveau de français avec Ludivine de FlePourTous",
+        title1: "Améliorez votre niveau de français avec Ludivine de FlePourTous",
+        title2: "",
+        title3: "",
         subtitle:
             "Développez vos connaissances avec FLE Pour Tous, votre partenaire de cours de français en ligne avec des méthodes efficaces et des cours personnalisés pour atteindre vos objectifs.",
         WhyChooseFleSection: {
