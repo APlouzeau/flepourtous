@@ -31,9 +31,9 @@ first-install: check-pnpm network ## Installation complète pour nouveau projet
 	@echo "📦 Installation des dépendances frontend avec pnpm..."
 	cd $(FRONTEND_DIR) && pnpm install
 	@echo "🔨 Build des images Docker..."
-	docker compose -f $(COMPOSE_PREPROD_FILE) build
+	docker compose -f $(COMPOSE_DEV_FILE) build
 	@echo "📦 Installation des dépendances backend via Docker..."
-	docker compose -f $(COMPOSE_PREPROD_FILE) run --rm api composer install
+	docker compose -f $(COMPOSE_DEV_FILE) run --rm api composer install
 	make preprod
 
 # Setup pour la préprod
@@ -62,7 +62,7 @@ dependencies-npm: ## Fallback : installe avec npm si problème pnpm
 	docker compose -f $(COMPOSE_FILE) run --rm backend composer install
 
 build: ## Build les images Docker
-	docker compose -f $(COMPOSE_FILE) build
+	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev build
 
 build-preprod: ## Build les images Docker pour préprod
 	docker compose -f $(COMPOSE_PREPROD_FILE) build
@@ -111,7 +111,7 @@ up-preprod: ## Démarre les services préprod (sans rebuild)
 up-staging: ## Démarre les services staging (sans rebuild)
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_STAGING_FILE) up -d
 
-down: ## Arrête tous les services
+down-dev: ## Arrête tous les services
 	docker compose -f $(COMPOSE_FILE) -f $(COMPOSE_DEV_FILE) --profile dev down
 
 down-prod: ## Arrête les services production
@@ -249,3 +249,16 @@ google-tunnel: ## Lance cloudflared tunnel pour le backend
 	@pkill cloudflared 2>/dev/null || true
 	@sleep 1
 	@cloudflared tunnel --url http://localhost:8000
+
+test: ## Lancer les tests unitaires
+	@echo "🧪 Lancement des tests unitaires..."
+	docker exec flepourtous-backend-dev vendor/bin/phpunit
+
+.PHONY: sync-preprod
+sync-preprod:
+	@echo "⚠️  Cette commande va écraser l'historique de la branche preprod avec celui de main."
+	@read -p "Confirmer ? [y/N] " confirm && [ "$$confirm" = "y" ] || exit 1
+	git checkout preprod
+	git reset --hard main
+	git push --force origin preprod
+	@echo "✅ preprod alignée sur main et poussée."

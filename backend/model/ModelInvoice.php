@@ -6,16 +6,16 @@ class ModelInvoice extends ClassDatabase
 {
     public function getInvoices($filtersToSql)
     {
-        $req = $this->conn->prepare('SELECT * FROM event WHERE ' . $filtersToSql['where']);
+        $req = $this->conn->prepare('SELECT * FROM events WHERE ' . $filtersToSql['where']);
 
         $req->execute($filtersToSql['params']);
         $datas = $req->fetchAll();
         $result = [];
         foreach ($datas as $data) {
             $result[] = [
-                'idEvent' => $data['idEvent'],
-                'userId' => $data['userId'],
-                'startDateTime' => $data['startDateTime'],
+                'idEvent' => $data['id_event'],
+                'userId' => $data['user_id'],
+                'startDateTime' => $data['start_date_time'],
                 'status' => $data['status'],
                 'isInvoiced' => $data['is_invoiced'],
                 'duration' => $data['duration']
@@ -26,9 +26,9 @@ class ModelInvoice extends ClassDatabase
 
     public function setInvoiced(string $idEvent)
     {
-        $sql = "UPDATE event SET is_invoiced = 1 WHERE idEvent = :idEvent";
+        $sql = "UPDATE events SET is_invoiced = 1 WHERE id_event = :id_event";
         $req = $this->conn->prepare($sql);
-        $req->bindValue(':idEvent', $idEvent, PDO::PARAM_STR);
+        $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
         if ($req->execute()) {
             return true;
         }

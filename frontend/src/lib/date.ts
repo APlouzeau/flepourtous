@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
-export function formatDateInUserTimezone(utcDateTimeString: string | undefined, userTimezone: string | undefined) {
+export function formatDateInUserTimezone(
+    utcDateTimeString: string | undefined,
+    userTimezone: string | undefined,
+    locale: string = "fr-FR",
+) {
     if (!utcDateTimeString || !userTimezone) {
         return { date: "Chargement...", time: "" };
     }
+
     try {
         const isoUtcString = utcDateTimeString.includes("T")
             ? utcDateTimeString
@@ -14,13 +19,13 @@ export function formatDateInUserTimezone(utcDateTimeString: string | undefined, 
             return { date: "Date invalide", time: "" };
         }
 
-        const formattedDate = dateObj.toLocaleDateString(undefined, {
+        const formattedDate = dateObj.toLocaleDateString(locale, {
             timeZone: userTimezone,
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
         });
-        const formattedTime = dateObj.toLocaleTimeString(undefined, {
+        const formattedTime = dateObj.toLocaleTimeString(locale, {
             timeZone: userTimezone,
             hour: "2-digit",
             minute: "2-digit",
@@ -33,21 +38,20 @@ export function formatDateInUserTimezone(utcDateTimeString: string | undefined, 
     }
 }
 
+function subscribe() {
+    // Le fuseau horaire ne change pas en cours de session, donc pas de vrai événement à écouter
+    return () => {};
+}
+
+function getSnapshot() {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+}
+
+function getServerSnapshot() {
+    return "UTC"; // valeur de repli pendant le rendu serveur
+}
+
 export function useUserTimezone() {
-    const [userTimezone, setUserTimezone] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        try {
-            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            setUserTimezone(timezone);
-        } catch (error) {
-            console.error("Error detecting user timezone:", error);
-            setUserTimezone("UTC");
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
-
-    return { userTimezone, isLoading };
+    const userTimezone = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+    return { userTimezone, isLoading: false };
 }

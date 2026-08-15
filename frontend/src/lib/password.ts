@@ -8,16 +8,13 @@ export async function forgetedPassword(mail: string) {
             headers: {
                 "Content-Type": "application/json",
             },
-        }
+        },
     );
-    if (response.data.code !== 0) {
-        throw new Error(
-            response.data.message || "Une erreur est survenue lors de la réinitialisation du mot de passe."
-        );
+    if (response.data.code == 0) {
+        throw new Error(response.data || "Une erreur est survenue lors de la réinitialisation du mot de passe.");
     }
     return response.data;
 }
-
 
 export async function resetPassword(newPassword: string, confirmNewPassword: string) {
     const response = await apiClient.post(
@@ -27,7 +24,7 @@ export async function resetPassword(newPassword: string, confirmNewPassword: str
             headers: {
                 "Content-Type": "application/json",
             },
-        }
+        },
     );
     return response.data;
 }

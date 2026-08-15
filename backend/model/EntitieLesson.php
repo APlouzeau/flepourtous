@@ -3,11 +3,7 @@
 class EntitieLesson
 {
     private int $idLesson;
-    private string $title;
-    private string $shortDescription;
-    private string $fullDescription;
-    private ?string $imagePath;
-    private int $slug;
+    private string $imagePath;
 
     public function __construct(array $data)
     {
@@ -24,122 +20,23 @@ class EntitieLesson
         }
     }
 
-    /**
-     * Get the value of id
-     */
-    public function getIdLesson()
+    public function getIdLesson(): int
     {
         return $this->idLesson;
     }
 
-    /**
-     * Set the value of id
-     *
-     * @return  self
-     */
-    public function setIdLesson($idLesson)
+    public function setIdLesson(int $idLesson): void
     {
         $this->idLesson = $idLesson;
-
-        return $this;
     }
 
-    /**
-     * Get the value of title
-     */
-    public function getTitle()
-    {
-        return $this->title;
-    }
-
-    /**
-     * Set the value of title
-     *
-     * @return  self
-     */
-    public function setTitle($title)
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of shortDescription
-     */
-    public function getShortDescription()
-    {
-        return $this->shortDescription;
-    }
-
-    /**
-     * Set the value of shortDescription
-     *
-     * @return  self
-     */
-    public function setShortDescription($shortDescription)
-    {
-        $this->shortDescription = $shortDescription;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of fullDescription
-     */
-    public function getFullDescription()
-    {
-        return $this->fullDescription;
-    }
-
-    /**
-     * Set the value of fullDescription
-     *
-     * @return  self
-     */
-    public function setFullDescription($fullDescription)
-    {
-        $this->fullDescription = $fullDescription;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of imagePath
-     */
-    public function getImagePath()
+    public function getImagePath(): string
     {
         return $this->imagePath;
     }
 
-    /**
-     * Set the value of imagePath
-     *
-     * @return  self
-     */
-    public function setImagePath($imagePath)
+    public function setImagePath(string $imagePath): void
     {
         $this->imagePath = $imagePath;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of slug
-     */
-    public function getSlug()
-    {
-        return $this->slug;
-    }
-    /**
-     * Set the value of slug
-     *
-     * @return  self
-     */
-    public function setSlug($slug)
-    {
-        $this->slug = $slug;
-
-        return $this;
     }
 }

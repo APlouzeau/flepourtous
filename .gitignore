@@ -74,6 +74,7 @@ githubaction.yml
 
 #cron
 renew_google_watch.sh
+handle_notification.sh
 sendAlertMail.sh
 switchDevFlepourtous.sh
 switchStartFlepourtous.sh
@@ -92,4 +93,4 @@ flepourtous-prod.sql
 #logs
 logs/
 
-
+./pnpm-store
