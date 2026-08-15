@@ -1,2 +1,6 @@
 ignoredBuiltDependencies:
   - '@clerk/shared'
+
+allowBuilds:
+  sharp: true
+  unrs-resolver: true

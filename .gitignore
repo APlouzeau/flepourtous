@@ -40,6 +40,7 @@ yarn-error.log*
 /**/*:Zone.Identifier
 # Ajoute cette ligne pour le backend
 /backend/.env
+/backend/.env.old
 
 # typescript
 *.tsbuildinfo
@@ -80,6 +81,9 @@ switchStartFlepourtous.sh
 #docker
 db_data
 
+#db
+backup-db/
+
 flepourtous.zip
 Flepourtous.zip.env.staging
 
@@ -87,3 +91,5 @@ flepourtous-prod.sql
 
 #logs
 logs/
+
+
