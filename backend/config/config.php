@@ -13,6 +13,9 @@ define("DB_PSW", getenv('DB_PSW'));
 define("DB_PORT", getenv('DB_PORT'));
 
 define("GOOGLE_CALENDAR_ID", getenv('GOOGLE_CALENDAR_ID'));
+define("GOOGLE_PERSONAL_CALENDAR_ID", getenv('GOOGLE_PERSONAL_CALENDAR_ID'));
+define("GOOGLE_PREPLY_CALENDAR_ID", getenv('GOOGLE_PREPLY_CALENDAR_ID'));
+define("GOOGLE_ITALKI_CALENDAR_ID", getenv('GOOGLE_ITALKI_CALENDAR_ID'));
 define("GOOGLE_TOKEN", getenv('GOOGLE_TOKEN'));
 
 define("VISIO_API_KEY", getenv('VISIO_API_KEY'));

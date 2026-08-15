@@ -3,6 +3,7 @@ name: flepourtous-prod
 services:
   api:
     container_name: flepourtous-backend-prod
+    restart: unless-stopped
     build:
       context: ./backend
       target: prod
@@ -24,6 +25,7 @@ services:
 
   app:
     container_name: flepourtous-frontend-prod
+    restart: unless-stopped
     build:
       context: ./frontend
       dockerfile: dockerfile

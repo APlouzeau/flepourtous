@@ -366,12 +366,31 @@ class ControllerGoogle
             $freebusyQuery = new Google\Service\Calendar\FreeBusyRequest();
             $freebusyQuery->setTimeMin($startDateTimeGoogle);
             $freebusyQuery->setTimeMax($endDateTimeGoogle);
-            $freebusyQuery->setItems([['id' => $calendarId]]);
+            $freebusyQuery->setItems([
+                ['id' => $calendarId],
+                ['id' => GOOGLE_PERSONAL_CALENDAR_ID],
+                ['id' => GOOGLE_PREPLY_CALENDAR_ID],
+                ['id' => GOOGLE_ITALKI_CALENDAR_ID],
+            ]);
 
             $freebusyResponse = $service->freebusy->query($freebusyQuery);
             $calendarsData = $freebusyResponse->getCalendars();
-            $calendarSpecificData = $calendarsData[$calendarId];
-            $busySlots = $calendarSpecificData->getBusy();
+
+            $calendarIds = [
+            $calendarId,
+            GOOGLE_PERSONAL_CALENDAR_ID,
+            GOOGLE_PREPLY_CALENDAR_ID,
+            GOOGLE_ITALKI_CALENDAR_ID,
+            ];
+                            
+            $busySlots = [];
+            foreach ($calendarIds as $id) {
+                if (isset($calendarsData[$id])) {
+                    $busySlots = array_merge($busySlots, $calendarsData[$id]->getBusy());
+                } else {
+                    error_log("Pas de données freebusy pour l'agenda $id");
+                }
+            }
 
             return $busySlots;
         } catch (Exception $e) {
