@@ -3,6 +3,13 @@
 
 class ControllerLesson
 {
+    private $controllerError;
+
+    public function __construct()
+    {
+        $this->controllerError = new ControllerError();
+    }
+
     public function getAllLessons()
     {
         $modelLesson = new ModelLesson();
@@ -10,17 +17,24 @@ class ControllerLesson
         echo json_encode($lessons);
     }
 
-    public function getLessonByName($slug)
+    public function getLessonByName($slug, $locale)
     {
         $modelLesson = new ModelLesson();
-        $lesson = $modelLesson->getLessonByName($slug);
+        $slug = urldecode($slug);
+        $lesson = $modelLesson->getLessonByName($slug, $locale);
         echo json_encode($lesson);
     }
-    public function getAllLessonsWithPrices()
+    public function getAllLessonsWithPrices($locale)
     {
-
         $modelLesson = new ModelLesson();
-        $lessons = $modelLesson->getAllLessonsWithPrices();
+        $lessons = $modelLesson->getAllLessonsWithPrices($locale);
         echo json_encode(array_values($lessons));
+    }
+
+    public function getSlugsByLocale($locale)
+    {
+        $modelLesson = new ModelLesson();
+        $slugs = $modelLesson->getSlugsByLocale($locale);
+        echo json_encode($slugs);
     }
 }

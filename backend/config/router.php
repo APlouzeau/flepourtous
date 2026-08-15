@@ -25,8 +25,9 @@ $router->addRoute("POST", "/api/resetPassword", "ControllerUser", "resetPassword
 
 //Lessons
 $router->addRoute("GET", "/api/lessons", "ControllerLesson", "getAllLessons");
-$router->addRoute("GET", "/api/offre-de-cours/{slug}", "ControllerLesson", "getLessonByName");
-$router->addRoute("POST", "/api/getAllLessonsWithPrices", "ControllerLesson", "getAllLessonsWithPrices");
+$router->addRoute("GET", "/api/offre-de-cours/{slug}/{locale}", "ControllerLesson", "getLessonByName");
+$router->addRoute("POST", "/api/getAllLessonsWithPrices/{locale}", "ControllerLesson", "getAllLessonsWithPrices");
+$router->addRoute("GET", "/api/getSlugs/{locale}", "ControllerLesson", "getSlugsByLocale");
 
 //Events
 $router->addRoute("POST", "/api/createEvent", "ControllerCalendar", "createEvent");

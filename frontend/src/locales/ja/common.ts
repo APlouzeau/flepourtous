@@ -1,0 +1,47 @@
+export default {
+    common: {
+        buttons: {
+            contactUs: "お問い合わせ",
+            register: "碑文",
+            login: "接続",
+            profile: "プロフィール",
+            calendar: "カレンダー",
+            logout: "切断する",
+            makeAppointment: "予約をする",
+            newAppointment: "新しい予定",
+            pack: "パック",
+            learnMore: "もっと詳しく知る",
+            joinUs: "参加しませんか",
+            inscriptionToReserve: "登録して予約する",
+            showPrices: "価格を見る",
+            reserveThisCourse: "このコースを予約する",
+            reserveNewCourse: "新しいコースを予約する",
+            chooseYourSlot: "理想的なスロットを選択し、数回クリックするだけでコースを予約します。",
+            save: "保存",
+            cancel: "キャンセル",
+            modify: "修正",
+            pay: "支払う",
+            commandPack: "パックを注文する",
+        },
+        prices: {
+            from: "から",
+            mn: "分",
+            for: "のために",
+        },
+        stats: {
+            students: "800+",
+            studentsString: "学生",
+            courses: "2000+",
+            coursesString: "コース",
+            experience: "8+",
+            years: "長年の経験",
+            yearsString: " 年",
+        },
+        miscellaneous: {
+            notProvided: "未提供",
+        },
+        alerts: {
+            isSaving: "保存中...",
+        },
+    },
+} as const;

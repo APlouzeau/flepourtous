@@ -29,7 +29,7 @@ class ClassRouter
                 '/\{([a-zA-Z0-9_]+)\}/', // Capture le nom du placeholder dans $match[1]
                 function ($match) use (&$paramNames) {
                     $paramNames[] = $match[1]; // Stocke le nom du paramètre (ex: 'token')
-                    return '([a-zA-Z0-9_-]+)';    // Le pattern de capture regex
+                    return '([^/]+)';     // Le pattern de capture regex
                 },
                 $route['path']
             );

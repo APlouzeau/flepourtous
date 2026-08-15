@@ -16,7 +16,7 @@ class EntitieUser
     private ?string $city;
 
     private ?string $country;
-    private string $dateInscription;
+    private string $createdAt;
     private int $isVerified;
     private string $verifyToken;
     private float $wallet;
@@ -171,16 +171,17 @@ class EntitieUser
 
         return $this;
     }
-    public function getDateInscription()
+    public function getCreatedAt()
     {
-        return $this->dateInscription;
+        return $this->createdAt;
     }
-    public function setDateInscription($dateInscription)
+    public function setCreatedAt($createdAt)
     {
-        $this->dateInscription = $dateInscription;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
+
 
     /**
      * Get the value of isVerified

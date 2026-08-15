@@ -201,7 +201,7 @@ class ControllerMail
 
             $emailBody = "Bonjour " . ",<br><br>";
             $emailBody .= "Nous avons reçu une demande de réinitialisation de votre mot de passe. Veuillez cliquer sur le lien ci-dessous pour réinitialiser votre mot de passe :<br>";
-            $emailBody .= "<a href=\"" . htmlspecialchars(URI . "api/reset-password/" . $token) . "\">" . "Lien de réinitialisation</a><br><br>";
+            $emailBody .= "<a href=\"" . htmlspecialchars(URI_MAIL . "api/reset-password/" . $token) . "\">" . "Lien de réinitialisation</a><br><br>";
             $emailBody .= "Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.<br><br>";
             $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
             $this->mailer->Body = $emailBody;
@@ -417,7 +417,7 @@ class ControllerMail
 
             $this->mailer->addAddress(TEACHER_MAIL);
             $this->mailer->isHTML(true);
-            $this->mailer->Subject = "Nouveau rendez-vous prit pour " . htmlspecialchars($user['firstName'] . " " . $user['lastName']);
+            $this->mailer->Subject = "Nouveau rendez-vous pris pour " . htmlspecialchars($user['firstName'] . " " . $user['lastName']);
             $emailBody = "Bonjour,<br><br>";
             $emailBody .= "Nous vous informons que " . htmlspecialchars($user['firstName'] . " " . $user['lastName']) . " a pris un nouveau rendez-vous prévu le " . htmlspecialchars($eventDate) . " à " . htmlspecialchars($eventHour) . ".<br><br>";
             $emailBody .= "Le montant de " . htmlspecialchars($amount['price']) . " € a été réglé.<br><br><br>";
@@ -445,7 +445,7 @@ class ControllerMail
             }
         }
     }
-    public function sendMailToAlertEventDeleteByAdmin($userId, $startDateTime, $timezone, $amount)
+    public function sendMailToAlertEventDelete($userId, $startDateTime, $timezone, $amount, $codeInvoiced)
     {
         $modelUser = new ModelUser();
         $userInformations = $modelUser->getUser(new EntitieUser(['idUser' => $userId]));
@@ -457,23 +457,78 @@ class ControllerMail
         $appointmentDate = $appointmentDateTime->format('j F Y'); // "4 octobre 2025"
         $appointmentHour = $appointmentDateTime->format('G\hi'); // "14h30" au lieu de "14:30"
 
-
-
         $this->mailer->addAddress($userInformations['mail']);
         $this->mailer->isHTML(true);
-        $this->mailer->Subject = "Annulation de rendez-vous par l'administrateur sur FLEpourtous";
+        $this->mailer->Subject = "Annulation de votre rendez-vous sur FLEpourtous";
         $emailBody = "Bonjour " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . ",<br><br>";
-        $emailBody .= "Nous vous informons que votre rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " a été annulé par l'administrateur du site.<br>";
-        $emailBody .= "Le montant de " . htmlspecialchars($amount) . " € a été recrédité sur votre porte-monnaie électronique.<br>";
+
+        $this->controllerError->debug("sendMailToAlertEventDelete: codeInvoiced = " . $codeInvoiced . ", amount = " . $amount . ", appointmentDate = " . $appointmentDate . ", appointmentHour = " . $appointmentHour);
+
+        switch ($codeInvoiced) {
+            case '1':
+                $emailBody .= "Nous confirmons votre annulation du rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur votre porte-monnaie électronique.<br>";
+                break;
+            case '2':
+                $emailBody .= "Nous confirmons votre annulation du rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € n'a pas été recrédité sur votre porte-monnaie électronique.<br>";
+                break;
+            case '3':
+                $emailBody .= "Nous vous informons que votre rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " a été annulé par l'administrateur et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur votre porte-monnaie électronique.<br>";
+                break;
+            default:
+                $emailBody .= "Nous vous informons que votre rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " a été annulé et que le montant de " . htmlspecialchars($amount) . " € n'a pas été remboursé.<br>";
+                break;
+        };
+
         $emailBody .= "Nous vous invitons à prendre un nouveau rendez-vous.<br>";
         $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
         $this->mailer->Body = $emailBody;
+        $this->controllerError->debug("sendMailToAlertEventDelete: Email body prepared: " . $emailBody);
         $this->mailer->send();
-        $this->controllerError->logs("Admin cancellation email sent", [
+        $this->controllerError->logs("User cancellation email sent", [
             "Email sent to: " . $userInformations['mail'],
             "Event DateTime: " . $startDateTime,
-            "Amount refunded: " . $amount
+            "Amount refunded: " . $amount,
+            "Refund method: " . ($codeInvoiced == '1' ? 'Wallet' : ($codeInvoiced == '2' ? 'No refund' : ($codeInvoiced == '3' ? 'Admin refund' : ($codeInvoiced == '' ? 'Unknown' : 'Unknown'))))
         ], self::MAIL_LOG_FILE);
+
+        $this->mailer->clearAddresses();
+        $this->mailer->clearAttachments();
+    }
+
+    public function sendMailToAlertEventDeleteByUser($userId, $startDateTime, $timezone, $amount, $codeInvoiced)
+    {
+        $modelUser = new ModelUser();
+        $userInformations = $modelUser->getUser(new EntitieUser(['idUser' => $userId]));
+        $appointmentDateTimeUTC = new DateTime($startDateTime);
+        $appointmentDateTime = $appointmentDateTimeUTC->setTimezone(new DateTimeZone($timezone));
+
+        // 🎨 Formatage user-friendly
+        setlocale(LC_TIME, 'fr_FR.UTF-8', 'fr_FR', 'french'); // Pour les noms français
+        $appointmentDate = $appointmentDateTime->format('j F Y'); // "4 octobre 2025"
+        $appointmentHour = $appointmentDateTime->format('G\hi'); // "14h30" au lieu de "14:30"
+
+        $this->mailer->addAddress(TEACHER_MAIL);
+        $this->mailer->isHTML(true);
+        $this->mailer->Subject = "Annulation du rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']);
+        $emailBody = "Bonjour,<br><br>";
+
+        match ($codeInvoiced) {
+            '1' => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
+            '2' => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € n'a pas été recrédité sur son porte-monnaie électronique.<br>",
+            '3' => $emailBody .= "Nous confirmons votre annulation du rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . "  et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
+            default => $emailBody .= "Nous vous informons que le rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " a été annulé et que le montant de " . htmlspecialchars($amount) . " € n'a pas été remboursé.<br>",
+        };
+
+        $emailBody .= "Cordialement,<br>L'équipe Flepourtous";
+        $this->mailer->Body = $emailBody;
+        $this->mailer->send();
+        $this->controllerError->logs("User cancellation email sent", [
+            "Email sent to: " . TEACHER_MAIL,
+            "Event DateTime: " . $startDateTime,
+            "Amount refunded: " . $amount,
+            "Refund method: " . ($codeInvoiced == '1' ? 'Wallet' : ($codeInvoiced == '2' ? 'No refund' : ($codeInvoiced == '3' ? 'Admin refund' : ($codeInvoiced == '' ? 'Unknown' : 'Unknown'))))
+        ], self::MAIL_LOG_FILE);
+
         $this->mailer->clearAddresses();
         $this->mailer->clearAttachments();
     }

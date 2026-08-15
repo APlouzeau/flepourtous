@@ -52,26 +52,32 @@ class ControllerError
         ]);
     }
 
-    public function debug(string $text, $data = null)
+    public function debug(string $text, $data = null): void
     {
-    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $stderr = fopen('php://stderr', 'w');
 
-    if (is_array($data)) {
-        error_log($text);
-        foreach ($data as $key => $value) {
-            error_log($key . ' => ' . print_r($value, true));
+        fwrite($stderr, "\n========== DEBUG ==========\n");
+        fwrite($stderr, $text . "\n");
+
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                fwrite($stderr, "  $key => " . print_r($value, true) . "\n");
+            }
+        } else {
+            fwrite($stderr, print_r($data, true) . "\n");
         }
-    } else {
-        error_log($text . print_r($data, true));
-    }
 
-    foreach ($trace as $frame) {
-        if (basename($frame['file']) !== 'index.php') {
-            error_log('Appel depuis : ' . $frame['file']);
-            error_log('Ligne ' . $frame['line']);
-            break;
+        foreach ($trace as $frame) {
+            if (isset($frame['file']) && basename($frame['file']) !== 'index.php') {
+                fwrite($stderr, "Appel depuis : " . $frame['file'] . "\n");
+                fwrite($stderr, "Ligne : " . $frame['line'] . "\n");
+                break;
             }
         }
+
+        fwrite($stderr, "===========================\n");
+        fclose($stderr);
     }
 
     public function logs(string $title, array $messages, string $file)
@@ -84,7 +90,7 @@ class ControllerError
         }
 
         $timestamp = date('Y-m-d H:i:s');
-        
+
         $logContent = "[{$timestamp}] {$title}\n";
         foreach ($messages as $message) {
             $logContent .= "  - {$message}\n";
