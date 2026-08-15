@@ -253,3 +253,12 @@ google-tunnel: ## Lance cloudflared tunnel pour le backend
 test: ## Lancer les tests unitaires
 	@echo "🧪 Lancement des tests unitaires..."
 	docker exec flepourtous-backend-dev vendor/bin/phpunit
+
+.PHONY: sync-preprod
+sync-preprod:
+	@echo "⚠️  Cette commande va écraser l'historique de la branche preprod avec celui de main."
+	@read -p "Confirmer ? [y/N] " confirm && [ "$$confirm" = "y" ] || exit 1
+	git checkout preprod
+	git reset --hard main
+	git push --force origin preprod
+	@echo "✅ preprod alignée sur main et poussée."

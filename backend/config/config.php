@@ -22,7 +22,7 @@ define("URI_FRONT", getenv('URI_FRONT'));
 define('URI_STRIPE', getenv('URI_STRIPE'));
 define("COOKIE_DOMAIN", getenv('COOKIE_DOMAIN'));
 
-define("CRON_KEY", getenv('CRON_KEY_PROD'));
+define("CRON_KEY", getenv('CRON_KEY'));
 define("JWT_KEY", getenv('JWT_KEY_PROD'));
 
 define("MAIL_HOST", getenv('MAIL_HOST'));
@@ -33,4 +33,3 @@ define("MAIL_PORT", getenv('MAIL_PORT'));
 define("TEACHER_MAIL", getenv('TEACHER_MAIL'));
 
 define("STRIPE_SECRET_KEY", getenv('STRIPE_SECRET_KEY'));
-
