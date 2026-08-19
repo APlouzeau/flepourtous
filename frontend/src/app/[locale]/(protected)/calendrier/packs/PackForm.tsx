@@ -3,7 +3,7 @@ import Button from "@/app/[locale]/components/front/Button";
 import { LessonsWithPrices, LessonWithPrice } from "@/app/[locale]/types/lessons";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import React, { SubmitEventHandler, useState } from "react";
+import React, { SubmitEventHandler, useMemo, useState } from "react";
 import { orderPacks } from "./PacksAction";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "@/locales/client";
@@ -16,20 +16,17 @@ export default function PackForm({ lessons }: { lessons: LessonsWithPrices }) {
     const [selectedPack, setSelectedPack] = useState<string>("");
     const [success, setSuccess] = useState<string | null>(null);
     const router = useRouter();
-    const [price, setPrice] = useState<number | null>(null);
     const trad = useTranslations();
 
-    if (selectedLesson && selectedDuration && selectedPack) {
-        // ✅ Trouver le prix de la durée sélectionnée
-        const priceForDuration =
-            selectedLesson.price?.find((p) => p.duration.toString() === selectedDuration)?.price || 0;
-
-        // ✅ Multiplier par le nombre de cours du pack
-        const packQuantity = parseInt(selectedPack); // "5" → 5 ou "10" → 10
-        setPrice(priceForDuration * packQuantity);
-    } else {
-        setPrice(null);
-    }
+    const price = useMemo(() => {
+        if (selectedLesson && selectedDuration && selectedPack) {
+            const priceForDuration =
+                selectedLesson.price?.find((p) => p.duration.toString() === selectedDuration)?.price || 0;
+            const packQuantity = parseInt(selectedPack);
+            return priceForDuration * packQuantity;
+        }
+        return null;
+    }, [selectedLesson, selectedDuration, selectedPack]);
 
     const handleSubmit: SubmitEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
