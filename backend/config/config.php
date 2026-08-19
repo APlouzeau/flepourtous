@@ -26,7 +26,7 @@ define('URI_STRIPE', getenv('URI_STRIPE'));
 define("COOKIE_DOMAIN", getenv('COOKIE_DOMAIN'));
 
 define("CRON_KEY", getenv('CRON_KEY'));
-define("JWT_KEY", getenv('JWT_KEY_PROD'));
+define("JWT_KEY", getenv('JWT_KEY'));
 
 define("MAIL_HOST", getenv('MAIL_HOST'));
 define("MAIL_USERNAME", getenv('MAIL_USERNAME'));
