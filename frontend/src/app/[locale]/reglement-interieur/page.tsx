@@ -126,8 +126,8 @@ export default async function ReglementInterieurPage() {
                             <p className="text-gray-700">{trad("rules.p10.p3")}</p>
                         </div>
                     </div>
+                    <Version document={trad("rules.title1") + " " + trad("rules.title2")} version="1.1" />
                 </div>
-                <Version document={trad("rules.title1") + " " + trad("rules.title2")} version="1.1" />
             </section>
         </div>
     );

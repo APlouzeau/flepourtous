@@ -161,8 +161,8 @@ export default async function CGVPage() {
                             <p className="text-gray-700">OVH SAS : 2 rue Kellermann - 59100 Roubaix - France (1007)</p>
                         </div>
                     </div>
+                    <Version document={trad("cgv.titleBlack") + " " + trad("cgv.titleRed")} version="1.1" />
                 </div>
-                <Version document={trad("cgv.titleBlack") + " " + trad("cgv.titleRed")} version="1.1" />
             </section>
         </div>
     );

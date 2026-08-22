@@ -195,8 +195,8 @@ export default async function RGPDPage() {
                             </p>
                         </div>
                     </div>
+                    <Version document={trad("privacy.title1") + " " + trad("privacy.title2")} version="1.1" />
                 </div>
-                <Version document={trad("privacy.title1") + " " + trad("privacy.title2")} version="1.1" />
             </section>
         </div>
     );
