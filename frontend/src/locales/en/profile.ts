@@ -56,6 +56,10 @@ export default {
             return: "Return",
             accountCreated:
                 "Your account has been successfully created! You will receive an email to confirm your account. Please check your inbox and spam folder.",
+            ID_INVALID: "Invalid email or password.",
+            USER_UNVERIFIED: "User not verified. Please check your email address.",
+            acceptTerms: "I accept the terms of service and privacy policy.",
+            acceptTermsError: "You must accept the terms of service and privacy policy.",
         },
         alerts: {
             profileUpdateSuccess: "Profile updated successfully !",

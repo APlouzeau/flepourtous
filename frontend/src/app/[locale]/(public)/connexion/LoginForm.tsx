@@ -40,7 +40,8 @@ export default function LoginForm() {
                     await createSession(response.data.data.role);
                     redirect("/profil");
                 } else {
-                    setError(response.data.message);
+                    const message = response.data.message;
+                    setError(trad(`profile.auth.${message}`));
                     setIsLoading(false);
                 }
             });

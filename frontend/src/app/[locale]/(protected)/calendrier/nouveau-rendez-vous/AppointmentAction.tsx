@@ -144,6 +144,7 @@ export async function getAllLessonsWithPrices() {
             },
             withCredentials: true,
         });
+        console.log("Fetched lessons with prices:", response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching lessons information:", error);

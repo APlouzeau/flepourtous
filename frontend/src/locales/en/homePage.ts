@@ -21,7 +21,7 @@ export default {
                         title: "Transparent pricing",
                         subtitle: "No hidden fees, just simple and accessible rates.",
                         description:
-                            "You know the price upfront: whether you take a single class or a package, everything is clearly indicated. The value for money is designed so that everyone can progress at their own pace without breaking the bank.",
+                            "You know the price upfront: whether you take a single class or a package, everything is clearly indicated. My pricing structure is designed so that everyone can progress at their own pace without breaking the bank.",
                     },
                 },
                 {
@@ -67,7 +67,7 @@ export default {
                 name: "Graham",
                 nationality: "English",
                 comment:
-                    "I have to say when I first signed up to Preply I was terrified that I was actually going to have to speak French. Ludivine is amazing, she makes you feel very relaxed. Im learning to speak French as a complete beginner, she is the most patient person alive. She puts up with my terrible accent and grammar and gently corrects me. She has a knack of getting the French to just flow. She speaks slowly and clearly. Shes amazing . merci Ludivine tu es tres gentille et tu es un excellent professeur.",
+                    "I have to say when I started learning French on Internet, I was terrified that I was actually going to have to speak French. Ludivine is amazing, she makes you feel very relaxed. Im learning to speak French as a complete beginner, she is the most patient person alive. She puts up with my terrible accent and grammar and gently corrects me. She has a knack of getting the French to just flow. She speaks slowly and clearly. Shes amazing . merci Ludivine tu es tres gentille et tu es un excellent professeur.",
             },
         },
         faqSection: {
@@ -76,7 +76,7 @@ export default {
             questions: [
                 {
                     question: "Who are you?",
-                    answer: "My name is Ludivine and I am French. I hold a master's degree in FLE, and I lived in Japan for several years where I taught French. I have a master's degree in didactics and a proficiency in Japanese. I have taught in France to very diverse audiences, mainly in French, but also in English, and I have also taught Japanese to beginners.",
+                    answer: "My name is Ludivine and I am French. I hold a master’s degree in French language education, and I lived in Japan for several years where I taught French. I have a master's degree in didactics and a proficiency in Japanese. I have taught in France to very diverse audiences, mainly in French, but also in English, and I have also taught Japanese to beginners.",
                 },
                 {
                     question: "Who are your courses for?",
@@ -92,15 +92,15 @@ export default {
                 },
                 {
                     question: "What do I need to take a course?",
-                    answer: "You need a good connection. You can take the course on a computer, tablet, or phone (a computer is recommended for better visibility). You do not need to download any software or application; you can connect directly to the video tool!",
+                    answer: "You need a good connection. You can take the course on a computer, tablet, or phone (a computer is recommended for better visibility). You don't need to download any software or apps; you can join your lesson directly through the website.",
                 },
                 {
                     question: "What happens if I am late?",
-                    answer: "If you are late, the time is lost, and you will not be able to make up for it. The course will end at the scheduled time. For more information, please read the terms of sale.",
+                    answer: "If you arrive late, your lesson will still end at the scheduled time and the missed time cannot be made up.  For more information, please see our Terms of Service.",
                 },
                 {
                     question: "Can I cancel or reschedule a course?",
-                    answer: "You can reschedule or cancel a course up to 24 hours before the course. If you want to cancel or reschedule within 24 hours before the course, the course will be considered due and will not be refunded. For more information, please read the terms of sale.",
+                    answer: "You can cancel or reschedule your lesson up to 24 hours before the scheduled start time.  If you cancel or reschedule less than 24 hours before your lesson, it will be charged in full and is non-refundable. Please see our Terms of Service for more information.",
                 },
             ],
         },
@@ -108,7 +108,7 @@ export default {
             title: "Seize the moment:",
             subtitle: "Join us!",
             description:
-                "Every day is an opportunity to progress. Invest in your future today with FLEpourtous. Excellence in French doesn't wait – it is built now, one lesson at a time.",
+                "Every day is an opportunity to progress. Invest in your future today with FLEpourtous. Excellence in French is built one lesson at a time. Don't hesitate, start now !",
         },
     },
 } as const;

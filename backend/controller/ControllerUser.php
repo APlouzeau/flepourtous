@@ -1,5 +1,6 @@
 <?php
 
+use config\enum\ErrorCodes;
 
 class ControllerUser
 {
@@ -74,14 +75,14 @@ class ControllerUser
 
             if ($userVerify === null) {
                 $response = [
-                    'code' => 0,
-                    'message' => 'Nom ou mot de passe incorrect.'
+                    'code' => 0, // 
+                    'message' => 'ID_INVALID'
                 ];
             }
             if (isset($userVerify['isVerified']) && $userVerify['isVerified'] === false) {
                 $response = [
                     'code' => 0,
-                    'message' => 'Utilisateur non vérifié. Veuillez vérifier votre adresse e-mail.'
+                    'message' => 'USER_UNVERIFIED'
                 ];
             }
 
@@ -228,6 +229,7 @@ class ControllerUser
     {
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
+        // return;
         if ($_SERVER['REQUEST_METHOD'] != 'POST') {
             $response = [
                 'code' => 0,
@@ -239,7 +241,8 @@ class ControllerUser
             !isset($data['lastName']) ||
             !isset($data['mail']) ||
             !isset($data['password']) ||
-            !isset($data['passwordConfirm'])
+            !isset($data['passwordConfirm']) ||
+            !isset($data['acceptations'])
         ) {
             $response = [
                 'code' => 0,
@@ -276,6 +279,9 @@ class ControllerUser
                             'mail' => $data['mail'],
                             'password' => password_hash($data['password'], PASSWORD_BCRYPT),
                             'verifyToken' => $verificationToken,
+                            'internalRegulationsVersion' => $data['acceptations'][0]['version'],
+                            'termsOfServiceVersion' => $data['acceptations'][1]['version'],
+                            'privacyPolicyVersion' => $data['acceptations'][2]['version'],
                         ]);
 
                         $register = $userModel->register($user);
@@ -414,6 +420,26 @@ class ControllerUser
             return [
                 'code' => 0,
                 'message' => 'Le nom doit contenir entre 2 et 25 caractères',
+            ];
+        }
+
+        if ($data['acceptations'][0]['accepted'] != 1) {
+            return [
+                'code' => 0,
+                'message' => ErrorCodes::REGULATIONS_INTERIOR_NOT_ACCEPTED,
+            ];
+        };
+
+        if ($data['acceptations'][1]['accepted'] != 1) {
+            return [
+                'code' => 0,
+                'message' => ErrorCodes::TERMS_OF_SERVICE_NOT_ACCEPTED,
+            ];
+        }
+        if ($data['acceptations'][2]['accepted'] != 1) {
+            return [
+                'code' => 0,
+                'message' => ErrorCodes::PRIVACY_POLICY_NOT_ACCEPTED,
             ];
         }
 

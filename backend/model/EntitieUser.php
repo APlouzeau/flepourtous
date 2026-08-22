@@ -20,6 +20,13 @@ class EntitieUser
     private int $isVerified;
     private string $verifyToken;
     private float $wallet;
+    private string $termsOfServiceAcceptedAt;
+
+    private string $termsOfServiceVersion;
+    private string $internalRegulationsAcceptedAt;
+    private string $internalRegulationsVersion;
+    private string $privacyPolicyAcceptedAt;
+    private string $privacyPolicyVersion;
 
     // Constructeur pour hydrater les données à partir d'un tableau
     public function __construct(array $data)
@@ -239,6 +246,77 @@ class EntitieUser
     public function setWallet($wallet)
     {
         $this->wallet = $wallet;
+
+        return $this;
+    }
+
+    public function getTermsOfServiceAcceptedAt()
+    {
+        return $this->termsOfServiceAcceptedAt;
+    }
+
+    public function setTermsOfServiceAcceptedAt($termsOfServiceAcceptedAt)
+    {
+        $this->termsOfServiceAcceptedAt = $termsOfServiceAcceptedAt;
+
+        return $this;
+    }
+
+    public function getTermsOfServiceVersion()
+    {
+        return $this->termsOfServiceVersion;
+    }
+    public function setTermsOfServiceVersion($termsOfServiceVersion)
+    {
+        $this->termsOfServiceVersion = $termsOfServiceVersion;
+
+        return $this;
+    }
+
+    public function getInternalRegulationsAcceptedAt()
+    {
+        return $this->internalRegulationsAcceptedAt;
+    }
+
+    public function setInternalRegulationsAcceptedAt($internalRegulationsAcceptedAt)
+    {
+        $this->internalRegulationsAcceptedAt = $internalRegulationsAcceptedAt;
+
+        return $this;
+    }
+
+    public function getInternalRegulationsVersion()
+    {
+        return $this->internalRegulationsVersion;
+    }
+
+    public function setInternalRegulationsVersion($internalRegulationsVersion)
+    {
+        $this->internalRegulationsVersion = $internalRegulationsVersion;
+
+        return $this;
+    }
+
+    public function getPrivacyPolicyAcceptedAt()
+    {
+        return $this->privacyPolicyAcceptedAt;
+    }
+
+    public function setPrivacyPolicyAcceptedAt($privacyPolicyAcceptedAt)
+    {
+        $this->privacyPolicyAcceptedAt = $privacyPolicyAcceptedAt;
+
+        return $this;
+    }
+
+    public function getPrivacyPolicyVersion()
+    {
+        return $this->privacyPolicyVersion;
+    }
+
+    public function setPrivacyPolicyVersion($privacyPolicyVersion)
+    {
+        $this->privacyPolicyVersion = $privacyPolicyVersion;
 
         return $this;
     }

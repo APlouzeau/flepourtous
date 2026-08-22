@@ -147,7 +147,9 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
 
                         {/* Sélecteur de langue mobile */}
                         <div className="mt-6 pt-6 border-t border-gray-700">
-                            <h3 className="text-white text-sm font-semibold mb-3 px-4">Langue</h3>
+                            <h3 className="text-white text-sm font-semibold mb-3 px-4">
+                                {trad("header.language.menu")}
+                            </h3>
                             <div className="space-y-2">
                                 {languages.map((lang) => (
                                     <button
@@ -175,14 +177,14 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
                                         className="block w-full bg-white text-black hover:bg-gray-100 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
                                         onClick={toggleMenu}
                                     >
-                                        Profil
+                                        {trad("common.buttons.profile")}
                                     </Link>
                                     <Link
                                         href="/calendrier"
                                         className="block w-full bg-gray-700 text-white hover:bg-gray-600 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
                                         onClick={toggleMenu}
                                     >
-                                        Calendrier
+                                        {trad("common.buttons.calendar")}
                                     </Link>
                                     <button
                                         onClick={async () => {
@@ -191,7 +193,7 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
                                         }}
                                         className="block w-full bg-black text-white hover:bg-gray-800 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
                                     >
-                                        Déconnexion
+                                        {trad("common.buttons.logout")}
                                     </button>
                                 </>
                             ) : (
@@ -201,14 +203,14 @@ export default function MobileMenuButton({ isLoggedIn, onLogout }: MobileMenuBut
                                         className="block w-full bg-white text-black hover:bg-gray-100 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
                                         onClick={toggleMenu}
                                     >
-                                        Inscription
+                                        {trad("common.buttons.register")}
                                     </Link>
                                     <Link
                                         href="/connexion"
                                         className="block w-full bg-black text-white hover:bg-gray-800 transition-colors px-6 py-3 rounded-md font-medium text-center text-lg"
                                         onClick={toggleMenu}
                                     >
-                                        Connexion
+                                        {trad("common.buttons.login")}
                                     </Link>
                                 </>
                             )}

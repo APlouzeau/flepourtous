@@ -1,11 +1,11 @@
 export default {
     coursesOffer: {
         titleBlack: "Our ",
-        titleRed: "offers",
+        titleRed: "courses",
         introduction: "Discover our personalized French courses, suitable for all ages and all levels",
         chooseBlack: "Choose your ",
         chooseRed: "plan",
-        subChoose: "Choose the course that best fits your goals and preferred duration.",
+        subChoose: "Choose the course that best fits your goals and schedule.",
         whyBlack: "Why choose our ",
         whyRed: "individual lessons?",
         subWhy: "A unique teaching approach tailored to each student",
@@ -34,8 +34,8 @@ export default {
     },
     courses: {
         prices: {
-            ourPrices: "Our Prices",
-            description: "Choose the duration that suits you best",
+            ourPrices: "Lesson Pricing",
+            description: "Choose the lesson length that works best for you",
             individual: "Individual lesson",
             gear: "Included materials",
             follow: "Personalized follow-up",

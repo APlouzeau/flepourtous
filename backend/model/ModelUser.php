@@ -16,7 +16,7 @@ extends ClassDatabase
 
     public function register(EntitieUser $user)
     {
-        $query = "INSERT INTO users (first_name, last_name, mail, nick_name, password, verify_token) VALUES (:first_name, :last_name, :mail, :nick_name, :password, :verify_token)";
+        $query = "INSERT INTO users (first_name, last_name, mail, nick_name, password, verify_token, internal_regulations_version, terms_of_service_version, privacy_policy_version) VALUES (:first_name, :last_name, :mail, :nick_name, :password, :verify_token, :internal_regulations_version, :terms_of_service_version, :privacy_policy_version)";
 
         $req = $this->conn->prepare($query);
         $req->bindValue(":first_name", $user->getFirstName());
@@ -25,6 +25,9 @@ extends ClassDatabase
         $req->bindValue(":nick_name", $user->getNickName());
         $req->bindValue(":password", $user->getPassword());
         $req->bindValue(":verify_token", $user->getVerifyToken());
+        $req->bindValue(":internal_regulations_version", $user->getInternalRegulationsVersion());
+        $req->bindValue(":terms_of_service_version", $user->getTermsOfServiceVersion());
+        $req->bindValue(":privacy_policy_version", $user->getPrivacyPolicyVersion());
 
         return $req->execute();
     }

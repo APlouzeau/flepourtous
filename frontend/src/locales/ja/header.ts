@@ -9,5 +9,11 @@ export default {
         resourcesUsed: {
             menu: "使用されるリソース",
         },
+        language: {
+            menu: "言語",
+            fr: "Français",
+            en: "English",
+            ja: "日本語",
+        },
     },
 } as const;

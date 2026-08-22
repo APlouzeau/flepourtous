@@ -18,7 +18,7 @@ export default {
         p3: {
             title: "3. Lateness and absences",
             p1: "If the student is late, the course ends at the initially scheduled time. Lost time cannot be recovered, with some exceptions.",
-            p2: "If the student does not show up within 15 minutes of the start of the lesson without warning, the lesson is considered canceled and due.",
+            p2: "If the student does not show up within 15 minutes of the start of the lesson without warning, the lesson is considered cancelled and due.",
             p3: "If the teacher is late, the course will be extended or a new session will be offered depending on availability.",
         },
         p4: {
