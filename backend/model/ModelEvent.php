@@ -305,7 +305,7 @@ class ModelEvent extends  ClassDatabase
 
     public function checkWaitingEvent()
     {
-        $waitingStatus = AppointmentStatus::UNPAID->value;
+        $waitingStatus = AppointmentStatus::PENDING->value;
         $selectReq = $this->conn->prepare('SELECT user_id, start_date_time, id_event, created_at,timezone FROM events WHERE status = :waitingStatus');
         $selectReq->bindValue(':waitingStatus', $waitingStatus, PDO::PARAM_STR);
         $selectReq->execute();

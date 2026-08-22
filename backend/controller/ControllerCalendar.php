@@ -139,7 +139,7 @@ class ControllerCalendar
         $duration = $data['duration'];
         $createdAt = date('Y-m-d H:i:s');
         $updatedAt = date('Y-m-d H:i:s');
-        $status = AppointmentStatus::UNPAID->value;
+        $status = AppointmentStatus::PENDING->value;
         $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
 
         // Récupérer l'email de l'utilisateur pour l'ajouter comme attendee dans Google Calendar
