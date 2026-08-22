@@ -57,6 +57,8 @@ export default {
             return: "Retour",
             accountCreated:
                 "Votre compte a été créé avec succès ! Vous recevrez un email pour confirmer votre compte. Veuillez vérifier votre boîte de réception et vos spams.",
+            ID_INVALID: "Email ou mot de passe invalide.",
+            USER_UNVERIFIED: "Utilisateur non vérifié. Veuillez vérifier votre adresse e-mail.",
         },
         alerts: {
             profileUpdateSuccess: "Profil mis à jour avec succès !",

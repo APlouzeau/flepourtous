@@ -12,7 +12,7 @@ export default {
             pack: "Pack",
             learnMore: "Learn more",
             joinUs: "Join us",
-            inscriptionToReserve: "Register to reserve",
+            inscriptionToReserve: "Book Now",
             showPrices: "See prices",
             reserveThisCourse: "Reserve this course",
             reserveNewCourse: "Reserve a new course",

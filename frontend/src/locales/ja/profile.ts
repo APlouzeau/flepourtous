@@ -56,6 +56,8 @@ export default {
             return: "戻る",
             accountCreated:
                 "アカウントが正常に作成されました！アカウントを確認するためのメールが届きます。受信トレイと迷惑メールフォルダを確認してください。",
+            ID_INVALID: "無効なメールアドレスまたはパスワード。",
+            USER_UNVERIFIED: "ユーザーが確認されていません。メールアドレスを確認してください。",
         },
         alerts: {
             profileUpdateSuccess: "プロフィールが正常に更新されました。",

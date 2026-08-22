@@ -74,14 +74,14 @@ class ControllerUser
 
             if ($userVerify === null) {
                 $response = [
-                    'code' => 0,
-                    'message' => 'Nom ou mot de passe incorrect.'
+                    'code' => 0, // 
+                    'message' => 'ID_INVALID'
                 ];
             }
             if (isset($userVerify['isVerified']) && $userVerify['isVerified'] === false) {
                 $response = [
                     'code' => 0,
-                    'message' => 'Utilisateur non vérifié. Veuillez vérifier votre adresse e-mail.'
+                    'message' => 'USER_UNVERIFIED'
                 ];
             }
 
