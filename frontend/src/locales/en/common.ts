@@ -23,6 +23,7 @@ export default {
             pay: "Pay",
             commandPack: "Order a pack",
         },
+        view: "View",
         prices: {
             from: "From",
             mn: "min",

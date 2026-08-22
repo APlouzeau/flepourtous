@@ -23,6 +23,7 @@ export default {
             pay: "支払う",
             commandPack: "パックを注文する",
         },
+        view: "見る",
         prices: {
             from: "から",
             mn: "分",
