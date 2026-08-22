@@ -13,6 +13,12 @@ export default {
             paymentStatus: "支払い状況",
             visioStatus: "法令のビジョン",
             actions: "アクション",
+            joinable: "参加可能",
+            joinable_tooltip: "ビデオに参加できます",
+            not_joinable: "参加不可",
+            error: "エラー",
+            not_joinable_tooltip: "このビデオに参加できません",
+            error_tooltip: "ステータスの計算中にエラーが発生しました",
         },
         appointment: {
             noAvailableSlots: "この日付には利用可能なスロットがありません。",

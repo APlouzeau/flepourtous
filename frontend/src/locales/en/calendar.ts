@@ -13,6 +13,12 @@ export default {
             paymentStatus: "Payment Status",
             visioStatus: "Visio Status",
             actions: "Actions",
+            joinable: "Joinable",
+            joinable_tooltip: "You can join the visio",
+            not_joinable: "Not joinable",
+            error: "Error",
+            not_joinable_tooltip: "You cannot join this visio",
+            error_tooltip: "Error calculating status",
         },
         appointment: {
             noAvailableSlots: "No available slots for this date.",

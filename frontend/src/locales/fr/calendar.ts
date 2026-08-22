@@ -13,6 +13,12 @@ export default {
             paymentStatus: "Statut Paiement",
             visioStatus: "Statut Visio",
             actions: "Actions",
+            joinable: "Rejoindre",
+            joinable_tooltip: "Vous pouvez rejoindre la visio",
+            not_joinable: "Non rejoignable",
+            error: "Erreur",
+            not_joinable_tooltip: "Vous ne pouvez pas rejoindre cette visio",
+            error_tooltip: "Erreur de calcul du statut",
         },
         appointment: {
             noAvailableSlots: "Aucun créneau disponible pour cette date.",

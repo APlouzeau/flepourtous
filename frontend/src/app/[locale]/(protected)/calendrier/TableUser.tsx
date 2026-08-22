@@ -99,28 +99,28 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
 
             if (now >= accessTime && now <= endAccessTime && statusOk) {
                 return {
-                    status: "Rejoindre",
+                    status: trad("calendar.table.joinable"),
                     className: "text-green-600 font-semibold",
                     isJoinable: true,
-                    tooltip: "Vous pouvez rejoindre la visio",
+                    tooltip: trad("calendar.table.joinable_tooltip"),
                     badgeColor: "bg-green-500",
                 };
             } else {
                 return {
-                    status: "Non rejoignable",
+                    status: trad("calendar.table.not_joinable"),
                     className: "text-red-600",
                     isJoinable: false,
-                    tooltip: "Vous ne pouvez pas rejoindre cette visio",
+                    tooltip: trad("calendar.table.not_joinable_tooltip"),
                     badgeColor: "bg-red-500",
                 };
             }
         } catch (error) {
             console.error("Error calculating visio status:", error);
             return {
-                status: "Erreur",
+                status: trad("calendar.table.error"),
                 className: "text-gray-500",
                 isJoinable: false,
-                tooltip: "Erreur de calcul du statut",
+                tooltip: trad("calendar.table.error_tooltip"),
                 badgeColor: "bg-gray-500",
             };
         }
