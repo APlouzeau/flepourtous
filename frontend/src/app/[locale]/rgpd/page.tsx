@@ -1,4 +1,5 @@
 import { getTranslations } from "@/locales/server";
+import Version from "../components/front/version";
 
 export default async function RGPDPage() {
     const trad = await getTranslations();
@@ -195,6 +196,7 @@ export default async function RGPDPage() {
                         </div>
                     </div>
                 </div>
+                <Version document={trad("privacy.title1") + " " + trad("privacy.title2")} version="1.1" />
             </section>
         </div>
     );

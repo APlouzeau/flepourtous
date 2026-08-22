@@ -182,7 +182,7 @@ class ControllerMail
         $this->mailer->isHTML(true);
         $this->mailer->Subject = "Cancellation of appointments on FLEpourtous";
         $emailBody = "Hello " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . ",<br><br>";
-        $emailBody .= "We inform you that your appointment scheduled for " . htmlspecialchars($appointmentDate) . " has been canceled because you have not paid the lesson fee.<br><br>";
+        $emailBody .= "We inform you that your appointment scheduled for " . htmlspecialchars($appointmentDate) . " has been cancelled because you have not paid the lesson fee.<br><br>";
         $emailBody .= "We invite you to make a new appointment.<br>";
         $emailBody .= "Sincerely, <br>The Flepourtous team";
         $this->mailer->Body = $emailBody;

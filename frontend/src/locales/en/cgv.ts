@@ -105,7 +105,7 @@ export default {
                 },
                 {
                     paragraph:
-                        "Canceled courses will be rescheduled whenever possible. These make-up sessions may take place at a different time than initially planned, subject to availability.",
+                        "Cancelled courses will be rescheduled whenever possible. These make-up sessions may take place at a different time than initially planned, subject to availability.",
                 },
                 {
                     paragraph: "If no rescheduling is possible within the following month, a refund may be offered.",

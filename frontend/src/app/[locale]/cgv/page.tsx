@@ -1,4 +1,5 @@
 import { getTranslations } from "@/locales/server";
+import Version from "../components/front/version";
 
 export default async function CGVPage() {
     const trad = await getTranslations();
@@ -161,6 +162,7 @@ export default async function CGVPage() {
                         </div>
                     </div>
                 </div>
+                <Version document={trad("cgv.titleBlack") + " " + trad("cgv.titleRed")} version="1.1" />
             </section>
         </div>
     );
