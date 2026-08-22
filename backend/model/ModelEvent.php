@@ -77,17 +77,6 @@ class ModelEvent extends  ClassDatabase
 
     public function createEvent(EntitieEvent $event)
     {
-        $this->controllerError->debug("Données de l'événement à enregistrer en base de données : " . json_encode([
-            'id_event' => $event->getIdEvent(),
-            'user_id' => $event->getUserId(),
-            'description' => $event->getDescription(),
-            'duration' => $event->getDuration(),
-            'start_date_time' => $event->getStartDateTime(),
-            'timezone' => $event->getTimezone(),
-            'visio_link' => $event->getVisioLink(),
-            'id_lesson' => $event->getId_lesson(),
-            'status' => $event->getStatus(),
-        ]));
         $baseReq = 'id_event, user_id, description, duration, start_date_time, visio_link, timezone';
         $baseValue = ':id_event, :user_id, :description, :duration, :start_date_time, :visio_link, :timezone';
 
@@ -310,13 +299,10 @@ class ModelEvent extends  ClassDatabase
         return $req->execute();
     }
 
-    public function deleteWaitingEvent()
+    public function checkWaitingEvent()
     {
-        $condition = 'WHERE created_at < DATE_SUB(UTC_TIMESTAMP(), INTERVAL 8 HOUR) AND status = "En attente"';
 
-        $this->conn->beginTransaction();
-
-        $selectReq = $this->conn->prepare("SELECT user_id, start_date_time FROM events {$condition}");
+        $selectReq = $this->conn->prepare('SELECT user_id, start_date_time, id_event, created_at,timezone FROM events WHERE status = \'En attente\'');
         $selectReq->execute();
         $datas = $selectReq->fetchAll();
 
@@ -328,14 +314,15 @@ class ModelEvent extends  ClassDatabase
                 $eventData = [
                     'userId' => $userId,
                     'startDateTime' => $startDateTime,
+                    'idEvent' => $data['id_event'],
+                    'createdAt' => $data['created_at'],
+                    'timezone' => $data['timezone'],
                 ];
                 $datasToAlert[] = $eventData;
             }
         }
 
-        $this->conn->commit();
-
-        return $datasToAlert;
+        return $datasToAlert ?? [];
     }
 
     public function deleteVisioLink(string $idEvent): bool

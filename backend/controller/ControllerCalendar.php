@@ -541,15 +541,19 @@ class ControllerCalendar
 
     public function checkWaitingEvents()
     {
-        $userWithEventDelete = $this->modelEvent->deleteWaitingEvent();
-        if (!$userWithEventDelete) {
-            $this->controllerMail = new ControllerMail();
-            foreach ($userWithEventDelete as $user) {
-                $this->controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($user);
-            }
+        $waitingEvents = $this->modelEvent->checkWaitingEvent();
+        if (!empty($waitingEvents)) {
+            $this->checkActionForUnpaidAppointments($waitingEvents);
+
             $response = [
                 'code' => 1,
                 'message' => 'Vérification des événements en attente effectuée avec succès',
+            ];
+            echo json_encode($response);
+        } else {
+            $response = [
+                'code' => 0,
+                'message' => 'Aucun événement en attente à vérifier',
             ];
             echo json_encode($response);
         }
@@ -621,5 +625,34 @@ class ControllerCalendar
         $createdEvent = $this->modelEvent->createEvent($eventDatabase);
 
         return $createdEvent;
+    }
+
+    public function checkActionForUnpaidAppointments(array $unpaidAppointments)
+    {
+        foreach ($unpaidAppointments as $appointment) {
+            $appointmentId = $appointment['idEvent'];
+            $createdAt = new DateTime($appointment['createdAt'], new DateTimeZone('UTC'));
+            $appointmentStartTime = new DateTime($appointment['startDateTime'], new DateTimeZone('UTC'));
+            $currentTime = new DateTime('now', new DateTimeZone('UTC'));
+            $timeDifferenceToStartTime = $currentTime->getTimestamp() - $appointmentStartTime->getTimestamp();
+            $timeDifferenceFromCreation = $currentTime->getTimestamp() - $createdAt->getTimestamp();
+
+            if ($timeDifferenceFromCreation > 15 * 60 && $timeDifferenceFromCreation < 25 * 60) { // 15 to 25 minutes in seconds
+                //notifier l'utilisateur
+                $this->controllerMail->sendMailToAlertEventNotPaid($appointment);
+            }
+            if ($timeDifferenceFromCreation > 120 * 60 && $appointmentStartTime->getTimestamp() > ($currentTime->getTimestamp() + 24 * 60 * 60)) { // RDV prévu dans plus de 24 heures et impayé depuis plus de 2 heures
+                //supprimer l'événement
+                $this->controllerVisio->deleteRoom($appointmentId);
+                $this->modelEvent->updateEventStatus($appointmentId, AppointmentStatus::CANCELLED_UNPAID->value);
+                $this->controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($appointment);
+            }
+            if ($timeDifferenceFromCreation > 30 * 60 && $appointmentStartTime->getTimestamp() <= ($currentTime->getTimestamp() + 24 * 60 * 60)) { // RDV prévu dans moins de 24 heures et impayé depuis plus de 30 minutes
+                //supprimer l'événement
+                $this->controllerVisio->deleteRoom($appointmentId);
+                $this->modelEvent->updateEventStatus($appointmentId, AppointmentStatus::CANCELLED_UNPAID->value);
+                $this->controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($appointment);
+            }
+        }
     }
 }

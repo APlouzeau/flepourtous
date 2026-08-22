@@ -37,7 +37,7 @@ $router->addRoute("POST", "/api/deleteEvent", "ControllerCalendar", "deleteEvent
 $router->addRoute("POST", "/api/getAvailableTimeSlots", "ControllerCalendar", "getAvailablesTimeSlots");
 $router->addRoute("POST", "/api/sendMailToAlertForNextAppointment", "ControllerMail", "sendMailToAlertForNextAppointment");
 $router->addRoute("POST", "/api/prepareRepayment", "ControllerOrder", "prepareRepayment");
-$router->addRoute("POST", "/api/deleteWaitingEvent", "ControllerCalendar", "checkWaitingEvents");
+$router->addRoute("POST", "/api/checkWaitingEvents", "ControllerCalendar", "checkWaitingEvents");
 $router->addRoute("GET", "/api/createInstantRoom", "ControllerVisio", "createInstantRoom");
 
 //Google
