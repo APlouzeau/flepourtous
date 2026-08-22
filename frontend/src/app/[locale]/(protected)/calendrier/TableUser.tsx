@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import CancelConfirmationModal from "@/components/CancelConfirmationModal";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "@/locales/client";
+import { getStatusBadgeData } from "@/lib/badge";
 
 interface AppointmentRowProps {
     listAppointments: showBasicAppointmentProps[];
@@ -92,7 +93,7 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
             const accessTime = new Date(appointmentStart.getTime() - 15 * 60000);
             // Autoriser l'accès jusqu'à 15 minutes après la fin
             const endAccessTime = new Date(appointmentEnd.getTime() + 15 * 60000);
-            const statusOk = status === "Payé" || status === "Google";
+            const statusOk = status === "paid" || status === "google";
 
             const now = currentTime;
 
@@ -126,41 +127,11 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
     };
 
     const getStatusBadge = (status: string) => {
-        const statusLower = status.toLowerCase();
-        let badgeColor = "";
-        let textColor = "";
-        let bgColor = "";
-
-        if (statusLower.includes("payé") || statusLower.includes("paye")) {
-            badgeColor = "bg-green-500";
-            textColor = "text-green-700";
-            bgColor = "bg-green-50";
-        } else if (
-            statusLower.includes("non payé") ||
-            statusLower.includes("non paye") ||
-            statusLower.includes("impayé")
-        ) {
-            badgeColor = "bg-red-500";
-            textColor = "text-red-700";
-            bgColor = "bg-red-50";
-        } else if (statusLower.includes("en attente") || statusLower.includes("attente")) {
-            badgeColor = "bg-yellow-500";
-            textColor = "text-yellow-700";
-            bgColor = "bg-yellow-50";
-        } else if (statusLower.includes("à voir") || statusLower.includes("a voir")) {
-            badgeColor = "bg-orange-500";
-            textColor = "text-orange-700";
-            bgColor = "bg-orange-50";
-        } else {
-            badgeColor = "bg-gray-500";
-            textColor = "text-gray-700";
-            bgColor = "bg-gray-50";
-        }
-
+        const { labelKey, badgeColor, textColor, bgColor } = getStatusBadgeData(status);
         return (
             <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full ${bgColor}`}>
                 <div className={`w-2 h-2 rounded-full ${badgeColor}`}></div>
-                <span className={`text-sm font-medium ${textColor}`}>{status}</span>
+                <span className={`text-sm font-medium ${textColor}`}>{trad(labelKey)}</span>
             </div>
         );
     };
@@ -266,9 +237,8 @@ export default function TableUser({ listAppointments }: AppointmentRowProps) {
                         const appointmentDate = new Date(item.startDateTime.replace(" ", "T") + "Z");
                         const today = new Date();
                         const canCancel =
-                            appointmentDate > today &&
-                            (item.status === "Payé" || item.status === "En attente" || item.status === "Google");
-                        const canPay = appointmentDate > today && item.status === "En attente";
+                            appointmentDate > today && ["paid", "pending", "google"].includes(item.status);
+                        const canPay = appointmentDate > today && item.status === "pending";
 
                         return (
                             <TableRow

@@ -1,5 +1,7 @@
 <?php
 
+use config\enum\AppointmentStatus;
+
 require_once APP_PATH . "/class/ClassDatabase.php";
 
 class ModelEvent extends  ClassDatabase
@@ -286,8 +288,10 @@ class ModelEvent extends  ClassDatabase
 
     public function setEventStatusPaid(string $idEvent)
     {
-        $req = $this->conn->prepare('UPDATE events SET status = "Payé" WHERE id_event = :id_event');
+        $status = AppointmentStatus::PAID->value;
+        $req = $this->conn->prepare('UPDATE events SET status = :status WHERE id_event = :id_event');
         $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
+        $req->bindValue(':status', $status, PDO::PARAM_STR);
         return $req->execute();
     }
 
@@ -301,8 +305,9 @@ class ModelEvent extends  ClassDatabase
 
     public function checkWaitingEvent()
     {
-
-        $selectReq = $this->conn->prepare('SELECT user_id, start_date_time, id_event, created_at,timezone FROM events WHERE status = \'En attente\'');
+        $waitingStatus = AppointmentStatus::UNPAID->value;
+        $selectReq = $this->conn->prepare('SELECT user_id, start_date_time, id_event, created_at,timezone FROM events WHERE status = :waitingStatus');
+        $selectReq->bindValue(':waitingStatus', $waitingStatus, PDO::PARAM_STR);
         $selectReq->execute();
         $datas = $selectReq->fetchAll();
 

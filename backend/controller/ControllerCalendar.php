@@ -139,7 +139,7 @@ class ControllerCalendar
         $duration = $data['duration'];
         $createdAt = date('Y-m-d H:i:s');
         $updatedAt = date('Y-m-d H:i:s');
-        $status = 'En attente';
+        $status = AppointmentStatus::UNPAID->value;
         $appointmentName = $_SESSION['firstName'] . "-" . $_SESSION['lastName'];
 
         // Récupérer l'email de l'utilisateur pour l'ajouter comme attendee dans Google Calendar
@@ -285,6 +285,7 @@ class ControllerCalendar
                 'message' => 'Pas de rendez-vous'
             ];
         } else {
+
             $response = [
                 'code' => 1,
                 'message' => 'Rendez-vous récupérés avec succès',

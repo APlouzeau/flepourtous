@@ -32,5 +32,17 @@ export default {
             reserveMyCourse: "Réserver mon cours",
             redirectingToPayment: "Redirection vers le paiement...",
         },
+        status: {
+            paid: "Payé",
+            unpaid: "Non payé",
+            pending: "En attente",
+            google: "Google",
+            cancelled_refunded: "Annulé - Remboursé",
+            cancelled_not_refunded: "Annulé - non Remboursé",
+            cancelled_admin: "Annulé - Admin",
+            cancelled_google_not_refunded: "Annulé Google - Non remboursé",
+            cancelled_google_refunded: "Annulé Google - Remboursé",
+            cancelled_unpaid: "Annulé - Non payé",
+        },
     },
 } as const;

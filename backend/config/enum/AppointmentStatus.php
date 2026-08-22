@@ -7,6 +7,7 @@ enum AppointmentStatus: string
     case PAID = 'Payé';
     case PAID_ADMIN = 'Payé - Admin';
     case UNPAID = 'Non payé';
+    case PENDING = 'En attente';
     case GOOGLE = 'Google';
     case CANCELLED_REFUNDED = 'Annulé - Remboursé';
     case CANCELLED_NOT_REFUNDED = 'Annulé - non Remboursé';
@@ -28,6 +29,8 @@ enum AppointmentStatus: string
             self::CANCELLED_ADMIN => 'Annulé - Admin',
             self::CANCELLED_GOOGLE_NOT_REFUNDED => 'Annulé Google - Non remboursé',
             self::CANCELLED_UNPAID => 'Annulé - Non payé',
+            self::CANCELLED_GOOGLE_REFUNDED => 'Annulé Google - Remboursé',
+            self::PENDING => 'En attente',
         };
     }
 }

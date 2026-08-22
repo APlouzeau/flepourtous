@@ -32,5 +32,17 @@ export default {
             reserveMyCourse: "Reserve my course",
             redirectingToPayment: "Redirecting to payment...",
         },
+        status: {
+            paid: "Paid",
+            unpaid: "Unpaid",
+            pending: "Waiting",
+            google: "Google",
+            cancelled_refunded: "Canceled -Refunded",
+            cancelled_not_refunded: "Cancelled -not Refunded",
+            cancelled_admin: "Cancelled -Admin",
+            cancelled_google_not_refunded: "Cancelled Google -Not refunded",
+            cancelled_google_refunded: "Canceled Google -Refunded",
+            cancelled_unpaid: "Cancelled -Unpaid",
+        },
     },
 } as const;

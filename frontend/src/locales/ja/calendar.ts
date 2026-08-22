@@ -32,5 +32,17 @@ export default {
             reserveMyCourse: "私のコースを予約する",
             redirectingToPayment: "支払いへのリダイレクト...",
         },
+        status: {
+            paid: "支払済み",
+            unpaid: "未払い",
+            pending: "保留中",
+            google: "Google",
+            cancelled_refunded: "キャンセル済み - 払い戻し済み",
+            cancelled_not_refunded: "キャンセル済み - 未払い戻し",
+            cancelled_admin: "キャンセル済み - 管理者",
+            cancelled_google_not_refunded: "キャンセル済み Google - 未払い戻し",
+            cancelled_google_refunded: "キャンセル済み Google - 払い戻し済み",
+            cancelled_unpaid: "キャンセル済み - 未払い",
+        },
     },
 } as const;
