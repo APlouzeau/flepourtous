@@ -5,7 +5,7 @@ $router->addRoute("GET", BASE_URL, "ControllerUser", "loginPage", 'public');
 $router->addRoute("POST", "/api/login", "ControllerUser", "login", 'public');
 $router->addRoute("POST", "/api/logout", "ControllerUser", "logout", 'auth');
 $router->addRoute("POST", "/api/register", "ControllerUser", "register", 'public');
-$router->addRoute("POST", "/api/verifyConnect", "ControllerUser", "verifyConnect", 'auth');
+$router->addRoute("POST", "/api/verifyConnect", "ControllerUser", "verifyConnect", 'public');
 
 //Users
 $router->addRoute("GET", "/api/users", "ControllerUser", "listUsers", 'admin');
@@ -30,12 +30,12 @@ $router->addRoute("POST", "/api/listEvents", "ControllerCalendar", "listEvents",
 $router->addRoute("POST", "/api/checkDeleteEvent", "ControllerCalendar", "checkDeleteEvent", 'auth');
 $router->addRoute("POST", "/api/deleteEvent", "ControllerCalendar", "deleteEvent", 'auth');
 $router->addRoute("POST", "/api/getAvailableTimeSlots", "ControllerCalendar", "getAvailablesTimeSlots", 'auth');
-$router->addRoute("POST", "/api/sendMailToAlertForNextAppointment", "ControllerMail", "sendMailToAlertForNextAppointment", 'auth');
+$router->addRoute("POST", "/api/sendMailToAlertForNextAppointment", "ControllerMail", "sendMailToAlertForNextAppointment", 'cron');
 $router->addRoute("POST", "/api/prepareRepayment", "ControllerOrder", "prepareRepayment", 'auth');
 $router->addRoute("POST", "/api/checkWaitingEvents", "ControllerCalendar", "checkWaitingEvents", 'cron');
 
 //Google
-$router->addRoute("POST", "/api/handleGoogleNotification", "ControllerGoogle", "handleGoogleNotification", 'cron');
+$router->addRoute("POST", "/api/handleGoogleNotification", "ControllerGoogle", "handleGoogleNotification", 'public');
 $router->addRoute("POST", "/api/setupGoogleWatch", "ControllerGoogle", "setupCalendarWatch", 'cron');
 
 //Visio
@@ -43,7 +43,7 @@ $router->addRoute("POST", "/api/createInstantVisio", "ControllerVisio", "createI
 
 //Stripe
 $router->addRoute("POST", "/api/checkout-session", "ControllerOrder", "checkout", 'auth');
-$router->addRoute("POST", "/api/payment-status", "ControllerOrder", "status", 'auth');
+$router->addRoute("POST", "/api/payment-status", "ControllerOrder", "status", 'public');
 
 //admin
 $router->addRoute("POST", "/api/getInvoices", "ControllerInvoice", "getInvoices", 'admin');

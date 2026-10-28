@@ -30,6 +30,19 @@ class ControllerUser
         }
     }
 
+    public function verifyCronKey()
+    {
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+
+        if (isset($_SERVER['HTTP_API_KEY']) && hash_equals(CRON_KEY, $_SERVER['HTTP_API_KEY'] ?? '')) {
+            return true;
+        } else {
+            http_response_code(401);
+            exit();
+        }
+    }
+
     public function verifyConnectAdmin()
     {
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser']) && isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {

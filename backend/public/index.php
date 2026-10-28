@@ -69,12 +69,14 @@ require_once APP_PATH . "config/router.php";
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+$controllerUser = new ControllerUser();
+
 $handler = $router->getHandler($method, $uri);
 match ($handler['access']) {
     'public' => null,
-    'auth' => $this->controllerUser->verifyConnectBack(),
-    'admin' => $this->controllerUser->verifyConnectAdmin(),
-    'cron' => hash_equals(CRON_KEY, $_SERVER['HTTP_API_KEY'] ?? '')
+    'auth' => $controllerUser->verifyConnectBack(),
+    'admin' => $controllerUser->verifyConnectAdmin(),
+    'cron' => $controllerUser->verifyCronKey()
 };
 
 if (!class_exists($handler['controller']) || $handler['controller'] == 'ControllerError') {
