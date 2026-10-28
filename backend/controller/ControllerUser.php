@@ -63,9 +63,7 @@ class ControllerUser
 
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
-        error_log("LOGIN - Request data: " . print_r($data, true));
-        error_log("LOGIN - Session ID before: " . session_id());
-        error_log("LOGIN - Cookie domain: " . COOKIE_DOMAIN);
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mail = $data['mail'];
             $password = $data['password'];
@@ -94,7 +92,7 @@ class ControllerUser
                 $_SESSION['mail'] = $userVerify['mail'];
                 $_SESSION['firstName'] = $userVerify['firstName'];
                 $_SESSION['lastName'] = $userVerify['lastName'];
-                error_log("LOGIN - Session Data after setting: " . print_r($_SESSION, true));
+
                 $response = [
                     'code' => 1,
                     'message' => 'Connexion réussie.',

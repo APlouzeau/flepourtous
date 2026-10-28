@@ -39,8 +39,6 @@ session_set_cookie_params([
 ]);
 session_start();
 
-
-
 spl_autoload_register(function ($class_name) {
     try {
         if (!preg_match("/^(Class|Controller|Model|Entitie)/", $class_name, $match)) {
@@ -72,6 +70,13 @@ $method = $_SERVER['REQUEST_METHOD'];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 $handler = $router->getHandler($method, $uri);
+match ($handler['access']) {
+    'public' => null,
+    'auth' => $this->controllerUser->verifyConnectBack(),
+    'admin' => $this->controllerUser->verifyConnectAdmin(),
+    'cron' => hash_equals(CRON_KEY, $_SERVER['HTTP_API_KEY'] ?? '')
+};
+
 if (!class_exists($handler['controller']) || $handler['controller'] == 'ControllerError') {
     $controller = new ControllerError();
     $controller->index($handler, $method, $uri);
