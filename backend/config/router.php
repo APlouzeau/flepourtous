@@ -8,7 +8,6 @@ $router->addRoute("POST", "/api/register", "ControllerUser", "register", 'public
 $router->addRoute("POST", "/api/verifyConnect", "ControllerUser", "verifyConnect", 'public');
 
 //Users
-$router->addRoute("GET", "/api/users", "ControllerUser", "listUsers", 'admin');
 $router->addRoute("POST", "/api/userInformations", "ControllerUser", "getUserInformations", 'auth');
 $router->addRoute("POST", "/api/updateUserProfile", "ControllerUser", "updateUserProfile", 'auth');
 $router->addRoute("GET", "/api/verify-email/{token}", "ControllerUser", "verifyEmail", 'public');

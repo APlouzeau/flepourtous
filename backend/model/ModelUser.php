@@ -32,18 +32,6 @@ extends ClassDatabase
         return $req->execute();
     }
 
-    public function getAllUsers()
-    {
-        $req = $this->conn->query('SELECT id_user, nick_name, first_name, mail FROM users ORDER BY nick_name');
-        $datas = $req->fetchAll();
-        $users = [];
-        foreach ($datas as $data) {
-            $user = new EntitieUser($data);
-            $users[] = $user;
-        }
-        return $users;
-    }
-
     public function login(string $mail, string $password)
     {
         $query = "SELECT * FROM users WHERE mail = :mail";

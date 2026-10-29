@@ -348,19 +348,6 @@ class ControllerUser
         echo json_encode($response);
     }
 
-    public function listUsers()
-    {
-        $modelUser = new ModelUser();
-        $users = $modelUser->getAllUsers();
-        $result = [];
-        foreach ($users as $user) {
-            $result[] = [
-                'mail' => $user->getMail(),
-            ];
-        }
-        echo json_encode($result);
-    }
-
     public function deleteUser()
     {
         $response = [
