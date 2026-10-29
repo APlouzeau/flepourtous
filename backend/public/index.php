@@ -56,7 +56,7 @@ spl_autoload_register(function ($class_name) {
             throw new Exception("Class not found => " . $class_name, 1);
         }
     } catch (\Throwable $th) {
-        var_dump($th, $class_name);
+        error_log("Autoload impossible pour " . $class_name . " : " . $th->getMessage());
     }
 });
 

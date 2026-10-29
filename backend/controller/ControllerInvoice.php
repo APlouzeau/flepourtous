@@ -78,9 +78,7 @@ class ControllerInvoice
         }
 
         if (isset($input['isInvoiced']) && $input['isInvoiced'] !== '') {
-            error_log("🔍 Processing isInvoiced: " . $input['isInvoiced']); // ← DEBUG
             $filters['is_invoiced'] = (int)$input['isInvoiced'];
-            error_log("🔍 Filters after isInvoiced: " . json_encode($filters)); // ← DEBUG
         }
 
 
@@ -91,7 +89,6 @@ class ControllerInvoice
     {
         $sqlParts = [];
         $params = [];
-        error_log("🔍 filterToSql received: " . json_encode($filters)); // ← DEBUG
 
         if (isset($filters['beginPeriod'])) {
             $sqlParts[] = 'start_date_time >= :beginPeriod';

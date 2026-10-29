@@ -1,7 +1,12 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Les erreurs PHP ne sont jamais affichées au client (chemins, requêtes SQL...),
+// sauf en local avec APP_DEBUG=true dans backend/.env. Elles partent toujours
+// dans les logs du conteneur (docker logs).
+$appDebug = getenv('APP_DEBUG') === 'true';
+ini_set('display_errors', $appDebug ? '1' : '0');
+ini_set('display_startup_errors', $appDebug ? '1' : '0');
+ini_set('log_errors', '1');
 error_reporting(E_ALL);
 
 define("CORS", getenv('CORS'));

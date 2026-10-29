@@ -3,12 +3,14 @@
 class ControllerError
 {
 
-    public function index($handler, $method, $uri)
+    public function index($handler = null, $method = null, $uri = null)
     {
-        echo "error";
-        var_dump($handler);
-        var_dump($method);
-        var_dump($uri);
+        // Route inconnue : réponse JSON neutre, sans exposer la structure du routeur.
+        http_response_code(404);
+        echo json_encode([
+            'code' => 0,
+            'message' => 'Route inconnue'
+        ]);
     }
 
     public function validateData($data, string $errorMessage, int $httpCode = 400)
