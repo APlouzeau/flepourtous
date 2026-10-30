@@ -174,6 +174,26 @@ extends ClassDatabase
         }
     }
 
+    /**
+     * Débite le porte-monnaie en une requête (pas de lecture puis écriture qu'une autre requête pourrait croiser).
+     * Par défaut, refuse si le solde est insuffisant (renvoie false).
+     * $allowPartial : débite au plus le solde disponible (part porte-monnaie d'un paiement déjà encaissé par Stripe).
+     */
+    public function debitWallet(int $idUser, float $amount, bool $allowPartial = false): bool
+    {
+        if ($allowPartial) {
+            $req = $this->conn->prepare("UPDATE users SET wallet = GREATEST(wallet - :amount, 0) WHERE id_user = :id_user");
+            $req->bindValue(":amount", $amount, PDO::PARAM_STR);
+        } else {
+            $req = $this->conn->prepare("UPDATE users SET wallet = wallet - :amount WHERE id_user = :id_user AND wallet >= :amount_check");
+            $req->bindValue(":amount", $amount, PDO::PARAM_STR);
+            $req->bindValue(":amount_check", $amount, PDO::PARAM_STR);
+        }
+        $req->bindValue(":id_user", $idUser, PDO::PARAM_INT);
+        $req->execute();
+        return $allowPartial ? true : $req->rowCount() === 1;
+    }
+
     public function addToWallet(int $idUser, float $amount)
     {
         $query = "UPDATE users SET wallet = wallet + :amount WHERE id_user = :id_user";

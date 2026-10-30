@@ -305,6 +305,44 @@ class ControllerMail
         }
     }
 
+    /**
+     * Paiement par carte arrivé après l'annulation du cours : le montant est crédité sur le porte-monnaie.
+     */
+    public function sendMailForWalletCreditAfterCancellation(int $userId, float $amount)
+    {
+        try {
+            $user = $this->modelUser->getUser(new EntitieUser(['idUser' => $userId]));
+            $this->mailer->addAddress($user['mail']);
+            $this->mailer->isHTML(true);
+            $this->mailer->Subject = "Flepourtous - Payment credited to your wallet / Paiement crédité sur votre porte-monnaie";
+            $formatted = htmlspecialchars(number_format($amount, 2, ',', ' '));
+            $emailBody = "Hello " . htmlspecialchars($user['firstName'] . " " . $user['lastName']) . ",<br><br>";
+            $emailBody .= "Your payment of " . $formatted . " € arrived after your appointment had been cancelled for non-payment.<br>";
+            $emailBody .= "The full amount has been credited to your wallet: you can use it to book a new lesson.<br><br>";
+            $emailBody .= "Bonjour,<br><br>Votre paiement de " . $formatted . " € est arrivé après l'annulation de votre rendez-vous pour non-paiement.<br>";
+            $emailBody .= "Le montant a été intégralement crédité sur votre porte-monnaie : vous pouvez l'utiliser pour réserver un nouveau cours.<br><br>";
+            $emailBody .= "The Flepourtous team / L'équipe Flepourtous";
+            $this->mailer->Body = $emailBody;
+            $this->mailer->send();
+            $this->controllerError->logs("Wallet credit after cancellation email sent", [
+                "Email sent to: " . $user['mail'],
+                "Amount: " . $amount
+            ], self::MAIL_LOG_FILE);
+            return true;
+        } catch (Exception $e) {
+            $this->controllerError->logs("Wallet credit after cancellation email fail", [
+                "PHPMailer Error: " . $this->mailer->ErrorInfo,
+                "Exception Message: " . $e->getMessage()
+            ], self::MAIL_LOG_FILE);
+            return false;
+        } finally {
+            if ($this->mailer) {
+                $this->mailer->clearAddresses();
+                $this->mailer->clearAttachments();
+            }
+        }
+    }
+
     public function sendMailForPackPurchase(string $userId, float $amount)
     {
         $modelUser = new ModelUser();

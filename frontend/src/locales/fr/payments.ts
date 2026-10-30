@@ -12,6 +12,7 @@ export default {
         missingPaymentInformations: "Informations de paiement manquantes. Veuillez réessayer.",
         returnToCalendar: "Retour à mon calendrier",
         successFullPayment: "Paiement réussi !",
+        creditedToWallet: "Votre rendez-vous a été annulé avant la fin du paiement (délai de paiement dépassé). Le montant payé a été crédité sur votre porte-monnaie : vous pouvez l'utiliser pour réserver un nouveau cours.",
         missingCheck: "Erreur lors de la vérification du paiement.",
         processing: "Traitement de votre paiement, veuillez patienter...",
         redirectToCalendar: "Redirection vers le calendrier dans quelques secondes...",
