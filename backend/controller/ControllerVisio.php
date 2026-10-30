@@ -112,6 +112,10 @@ class ControllerVisio
         $modelEvent = new ModelEvent();
         $event = $modelEvent->getEventById($idEvent);
         $modelEvent->deleteVisioLink($idEvent);
+        // Pas de lien enregistré : aucune room à supprimer chez Daily (sinon l'appel partirait sans nom de room).
+        if (!$event || empty($event['visioLink'])) {
+            return;
+        }
         $path = parse_url($event['visioLink'], PHP_URL_PATH);
         $roomNameOnly = $path ? ltrim($path, '/') : null;
         $visioApiKey = VISIO_API_KEY;

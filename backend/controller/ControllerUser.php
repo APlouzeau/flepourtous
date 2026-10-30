@@ -39,10 +39,12 @@ class ControllerUser
 
     public function verifyCronKey()
     {
-        $requestBody = file_get_contents('php://input');
-        $data = json_decode($requestBody, true);
+        // Clé absente ou vide côté serveur : on refuse tout, sinon un en-tête
+        // Api-Key vide passerait la comparaison.
+        $expectedKey = is_string(CRON_KEY) ? CRON_KEY : '';
+        $givenKey = $_SERVER['HTTP_API_KEY'] ?? '';
 
-        if (isset($_SERVER['HTTP_API_KEY']) && hash_equals(CRON_KEY, $_SERVER['HTTP_API_KEY'] ?? '')) {
+        if ($expectedKey !== '' && is_string($givenKey) && hash_equals($expectedKey, $givenKey)) {
             return true;
         } else {
             http_response_code(401);
@@ -131,9 +133,19 @@ class ControllerUser
 
     public function logout()
     {
+        // Le cookie est effacé avec les mêmes paramètres que ceux de sa création
+        // (domaine, secure…), sinon le navigateur garde l'original.
+        $params = session_get_cookie_params();
         session_unset();
         session_destroy();
-        setcookie(session_name(), "", time() - 3600, "/");
+        setcookie(session_name(), "", [
+            'expires' => time() - 3600,
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => $params['samesite'],
+        ]);
         echo json_encode([
             'code' => 1,
             'message' => 'Deconnexion réussie.'
@@ -296,14 +308,15 @@ class ControllerUser
                             'message' => 'Adresse e-mail déjà utilisée',
                         ];
                     } else {
-                        $verificationToken = hash('sha256', $data['mail'] . $data['nickName'] . CRON_KEY);
+                        // Jeton aléatoire : envoyé en clair par mail, seul son hash est stocké.
+                        $verificationToken = bin2hex(random_bytes(32));
                         $user = new EntitieUser([
                             'nickName' => $data['nickName'],
                             'firstName' => $data['firstName'],
                             'lastName' => $data['lastName'],
                             'mail' => $data['mail'],
                             'password' => password_hash($data['password'], PASSWORD_BCRYPT),
-                            'verifyToken' => $verificationToken,
+                            'verifyToken' => hash('sha256', $verificationToken),
                             'internalRegulationsVersion' => self::INTERNAL_REGULATIONS_VERSION,
                             'termsOfServiceVersion' => self::TERMS_OF_SERVICE_VERSION,
                             'privacyPolicyVersion' => self::PRIVACY_POLICY_VERSION,
@@ -608,52 +621,43 @@ class ControllerUser
         $modelUser = new ModelUser();
         $userId = $modelUser->checkMail($mail);
         if ($userId) {
-            $verificationToken = hash('sha256', $data['mail'] . CRON_KEY);
-            $modelUser->setNewToken($userId, $verificationToken);
+            // Jeton aléatoire, valable 1 h : envoyé en clair par mail, seul son hash est stocké.
+            $resetToken = bin2hex(random_bytes(32));
+            $modelUser->setResetToken($userId, hash('sha256', $resetToken));
 
             $controllerMail = new ControllerMail();
-            $controllerMail->sendMailToForgetedPassword($mail, $verificationToken);
-
-            echo json_encode([
-                'code' => 1,
-                'message' => 'Un e-mail de réinitialisation du mot de passe a été envoyé.',
-            ]);
-            return;
-        } else {
-            echo json_encode([
-                'code' => 0,
-                'message' => 'Aucun utilisateur trouvé avec cette adresse e-mail.',
-            ]);
-            return;
+            $controllerMail->sendMailToForgetedPassword($mail, $resetToken);
         }
+
+        // Même réponse que le compte existe ou non : on ne révèle pas qui est inscrit.
+        echo json_encode([
+            'code' => 1,
+            'message' => 'Si un compte existe avec cette adresse, un e-mail de réinitialisation a été envoyé.',
+        ]);
     }
 
     public function resetPasswordLink($token = null)
     {
+        // header() avant toute sortie, sinon la redirection échoue.
         if (!$token) {
-            echo json_encode([
-                'code' => 0,
-                'message' => 'Token manquant',
-            ]);
             header('Location: ' . URI_FRONT . 'echec-reinitialisation-du-mot-de-passe?raison=token_manquant');
-            return;
+            exit();
         }
 
         $modelUser = new ModelUser();
-        $userId = $modelUser->verifyEmail($token);
+        $userId = $modelUser->consumeResetToken($token);
         if (!$userId) {
             header('Location: ' . URI_FRONT . 'echec?raison=token_invalide');
-            echo json_encode([
-                'code' => 0,
-                'message' => 'Token invalide ou expiré',
-            ]);
-            return;
+            exit();
         }
 
-        if ($userId) {
-            $_SESSION['idUser'] = $userId;
-            header('Location: ' . URI_FRONT . 'reset-password');
-        }
+        // Pas de connexion : la session ne sert qu'à autoriser le changement
+        // de mot de passe de CE compte, pendant 15 minutes.
+        session_regenerate_id(true);
+        $_SESSION['resetUserId'] = $userId;
+        $_SESSION['resetUntil'] = time() + 15 * 60;
+        header('Location: ' . URI_FRONT . 'reset-password');
+        exit();
     }
 
     public function resetPassword()
@@ -687,9 +691,18 @@ class ControllerUser
             ]);
             return;
         }
+        if (empty($_SESSION['resetUserId']) || empty($_SESSION['resetUntil']) || $_SESSION['resetUntil'] < time()) {
+            unset($_SESSION['resetUserId'], $_SESSION['resetUntil']);
+            http_response_code(401);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Lien de réinitialisation expiré, refaites une demande.',
+            ]);
+            return;
+        }
         $password = password_hash($data['newPassword'], PASSWORD_BCRYPT);
         $modelUser = new ModelUser();
-        $updatePassword = $modelUser->updatePassword($_SESSION['idUser'], $password);
+        $updatePassword = $modelUser->updatePassword((int) $_SESSION['resetUserId'], $password);
         if (!$updatePassword) {
             echo json_encode([
                 'code' => 0,
@@ -697,9 +710,17 @@ class ControllerUser
             ]);
             return;
         }
+        $params = session_get_cookie_params();
         session_unset();
         session_destroy();
-        setcookie(session_name(), "", time() - 3600, "/");
+        setcookie(session_name(), "", [
+            'expires' => time() - 3600,
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => $params['samesite'],
+        ]);
         echo json_encode([
             'code' => 1,
             'message' => 'Mot de passe réinitialisé avec succès',

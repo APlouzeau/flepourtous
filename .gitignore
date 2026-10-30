@@ -94,3 +94,5 @@ flepourtous-prod.sql
 logs/
 
 ./pnpm-store
+# Fichiers de session curl (FLE-53)
+cookies.txt

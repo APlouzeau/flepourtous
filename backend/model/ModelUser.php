@@ -16,7 +16,8 @@ extends ClassDatabase
 
     public function register(EntitieUser $user)
     {
-        $query = "INSERT INTO users (first_name, last_name, mail, nick_name, password, verify_token, internal_regulations_version, terms_of_service_version, privacy_policy_version) VALUES (:first_name, :last_name, :mail, :nick_name, :password, :verify_token, :internal_regulations_version, :terms_of_service_version, :privacy_policy_version)";
+        // verify_token contient le hash du jeton envoyé par mail, valable 48 h (UTC).
+        $query = "INSERT INTO users (first_name, last_name, mail, nick_name, password, verify_token, verify_token_expires_at, internal_regulations_version, terms_of_service_version, privacy_policy_version) VALUES (:first_name, :last_name, :mail, :nick_name, :password, :verify_token, UTC_TIMESTAMP() + INTERVAL 48 HOUR, :internal_regulations_version, :terms_of_service_version, :privacy_policy_version)";
 
         $req = $this->conn->prepare($query);
         $req->bindValue(":first_name", $user->getFirstName());
@@ -109,27 +110,55 @@ extends ClassDatabase
         }
     }
 
-    public function verifyEmail(string $verifyToken)
+    /**
+     * Vérifie l'e-mail à partir du jeton reçu par mail (en clair).
+     * Le jeton est à usage unique et expire 48 h après l'inscription.
+     * Renvoie l'id de l'utilisateur, ou false si le jeton est inconnu ou expiré.
+     */
+    public function verifyEmail(string $token)
     {
-        $req = $this->conn->prepare("SELECT id_user FROM users WHERE verify_token = :verify_token");
-        $req->bindValue(":verify_token", $verifyToken);
+        $req = $this->conn->prepare("SELECT id_user FROM users WHERE verify_token = :token_hash AND verify_token_expires_at > UTC_TIMESTAMP()");
+        $req->bindValue(":token_hash", hash('sha256', $token));
         $req->execute();
         $data = $req->fetch(PDO::FETCH_ASSOC);
         if (!$data) {
-            return false; // Token invalide
-        }
-        $query = "UPDATE users SET is_verified = 1 WHERE verify_token = :verify_token";
-        $req = $this->conn->prepare($query);
-        $req->bindValue(":verify_token", $verifyToken);
-        if ($req->execute()) {
-            $query = "UPDATE users SET verify_token = NULL WHERE verify_token = :verify_token";
-            $req = $this->conn->prepare($query);
-            $req->bindValue(":verify_token", $verifyToken);
-            $req->execute();
-            return $data['id_user'];
-        } else {
             return false;
         }
+        $req = $this->conn->prepare("UPDATE users SET is_verified = 1, verify_token = NULL, verify_token_expires_at = NULL WHERE id_user = :id_user");
+        $req->bindValue(":id_user", $data['id_user'], PDO::PARAM_INT);
+        return $req->execute() ? (int) $data['id_user'] : false;
+    }
+
+    /**
+     * Enregistre le hash d'un jeton de réinitialisation, valable 1 h (UTC).
+     * Une nouvelle demande remplace la précédente.
+     */
+    public function setResetToken(int $idUser, string $tokenHash)
+    {
+        $req = $this->conn->prepare("UPDATE users SET reset_token = :token_hash, reset_token_expires_at = UTC_TIMESTAMP() + INTERVAL 1 HOUR WHERE id_user = :id_user");
+        $req->bindValue(":token_hash", $tokenHash, PDO::PARAM_STR);
+        $req->bindValue(":id_user", $idUser, PDO::PARAM_INT);
+        return $req->execute();
+    }
+
+    /**
+     * Consomme un jeton de réinitialisation (en clair) : le jeton est effacé
+     * dès qu'il est utilisé. Cliquer le lien prouve aussi l'accès à la boîte
+     * mail, donc le compte est marqué vérifié.
+     * Renvoie l'id de l'utilisateur, ou false si le jeton est inconnu ou expiré.
+     */
+    public function consumeResetToken(string $token)
+    {
+        $req = $this->conn->prepare("SELECT id_user FROM users WHERE reset_token = :token_hash AND reset_token_expires_at > UTC_TIMESTAMP()");
+        $req->bindValue(":token_hash", hash('sha256', $token));
+        $req->execute();
+        $data = $req->fetch(PDO::FETCH_ASSOC);
+        if (!$data) {
+            return false;
+        }
+        $req = $this->conn->prepare("UPDATE users SET reset_token = NULL, reset_token_expires_at = NULL, is_verified = 1 WHERE id_user = :id_user");
+        $req->bindValue(":id_user", $data['id_user'], PDO::PARAM_INT);
+        return $req->execute() ? (int) $data['id_user'] : false;
     }
 
     public function updateWallet(int $idUser, float $amount)
@@ -251,15 +280,6 @@ extends ClassDatabase
         $req = $this->conn->prepare($query);
         $req->bindValue(":password", $user->getPassword(), PDO::PARAM_STR);
         $req->bindValue(":id_user", $user->getIdUser(), PDO::PARAM_INT);
-        return $req->execute();
-    }
-
-    public function setNewToken(int $idUser, string $token)
-    {
-        $query = "UPDATE users SET verify_token = :verify_token WHERE id_user = :id_user";
-        $req = $this->conn->prepare($query);
-        $req->bindValue(":verify_token", $token, PDO::PARAM_STR);
-        $req->bindValue(":id_user", $idUser, PDO::PARAM_INT);
         return $req->execute();
     }
 

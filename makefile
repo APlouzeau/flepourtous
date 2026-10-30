@@ -182,6 +182,25 @@ shell-backend: ## Shell dans le container backend
 shell-frontend: ## Shell dans le container frontend
 	docker compose -f $(COMPOSE_FILE) exec frontend sh
 
+# Base preprod / prod (MariaDB sur l'hôte du VPS) — voir scripts/db.sh
+db-backup-prod: ## [VPS] Dump de la base prod dans ~/backups/flepourtous/ (garde les 10 derniers)
+	bash scripts/db.sh backup prod
+
+db-backup-preprod: ## [VPS] Dump de la base preprod dans ~/backups/flepourtous/ (garde les 10 derniers)
+	bash scripts/db.sh backup preprod
+
+db-migrate-prod: ## [VPS] Applique les migrations en attente sur la base prod
+	bash scripts/db.sh migrate prod
+
+db-migrate-preprod: ## [VPS] Applique les migrations en attente sur la base preprod
+	bash scripts/db.sh migrate preprod
+
+db-status-prod: ## [VPS] Migrations appliquées / en attente sur la prod
+	bash scripts/db.sh status prod
+
+db-status-preprod: ## [VPS] Migrations appliquées / en attente sur la preprod
+	bash scripts/db.sh status preprod
+
 db-backup: ## Sauvegarde la base de données
 	@echo "💾 Sauvegarde de la base..."
 	docker compose -f $(COMPOSE_FILE) exec db mysqldump -u flepourtous -p1234 flepourtous > backup-$(shell date +%Y%m%d-%H%M%S).sql
@@ -236,9 +255,11 @@ reset-all:
 # Google Calendar Webhooks
 google-setup-watch: ## Configure le webhook Google Calendar
 	@echo "🔔 Configuration du webhook Google Calendar..."
-	@curl -X POST "http://localhost:8000/api/setupGoogleWatch" \
+	@KEY="$${CRON_KEY:-$$(docker exec flepourtous-backend-dev printenv CRON_KEY 2>/dev/null)}"; \
+	if [ -z "$$KEY" ]; then echo "❌ CRON_KEY absente (ni exportée, ni dans le conteneur backend)"; exit 1; fi; \
+	curl -X POST "http://localhost:8000/api/setupGoogleWatch" \
 		-H "Content-Type: application/json" \
-		-H "Api-Key: $${CRON_KEY:-IFyAdjbJa1OHCFfLirZXtumCrTBprgZKoZMYaKoUE0UozKwSTyCd8LkHBefGPEzY}" \
+		-H "Api-Key: $$KEY" \
 		-s || echo "❌ Erreur lors de la configuration"
 	@echo ""
 	@echo "✅ Webhook configuré !"

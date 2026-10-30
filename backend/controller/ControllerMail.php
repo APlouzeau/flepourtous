@@ -171,10 +171,11 @@ class ControllerMail
         $userEntitie = new EntitieUser([
             'idUser' => $appointment['userId']
         ]);
+        // Date affichée dans le fuseau de l'élève (stockée en UTC), avec le fuseau précisé.
         $startDateTime = $appointment['startDateTime'];
-        $appointmentDateTime = new DateTime($startDateTime, new DateTimeZone('UTC'));
-        $appointmentDate = $appointmentDateTime->format('d-m H:i:s');
-        $appointmentHour = $appointmentDateTime->format('H:i');
+        $timezone = $appointment['timezone'] ?: 'UTC';
+        $appointmentDateTime = (new DateTime($startDateTime, new DateTimeZone('UTC')))->setTimezone(new DateTimeZone($timezone));
+        $appointmentDate = $appointmentDateTime->format('d/m/Y H:i') . ' (' . $timezone . ')';
 
         $userInformations = $this->modelUser->getUser($userEntitie);
 
