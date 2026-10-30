@@ -27,6 +27,7 @@ export default function RegisterPage() {
         rgpd: false,
     });
 
+    // Les versions doivent être celles de ControllerUser (backend), sinon l'inscription est refusée.
     const documentInternalRegulations = {
         document: "Internal regulations",
         version: "1.1",

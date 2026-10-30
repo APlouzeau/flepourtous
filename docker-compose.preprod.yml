@@ -3,6 +3,11 @@ name: flepourtous-preprod
 services:
   api:
     container_name: flepourtous-backend-preprod
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     build:
       context: ./backend
       target: prod
@@ -24,6 +29,11 @@ services:
 
   app:
     container_name: flepourtous-frontend-preprod
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     build:
       context: ./frontend
       dockerfile: dockerfile
