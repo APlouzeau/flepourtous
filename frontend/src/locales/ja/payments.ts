@@ -12,6 +12,7 @@ export default {
         missingPaymentInformations: "支払い情報がありません。もう一度試してください。",
         returnToCalendar: "カレンダーに戻る",
         successFullPayment: "支払いが成功しました！",
+        creditedToWallet: "お支払いが完了する前に、予約はキャンセルされました（お支払い期限切れ）。お支払い金額はウォレットにチャージされました。新しいレッスンの予約にご利用いただけます。",
         missingCheck: "支払いの確認中にエラーが発生しました。",
         processing: "お支払いを処理しています。お待ちください...",
         redirectToCalendar: "数秒後にカレンダーにリダイレクトします...",

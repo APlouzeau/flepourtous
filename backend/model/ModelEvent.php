@@ -295,6 +295,20 @@ class ModelEvent extends  ClassDatabase
         return $req->execute();
     }
 
+    /**
+     * Passe le rendez-vous en « Payé » seulement s'il est encore « En attente », en une requête :
+     * si le cron l'a annulé entre-temps, rien ne change et la méthode renvoie false.
+     */
+    public function markPaidIfPending(string $idEvent): bool
+    {
+        $req = $this->conn->prepare('UPDATE events SET status = :paid WHERE id_event = :id_event AND status = :pending');
+        $req->bindValue(':paid', AppointmentStatus::PAID->value, PDO::PARAM_STR);
+        $req->bindValue(':pending', AppointmentStatus::PENDING->value, PDO::PARAM_STR);
+        $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
+        $req->execute();
+        return $req->rowCount() === 1;
+    }
+
     public function updateEventStatus(string $idEvent, string $status): bool
     {
         $req = $this->conn->prepare('UPDATE events SET status = :status WHERE id_event = :id_event');
