@@ -29,6 +29,8 @@ define("URI_MAIL", getenv('URI_MAIL'));
 define("URI_FRONT", getenv('URI_FRONT'));
 define('URI_STRIPE', getenv('URI_STRIPE'));
 define("COOKIE_DOMAIN", getenv('COOKIE_DOMAIN'));
+// Cookie de session en HTTPS uniquement, sauf SESSION_COOKIE_SECURE=false (local en HTTP).
+define("SESSION_COOKIE_SECURE", getenv('SESSION_COOKIE_SECURE') !== 'false');
 
 define("CRON_KEY", getenv('CRON_KEY'));
 define("JWT_KEY", getenv('JWT_KEY'));

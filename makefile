@@ -236,9 +236,11 @@ reset-all:
 # Google Calendar Webhooks
 google-setup-watch: ## Configure le webhook Google Calendar
 	@echo "🔔 Configuration du webhook Google Calendar..."
-	@curl -X POST "http://localhost:8000/api/setupGoogleWatch" \
+	@KEY="$${CRON_KEY:-$$(docker exec flepourtous-backend-dev printenv CRON_KEY 2>/dev/null)}"; \
+	if [ -z "$$KEY" ]; then echo "❌ CRON_KEY absente (ni exportée, ni dans le conteneur backend)"; exit 1; fi; \
+	curl -X POST "http://localhost:8000/api/setupGoogleWatch" \
 		-H "Content-Type: application/json" \
-		-H "Api-Key: $${CRON_KEY:-IFyAdjbJa1OHCFfLirZXtumCrTBprgZKoZMYaKoUE0UozKwSTyCd8LkHBefGPEzY}" \
+		-H "Api-Key: $$KEY" \
 		-s || echo "❌ Erreur lors de la configuration"
 	@echo ""
 	@echo "✅ Webhook configuré !"
