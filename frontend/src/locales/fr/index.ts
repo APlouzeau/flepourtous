@@ -9,6 +9,7 @@ import cgv from "./cgv";
 import calendar from "./calendar";
 import payments from "./payments";
 import rules from "./rules";
+import seo from "./seo";
 import privacy from "./privacy";
 
 export default {
@@ -24,4 +25,5 @@ export default {
     ...payments,
     ...rules,
     ...privacy,
+    ...seo,
 } as const;

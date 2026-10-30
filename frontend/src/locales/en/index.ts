@@ -10,6 +10,7 @@ import privacy from "./privacy";
 import profile from "./profile";
 import ressources from "./ressources";
 import rules from "./rules";
+import seo from "./seo";
 
 export default {
     ...common,
@@ -24,4 +25,5 @@ export default {
     ...payments,
     ...rules,
     ...privacy,
+    ...seo,
 } as const;

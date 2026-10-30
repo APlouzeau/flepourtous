@@ -1,7 +1,16 @@
+import { pageMetadata } from "@/lib/metadata";
 import Link from "next/link";
 import Image from "next/image";
 import LoginForm from "./LoginForm";
 import { getTranslations } from "@/locales/server";
+
+
+type LocaleParams = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: LocaleParams) {
+    const { locale } = await params;
+    return pageMetadata(locale, "login");
+}
 
 export default async function ConnexionPage() {
     const trad = await getTranslations();

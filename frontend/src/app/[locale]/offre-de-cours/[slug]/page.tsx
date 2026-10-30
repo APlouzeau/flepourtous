@@ -1,5 +1,7 @@
 import { Lesson } from "@/app/[locale]/types/lessons";
 import { getLessons } from "@/lib/lessons";
+import { toDescription } from "@/lib/metadata";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getCookieBackend } from "@/lib/session";
@@ -16,6 +18,21 @@ const CheckIcon = ({ className }: { className?: string }) => (
 );
 
 type tParams = Promise<{ slug: string }>;
+
+// Titre et description tirés du cours en base (titre + introduction, déjà traduits) : un nouveau cours
+// a ses propres balises sans changer le code. getLessons est mis en cache pour la requête : un seul appel API.
+export async function generateMetadata(props: { params: tParams }): Promise<Metadata> {
+    const { slug } = await props.params;
+    const trad = await getTranslations();
+    const lesson: Partial<Lesson> = await getLessons(slug);
+    if (!lesson?.title) return {};
+    const suffix = trad("seo.lessonTitleSuffix");
+    const title = (lesson.title + suffix).length <= 60 ? lesson.title + suffix : lesson.title;
+    return {
+        title: { absolute: title },
+        description: toDescription(lesson.introduction || lesson.fullDescription_1),
+    };
+}
 
 export default async function LessonPage(props: { params: tParams }) {
     const { slug } = await props.params;

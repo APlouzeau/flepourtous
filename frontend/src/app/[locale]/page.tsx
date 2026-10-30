@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/metadata";
 import { getLessonsWithPrices } from "@/lib/lessons";
 import HeroSection from "./components/heroSection";
 import WhyChooseFleSection from "./components/whyChooseFleSection";
@@ -6,6 +7,14 @@ import NumbersSection from "./components/numbersSection";
 import TestimonialsSection from "./components/testimonialsSection";
 import FaqSection from "./components/faqSection";
 import CtaSection from "./components/ctaSection";
+
+
+type LocaleParams = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: LocaleParams) {
+    const { locale } = await params;
+    return pageMetadata(locale, "home");
+}
 
 export default async function Home() {
     // Cette page doit toujours rester server pour récupérer les données server side et hydrater les sous-composants qui peuvent être client. C'est le Server Side Rendering (SSR).

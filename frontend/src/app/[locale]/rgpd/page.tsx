@@ -1,5 +1,14 @@
+import { pageMetadata } from "@/lib/metadata";
 import { getTranslations } from "@/locales/server";
 import Version from "../components/front/version";
+
+
+type LocaleParams = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: LocaleParams) {
+    const { locale } = await params;
+    return pageMetadata(locale, "privacy");
+}
 
 export default async function RGPDPage() {
     const trad = await getTranslations();

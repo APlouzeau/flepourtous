@@ -1,6 +1,15 @@
+import { pageMetadata } from "@/lib/metadata";
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "@/locales/server";
+
+
+type LocaleParams = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: LocaleParams) {
+    const { locale } = await params;
+    return pageMetadata(locale, "resources");
+}
 
 export default async function ResourcesPage() {
     const trad = await getTranslations();
