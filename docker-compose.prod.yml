@@ -43,6 +43,9 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_STRIPE_PUBLIC_KEY: ${NEXT_PUBLIC_STRIPE_PUBLIC_KEY}
+        # Pas des secrets, propres à l'environnement comme les labels Traefik : écrits ici plutôt que dans .env.
+        NEXT_PUBLIC_SITE_URL: https://flepourtous.fr
+        NEXT_PUBLIC_SITE_ENV: prod
     environment:
       - INTERNAL_API_URL=http://flepourtous-backend-prod
       - JWT_SECRET=${JWT_SECRET}
