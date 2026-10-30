@@ -628,32 +628,74 @@ class ControllerCalendar
         return $createdEvent;
     }
 
+    /**
+     * Rendez-vous « En attente » (non payés), appelé par le cron toutes les 10 min :
+     * - entre 15 et 25 min après la réservation : un mail de rappel (fenêtre de 10 min = un seul passage du cron) ;
+     * - cours dans moins de 24 h et non payé depuis 30 min, ou cours dans plus de 24 h et non payé depuis 2 h :
+     *   annulation (statut, room visio, événement Google pour libérer le créneau) + mail ;
+     * - cours déjà passé : statut annulé en silence, sans mail ni suppression (vieux rendez-vous restés en attente).
+     * Chaque rendez-vous est traité à part : une erreur sur l'un n'empêche pas les suivants.
+     */
     public function checkActionForUnpaidAppointments(array $unpaidAppointments)
     {
+        $currentTime = new DateTime('now', new DateTimeZone('UTC'));
+        $now = $currentTime->getTimestamp();
+
         foreach ($unpaidAppointments as $appointment) {
             $appointmentId = $appointment['idEvent'];
-            $createdAt = new DateTime($appointment['createdAt'], new DateTimeZone('UTC'));
-            $appointmentStartTime = new DateTime($appointment['startDateTime'], new DateTimeZone('UTC'));
-            $currentTime = new DateTime('now', new DateTimeZone('UTC'));
-            $timeDifferenceToStartTime = $currentTime->getTimestamp() - $appointmentStartTime->getTimestamp();
-            $timeDifferenceFromCreation = $currentTime->getTimestamp() - $createdAt->getTimestamp();
+            try {
+                $createdAt = new DateTime($appointment['createdAt'], new DateTimeZone('UTC'));
+                $appointmentStart = (new DateTime($appointment['startDateTime'], new DateTimeZone('UTC')))->getTimestamp();
+                $sinceCreation = $now - $createdAt->getTimestamp();
 
-            if ($timeDifferenceFromCreation > 15 * 60 && $timeDifferenceFromCreation < 25 * 60) { // 15 to 25 minutes in seconds
-                //notifier l'utilisateur
-                $this->controllerMail->sendMailToAlertEventNotPaid($appointment);
+                if ($appointmentStart <= $now) {
+                    $this->modelEvent->updateEventStatus($appointmentId, AppointmentStatus::CANCELLED_UNPAID->value);
+                    $this->controllerError->logs("Rendez-vous passé non payé, annulé sans mail", [$appointmentId], self::EVENT_LOG_FILE);
+                    continue;
+                }
+
+                if ($sinceCreation > 15 * 60 && $sinceCreation < 25 * 60) {
+                    $this->controllerMail->sendMailToAlertEventNotPaid($appointment);
+                }
+
+                $startsWithin24h = $appointmentStart <= $now + 24 * 60 * 60;
+                $mustCancel = ($startsWithin24h && $sinceCreation > 30 * 60)
+                    || (!$startsWithin24h && $sinceCreation > 120 * 60);
+
+                if ($mustCancel) {
+                    // Statut d'abord : c'est lui qui fait foi si une étape suivante échoue.
+                    $this->modelEvent->updateEventStatus($appointmentId, AppointmentStatus::CANCELLED_UNPAID->value);
+                    $this->controllerVisio->deleteRoom($appointmentId);
+                    $this->deleteGoogleEvent($appointmentId);
+                    $this->controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($appointment);
+                    $this->controllerError->logs("Rendez-vous non payé annulé", [$appointmentId], self::EVENT_LOG_FILE);
+                }
+            } catch (Throwable $e) {
+                error_log("checkActionForUnpaidAppointments : erreur sur l'événement " . $appointmentId . " : " . $e->getMessage());
             }
-            if ($timeDifferenceFromCreation > 120 * 60 && $appointmentStartTime->getTimestamp() > ($currentTime->getTimestamp() + 24 * 60 * 60)) { // RDV prévu dans plus de 24 heures et impayé depuis plus de 2 heures
-                //supprimer l'événement
-                $this->controllerVisio->deleteRoom($appointmentId);
-                $this->modelEvent->updateEventStatus($appointmentId, AppointmentStatus::CANCELLED_UNPAID->value);
-                $this->controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($appointment);
+        }
+    }
+
+    /**
+     * Supprime l'événement de l'agenda Google (libère le créneau).
+     * Un événement déjà supprimé côté Google (404 / 410) compte comme un succès.
+     */
+    private function deleteGoogleEvent(string $idEvent): bool
+    {
+        try {
+            $service = new Google\Service\Calendar($this->getClient());
+            $service->events->delete(GOOGLE_CALENDAR_ID, $idEvent);
+            return true;
+        } catch (Google\Service\Exception $e) {
+            if (in_array($e->getCode(), [404, 410], true)) {
+                return true;
             }
-            if ($timeDifferenceFromCreation > 30 * 60 && $appointmentStartTime->getTimestamp() <= ($currentTime->getTimestamp() + 24 * 60 * 60)) { // RDV prévu dans moins de 24 heures et impayé depuis plus de 30 minutes
-                //supprimer l'événement
-                $this->controllerVisio->deleteRoom($appointmentId);
-                $this->modelEvent->updateEventStatus($appointmentId, AppointmentStatus::CANCELLED_UNPAID->value);
-                $this->controllerMail->sendMailToAlertEventDeleteBecauseNotPaid($appointment);
-            }
+            error_log("Suppression Google impossible pour l'événement " . $idEvent . " : " . $e->getMessage());
+            return false;
+        } catch (Throwable $e) {
+            // Réseau, clé du compte de service… : on journalise sans bloquer la suite (mail à l'élève).
+            error_log("Suppression Google impossible pour l'événement " . $idEvent . " : " . $e->getMessage());
+            return false;
         }
     }
 }
