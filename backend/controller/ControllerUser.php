@@ -77,6 +77,7 @@ class ControllerUser
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mail = $data['mail'];
             $password = $data['password'];
