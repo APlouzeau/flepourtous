@@ -14,6 +14,9 @@
 set -euo pipefail
 # Les erreurs dans les $(…) arrêtent aussi le script (sinon une requête ratée passerait pour « vide »).
 shopt -s inherit_errexit
+# Aucun échec muet : toute commande qui arrête le script dit où.
+set -E
+trap 'echo "❌ db.sh : échec ligne $LINENO : $BASH_COMMAND" >&2' ERR
 
 ACTION="${1:-}"
 ENV_NAME="${2:-}"
@@ -28,8 +31,9 @@ usage() { echo "Usage : $0 <backup|migrate|status> <prod|preprod>" >&2; exit 2; 
 [ -f "$ENV_FILE" ] || { echo "❌ $ENV_FILE introuvable (lancer depuis la racine du projet)" >&2; exit 1; }
 
 # Lit une variable du .env sans l'exécuter : retire guillemets et fins de ligne Windows.
+# Variable absente = chaîne vide (DB_PORT n'est pas toujours défini).
 env_value() {
-    grep -E "^[[:space:]]*$1[[:space:]]*=" "$ENV_FILE" | tail -n 1 | cut -d= -f2- \
+    { grep -E "^[[:space:]]*$1[[:space:]]*=" "$ENV_FILE" || true; } | tail -n 1 | cut -d= -f2- \
         | tr -d '\r' | sed -E 's/^[[:space:]]+|[[:space:]]+$//g; s/^"(.*)"$/\1/; s/^'\''(.*)'\''$/\1/'
 }
 DB_HOST="$(env_value DB_HOST)"; DB_PORT="$(env_value DB_PORT)"; DB_PORT="${DB_PORT:-3306}"
