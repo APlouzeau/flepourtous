@@ -66,9 +66,19 @@ jobs:
                       git fetch origin preprod
                       git reset --hard origin/preprod
 
-                      echo " Building and restarting containers..."
-                      make preprod
+                      # Ordre : build (l'ancien site tourne encore) → dump → migrations → redémarrage.
+                      # Un échec au dump ou à une migration arrête tout avant de toucher aux conteneurs.
+                      echo "🏗️  Building images..."
+                      make build-preprod
 
+                      echo "💾 Backing up the database..."
+                      make db-backup-preprod
+
+                      echo "🛠️  Applying pending migrations..."
+                      make db-migrate-preprod
+
+                      echo "🔄 Restarting containers..."
+                      make preprod
                       echo "🧹 Cleaning up old Docker images..."
                       docker image prune -f
 

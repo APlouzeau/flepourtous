@@ -33,7 +33,7 @@ session_set_cookie_params([
     'lifetime' => 0,
     'path' => '/',
     'domain' => COOKIE_DOMAIN,
-    'secure' => false, // Set to false for development (HTTP), true for production (HTTPS)
+    'secure' => SESSION_COOKIE_SECURE, // true partout, sauf SESSION_COOKIE_SECURE=false en local
     'httponly' => true,
     'samesite' => 'Lax'
 ]);

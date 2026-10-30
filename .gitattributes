@@ -1,0 +1,3 @@
+# Scripts shell exécutés sur le VPS (Linux) : toujours en LF, même depuis un clone Windows.
+*.sh text eol=lf
+makefile text eol=lf
