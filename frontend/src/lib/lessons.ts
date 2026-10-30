@@ -1,3 +1,4 @@
+import { cache } from "react";
 import apiClient from "@/lib/axios";
 import { getLocale } from "@/locales/server";
 
@@ -12,7 +13,7 @@ export async function getLessonsWithPrices() {
     }
 }
 
-export async function getLessons(slug: string) {
+export const getLessons = cache(async function getLessons(slug: string) {
     try {
         const locale = await getLocale();
         const decodedSlug = decodeURIComponent(slug);
@@ -22,7 +23,7 @@ export async function getLessons(slug: string) {
         console.error("Failed to fetch lessons:", error);
         return [];
     }
-}
+});
 
 export async function getSlugs() {
     const locale = await getLocale();

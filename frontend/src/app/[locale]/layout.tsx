@@ -1,5 +1,5 @@
 // app/[locale]/layout.tsx
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -9,10 +9,11 @@ import { Providers } from "./providers";
 import { getSlugs } from "@/lib/lessons";
 import { getMessages } from "next-intl/server"; // 👈 ajout
 
-export const metadata: Metadata = {
-    title: "FLE pour tous",
-    description: "Cours de français langue étrangère pour tous les niveaux",
-};
+// Valeurs par défaut (celles de l'accueil) pour toute page qui ne définit pas les siennes.
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
+    return pageMetadata(locale, "home");
+}
 
 const inter = Inter({
     subsets: ["latin"],
