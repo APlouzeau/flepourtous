@@ -174,13 +174,14 @@ class ModelLesson extends  ClassDatabase
     }
     public function getSlugsByLocale($locale)
     {
-        $req = $this->conn->prepare('SELECT slug, title FROM lesson_translations WHERE locale = :locale');
+        $req = $this->conn->prepare('SELECT id_lesson, slug, title FROM lesson_translations WHERE locale = :locale');
         $req->bindValue(':locale', $locale, PDO::PARAM_STR);
         $req->execute();
         $datas = $req->fetchAll();
         $slugs = [];
         foreach ($datas as $data) {
             $slugs[] = [
+                'idLesson' => (int) $data['id_lesson'],
                 'slug' => $data['slug'],
                 'title' => $data['title']
             ];
