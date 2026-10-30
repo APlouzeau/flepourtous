@@ -92,20 +92,26 @@ export async function getSession() {
 export async function logout() {
     const session = await getCookieBackend();
     if (session) {
-        await apiClient.post(
-            "/api/logout",
-            {},
-            {
-                headers: {
-                    Cookie: `PHPSESSID=${session}`,
-                    "Content-Type": "application/json",
-                },
-                withCredentials: true,
-            }
-        );
+        // Une session PHP déjà expirée ou invalide ne doit pas empêcher de se déconnecter :
+        // l'erreur de l'API est ignorée, la session Next.js est supprimée dans tous les cas.
+        try {
+            await apiClient.post(
+                "/api/logout",
+                {},
+                {
+                    headers: {
+                        Cookie: `PHPSESSID=${session}`,
+                        "Content-Type": "application/json",
+                    },
+                    withCredentials: true,
+                }
+            );
+        } catch (error) {
+            console.error("Erreur API lors de la déconnexion (ignorée) :", error);
+        }
     }
-    // Supprime le cookie côté Next.js si besoin
     (await cookies()).delete("session");
+    // redirect() lève une exception volontaire : il reste hors du try.
     redirect("/");
 }
 

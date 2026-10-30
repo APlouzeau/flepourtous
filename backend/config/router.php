@@ -3,7 +3,8 @@
 // Connexion
 $router->addRoute("GET", BASE_URL, "ControllerUser", "loginPage", 'public');
 $router->addRoute("POST", "/api/login", "ControllerUser", "login", 'public');
-$router->addRoute("POST", "/api/logout", "ControllerUser", "logout", 'auth');
+// public : se déconnecter doit marcher même si la session PHP a déjà expiré.
+$router->addRoute("POST", "/api/logout", "ControllerUser", "logout", 'public');
 $router->addRoute("POST", "/api/register", "ControllerUser", "register", 'public');
 $router->addRoute("POST", "/api/verifyConnect", "ControllerUser", "verifyConnect", 'public');
 

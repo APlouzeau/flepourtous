@@ -133,9 +133,19 @@ class ControllerUser
 
     public function logout()
     {
+        // Le cookie est effacé avec les mêmes paramètres que ceux de sa création
+        // (domaine, secure…), sinon le navigateur garde l'original.
+        $params = session_get_cookie_params();
         session_unset();
         session_destroy();
-        setcookie(session_name(), "", time() - 3600, "/");
+        setcookie(session_name(), "", [
+            'expires' => time() - 3600,
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => $params['samesite'],
+        ]);
         echo json_encode([
             'code' => 1,
             'message' => 'Deconnexion réussie.'
@@ -700,9 +710,17 @@ class ControllerUser
             ]);
             return;
         }
+        $params = session_get_cookie_params();
         session_unset();
         session_destroy();
-        setcookie(session_name(), "", time() - 3600, "/");
+        setcookie(session_name(), "", [
+            'expires' => time() - 3600,
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => $params['samesite'],
+        ]);
         echo json_encode([
             'code' => 1,
             'message' => 'Mot de passe réinitialisé avec succès',
