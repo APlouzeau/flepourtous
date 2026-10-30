@@ -10,13 +10,14 @@ class ClassRouter
         $this->routes = [];
     }
 
-    public function addRoute($method, $path, $controller, $action)
+    public function addRoute($method, $path, $controller, $action, $access = 'auth')
     {
         $this->routes[] = [
             'method' => $method,
             'path' => $path,
             'controller' => $controller,
-            'action' => $action
+            'action' => $action,
+            'access' => $access
         ];
     }
 
@@ -48,11 +49,12 @@ class ClassRouter
                 return [
                     'controller' => $route['controller'],
                     'action' => $route['action'],
-                    'params' => $params
+                    'params' => $params,
+                    'access' => $route['access']
                 ];
             }
         }
-        return ['controller' => 'ControllerError', 'action' => 'index', 'params' => []];
+        return ['controller' => 'ControllerError', 'action' => 'index', 'params' => [], 'access' => 'public'];
     }
 
     public function getRoutes()

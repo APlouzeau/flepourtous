@@ -39,8 +39,6 @@ session_set_cookie_params([
 ]);
 session_start();
 
-
-
 spl_autoload_register(function ($class_name) {
     try {
         if (!preg_match("/^(Class|Controller|Model|Entitie)/", $class_name, $match)) {
@@ -58,7 +56,7 @@ spl_autoload_register(function ($class_name) {
             throw new Exception("Class not found => " . $class_name, 1);
         }
     } catch (\Throwable $th) {
-        var_dump($th, $class_name);
+        error_log("Autoload impossible pour " . $class_name . " : " . $th->getMessage());
     }
 });
 
@@ -71,7 +69,16 @@ require_once APP_PATH . "config/router.php";
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
+$controllerUser = new ControllerUser();
+
 $handler = $router->getHandler($method, $uri);
+match ($handler['access']) {
+    'public' => null,
+    'auth' => $controllerUser->verifyConnectBack(),
+    'admin' => $controllerUser->verifyConnectAdmin(),
+    'cron' => $controllerUser->verifyCronKey()
+};
+
 if (!class_exists($handler['controller']) || $handler['controller'] == 'ControllerError') {
     $controller = new ControllerError();
     $controller->index($handler, $method, $uri);

@@ -101,7 +101,7 @@ class ControllerOrder
             http_response_code(401);
             $this->controllerError->logs(
                 "ERREUR checkout: Utilisateur non connecté",
-                ["Session: " . session_id()],
+                ["Aucun utilisateur en session"],
                 self::ORDER_LOG_FILE
             );
             echo json_encode(['code' => 0, 'error' => 'Utilisateur non connecté']);
@@ -116,8 +116,7 @@ class ControllerOrder
                     "Utilisateur ID: " . $idUser,
                     "lesson_price: " . ($lessonPrice ?? 'NULL'),
                     "lesson_name: " . ($lessonName ?? 'NULL'),
-                    "event_id: " . ($eventId ?? 'NULL'),
-                    "Session ID: " . session_id()
+                    "event_id: " . ($eventId ?? 'NULL')
                 ],
                 self::ORDER_LOG_FILE
             );

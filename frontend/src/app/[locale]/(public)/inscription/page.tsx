@@ -7,6 +7,7 @@ import Button from "../../components/front/Button";
 import ShowPassword from "@/app/[locale]/components/front/showPassword";
 import type { SubmitEventHandler } from "react";
 import { useTranslations } from "@/locales/client";
+import Acceptation from "./acceptation";
 
 export default function RegisterPage() {
     const [nickName, setNickName] = useState("");
@@ -20,6 +21,34 @@ export default function RegisterPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const trad = useTranslations();
+    const [acceptations, setAcceptations] = useState({
+        internalRegulations: false,
+        cgv: false,
+        rgpd: false,
+    });
+
+    // Les versions doivent être celles de ControllerUser (backend), sinon l'inscription est refusée.
+    const documentInternalRegulations = {
+        document: "Internal regulations",
+        version: "1.1",
+        accepted: acceptations.internalRegulations,
+    };
+    const documentCGV = {
+        document: "Terms and conditions",
+        version: "1.1",
+        accepted: acceptations.cgv,
+    };
+
+    const documentRGPD = {
+        document: "Privacy policy",
+        version: "1.1",
+        accepted: acceptations.rgpd,
+    };
+
+    const toggleAcceptation = (key: keyof typeof acceptations) => (checked: boolean) =>
+        setAcceptations((prev) => ({ ...prev, [key]: checked }));
+
+    const allAccepted = Object.values(acceptations).every(Boolean);
 
     const handleSubmit: SubmitEventHandler<HTMLFormElement> = (e) => {
         e.preventDefault();
@@ -33,6 +62,7 @@ export default function RegisterPage() {
                 mail,
                 password,
                 passwordConfirm,
+                acceptations: [documentInternalRegulations, documentCGV, documentRGPD],
             })
             .then((response) => {
                 if (response.data.code == 1) {
@@ -64,8 +94,7 @@ export default function RegisterPage() {
         passwordConfirm.trim() !== "";
 
     const passwordsMatch = password === passwordConfirm;
-
-    const disabled = !(allFieldsFilled && passwordsMatch);
+    const disabled = !(allFieldsFilled && passwordsMatch && allAccepted);
 
     return (
         <div className="w-full">
@@ -174,6 +203,31 @@ export default function RegisterPage() {
                         />
                         <ShowPassword showPassword={showPassword} setShowPassword={setShowPassword} />
                     </div>
+                    <p className="text-xs sm:text-sm text-gray-500">{trad("profile.auth.acceptTerms")} </p>
+                    <Acceptation
+                        document={documentInternalRegulations.document}
+                        version={documentInternalRegulations.version}
+                        link="/reglement-interieur"
+                        slug={trad("rules.title1") + " " + trad("rules.title2")}
+                        checked={documentInternalRegulations.accepted}
+                        onChange={toggleAcceptation("internalRegulations")}
+                    />
+                    <Acceptation
+                        document={documentCGV.document}
+                        version={documentCGV.version}
+                        link="/cgv"
+                        slug={trad("cgv.titleBlack") + " " + trad("cgv.titleRed")}
+                        checked={documentCGV.accepted}
+                        onChange={toggleAcceptation("cgv")}
+                    />
+                    <Acceptation
+                        document={documentRGPD.document}
+                        version={documentRGPD.version}
+                        link="/rgpd"
+                        slug={trad("privacy.title1") + " " + trad("privacy.title2")}
+                        checked={documentRGPD.accepted}
+                        onChange={toggleAcceptation("rgpd")}
+                    />
 
                     {error && (
                         <p className="text-red-500 text-xs sm:text-sm text-center bg-red-50 p-3 rounded-xl border border-red-200">

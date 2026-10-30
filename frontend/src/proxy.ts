@@ -2,18 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken, generateRefreshedToken } from "./lib/session";
 import createMiddleware from "next-intl/middleware"; // 👈 nouveau
 import { routing } from "./i18n/routing";
+import { localizedRoutes } from "./i18n/routes";
 
 const I18nMiddleware = createMiddleware(routing); // 👈 nouveau
 
-const isProtectedRoute = [
-    "/calendrier",
-    "/profil",
-    "/calendrier/nouveau-rendez-vous",
-    "/calendrier/nouveau-rendez-vous/paiement",
-    "/calendrier/packs",
-    "/calendrier/admin-dashboard",
-    "/retour-paiement",
+const protectedRouteSegments = [
+    "calendrier",
+    "profil",
+    "calendrier/nouveau-rendez-vous",
+    "calendrier/nouveau-rendez-vous/paiement",
+    "calendrier/packs",
+    "calendrier/admin-dashboard",
+    "retour-paiement",
 ];
+
+const isProtectedRoute = protectedRouteSegments.flatMap((key) => {
+    const route = localizedRoutes.find((r) => r.fr === key);
+    if (!route) return [`/${key}`];
+    return routing.locales.map((locale) => `/${route[locale as "fr" | "en" | "ja"]}`);
+});
 
 const ONE_HOUR_IN_MS = 1 * 60 * 60 * 1000;
 const REFRESH_IF_OLDER_THAN_MS = ONE_HOUR_IN_MS / 2;
@@ -47,8 +54,11 @@ export async function proxy(request: NextRequest) {
 
     const response = i18nResponse;
 
+    const localePattern = new RegExp(`^/(${routing.locales.join("|")})(?=/|$)`);
+    const pathnameWithoutLocale = pathname.replace(localePattern, "") || "/";
+
     // Auth — identique, rien ne change ici
-    if (isProtectedRoute.includes(pathname)) {
+    if (isProtectedRoute.includes(pathnameWithoutLocale)) {
         const sessionCookie = request.cookies.get("session");
         const sessionToken = sessionCookie?.value;
 

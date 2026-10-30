@@ -30,7 +30,7 @@ export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
         );
         if (response.data && Array.isArray(response.data.data)) {
             const appointments = response.data.data;
-
+            console.log("Appointments fetched:", appointments);
             appointments.sort((a: showBasicAppointmentProps, b: showBasicAppointmentProps) => {
                 const dateA = new Date(a.startDateTime).getTime();
                 const dateB = new Date(b.startDateTime).getTime();

@@ -1,5 +1,6 @@
 <?php
 
+use config\enum\ErrorCodes;
 
 class ControllerUser
 {
@@ -10,6 +11,13 @@ class ControllerUser
     {
         $this->controllerError = new ControllerError();
     }
+
+    // Versions en vigueur des documents à accepter à l'inscription, dans l'ordre
+    // envoyé par le formulaire. À changer ici ET dans le formulaire d'inscription
+    // à chaque nouvelle version d'un document.
+    public const INTERNAL_REGULATIONS_VERSION = '1.1';
+    public const TERMS_OF_SERVICE_VERSION = '1.1';
+    public const PRIVACY_POLICY_VERSION = '1.1';
 
     private $userNotConnected = [
         'code' => 0,
@@ -25,6 +33,19 @@ class ControllerUser
             http_response_code(401);
             $response = $this->userNotConnected;
             echo json_encode($response);
+            exit();
+        }
+    }
+
+    public function verifyCronKey()
+    {
+        $requestBody = file_get_contents('php://input');
+        $data = json_decode($requestBody, true);
+
+        if (isset($_SERVER['HTTP_API_KEY']) && hash_equals(CRON_KEY, $_SERVER['HTTP_API_KEY'] ?? '')) {
+            return true;
+        } else {
+            http_response_code(401);
             exit();
         }
     }
@@ -63,6 +84,7 @@ class ControllerUser
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
+
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mail = $data['mail'];
             $password = $data['password'];
@@ -91,7 +113,7 @@ class ControllerUser
                 $_SESSION['mail'] = $userVerify['mail'];
                 $_SESSION['firstName'] = $userVerify['firstName'];
                 $_SESSION['lastName'] = $userVerify['lastName'];
-                
+
                 $response = [
                     'code' => 1,
                     'message' => 'Connexion réussie.',
@@ -226,6 +248,7 @@ class ControllerUser
     {
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
+        // return;
         if ($_SERVER['REQUEST_METHOD'] != 'POST') {
             $response = [
                 'code' => 0,
@@ -237,7 +260,8 @@ class ControllerUser
             !isset($data['lastName']) ||
             !isset($data['mail']) ||
             !isset($data['password']) ||
-            !isset($data['passwordConfirm'])
+            !isset($data['passwordConfirm']) ||
+            !isset($data['acceptations'])
         ) {
             $response = [
                 'code' => 0,
@@ -245,10 +269,16 @@ class ControllerUser
             ];
         } else {
             $validationUserInformations = $this->controlUserInformations($data);
+            $validationAcceptations = $this->controlAcceptations($data['acceptations']);
             if ($validationUserInformations['code'] == 0) {
                 $response = [
                     'code' => 0,
                     'message' => $validationUserInformations['message'],
+                ];
+            } elseif ($validationAcceptations['code'] == 0) {
+                $response = [
+                    'code' => 0,
+                    'message' => $validationAcceptations['message'],
                 ];
             } else {
                 $validationPassword = $this->controlUserPasswordFormat($data);
@@ -274,6 +304,9 @@ class ControllerUser
                             'mail' => $data['mail'],
                             'password' => password_hash($data['password'], PASSWORD_BCRYPT),
                             'verifyToken' => $verificationToken,
+                            'internalRegulationsVersion' => self::INTERNAL_REGULATIONS_VERSION,
+                            'termsOfServiceVersion' => self::TERMS_OF_SERVICE_VERSION,
+                            'privacyPolicyVersion' => self::PRIVACY_POLICY_VERSION,
                         ]);
 
                         $register = $userModel->register($user);
@@ -327,19 +360,6 @@ class ControllerUser
             }
         }
         echo json_encode($response);
-    }
-
-    public function listUsers()
-    {
-        $modelUser = new ModelUser();
-        $users = $modelUser->getAllUsers();
-        $result = [];
-        foreach ($users as $user) {
-            $result[] = [
-                'mail' => $user->getMail(),
-            ];
-        }
-        echo json_encode($result);
     }
 
     public function deleteUser()
@@ -419,6 +439,54 @@ class ControllerUser
         return [
             'code' => 1,
             'message' => 'Informations valides',
+        ];
+    }
+
+    /**
+     * Les trois documents doivent être acceptés, dans la version en vigueur.
+     * La version envoyée par le formulaire sert seulement à vérifier que la personne
+     * a vu le document actuel : c'est la version du backend qui est enregistrée.
+     */
+    public function controlAcceptations($acceptations)
+    {
+        $documents = [
+            [self::INTERNAL_REGULATIONS_VERSION, ErrorCodes::REGULATIONS_INTERIOR_NOT_ACCEPTED],
+            [self::TERMS_OF_SERVICE_VERSION, ErrorCodes::TERMS_OF_SERVICE_NOT_ACCEPTED],
+            [self::PRIVACY_POLICY_VERSION, ErrorCodes::PRIVACY_POLICY_NOT_ACCEPTED],
+        ];
+
+        if (!is_array($acceptations) || count($acceptations) != count($documents)) {
+            return [
+                'code' => 0,
+                'message' => 'Erreur de paramètres',
+            ];
+        }
+
+        foreach ($documents as $index => [$currentVersion, $notAcceptedError]) {
+            $acceptation = $acceptations[$index] ?? null;
+            if (!is_array($acceptation)) {
+                return [
+                    'code' => 0,
+                    'message' => 'Erreur de paramètres',
+                ];
+            }
+            if (($acceptation['accepted'] ?? null) !== true) {
+                return [
+                    'code' => 0,
+                    'message' => $notAcceptedError,
+                ];
+            }
+            if (($acceptation['version'] ?? null) !== $currentVersion) {
+                return [
+                    'code' => 0,
+                    'message' => ErrorCodes::DOCUMENT_VERSION_OUTDATED,
+                ];
+            }
+        }
+
+        return [
+            'code' => 1,
+            'message' => 'Acceptations valides',
         ];
     }
 
