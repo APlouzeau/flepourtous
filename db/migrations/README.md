@@ -9,8 +9,14 @@ SELECT * FROM schema_migrations ORDER BY version;
 
 ## Règles
 
-- **Avant toute exécution en prod : mysqldump**, hors du dépôt (jamais commité) :
-  `mysqldump --single-transaction --routines --triggers -u <user> -p <base> | gzip > /chemin/hors-depot/<base>-AAAAMMJJ-HHMM.sql.gz`
+- **Le déploiement (GitHub Actions) fait le travail** en preprod et en prod, dans cet ordre :
+  build des images → dump (`make db-backup-<env>`) → migrations en attente (`make db-migrate-<env>`) → redémarrage.
+  Un échec au dump ou à une migration arrête le déploiement avant de toucher aux conteneurs.
+- Dumps : `~/backups/flepourtous/flepourtous-<prod|preprod>-AAAAMMJJ-HHMMSSZ.sql.gz` sur le VPS, 10 derniers gardés par environnement.
+- À la main sur le VPS, depuis la racine du projet : `make db-status-<env>`, `make db-backup-<env>`, `make db-migrate-<env>`.
+- Seuls les fichiers `NNN_*.sql` à la racine de ce dossier sont appliqués. **Une migration qui doit attendre**
+  (suppression de colonnes « quelques jours après ») reste dans `a-venir/` ; la déplacer ici quand c'est le moment,
+  elle part au déploiement suivant.
 - Toujours dans l'ordre : local → preprod (test par la cliente) → prod.
 - Sous MariaDB, chaque `ALTER TABLE` est validé immédiatement : une transaction ne protège rien.
   Les scripts ajoutent et copient d'abord, et ne suppriment qu'ensuite, dans un fichier séparé.
