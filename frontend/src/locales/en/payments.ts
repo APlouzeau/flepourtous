@@ -12,6 +12,7 @@ export default {
         missingPaymentInformations: "Missing payment information. Please try again.",
         returnToCalendar: "Return to my calendar",
         successFullPayment: "Successful payment !",
+        creditedToWallet: "Your appointment was cancelled before the payment was completed (payment deadline passed). The amount paid has been credited to your wallet: you can use it to book a new lesson.",
         missingCheck: "Error during payment verification.",
         processing: "Processing your payment, please wait...",
         redirectToCalendar: "Redirecting to calendar in a few seconds...",

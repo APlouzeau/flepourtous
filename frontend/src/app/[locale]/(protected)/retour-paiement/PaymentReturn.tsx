@@ -18,7 +18,9 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
     const paymentStatus = searchParams.get("status");
     const isWalletSuccess = paymentStatus === "success" && paymentMethod === "wallet";
 
-    const [status, setStatus] = useState<"loading" | "success" | "error">(isWalletSuccess ? "success" : "loading");
+    const [status, setStatus] = useState<"loading" | "success" | "error" | "credited">(
+        isWalletSuccess ? "success" : "loading",
+    );
     const [message, setMessage] = useState<string>(isWalletSuccess ? "Paiement réussi avec votre portefeuille !" : "");
     const [hasChecked, setHasChecked] = useState(isWalletSuccess);
     const trad = useTranslations();
@@ -49,7 +51,11 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
 
                 const result = response.data;
 
-                if (result.payment_status === "paid" || result.status === "already_processed") {
+                if (result.status === "credited_to_wallet") {
+                    // Cours annulé avant la fin du paiement : le montant est sur le porte-monnaie.
+                    setStatus("credited");
+                    setMessage(trad("payment.creditedToWallet"));
+                } else if (result.payment_status === "paid" || result.status === "already_processed") {
                     setStatus("success");
                     setMessage(trad("payment.successFullPayment"));
                     setTimeout(() => router.push("/calendrier"), 3000);
@@ -96,6 +102,17 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
             </p>
 
             {status === "success" && <p className="text-sm text-gray-500 mt-4">{trad("payment.redirectToCalendar")}</p>}
+
+            {status === "credited" && (
+                <div className="mt-6">
+                    <button
+                        onClick={() => router.push("/calendrier")}
+                        className="block w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                    >
+                        {trad("payment.returnToCalendar")}
+                    </button>
+                </div>
+            )}
 
             {status === "error" && (
                 <div className="mt-6 space-y-2">

@@ -1,6 +1,9 @@
 <?php
 
 require_once APP_PATH . 'vendor/autoload.php';
+
+use config\enum\AppointmentStatus;
+
 class ControllerOrder
 {
 
@@ -66,6 +69,10 @@ class ControllerOrder
             return;
         }
 
+        if (!$this->checkPayableEvent((string) $eventId, (int) $_SESSION['idUser'])) {
+            return;
+        }
+
         $modelPrices = new ModelPrices();
         $lessonDetails = $modelPrices->getPriceByEventId($eventId);
 
@@ -125,6 +132,10 @@ class ControllerOrder
         }
 
         if ($eventId !== 0) {
+            // Revérifié ici : entre la réservation et le paiement, le cron a pu annuler le cours.
+            if (!$this->checkPayableEvent((string) $eventId, (int) $idUser)) {
+                return;
+            }
             $this->payExistingAppointment($idUser, $lessonPrice, $lessonName, $eventId,);
         } else {
             $this->payPackPurchase($idUser, $lessonPrice, $lessonName);
@@ -137,9 +148,19 @@ class ControllerOrder
         $remainingAmount = $userWallet - $lessonPrice;
 
         if ($remainingAmount >= 0) {
-            $modelEvent = new ModelEvent();
-            $this->modelUser->updateWallet($idUser, $remainingAmount);
-            $modelEvent->setEventStatusPaid($eventId);
+            // Débit vérifié en base (le solde a pu changer depuis la lecture), puis passage en « Payé »
+            // seulement si le cours est encore en attente ; sinon on rend l'argent.
+            if (!$this->modelUser->debitWallet((int) $idUser, (float) $lessonPrice)) {
+                http_response_code(409);
+                echo json_encode(['code' => 0, 'message' => 'Solde du porte-monnaie insuffisant, veuillez réessayer.']);
+                return;
+            }
+            if (!$this->modelEvent->markPaidIfPending((string) $eventId)) {
+                $this->modelUser->addToWallet((int) $idUser, (float) $lessonPrice);
+                http_response_code(409);
+                echo json_encode(['code' => 0, 'message' => "Ce rendez-vous n'est plus en attente de paiement."]);
+                return;
+            }
 
             // Envoi des emails avec gestion d'erreur
             try {
@@ -177,6 +198,26 @@ class ControllerOrder
 
         $amountToPay = abs($remainingAmount); // Montant manquant
         $this->createStripeSession($amountToPay, $lessonName, $eventId, $idUser);
+    }
+
+    /**
+     * Un rendez-vous ne se paie que par son propriétaire, et tant qu'il est « En attente ».
+     * Sinon : réponse 403 / 409 envoyée, et false.
+     */
+    private function checkPayableEvent(string $eventId, int $idUser): bool
+    {
+        $event = $this->modelEvent->getEventById($eventId);
+        if (!$event || (int) $event['userId'] !== $idUser) {
+            http_response_code(403);
+            echo json_encode(['code' => 0, 'message' => "Ce rendez-vous n'existe pas ou ne vous appartient pas."]);
+            return false;
+        }
+        if ($event['status'] !== AppointmentStatus::PENDING->value) {
+            http_response_code(409);
+            echo json_encode(['code' => 0, 'message' => "Ce rendez-vous n'est plus en attente de paiement."]);
+            return false;
+        }
+        return true;
     }
 
     private function payPackPurchase($idUser, $lessonPrice, $lessonName)
@@ -222,122 +263,111 @@ class ControllerOrder
         }
     }
 
+    /**
+     * Retour de paiement Stripe (route publique, appelée par la page de retour).
+     * Une session Stripe n'est appliquée qu'une fois, enregistrée en base (stripe_payments) :
+     * rappeler la route, même depuis une autre session, ne recrédite ni ne redébite rien.
+     */
     public function status()
     {
-        $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+        $jsonObj = json_decode(file_get_contents('php://input'));
+        $sessionId = (is_object($jsonObj) && isset($jsonObj->session_id) && is_string($jsonObj->session_id)) ? $jsonObj->session_id : '';
+        if ($sessionId === '') {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'session_id manquant']);
+            return;
+        }
 
         try {
-            $jsonStr = file_get_contents('php://input');
-            $jsonObj = json_decode($jsonStr);
-
-            // ✅ Vérifier si déjà traité via les sessions PHP
-            $sessionKey = "stripe_processed_" . $jsonObj->session_id;
-
-            if (isset($_SESSION[$sessionKey])) {
-                echo json_encode([
-                    'status' => 'already_processed',
-                    'payment_status' => 'paid',
-                    'message' => 'Paiement déjà traité avec succès !'
-                ]);
-                return;
-            }
-
-            $session = $stripe->checkout->sessions->retrieve($jsonObj->session_id);
-
-            if ($session->payment_status === 'paid') {
-                $idUser = $session->metadata->user_id;
-                $eventId = $session->metadata->event_id;
-
-                if ($eventId != 0) {
-                    $this->modelEvent->setEventStatusPaid($eventId);
-                    $this->modelUser->updateWallet($idUser, 0); // Mettre à jour le portefeuille à 0
-                    $this->controllerError->logs(
-                        "Paiement de leçon avec carte réussi",
-                        [
-                            "Utilisateur ID: " . $idUser,
-                            "Événement ID: " . $eventId,
-                            "Leçon: " . $session->metadata->lesson_name,
-                            "Montant: " . $session->amount_total / 100 . "€"
-                        ],
-                        self::ORDER_LOG_FILE
-                    );
-                } else {
-                    $amount = $session->amount_total / 100;
-                    $modelUser = new ModelUser();
-                    $modelUser->addToWallet($idUser, $amount);
-                    $this->controllerError->logs(
-                        "Achat de pack réussi",
-                        [
-                            "Utilisateur ID: " . $idUser,
-                            "Montant: " . $amount . "€",
-                            "Leçon: " . $session->metadata->lesson_name
-                        ],
-                        self::ORDER_LOG_FILE
-                    );
-                }
-
-                // ✅ MARQUER COMME TRAITÉ dans la session PHP
-                $_SESSION[$sessionKey] = [
-                    'processed_at' => date('Y-m-d H:i:s'),
-                    'user_id' => $idUser,
-                    'event_id' => $eventId
-                ];
-
-                // Envoyer l'email approprié selon le type de paiement
-                try {
-                    if ($eventId != 0) {
-                        $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
-                        $this->controllerMail->sendMailToConfirmAppointment($eventId, $idUser);
-                    } else {
-                        $amount = $session->amount_total / 100;
-                        $this->controllerMail->sendMailForPackPurchase($idUser, $amount);
-                    }
-                } catch (Exception $e) {
-                    error_log("❌ Error sending emails after Stripe payment: " . $e->getMessage());
-                    $this->controllerError->logs("Error sending emails after Stripe payment", [
-                        "Error: " . $e->getMessage(),
-                        "User ID: " . $idUser,
-                        "Event ID: " . $eventId
-                    ], self::ORDER_LOG_FILE);
-                    // Ne pas bloquer le paiement si les emails échouent
-                }
-
-                echo json_encode([
-                    'status' => 'complete',
-                    'payment_status' => 'paid',
-                    'message' => 'Paiement traité avec succès !'
-                ]);
-            } else {
-                /*                 $this->controllerError->logs(
-                    "Paiement en attente ou non payé", 
-                    [
-                        "Utilisateur: " . $_SESSION['firstName'] . " " . $_SESSION['lastName'],
-                        "Mail: " . $_SESSION['email'],
-                        "Session ID: " . $jsonObj->session_id,
-                        "Statut de paiement: " . $session->payment_status
-                    ], 
-                    self::ORDER_LOG_FILE
-                ); */
-                echo json_encode([
-                    'status' => $session->status ?? 'unknown',
-                    'payment_status' => $session->payment_status ?? 'unknown',
-                    'message' => 'Paiement en cours ou non payé'
-                ]);
-            }
+            $stripe = new \Stripe\StripeClient(STRIPE_SECRET_KEY);
+            $session = $stripe->checkout->sessions->retrieve($sessionId);
         } catch (\Stripe\Exception\ApiErrorException $e) {
-            /*             $this->controllerError->logs(
-                "ERREUR Stripe lors de la vérification du paiement", 
-                [
-                    "Utilisateur: " . ($_SESSION['firstName'] ?? 'Inconnu') . " " . ($_SESSION['lastName'] ?? ''),
-                    "Session ID: " . ($jsonObj->session_id ?? 'N/A'),
-                    "Message d'erreur: " . $e->getMessage()
-                ], 
-                self::ORDER_LOG_FILE
-            ); */
             error_log("Erreur Stripe: " . $e->getMessage());
             http_response_code(500);
-            echo json_encode(['error' => $e->getMessage()]);
+            echo json_encode(['error' => 'Vérification du paiement impossible']);
+            return;
         }
+
+        if ($session->payment_status !== 'paid') {
+            echo json_encode([
+                'status' => $session->status ?? 'unknown',
+                'payment_status' => $session->payment_status ?? 'unknown',
+                'message' => 'Paiement en cours ou non payé'
+            ]);
+            return;
+        }
+
+        $idUser = (int) $session->metadata->user_id;
+        $eventId = (string) $session->metadata->event_id;
+        $isPack = $eventId === '0' || $eventId === '';
+        $amount = $session->amount_total / 100;
+
+        // Sessions de plus de 48 h : antérieures à la table stripe_payments, déjà traitées à l'époque.
+        $tooOld = $session->created < time() - 48 * 3600;
+        $modelPayment = new ModelPayment();
+        if ($tooOld || !$modelPayment->claim($sessionId, $idUser, $isPack ? null : $eventId, $amount)) {
+            echo json_encode([
+                'status' => 'already_processed',
+                'payment_status' => 'paid',
+                'message' => 'Paiement déjà traité.'
+            ]);
+            return;
+        }
+
+        if ($isPack) {
+            $this->modelUser->addToWallet($idUser, $amount);
+            $modelPayment->setOutcome($sessionId, 'pack_credited');
+            $this->controllerError->logs("Achat de pack réussi", [
+                "Utilisateur ID: " . $idUser,
+                "Montant: " . $amount . "€",
+                "Leçon: " . $session->metadata->lesson_name
+            ], self::ORDER_LOG_FILE);
+            $this->controllerMail->sendMailForPackPurchase($idUser, $amount);
+            echo json_encode(['status' => 'complete', 'payment_status' => 'paid', 'message' => 'Paiement traité avec succès !']);
+            return;
+        }
+
+        if ($this->modelEvent->markPaidIfPending($eventId)) {
+            // Part payée par le porte-monnaie = prix du cours - montant payé par carte.
+            $lesson = $this->modelPrice->getPriceByEventId($eventId);
+            $walletPart = $lesson ? round($lesson['price'] - $amount, 2) : 0;
+            if ($walletPart > 0) {
+                $this->modelUser->debitWallet($idUser, $walletPart, true);
+            }
+            $modelPayment->setOutcome($sessionId, 'lesson_paid');
+            $this->controllerError->logs("Paiement de leçon avec carte réussi", [
+                "Utilisateur ID: " . $idUser,
+                "Événement ID: " . $eventId,
+                "Leçon: " . $session->metadata->lesson_name,
+                "Montant carte: " . $amount . "€",
+                "Part porte-monnaie: " . $walletPart . "€"
+            ], self::ORDER_LOG_FILE);
+            try {
+                $this->controllerMail->sendMailForPaymentSuccess($idUser, $eventId);
+                $this->controllerMail->sendMailToConfirmAppointment($eventId, $idUser);
+            } catch (Exception $e) {
+                error_log("❌ Error sending emails after Stripe payment: " . $e->getMessage());
+            }
+            echo json_encode(['status' => 'complete', 'payment_status' => 'paid', 'message' => 'Paiement traité avec succès !']);
+            return;
+        }
+
+        // Le cours n'est plus en attente (annulé par le cron pendant le paiement, ou déjà payé) :
+        // on ne le « ressuscite » pas, le montant payé par carte va sur le porte-monnaie.
+        $this->modelUser->addToWallet($idUser, $amount);
+        $modelPayment->setOutcome($sessionId, 'credited_to_wallet');
+        $this->controllerError->logs("Paiement reçu pour un cours qui n'est plus en attente : crédité sur le porte-monnaie", [
+            "Utilisateur ID: " . $idUser,
+            "Événement ID: " . $eventId,
+            "Montant: " . $amount . "€"
+        ], self::ORDER_LOG_FILE);
+        $this->controllerMail->sendMailForWalletCreditAfterCancellation($idUser, $amount);
+        echo json_encode([
+            'status' => 'credited_to_wallet',
+            'payment_status' => 'paid',
+            'amount' => $amount,
+            'message' => 'Le rendez-vous a été annulé avant la fin du paiement : le montant a été crédité sur votre porte-monnaie.'
+        ]);
     }
 
     public function refuseAppointment()
