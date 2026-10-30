@@ -15,7 +15,7 @@ enum ErrorCodes: string
     case REGULATIONS_INTERIOR_NOT_ACCEPTED = 'Le règlement intérieur n\'a pas été accepté';
     case PRIVACY_POLICY_NOT_ACCEPTED = 'La politique de confidentialité n\'a pas été acceptée';
     case TERMS_OF_SERVICE_NOT_ACCEPTED = 'Les conditions générales de vente n\'ont pas été acceptées';
-
+    case DOCUMENT_VERSION_OUTDATED = 'Un document à accepter a été mis à jour, rechargez la page pour lire la nouvelle version';
 
     public function label(): string
     {
@@ -31,6 +31,7 @@ enum ErrorCodes: string
             self::REGULATIONS_INTERIOR_NOT_ACCEPTED => 'Les acceptations requises ne sont pas toutes acceptées',
             self::PRIVACY_POLICY_NOT_ACCEPTED => 'La politique de confidentialité n\'a pas été acceptée',
             self::TERMS_OF_SERVICE_NOT_ACCEPTED => 'Les conditions générales de vente n\'ont pas été acceptées',
+            self::DOCUMENT_VERSION_OUTDATED => 'Un document à accepter a été mis à jour, rechargez la page pour lire la nouvelle version',
         };
     }
 }

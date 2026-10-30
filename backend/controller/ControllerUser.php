@@ -12,6 +12,13 @@ class ControllerUser
         $this->controllerError = new ControllerError();
     }
 
+    // Versions en vigueur des documents à accepter à l'inscription, dans l'ordre
+    // envoyé par le formulaire. À changer ici ET dans le formulaire d'inscription
+    // à chaque nouvelle version d'un document.
+    public const INTERNAL_REGULATIONS_VERSION = '1.1';
+    public const TERMS_OF_SERVICE_VERSION = '1.1';
+    public const PRIVACY_POLICY_VERSION = '1.1';
+
     private $userNotConnected = [
         'code' => 0,
         'message' => 'Utilisateur non connecté'
@@ -262,10 +269,16 @@ class ControllerUser
             ];
         } else {
             $validationUserInformations = $this->controlUserInformations($data);
+            $validationAcceptations = $this->controlAcceptations($data['acceptations']);
             if ($validationUserInformations['code'] == 0) {
                 $response = [
                     'code' => 0,
                     'message' => $validationUserInformations['message'],
+                ];
+            } elseif ($validationAcceptations['code'] == 0) {
+                $response = [
+                    'code' => 0,
+                    'message' => $validationAcceptations['message'],
                 ];
             } else {
                 $validationPassword = $this->controlUserPasswordFormat($data);
@@ -291,9 +304,9 @@ class ControllerUser
                             'mail' => $data['mail'],
                             'password' => password_hash($data['password'], PASSWORD_BCRYPT),
                             'verifyToken' => $verificationToken,
-                            'internalRegulationsVersion' => $data['acceptations'][0]['version'],
-                            'termsOfServiceVersion' => $data['acceptations'][1]['version'],
-                            'privacyPolicyVersion' => $data['acceptations'][2]['version'],
+                            'internalRegulationsVersion' => self::INTERNAL_REGULATIONS_VERSION,
+                            'termsOfServiceVersion' => self::TERMS_OF_SERVICE_VERSION,
+                            'privacyPolicyVersion' => self::PRIVACY_POLICY_VERSION,
                         ]);
 
                         $register = $userModel->register($user);
@@ -422,30 +435,58 @@ class ControllerUser
             ];
         }
 
-        if ($data['acceptations'][0]['accepted'] != 1) {
-            return [
-                'code' => 0,
-                'message' => ErrorCodes::REGULATIONS_INTERIOR_NOT_ACCEPTED,
-            ];
-        };
-
-        if ($data['acceptations'][1]['accepted'] != 1) {
-            return [
-                'code' => 0,
-                'message' => ErrorCodes::TERMS_OF_SERVICE_NOT_ACCEPTED,
-            ];
-        }
-        if ($data['acceptations'][2]['accepted'] != 1) {
-            return [
-                'code' => 0,
-                'message' => ErrorCodes::PRIVACY_POLICY_NOT_ACCEPTED,
-            ];
-        }
-
         // Si toutes les vérifications ci-dessus sont passées, les informations sont valides.
         return [
             'code' => 1,
             'message' => 'Informations valides',
+        ];
+    }
+
+    /**
+     * Les trois documents doivent être acceptés, dans la version en vigueur.
+     * La version envoyée par le formulaire sert seulement à vérifier que la personne
+     * a vu le document actuel : c'est la version du backend qui est enregistrée.
+     */
+    public function controlAcceptations($acceptations)
+    {
+        $documents = [
+            [self::INTERNAL_REGULATIONS_VERSION, ErrorCodes::REGULATIONS_INTERIOR_NOT_ACCEPTED],
+            [self::TERMS_OF_SERVICE_VERSION, ErrorCodes::TERMS_OF_SERVICE_NOT_ACCEPTED],
+            [self::PRIVACY_POLICY_VERSION, ErrorCodes::PRIVACY_POLICY_NOT_ACCEPTED],
+        ];
+
+        if (!is_array($acceptations) || count($acceptations) != count($documents)) {
+            return [
+                'code' => 0,
+                'message' => 'Erreur de paramètres',
+            ];
+        }
+
+        foreach ($documents as $index => [$currentVersion, $notAcceptedError]) {
+            $acceptation = $acceptations[$index] ?? null;
+            if (!is_array($acceptation)) {
+                return [
+                    'code' => 0,
+                    'message' => 'Erreur de paramètres',
+                ];
+            }
+            if (($acceptation['accepted'] ?? null) !== true) {
+                return [
+                    'code' => 0,
+                    'message' => $notAcceptedError,
+                ];
+            }
+            if (($acceptation['version'] ?? null) !== $currentVersion) {
+                return [
+                    'code' => 0,
+                    'message' => ErrorCodes::DOCUMENT_VERSION_OUTDATED,
+                ];
+            }
+        }
+
+        return [
+            'code' => 1,
+            'message' => 'Acceptations valides',
         ];
     }
 
