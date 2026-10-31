@@ -301,6 +301,15 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
+        if (!$data || !isset($data['idEvent'])) {
+            $response = [
+                'code' => 0,
+                'message' => 'Données manquantes pour vérifier l\'annulation (idEvent requis).'
+            ];
+            echo json_encode($response);
+            return;
+        }
+
         $event = $this->modelEvent->getEventById($data['idEvent']);
         if (!$event) {
             $response = [
@@ -311,10 +320,21 @@ class ControllerCalendar
             return;
         }
 
+        // Même règle que deleteEvent : un élève ne peut interroger que ses propres cours.
+        $isAdmin = ($_SESSION['role'] ?? null) === 'admin';
+        if ((int) $event['userId'] !== (int) $_SESSION['idUser'] && !$isAdmin) {
+            $response = [
+                'code' => 0,
+                'message' => 'Vous n\'êtes pas autorisé à supprimer cet événement.',
+            ];
+            echo json_encode($response);
+            return;
+        }
+
         $timeRemaining = (new DateTime($event['startDateTime']))->getTimestamp() - (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
 
-        // Vérifier si c'est une annulation admin
-        if (isset($data['code']) && $data['code'] === 3) {
+        // Annulation admin : le code 3 envoyé par le front n'est pris en compte que pour un admin.
+        if ($isAdmin && isset($data['code']) && $data['code'] === 3) {
             $response = [
                 'code' => 3,
                 'message' => "En tant qu'administrateur, vous pouvez annuler ce rendez-vous sans frais pour l'utilisateur. Un mail sera automatiquement envoyé à l'élève afin de le prévenir, et son porte-monnaie sera recrédité. Confirmez-vous l'annulation ?",
