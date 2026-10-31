@@ -4,8 +4,10 @@ define("APP_PATH", __DIR__ . "/../");
 define("BASE_URL", "/");
 
 require_once __DIR__ . '/../vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..', null, true); // 'true' enables overload mode
-$dotenv->load();
+// En preprod et prod, les variables viennent de l'env_file de Docker : le .env n'est plus copié
+// dans l'image (.dockerignore). safeLoad() lit backend/.env s'il existe (local), sans erreur sinon.
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->safeLoad();
 
 require_once APP_PATH . "config/config.php";
 

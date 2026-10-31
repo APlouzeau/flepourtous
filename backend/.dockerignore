@@ -4,8 +4,14 @@ vendor/
 # Ne pas copier les dépendances Node si tu en avais
 node_modules/
 
-# Ne pas copier les fichiers d'environnement locaux
-#.env
+# Ne pas copier les fichiers d'environnement : ils contiennent les secrets, et les conteneurs
+# reçoivent leurs variables par l'env_file de docker compose.
+.env
+.env.*
+!.env.example
+
+# Logs : montés en volume en preprod et prod, jamais dans l'image.
+logs/
 
 # Fichiers de configuration Git
 .git

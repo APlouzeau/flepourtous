@@ -332,7 +332,9 @@ docker compose up --build -d
 
 The first time you run this, it may take a few minutes to download the base images and install dependencies.
 
-> **Database Note**: On the first launch, Docker will automatically import the database structure and initial data from the `db/flepourtous.sql` file. You don't need to do anything!
+> **Database Note**: On the first launch, Docker will automatically import the database structure and initial data from the `db/flepourtous_1.1.sql` file. You don't need to do anything!
+>
+> **Test accounts** (fictitious data only, password `Test1234!` for all): `eleve@example.com` and `eleve2@example.com` (students), `admin@example.com` (admin). Never put real accounts in this file: the repository is public.
 
 ### 4. You're All Set!
 
