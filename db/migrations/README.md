@@ -35,10 +35,11 @@ SELECT * FROM schema_migrations ORDER BY version;
 | `preprod_remise_a_niveau.sql` | Ramène la preprod à l'état de la prod | Preprod uniquement, avant 001 |
 | `005_users_jetons_aleatoires_avec_expiration.sql` | Jetons de vérification et de réinitialisation séparés, hachés, avec expiration (FLE-52) | Avant le déploiement du code qui les utilise |
 | `006_stripe_payments.sql` | Sessions Stripe déjà traitées : un paiement n'est appliqué qu'une fois (FLE-99) | Appliquée par le pipeline au déploiement |
+| `007_google_sync_id_calendar.sql` | Renomme `google_sync.idCalendar` en `id_calendar` : les notifications Google plantaient (FLE-109) | Appliqué à la main en preprod et prod le 31/10/2026 ; sans effet là-bas (`IF EXISTS`), utile en local |
 | `prod_rattrapage_2026-10-30.sql` | Prod migrée à la main le 30/10/2026 : l'amène à l'état 001 + 002 + 003 | Déjà appliqué en prod, ne pas relancer ailleurs |
 
 ## État des environnements
 
-Au 30/10/2026, prod et preprod sont à `005` (schémas identiques), appliquée par le pipeline.
+Au 31/10/2026, prod et preprod sont à `007` (schémas identiques). `006` a été appliquée par le pipeline ; `007` à la main (dump avant), son fichier est rejouable.
 En local : `preprod_remise_a_niveau.sql` si la base a le schéma preprod, puis 001 à 006.
-Prochain changement de schéma : `007_…`.
+Prochain changement de schéma : `008_…` (FLE-101, FLE-106 et FLE-108 en prévoient chacun une : numéroter au moment du code).

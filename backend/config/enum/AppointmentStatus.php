@@ -17,6 +17,21 @@ enum AppointmentStatus: string
     case CANCELLED_UNPAID = 'Annulé - Non payé';
 
 
+    /**
+     * Code envoyé au front élève (lib/badge.ts) : nom du cas en minuscules, ex. PAID → "paid",
+     * CANCELLED_GOOGLE_REFUNDED → "cancelled_google_refunded". La base garde le libellé français.
+     */
+    public function code(): string
+    {
+        return strtolower($this->name);
+    }
+
+    /** Code d'un libellé stocké en base ; "unknown" pour un libellé hors enum (ex. « Refusé »). */
+    public static function codeOf(?string $label): string
+    {
+        return self::tryFrom((string) $label)?->code() ?? 'unknown';
+    }
+
     public function label(): string
     {
         return match ($this) {
