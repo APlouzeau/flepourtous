@@ -37,21 +37,6 @@ class ControllerUser
         }
     }
 
-    public function verifyCronKey()
-    {
-        // Clé absente ou vide côté serveur : on refuse tout, sinon un en-tête
-        // Api-Key vide passerait la comparaison.
-        $expectedKey = is_string(CRON_KEY) ? CRON_KEY : '';
-        $givenKey = $_SERVER['HTTP_API_KEY'] ?? '';
-
-        if ($expectedKey !== '' && is_string($givenKey) && hash_equals($expectedKey, $givenKey)) {
-            return true;
-        } else {
-            http_response_code(401);
-            exit();
-        }
-    }
-
     public function verifyConnectAdmin()
     {
         if (isset($_SESSION['idUser']) && !empty($_SESSION['idUser']) && isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {

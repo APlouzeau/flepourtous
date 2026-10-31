@@ -547,10 +547,12 @@ class ControllerMail
         $this->mailer->Subject = "Annulation du rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']);
         $emailBody = "Bonjour,<br><br>";
 
-        match ($codeInvoiced) {
-            '1' => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
-            '2' => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € n'a pas été recrédité sur son porte-monnaie électronique.<br>",
-            '3' => $emailBody .= "Nous confirmons votre annulation du rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . "  et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
+        // (int) : le code arrive en entier ; avec '1', '2', '3' en chaîne, match (strict)
+        // tombait toujours dans default et annonçait « non remboursé ».
+        match ((int) $codeInvoiced) {
+            1 => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
+            2 => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € n'a pas été recrédité sur son porte-monnaie électronique.<br>",
+            3 => $emailBody .= "Nous confirmons votre annulation du rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . "  et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
             default => $emailBody .= "Nous vous informons que le rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " a été annulé et que le montant de " . htmlspecialchars($amount) . " € n'a pas été remboursé.<br>",
         };
 

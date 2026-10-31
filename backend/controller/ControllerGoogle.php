@@ -338,17 +338,44 @@ class ControllerGoogle
                 error_log("L'événement ID: " . $idEvent . " est lié à une leçon. Remboursement de " . $price['price'] . " en préparation.");
             }
 
-            $userId = $event['userId'];
-            $teacherId = $this->modelUser->checkMail(TEACHER_MAIL);
+            // $event est la ligne brute de checkEvent() (SELECT *) : colonnes en snake_case.
+            // L'ancienne clé 'userId' n'existait pas, $userId valait null et addToWallet(null)
+            // levait une TypeError : l'annulation Google d'un cours payé n'aboutissait jamais.
+            $userId = (int) ($event['user_id'] ?? 0);
+            $teacherId = (int) $this->modelUser->checkMail(TEACHER_MAIL);
 
-            if ($userId != $teacherId && $price['price'] != null) {
-                $this->modelUser->addToWallet($userId, $price['price']);
-                $this->modelEvent->updateEventStatus($idEvent, AppointmentStatus::CANCELLED_GOOGLE_REFUNDED->value);
-            } else {
-                error_log("Pas de remboursement (userId=" . $userId . ", teacherId=" . $teacherId . ", price=" . ($price['price'] ?? 'null') . ")");
-                $this->modelEvent->updateEventStatus($idEvent, AppointmentStatus::CANCELLED_GOOGLE_NOT_REFUNDED->value);
+            // Seuls les cours payés sur l'app (« Payé ») sont recrédités. « Payé - Admin »
+            // (payé hors app), « Google », « En attente » et « Non payé » sont annulés sans crédit.
+            // Le statut est testé dans la requête elle-même (cancelAndRefund) : statut et
+            // porte-monnaie changent ensemble et une seule fois, même si Google envoie la
+            // notification en double.
+            $done = false;
+            $canRefund = $userId > 0 && $userId !== $teacherId && ($price['price'] ?? null) != null;
+            if ($canRefund) {
+                $done = $this->modelEvent->cancelAndRefund($idEvent, AppointmentStatus::CANCELLED_GOOGLE_REFUNDED->value, [AppointmentStatus::PAID->value], $userId, (float) $price['price']);
             }
-        } catch (Exception $e) {
+
+            if (!$done) {
+                error_log("Pas de remboursement pour l'événement " . $idEvent . " (statut=" . ($event['status'] ?? '?') . ", userId=" . $userId . ", teacherId=" . $teacherId . ", price=" . ($price['price'] ?? 'null') . ")");
+                $notRefundedFrom = [
+                    AppointmentStatus::PAID_ADMIN->value,
+                    AppointmentStatus::UNPAID->value,
+                    AppointmentStatus::PENDING->value,
+                    AppointmentStatus::GOOGLE->value,
+                ];
+                // « Payé » sans crédit seulement si le crédit n'était pas possible (cours de
+                // l'enseignante ou sans prix). Sinon, un cours « Payé » non annulé ci-dessus a déjà
+                // été annulé par une autre notification : on ne l'annule pas une seconde fois.
+                if (!$canRefund) {
+                    $notRefundedFrom[] = AppointmentStatus::PAID->value;
+                }
+                $done = $this->modelEvent->cancelAndRefund($idEvent, AppointmentStatus::CANCELLED_GOOGLE_NOT_REFUNDED->value, $notRefundedFrom, null, 0.0);
+            }
+
+            if (!$done) {
+                error_log("Annulation Google de l'événement " . $idEvent . " ignorée : déjà annulé (notification en double ?) ou erreur.");
+            }
+        } catch (Throwable $e) {
             error_log("Erreur dans markGoogleEventAsCancelled pour l'événement " . $idEvent . ": " . $e->getMessage());
         }
     }

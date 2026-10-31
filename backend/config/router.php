@@ -1,7 +1,9 @@
 <?php
 
+// Niveaux d'accès (FLE-55 / FLE-56), vérifiés par ClassAccess dans public/index.php :
+// public, auth (défaut si omis), admin, cron (en-tête Api-Key).
+
 // Connexion
-$router->addRoute("GET", BASE_URL, "ControllerUser", "loginPage", 'public');
 $router->addRoute("POST", "/api/login", "ControllerUser", "login", 'public');
 // public : se déconnecter doit marcher même si la session PHP a déjà expiré.
 $router->addRoute("POST", "/api/logout", "ControllerUser", "logout", 'public');
