@@ -6,7 +6,7 @@
 #   scripts/logs.sh scrub  <prod|preprod>   supprime les ID de session, masque les e-mails (FLE-57)
 #   scripts/logs.sh rotate <prod|preprod>   archive les .log du mois et supprime les archives anciennes
 #
-# Durée de conservation : LOG_RETENTION_DAYS (180 jours par défaut, soit 6 mois).
+# Durée de conservation : LOG_RETENTION_DAYS (360 jours par défaut, décidé le 31/10).
 # Rotation : une fois par mois, par cron, par exemple :
 #   5 3 1 * * /chemin/du/projet/scripts/logs.sh rotate prod
 #
@@ -23,7 +23,7 @@ ENV_NAME="${2:-}"
 
 CONTAINER="flepourtous-backend-$ENV_NAME"
 LOG_DIR_IN_CONTAINER="/var/www/html/logs"
-RETENTION_DAYS="${LOG_RETENTION_DAYS:-180}"
+RETENTION_DAYS="${LOG_RETENTION_DAYS:-360}"
 [[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]] && [ "$RETENTION_DAYS" -ge 30 ] \
     || { echo "LOG_RETENTION_DAYS doit être un nombre de jours >= 30" >&2; exit 2; }
 
