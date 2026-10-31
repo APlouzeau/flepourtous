@@ -69,15 +69,23 @@ require_once APP_PATH . "config/router.php";
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-$controllerUser = new ControllerUser();
-
 $handler = $router->getHandler($method, $uri);
-match ($handler['access']) {
-    'public' => null,
-    'auth' => $controllerUser->verifyConnectBack(),
-    'admin' => $controllerUser->verifyConnectAdmin(),
-    'cron' => $controllerUser->verifyCronKey()
-};
+
+// Contrôle d'accès centralisé (FLE-56) : le niveau est déclaré sur la route
+// dans config/router.php, une route sans niveau est 'auth' par défaut.
+$accessStatus = ClassAccess::check($handler['access'], $_SESSION, $_SERVER, CRON_KEY);
+if ($accessStatus !== 200) {
+    if (!in_array($handler['access'], ClassAccess::LEVELS, true)) {
+        error_log("Niveau d'accès inconnu '" . $handler['access'] . "' pour $method $uri");
+    }
+    http_response_code($accessStatus);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'code' => 0,
+        'message' => $accessStatus === 401 ? 'Utilisateur non connecté' : 'Utilisateur non autorisé'
+    ]);
+    exit();
+}
 
 if (!class_exists($handler['controller']) || $handler['controller'] == 'ControllerError') {
     $controller = new ControllerError();
