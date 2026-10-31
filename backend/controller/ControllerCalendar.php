@@ -26,6 +26,32 @@ class ControllerCalendar
 
     private const EVENT_LOG_FILE = 'event_log';
 
+    // Codes d'annulation, partagés avec le front (checkDeleteEvent → modale → deleteEvent).
+    public const CANCEL_REFUNDED = 1;          // plus de 24 h avant : recrédité
+    public const CANCEL_LATE_NOT_REFUNDED = 2; // moins de 24 h avant : séance due
+    public const CANCEL_ADMIN = 3;             // annulation par l'admin : recrédité
+    private const CANCEL_FREE_DELAY_SECONDS = 24 * 3600;
+
+    /**
+     * Règle d'annulation, unique pour checkDeleteEvent et deleteEvent.
+     * Le code demandé par le front n'est écouté que pour l'annulation admin (3),
+     * et seulement si la session est admin ; sinon seul le délai avant le cours compte.
+     *
+     * @param string $startDateTimeUtc startDateTime de la table event (UTC)
+     */
+    public static function cancellationCode(string $startDateTimeUtc, bool $isAdmin, mixed $requestedCode, ?DateTimeImmutable $now = null): int
+    {
+        if ($isAdmin && (int) $requestedCode === self::CANCEL_ADMIN) {
+            return self::CANCEL_ADMIN;
+        }
+
+        $utc = new DateTimeZone('UTC');
+        $now = $now ?? new DateTimeImmutable('now', $utc);
+        $timeRemaining = (new DateTimeImmutable($startDateTimeUtc, $utc))->getTimestamp() - $now->getTimestamp();
+
+        return $timeRemaining < self::CANCEL_FREE_DELAY_SECONDS ? self::CANCEL_LATE_NOT_REFUNDED : self::CANCEL_REFUNDED;
+    }
+
     public function __construct()
     {
         $this->modelEvent = new ModelEvent();
@@ -331,17 +357,16 @@ class ControllerCalendar
             return;
         }
 
-        $timeRemaining = (new DateTime($event['startDateTime']))->getTimestamp() - (new DateTime('now', new DateTimeZone('UTC')))->getTimestamp();
+        $cancellationCode = self::cancellationCode($event['startDateTime'], $isAdmin, $data['code'] ?? null);
 
-        // Annulation admin : le code 3 envoyé par le front n'est pris en compte que pour un admin.
-        if ($isAdmin && isset($data['code']) && $data['code'] === 3) {
+        if ($cancellationCode === self::CANCEL_ADMIN) {
             $response = [
                 'code' => 3,
                 'message' => "En tant qu'administrateur, vous pouvez annuler ce rendez-vous sans frais pour l'utilisateur. Un mail sera automatiquement envoyé à l'élève afin de le prévenir, et son porte-monnaie sera recrédité. Confirmez-vous l'annulation ?",
             ];
         } else {
             // Logique normale pour les utilisateurs
-            if ($timeRemaining < 24 * 3600) {
+            if ($cancellationCode === self::CANCEL_LATE_NOT_REFUNDED) {
                 $response = [
                     'code' => 2,
                     'message' => "L'annulation d'un rendez-vous moins de 24 heures avant le début entraîne le paiement de la totalité de la séance. Confirmez- vous l'annulation ?",
@@ -382,7 +407,8 @@ class ControllerCalendar
             return;
         }
 
-        if ($event['userId'] != $_SESSION['idUser'] && $_SESSION['role'] != 'admin') {
+        $isAdmin = ($_SESSION['role'] ?? null) === 'admin';
+        if ((int) $event['userId'] !== (int) $_SESSION['idUser'] && !$isAdmin) {
             $response = [
                 'code' => 0,
                 'message' => 'Vous n\'êtes pas autorisé à supprimer cet événement.',
@@ -409,7 +435,23 @@ class ControllerCalendar
             return;
         }
 
-        $invoiced = $data['code'];
+        // Le remboursement est décidé ici, jamais par le code envoyé par le navigateur :
+        // sinon un élève pourrait envoyer code 1 ou 3 à moins de 24 h et être remboursé.
+        $invoiced = self::cancellationCode($event['startDateTime'], $isAdmin, $data['code']);
+
+        // Le code envoyé est celui du message que l'utilisateur a confirmé. S'il ne correspond
+        // plus (cap des 24 h franchi entre la confirmation et le clic, ou code falsifié),
+        // on n'annule pas : l'utilisateur doit relancer l'annulation et voir les vraies conditions.
+        if ((int) $data['code'] !== $invoiced) {
+            error_log("Annulation refusée pour l'événement " . $data['idEvent'] . " : code envoyé " . json_encode($data['code']) . ", code calculé $invoiced, utilisateur " . $_SESSION['idUser']);
+            http_response_code(409);
+            $response = [
+                'code' => 0,
+                'message' => 'Les conditions d\'annulation ont changé. Relancez l\'annulation pour voir les nouvelles conditions.',
+            ];
+            echo json_encode($response);
+            return;
+        }
 
         $lessonPrice = $this->modelPrice->getPriceByEventId($event['idEvent']);
         if ($invoiced == 1) {
