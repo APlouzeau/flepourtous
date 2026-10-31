@@ -134,7 +134,7 @@ class ControllerMail
 
         $this->mailer->send();
         $this->controllerError->logs("Appointment reminder email sent to user", [
-            "Email sent to: " . $event['mail'],
+            "Email sent to: " . ControllerError::maskEmail($event['mail']),
         ], self::MAIL_LOG_FILE);
         $this->mailer->clearAddresses();
     }
@@ -193,7 +193,7 @@ class ControllerMail
 
     public function sendMailToForgetedPassword($mail, $token)
     {
-        error_log("Sending password reset email to: " . $mail);
+        error_log("Sending password reset email to: " . ControllerError::maskEmail($mail));
         try {
             $this->mailer->addAddress($mail);
             $this->mailer->isHTML(true);
@@ -207,9 +207,9 @@ class ControllerMail
             $this->mailer->Body = $emailBody;
 
             $this->mailer->send();
-            error_log("✅ Password reset email SENT successfully to: " . $mail);
+            error_log("✅ Password reset email SENT successfully to: " . ControllerError::maskEmail($mail));
             $this->controllerError->logs("Password reset email sent", [
-                "Email sent to: " . $mail,
+                "Email sent to: " . ControllerError::maskEmail($mail),
             ], self::MAIL_LOG_FILE);
             return true;
         } catch (Exception $e) {
@@ -286,7 +286,7 @@ class ControllerMail
             $this->mailer->send();
 
             $this->controllerError->logs("Payment success email sent", [
-                "Email sent to: " . $userMail,
+                "Email sent to: " . ControllerError::maskEmail($userMail),
                 "Event ID: " . $eventId
             ], self::MAIL_LOG_FILE);
 
@@ -325,7 +325,7 @@ class ControllerMail
             $this->mailer->Body = $emailBody;
             $this->mailer->send();
             $this->controllerError->logs("Wallet credit after cancellation email sent", [
-                "Email sent to: " . $user['mail'],
+                "Email sent to: " . ControllerError::maskEmail($user['mail']),
                 "Amount: " . $amount
             ], self::MAIL_LOG_FILE);
             return true;
@@ -349,7 +349,7 @@ class ControllerMail
         try {
             $user = $modelUser->getUser(new EntitieUser(['idUser' => $userId]));
             $userMail = $user['mail'];
-            error_log("Sending pack purchase confirmation email to: " . $user['firstName'] . " " . $user['lastName'] . " at " . $userMail);
+            error_log("Sending pack purchase confirmation email to: " . ControllerError::maskEmail($userMail));
 
             $this->mailer->addAddress($userMail);
             $this->mailer->isHTML(true);
@@ -365,7 +365,7 @@ class ControllerMail
 
             $this->mailer->send();
             $this->controllerError->logs("Pack purchase email sent", [
-                "Email sent to: " . $userMail,
+                "Email sent to: " . ControllerError::maskEmail($userMail),
                 "Amount: " . $amount
             ], self::MAIL_LOG_FILE);
             return true;
@@ -385,7 +385,7 @@ class ControllerMail
 
     public function sendVisioEmail($email, $roomUrl, $duration)
     {
-        error_log("Sending visio email to: " . $email);
+        error_log("Sending visio email to: " . ControllerError::maskEmail($email));
         try {
             $this->mailer->addAddress($email);
             $this->mailer->isHTML(true);
@@ -400,7 +400,7 @@ class ControllerMail
 
             $this->mailer->send();
             $this->controllerError->logs("Visio email sent", [
-                "Email sent to: " . $email,
+                "Email sent to: " . ControllerError::maskEmail($email),
                 "Room URL: " . $roomUrl,
                 "Duration: " . $duration
             ], self::MAIL_LOG_FILE);
@@ -520,7 +520,7 @@ class ControllerMail
         $this->mailer->Body = $emailBody;
         $this->mailer->send();
         $this->controllerError->logs("User cancellation email sent", [
-            "Email sent to: " . $userInformations['mail'],
+            "Email sent to: " . ControllerError::maskEmail($userInformations['mail']),
             "Event DateTime: " . $startDateTime,
             "Amount refunded: " . $amount,
             "Refund method: " . ($codeInvoiced == '1' ? 'Wallet' : ($codeInvoiced == '2' ? 'No refund' : ($codeInvoiced == '3' ? 'Admin refund' : ($codeInvoiced == '' ? 'Unknown' : 'Unknown'))))
@@ -599,7 +599,7 @@ class ControllerMail
         $this->mailer->Body = $emailBody;
         $this->mailer->send();
         $this->controllerError->logs("Payment reminder email sent", [
-            "Email sent to: " . $userInformations['mail'],
+            "Email sent to: " . ControllerError::maskEmail($userInformations['mail']),
             "Event DateTime: " . $startDateTime,
             "Amount due: " . $amount
         ], self::MAIL_LOG_FILE);
