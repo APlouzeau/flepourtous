@@ -188,7 +188,7 @@ class ControllerGoogle
         }
 
         $idEvent = $event->getId();
-        $isAppEvent = strpos($event->getDescription(), 'Source:app') !== false;
+        $isAppEvent = strpos($event->getDescription() ?? '', 'Source:app') !== false;
         if ($isAppEvent && $this->checkSameEvent($event)) {
             return;
         }
@@ -226,7 +226,7 @@ class ControllerGoogle
 
         if ($eventExist) {
             error_log("L'événement Google ID: " . $idEvent . " existe déjà en BDD. Mise à jour en cours.");
-            $this->updateExistingEvent($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone);
+            $this->updateExistingEvent($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone, $eventExist, $isAppEvent);
         } else {
             error_log("L'événement Google ID: " . $idEvent . " n'existe pas en BDD. Création en cours.");
             $this->createNewEventFromGoogle($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone);
@@ -265,7 +265,7 @@ class ControllerGoogle
         $newEvent = new EntitieEvent([
             'idEvent' => $idEvent,
             'userId' => $userId,
-            'description' => $event->getSummary() || '',
+            'description' => $event->getSummary() ?? '', // (avant : `|| ''`, qui enregistrait « 1 »)
             'duration' => $duration,
             'startDateTime' => $startDateTimeUTC,  // ✅ Stocké en UTC
             'timezone' => $eventTimezone,          // ✅ Timezone de l'événement
@@ -301,7 +301,11 @@ class ControllerGoogle
         }
     }
 
-    public function updateExistingEvent($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone)
+    /**
+     * @param array $localEvent ligne brute de checkEvent() (colonnes snake_case)
+     * @param bool  $isAppEvent cours réservé depuis l'app (« Source:app » dans la description Google)
+     */
+    public function updateExistingEvent($event, $idEvent, $duration, $startDateTimeUTC, $eventTimezone, array $localEvent, bool $isAppEvent)
     {
         $this->controllerVisio->deleteRoom($idEvent);
 
@@ -318,7 +322,10 @@ class ControllerGoogle
         $eventEntity = new EntitieEvent([
             'idEvent' => $idEvent,
             'userId' => $userId,
-            'description' => $event->getSummary(),
+            // Cours réservé dans l'app : la description en base est le commentaire de l'élève, on la
+            // garde. Le titre Google est « Prénom-Nom » : l'écrire ici remplaçait le commentaire par
+            // le nom de l'élève à chaque notification. Cours créé dans Google : son titre, comme à la création.
+            'description' => $isAppEvent ? ($localEvent['description'] ?? '') : ($event->getSummary() ?? ''),
             'duration' => $duration,
             'startDateTime' => $startDateTimeUTC,  // ✅ Stocké en UTC
             'timezone' => $eventTimezone,          // ✅ Timezone de l'événement
@@ -403,7 +410,13 @@ class ControllerGoogle
     {
         $idEvent = $googleEvent->getId();
         $localEvent = $this->modelEvent->checkEvent($idEvent);
-        $localEventStart = new DateTime($localEvent['startDateTime'], new DateTimeZone('UTC'));
+        if (!$localEvent) {
+            return false;
+        }
+        // checkEvent() renvoie la ligne brute (start_date_time) : l'ancienne clé startDateTime
+        // n'existait pas, la date valait « maintenant » et chaque cours de l'app passait pour modifié
+        // (salle de visio supprimée puis recréée à chaque notification Google).
+        $localEventStart = new DateTime($localEvent['start_date_time'], new DateTimeZone('UTC'));
         $googleEventStart = new DateTime($googleEvent->getStart()->getDateTime(), new DateTimeZone('UTC'));
         $localEventDuration = $localEvent['duration'];
         $googleEventEnd = new DateTime($googleEvent->getEnd()->getDateTime(), new DateTimeZone('UTC'));
