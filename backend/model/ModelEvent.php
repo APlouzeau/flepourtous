@@ -65,7 +65,10 @@ class ModelEvent extends  ClassDatabase
                     'duration' => $data['duration'],
                     'createdAt' => $data['created_at'],
                     'updatedAt' => $data['updated_at'],
-                    'status' => $data['status'],
+                    // Le front élève (TableUser, lib/badge.ts) attend un code (« paid »), la base stocke
+                    // le libellé français (« Payé ») : sans conversion, pastille « unknown » et aucun bouton
+                    // (payer, annuler, rejoindre la visio). Le côté admin lit toujours le libellé.
+                    'status' => AppointmentStatus::codeOf($data['status']),
                     'visioLink' => $data['visio_link'],
                     'startDateTime' => $data['start_date_time'],
                     'timezone' => $data['timezone'],
