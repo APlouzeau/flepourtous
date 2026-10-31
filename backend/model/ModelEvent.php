@@ -296,6 +296,65 @@ class ModelEvent extends  ClassDatabase
     }
 
     /**
+     * Annule un rendez-vous et recrédite éventuellement le porte-monnaie, en une transaction.
+     *
+     * Le statut ne change que si le rendez-vous est encore dans un des $fromStatuses :
+     * si deux requêtes arrivent en même temps (double clic, notifications Google en double),
+     * une seule modifie la ligne et donc une seule recrédite.
+     *
+     * @param string[] $fromStatuses statuts depuis lesquels l'annulation est permise
+     * @return bool true si cette requête a annulé (et recrédité) ; false si le rendez-vous
+     *              n'était plus annulable, ou en cas d'erreur (rien n'est modifié)
+     */
+    public function cancelAndRefund(string $idEvent, string $newStatus, array $fromStatuses, ?int $refundUserId, float $refundAmount): bool
+    {
+        if (empty($fromStatuses)) {
+            return false;
+        }
+
+        try {
+            $this->conn->beginTransaction();
+
+            $placeholders = [];
+            foreach (array_values($fromStatuses) as $i => $status) {
+                $placeholders[] = ':from' . $i;
+            }
+            $req = $this->conn->prepare('UPDATE events SET status = :new_status
+                WHERE id_event = :id_event AND status IN (' . implode(', ', $placeholders) . ')');
+            $req->bindValue(':new_status', $newStatus, PDO::PARAM_STR);
+            $req->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
+            foreach (array_values($fromStatuses) as $i => $status) {
+                $req->bindValue(':from' . $i, $status, PDO::PARAM_STR);
+            }
+            $req->execute();
+
+            if ($req->rowCount() !== 1) {
+                $this->conn->rollBack();
+                return false;
+            }
+
+            if ($refundUserId !== null && $refundAmount > 0) {
+                $wallet = $this->conn->prepare('UPDATE users SET wallet = wallet + :amount WHERE id_user = :id_user');
+                $wallet->bindValue(':amount', $refundAmount);
+                $wallet->bindValue(':id_user', $refundUserId, PDO::PARAM_INT);
+                $wallet->execute();
+                if ($wallet->rowCount() !== 1) {
+                    throw new RuntimeException("Utilisateur $refundUserId introuvable pour le remboursement");
+                }
+            }
+
+            $this->conn->commit();
+            return true;
+        } catch (Throwable $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            error_log("Annulation de l'événement $idEvent impossible : " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Passe le rendez-vous en « Payé » seulement s'il est encore « En attente », en une requête :
      * si le cron l'a annulé entre-temps, rien ne change et la méthode renvoie false.
      */

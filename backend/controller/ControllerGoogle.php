@@ -341,12 +341,25 @@ class ControllerGoogle
             $userId = $event['userId'];
             $teacherId = $this->modelUser->checkMail(TEACHER_MAIL);
 
-            if ($userId != $teacherId && $price['price'] != null) {
-                $this->modelUser->addToWallet($userId, $price['price']);
-                $this->modelEvent->updateEventStatus($idEvent, AppointmentStatus::CANCELLED_GOOGLE_REFUNDED->value);
+            // Tous les statuts non annulés : mêmes règles qu'avant, mais statut et porte-monnaie
+            // changent ensemble et une seule fois, même si Google envoie la notification en double.
+            $activeStatuses = [
+                AppointmentStatus::PAID->value,
+                AppointmentStatus::PAID_ADMIN->value,
+                AppointmentStatus::UNPAID->value,
+                AppointmentStatus::PENDING->value,
+                AppointmentStatus::GOOGLE->value,
+            ];
+
+            if ($userId != $teacherId && ($price['price'] ?? null) != null) {
+                $done = $this->modelEvent->cancelAndRefund($idEvent, AppointmentStatus::CANCELLED_GOOGLE_REFUNDED->value, $activeStatuses, (int) $userId, (float) $price['price']);
             } else {
                 error_log("Pas de remboursement (userId=" . $userId . ", teacherId=" . $teacherId . ", price=" . ($price['price'] ?? 'null') . ")");
-                $this->modelEvent->updateEventStatus($idEvent, AppointmentStatus::CANCELLED_GOOGLE_NOT_REFUNDED->value);
+                $done = $this->modelEvent->cancelAndRefund($idEvent, AppointmentStatus::CANCELLED_GOOGLE_NOT_REFUNDED->value, $activeStatuses, null, 0.0);
+            }
+
+            if (!$done) {
+                error_log("Annulation Google de l'événement " . $idEvent . " ignorée : déjà annulé (notification en double ?) ou erreur.");
             }
         } catch (Exception $e) {
             error_log("Erreur dans markGoogleEventAsCancelled pour l'événement " . $idEvent . ": " . $e->getMessage());

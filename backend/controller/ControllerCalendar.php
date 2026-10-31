@@ -454,27 +454,43 @@ class ControllerCalendar
         }
 
         $lessonPrice = $this->modelPrice->getPriceByEventId($event['idEvent']);
-        if ($invoiced == 1) {
-            $this->modelUser->addToWallet($event['userId'], $lessonPrice['price']);
-            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], AppointmentStatus::CANCELLED_REFUNDED->value);
+        $price = (float) ($lessonPrice['price'] ?? 0);
+
+        $newStatus = match ($invoiced) {
+            self::CANCEL_REFUNDED => AppointmentStatus::CANCELLED_REFUNDED->value,
+            self::CANCEL_LATE_NOT_REFUNDED => AppointmentStatus::CANCELLED_NOT_REFUNDED->value,
+            self::CANCEL_ADMIN => AppointmentStatus::CANCELLED_ADMIN->value,
+        };
+        $refundAmount = $invoiced === self::CANCEL_LATE_NOT_REFUNDED ? 0.0 : $price;
+
+        // Statut et porte-monnaie changés ensemble, et seulement si le cours est encore actif :
+        // une deuxième requête simultanée (double clic, requête rejouée) ne recrédite pas.
+        $cancelled = $this->modelEvent->cancelAndRefund(
+            $data['idEvent'],
+            $newStatus,
+            [AppointmentStatus::PAID->value, AppointmentStatus::GOOGLE->value],
+            (int) $event['userId'],
+            $refundAmount
+        );
+
+        $this->controllerError->logs("Annulation de l'événement " . $data['idEvent'] . " (code $invoiced) : ", [$cancelled ? 'OK' : 'refusée ou erreur'], self::EVENT_LOG_FILE);
+
+        if (!$cancelled) {
+            http_response_code(409);
+            $response = [
+                'code' => 0,
+                'message' => 'Ce rendez-vous a déjà été annulé ou ne peut plus l\'être.',
+            ];
+            echo json_encode($response);
+            return;
         }
 
-        if ($invoiced == 2) {
-            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], AppointmentStatus::CANCELLED_NOT_REFUNDED->value);
-        }
-
-        if ($invoiced == 3) {
-            $this->modelUser->addToWallet($event['userId'], $lessonPrice['price']);
-            $deleteEventSuccess = $this->modelEvent->updateEventStatus($data['idEvent'], AppointmentStatus::CANCELLED_ADMIN->value);
-        }
-
+        // Effets de bord seulement pour la requête qui a réellement annulé.
         $this->controllerVisio->deleteRoom($data['idEvent']);
         $this->modelEvent->deleteVisioLink($data['idEvent']);
 
-        $this->controllerMail->sendMailToAlertEventDelete($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price'], $invoiced);
-        $this->controllerMail->sendMailToAlertEventDeleteByUser($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price'], $invoiced);
-
-        $this->controllerError->logs("Résultat de la mise à jour du statut de l'événement " . $data['idEvent'] . " : ", $deleteEventSuccess ? [$deleteEventSuccess] : ['Error'], self::EVENT_LOG_FILE);
+        $this->controllerMail->sendMailToAlertEventDelete($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price'] ?? 0, $invoiced);
+        $this->controllerMail->sendMailToAlertEventDeleteByUser($event['userId'], $event['startDateTime'], $event['timezone'], $lessonPrice['price'] ?? 0, $invoiced);
 
         $client = $this->getClient();
         $service = new Google\Service\Calendar($client);
@@ -482,6 +498,8 @@ class ControllerCalendar
         try {
             $service->events->delete(GOOGLE_CALENDAR_ID, $data['idEvent']);
         } catch (Exception $e) {
+            // Le cours est déjà annulé et recrédité en base : seul l'agenda Google n'est pas à jour.
+            error_log("Événement " . $data['idEvent'] . " annulé en base mais pas supprimé de Google Calendar : " . $e->getMessage());
             $response = [
                 'code' => 0,
                 'message' => 'Erreur lors de la suppression de l\'événement dans Google Calendar',
@@ -490,22 +508,10 @@ class ControllerCalendar
             return;
         }
 
-
-
-
-        if (!$deleteEventSuccess) {
-            $response = [
-                'code' => 0,
-                'message' => 'Erreur lors de la suppression de l\'événement en base de données',
-            ];
-            echo json_encode($response);
-            return;
-        } else {
-            $response = [
-                'code' => 1,
-                'message' => 'Événement supprimé de la base de données avec succès',
-            ];
-        }
+        $response = [
+            'code' => 1,
+            'message' => 'Événement supprimé de la base de données avec succès',
+        ];
         echo json_encode($response);
     }
 
