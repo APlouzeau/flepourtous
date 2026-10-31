@@ -40,6 +40,21 @@ DB_HOST="$(env_value DB_HOST)"; DB_PORT="$(env_value DB_PORT)"; DB_PORT="${DB_PO
 DB_NAME="$(env_value DB_NAME)"; DB_USER="$(env_value DB_USER)"; DB_PSW="$(env_value DB_PSW)"
 [ -n "$DB_HOST" ] && [ -n "$DB_NAME" ] && [ -n "$DB_USER" ] || { echo "❌ DB_HOST, DB_NAME ou DB_USER vide dans $ENV_FILE" >&2; exit 1; }
 
+# Le .env lu est celui du dossier courant : « db.sh backup preprod » lancé depuis le dossier
+# prod sauvegardait la base prod sous le nom preprod (31/10). On vérifie que le .env est bien
+# celui de l'environnement demandé : COOKIE_DOMAIN = .preprod.flepourtous.fr en preprod,
+# .flepourtous.fr en prod.
+COOKIE_DOMAIN="$(env_value COOKIE_DOMAIN)"
+case "$ENV_NAME:$COOKIE_DOMAIN" in
+    preprod:*preprod*) ;;
+    prod:*flepourtous.fr) [[ "$COOKIE_DOMAIN" != *preprod* ]] || ENV_MISMATCH=1 ;;
+    *) ENV_MISMATCH=1 ;;
+esac
+if [ "${ENV_MISMATCH:-0}" = 1 ]; then
+    echo "❌ $ENV_FILE (COOKIE_DOMAIN=${COOKIE_DOMAIN:-vide}) n'est pas celui de « $ENV_NAME » : lancer depuis le dossier du projet $ENV_NAME. Arrêt." >&2
+    exit 1
+fi
+
 CNF="$(mktemp)"; chmod 600 "$CNF"
 PARTIAL=""
 trap 'rm -f "$CNF"; [ -z "$PARTIAL" ] || rm -f "$PARTIAL"' EXIT

@@ -7,7 +7,7 @@ class ModelGoogleSync extends ClassDatabase
     /**
      * Sauvegarde ou met à jour le syncToken pour un calendrier donné.
      * Utilise une requête UPSERT pour être plus robuste.
-     * Assurez-vous que la colonne 'idCalendar' est une clé UNIQUE ou PRIMARY.
+     * La colonne 'id_calendar' doit être UNIQUE ou PRIMARY (migration 007).
      */
     public function saveNextSyncToken(string $idGoogleCalendar, string $nextSyncToken)
     {
