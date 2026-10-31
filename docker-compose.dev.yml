@@ -10,6 +10,8 @@ services:
       context: ./backend
       target: dev
     container_name: flepourtous-backend-dev
+    environment:
+      - SESSION_NAME=FLE_DEV_SESSID
 
   app:
     ports:
@@ -22,6 +24,8 @@ services:
       target: dev
     command: pnpm run dev
     container_name: flepourtous-frontend-dev
+    environment:
+      - SESSION_COOKIE_NAME=FLE_DEV_SESSID
 
   db:
     image: mariadb:10.6

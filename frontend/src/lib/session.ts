@@ -1,11 +1,12 @@
 "use server";
+import { phpSessionCookieHeader, SESSION_COOKIE_NAME } from "@/lib/sessionCookie";
 import { cookies, headers } from "next/headers";
 import apiClient from "@/lib/axios";
 import { redirect } from "next/navigation";
 import { SignJWT, jwtVerify } from "jose";
 
 export async function createSession(userRole: string) {
-    const cookie = (await cookies()).get("PHPSESSID");
+    const cookie = (await cookies()).get(SESSION_COOKIE_NAME);
     const cookiePHP = cookie?.value;
 
     const jwt = await new SignJWT({ cookiePHP, role: userRole })
@@ -100,7 +101,7 @@ export async function logout() {
                 {},
                 {
                     headers: {
-                        Cookie: `PHPSESSID=${session}`,
+                        Cookie: phpSessionCookieHeader(session),
                         "Content-Type": "application/json",
                     },
                     withCredentials: true,
@@ -140,7 +141,7 @@ export async function getWallet() {
             {},
             {
                 headers: {
-                    Cookie: `PHPSESSID=${session}`,
+                    Cookie: phpSessionCookieHeader(session),
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,

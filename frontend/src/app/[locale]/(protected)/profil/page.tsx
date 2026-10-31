@@ -1,3 +1,4 @@
+import { phpSessionCookieHeader } from "@/lib/sessionCookie";
 import Provider from "./profileProvider";
 import DisplayUserprofil from "./display";
 import apiClient from "@/lib/axios";
@@ -10,7 +11,7 @@ export default async function profilPage() {
         {},
         {
             headers: {
-                Cookie: `PHPSESSID=${cookie}`,
+                Cookie: phpSessionCookieHeader(cookie),
                 "Content-Type": "application/json",
             },
             withCredentials: true,

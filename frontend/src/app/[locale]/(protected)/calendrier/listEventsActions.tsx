@@ -1,4 +1,5 @@
 "use server";
+import { phpSessionCookieHeader } from "@/lib/sessionCookie";
 
 import apiClient from "@/lib/axios";
 import { showBasicAppointmentProps, showInvoicableAppointmentProps } from "@/app/[locale]/types/appointments";
@@ -22,7 +23,7 @@ export async function appointmentList(): Promise<showBasicAppointmentProps[]> {
             { locale },
             {
                 headers: {
-                    Cookie: `PHPSESSID=${cookie}`,
+                    Cookie: phpSessionCookieHeader(cookie),
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,
@@ -54,7 +55,7 @@ export async function listInvoices(filters?: filtersProps): Promise<showInvoicab
         console.log("Filters envoyés à /api/getInvoices:", JSON.stringify(filters));
         const response = await apiClient.post("/api/getInvoices", filters || {}, {
             headers: {
-                Cookie: `PHPSESSID=${cookie}`,
+                Cookie: phpSessionCookieHeader(cookie),
                 "Content-Type": "application/json",
             },
         });
@@ -88,7 +89,7 @@ export async function setInvoiced(idEvent: string) {
             { idEvent },
             {
                 headers: {
-                    Cookie: `PHPSESSID=${cookie}`,
+                    Cookie: phpSessionCookieHeader(cookie),
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,

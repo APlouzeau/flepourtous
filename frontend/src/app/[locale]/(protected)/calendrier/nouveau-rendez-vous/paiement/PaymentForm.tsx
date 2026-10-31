@@ -9,11 +9,12 @@ import { useTranslations } from "@/locales/client";
 
 interface PaymentFormProps {
     stripePublicKey: string | null | undefined;
-    cookie: string | null;
+    // Session présente : seul ce booléen est envoyé au navigateur, jamais l'identifiant de session.
+    hasSession: boolean;
     serverError?: string | null;
 }
 
-export default function PaymentForm({ stripePublicKey, cookie, serverError }: PaymentFormProps) {
+export default function PaymentForm({ stripePublicKey, hasSession, serverError }: PaymentFormProps) {
     const [stripeInstance, setStripeInstance] = useState<Stripe | null>(null);
     const [asyncStripeError, setAsyncStripeError] = useState<string | null>(null);
     const router = useRouter();
@@ -55,8 +56,8 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
     }, [stripePromise]);
 
     const fetchClientSecret = useCallback(async (): Promise<string> => {
-        if (!cookie) {
-            console.warn("[PaymentForm] fetchClientSecret: Tentative d'appel sans cookie.");
+        if (!hasSession) {
+            console.warn("[PaymentForm] fetchClientSecret: Tentative d'appel sans session.");
             return "";
         }
         try {
@@ -90,7 +91,7 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
             setAsyncStripeError(trad("payments.errorMessage"));
             return "";
         }
-    }, [cookie, router, trad]);
+    }, [hasSession, router, trad]);
 
     if (serverError) {
         return (
@@ -130,7 +131,7 @@ export default function PaymentForm({ stripePublicKey, cookie, serverError }: Pa
         );
     }
 
-    if (!cookie || cookie.trim() === "") {
+    if (!hasSession) {
         return (
             <div className="p-4 md:p-8 text-center">
                 <h1 className="text-2xl font-bold mb-6">{trad("payment.finish")}</h1>

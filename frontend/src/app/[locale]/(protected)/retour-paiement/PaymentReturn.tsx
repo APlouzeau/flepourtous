@@ -7,10 +7,9 @@ import { useTranslations } from "@/locales/client";
 
 interface PaymentReturnProps {
     sessionId?: string;
-    cookie: string | null;
 }
 
-export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps) {
+export default function PaymentReturn({ sessionId }: PaymentReturnProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -42,7 +41,6 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
                     { session_id: sessionId },
                     {
                         headers: {
-                            Cookie: `PHPSESSID=${cookie}`,
                             "Content-Type": "application/json",
                         },
                         withCredentials: true,
@@ -76,7 +74,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
         };
 
         checkPaymentStatus();
-    }, [isWalletSuccess, hasChecked, sessionId, router, cookie, trad, searchParams]);
+    }, [isWalletSuccess, hasChecked, sessionId, router, trad, searchParams]);
 
     return (
         <div className="p-4 md:p-8 text-center max-w-md mx-auto">

@@ -13,6 +13,9 @@ services:
       target: prod
     env_file:
       - ./backend/.env
+    environment:
+      # Nom du cookie de session propre à l'environnement (FLE-95), le même côté front.
+      - SESSION_NAME=FLE_PREPROD_SESSID
     volumes:
       - ./logs:/var/www/html/logs
     command: apache2-foreground
@@ -46,6 +49,7 @@ services:
         NEXT_PUBLIC_SITE_ENV: preprod
     environment:
       - INTERNAL_API_URL=http://flepourtous-backend-preprod
+      - SESSION_COOKIE_NAME=FLE_PREPROD_SESSID
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=1h
     command: pnpm run start

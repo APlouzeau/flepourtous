@@ -29,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 
+session_name(SESSION_NAME);
 session_set_cookie_params([
     'lifetime' => 0,
     'path' => '/',

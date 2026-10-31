@@ -1,4 +1,5 @@
 "use server";
+import { phpSessionCookieHeader } from "@/lib/sessionCookie";
 
 import { getCookieBackend } from "@/lib/session";
 import apiClient from "@/lib/axios";
@@ -20,7 +21,7 @@ export async function registerAppointment(formData: FormData) {
     try {
         const response = await apiClient.post("/api/createEvent", data, {
             headers: {
-                Cookie: `PHPSESSID=${cookie}`,
+                Cookie: phpSessionCookieHeader(cookie),
                 "Content-Type": "application/json",
             },
             withCredentials: true,
@@ -44,7 +45,7 @@ export async function prepareRepaymentAction(eventId: string) {
             { eventId },
             {
                 headers: {
-                    Cookie: `PHPSESSID=${cookie}`,
+                    Cookie: phpSessionCookieHeader(cookie),
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,
@@ -70,7 +71,7 @@ export async function checkDeleteEvent(idEvent: string, code?: number) {
 
         const response = await apiClient.post("/api/checkDeleteEvent", requestData, {
             headers: {
-                Cookie: `PHPSESSID=${cookie}`,
+                Cookie: phpSessionCookieHeader(cookie),
                 "Content-Type": "application/json",
             },
             withCredentials: true,
@@ -94,7 +95,7 @@ export async function deleteAppointment(idEvent: string, code: number) {
             { idEvent, code },
             {
                 headers: {
-                    Cookie: `PHPSESSID=${cookie}`,
+                    Cookie: phpSessionCookieHeader(cookie),
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,
@@ -120,7 +121,7 @@ export async function getAvailableTimeSlots(date: string, userTimeZone: string, 
             { date, userTimeZone, selectedDuration },
             {
                 headers: {
-                    Cookie: `PHPSESSID=${cookie}`,
+                    Cookie: phpSessionCookieHeader(cookie),
                     "Content-Type": "application/json",
                 },
                 withCredentials: true,
@@ -139,7 +140,7 @@ export async function getAllLessonsWithPrices() {
     try {
         const response = await apiClient.post(`/api/getAllLessonsWithPrices/${locale}`, {
             headers: {
-                Cookie: `PHPSESSID=${cookie}`,
+                Cookie: phpSessionCookieHeader(cookie),
                 "Content-Type": "application/json",
             },
             withCredentials: true,
