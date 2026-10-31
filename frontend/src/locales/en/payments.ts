@@ -13,6 +13,7 @@ export default {
         returnToCalendar: "Return to my calendar",
         successFullPayment: "Successful payment !",
         creditedToWallet: "Your appointment was cancelled before the payment was completed (payment deadline passed). The amount paid has been credited to your wallet: you can use it to book a new lesson.",
+        creditedWalletShort: "Your wallet no longer covers the rest of the lesson price (it was used during the payment). The amount paid by card has been credited to your wallet: the appointment still needs to be paid from your calendar.",
         missingCheck: "Error during payment verification.",
         processing: "Processing your payment, please wait...",
         redirectToCalendar: "Redirecting to calendar in a few seconds...",

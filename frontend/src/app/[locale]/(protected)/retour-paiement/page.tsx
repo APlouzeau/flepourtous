@@ -1,6 +1,5 @@
 import { getTranslations } from "@/locales/server";
 import PaymentReturn from "./PaymentReturn";
-import { getCookieBackend } from "@/lib/session";
 
 export default async function PaymentReturnPage({
     searchParams,
@@ -15,8 +14,6 @@ export default async function PaymentReturnPage({
     const sessionId = resolvedSearchParams.session_id || undefined;
     const method = resolvedSearchParams.method || null;
     const trad = await getTranslations();
-
-    const cookie = await getCookieBackend();
 
     if (!sessionId && method !== "wallet") {
         return (
@@ -37,5 +34,5 @@ export default async function PaymentReturnPage({
         );
     }
 
-    return <PaymentReturn sessionId={sessionId} cookie={cookie} />;
+    return <PaymentReturn sessionId={sessionId} />;
 }

@@ -15,6 +15,8 @@ class ControllerOrder
     private $modelEvent;
     private $controllerMail;
     const ORDER_LOG_FILE = "orders";
+    // Tailles de pack proposées par le formulaire (PackForm.tsx : pack-5, pack-10).
+    private const ALLOWED_PACKS = [5, 10];
 
     public function __construct()
     {
@@ -148,17 +150,22 @@ class ControllerOrder
         $remainingAmount = $userWallet - $lessonPrice;
 
         if ($remainingAmount >= 0) {
-            // Débit vérifié en base (le solde a pu changer depuis la lecture), puis passage en « Payé »
-            // seulement si le cours est encore en attente ; sinon on rend l'argent.
-            if (!$this->modelUser->debitWallet((int) $idUser, (float) $lessonPrice)) {
+            // Passage en « Payé » et débit du porte-monnaie en une transaction : le solde a pu
+            // changer depuis la lecture, et le cours a pu être annulé par le cron.
+            $result = $this->modelEvent->payWithWallet((string) $eventId, (int) $idUser, (float) $lessonPrice);
+            if ($result === ModelEvent::PAY_INSUFFICIENT_WALLET) {
                 http_response_code(409);
                 echo json_encode(['code' => 0, 'message' => 'Solde du porte-monnaie insuffisant, veuillez réessayer.']);
                 return;
             }
-            if (!$this->modelEvent->markPaidIfPending((string) $eventId)) {
-                $this->modelUser->addToWallet((int) $idUser, (float) $lessonPrice);
+            if ($result === ModelEvent::PAY_NOT_PENDING) {
                 http_response_code(409);
                 echo json_encode(['code' => 0, 'message' => "Ce rendez-vous n'est plus en attente de paiement."]);
+                return;
+            }
+            if ($result !== ModelEvent::PAY_OK) {
+                http_response_code(500);
+                echo json_encode(['code' => 0, 'message' => 'Erreur lors du paiement, rien n\'a été débité. Veuillez réessayer.']);
                 return;
             }
 
@@ -243,7 +250,8 @@ class ControllerOrder
                         'product_data' => [
                             'name' => $productName,
                         ],
-                        'unit_amount' => $amountToPay * 100,
+                        // Centimes entiers : 16,40 € * 100 donne 1639.9999999999998 en flottant, refusé par Stripe.
+                        'unit_amount' => (int) round($amountToPay * 100),
                     ],
                     'quantity' => 1,
                 ]],
@@ -327,13 +335,44 @@ class ControllerOrder
             return;
         }
 
-        if ($this->modelEvent->markPaidIfPending($eventId)) {
-            // Part payée par le porte-monnaie = prix du cours - montant payé par carte.
-            $lesson = $this->modelPrice->getPriceByEventId($eventId);
-            $walletPart = $lesson ? round($lesson['price'] - $amount, 2) : 0;
-            if ($walletPart > 0) {
-                $this->modelUser->debitWallet($idUser, $walletPart, true);
-            }
+        // Part payée par le porte-monnaie = prix du cours - montant payé par carte. Elle est débitée
+        // dans la même transaction que le passage en « Payé », et seulement si le solde la couvre
+        // encore : avant, un solde dépensé pendant le paiement par carte tombait à 0 et le cours
+        // passait quand même en « Payé » (cours à 22 € obtenu pour 2 € par carte).
+        $lesson = $this->modelPrice->getPriceByEventId($eventId);
+        $walletPart = $lesson ? max(0, round($lesson['price'] - $amount, 2)) : 0;
+        $payResult = $this->modelEvent->payWithWallet($eventId, $idUser, $walletPart);
+
+        if ($payResult === ModelEvent::PAY_INSUFFICIENT_WALLET) {
+            // Le cours reste « En attente » ; le montant payé par carte va sur le porte-monnaie,
+            // l'élève peut finir de payer le cours avec.
+            $this->modelUser->addToWallet($idUser, $amount);
+            $modelPayment->setOutcome($sessionId, 'credited_wallet_short');
+            $this->controllerError->logs("Paiement carte reçu mais porte-monnaie insuffisant pour le reste : crédité sur le porte-monnaie", [
+                "Utilisateur ID: " . $idUser,
+                "Événement ID: " . $eventId,
+                "Montant carte: " . $amount . "€",
+                "Part porte-monnaie attendue: " . $walletPart . "€"
+            ], self::ORDER_LOG_FILE);
+            echo json_encode([
+                'status' => 'credited_wallet_short',
+                'payment_status' => 'paid',
+                'amount' => $amount,
+                'message' => 'Votre porte-monnaie ne couvre plus le reste du cours : le montant payé par carte a été crédité sur votre porte-monnaie. Le rendez-vous reste à payer.'
+            ]);
+            return;
+        }
+
+        if ($payResult === ModelEvent::PAY_ERROR) {
+            // Paiement encaissé par Stripe mais rien d'appliqué : à traiter à la main.
+            $modelPayment->setOutcome($sessionId, 'error');
+            error_log("ALERTE paiement Stripe $sessionId encaissé ($amount €) mais non appliqué à l'événement $eventId, utilisateur $idUser");
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'payment_status' => 'paid', 'message' => 'Paiement reçu, mais une erreur empêche de le valider. Contactez-nous, rien n\'est perdu.']);
+            return;
+        }
+
+        if ($payResult === ModelEvent::PAY_OK) {
             $modelPayment->setOutcome($sessionId, 'lesson_paid');
             $this->controllerError->logs("Paiement de leçon avec carte réussi", [
                 "Utilisateur ID: " . $idUser,
@@ -370,61 +409,6 @@ class ControllerOrder
         ]);
     }
 
-    public function refuseAppointment()
-    {
-        $controllerUser = new ControllerUser();
-        $controllerUser->verifyConnectBack();
-
-        $input = json_decode(file_get_contents('php://input'), true);
-        $eventId = $input['event_id'];
-        $idUser = $input['id_user'];
-
-        if ($eventId) {
-            $modelEvent = new ModelEvent();
-            $modelPrices = new ModelPrices();
-            $modelUser = new ModelUser();
-            $lessonPrice = $modelPrices->getPriceByEventId($eventId);
-            $wallet = $modelUser->addToWallet($idUser, $lessonPrice['price']);
-            $status = $modelEvent->updateEventStatus($eventId, 'Refusé');
-
-            if ($wallet && $status) {
-                /*                 $this->controllerError->logs(
-                    "Rendez-vous refusé et remboursé", 
-                    [
-                        "Utilisateur ID: " . $idUser,
-                        "Événement ID: " . $eventId,
-                        "Montant remboursé: " . $lessonPrice['price'] . "€",
-                        "Leçon: " . $lessonPrice['title']
-                    ], 
-                    self::ORDER_LOG_FILE
-                ); */
-                echo json_encode([
-                    'code' => 1,
-                    'message' => 'Rendez-vous refusé avec succès.'
-                ]);
-            } else {
-                /*                 $this->controllerError->logs(
-                    "ERREUR lors du refus de rendez-vous", 
-                    [
-                        "Utilisateur ID: " . $idUser,
-                        "Événement ID: " . $eventId,
-                        "Raison: Échec de la mise à jour du wallet ou du statut"
-                    ], 
-                    self::ORDER_LOG_FILE
-                ); */
-                echo json_encode([
-                    'code' => 0,
-                    'message' => 'Échec du refus du rendez-vous.'
-                ]);
-            }
-        } else {
-            echo json_encode([
-                'code' => 0,
-                'message' => 'ID de l\'événement manquant.'
-            ]);
-        }
-    }
-
     public function orderPacks()
     {
         $controllerUser = new ControllerUser();
@@ -436,6 +420,15 @@ class ControllerOrder
             return;
         }
 
+        // Seuls les packs proposés par le formulaire (5 ou 10 cours) : le multiplicateur venait du
+        // navigateur sans contrôle (0,01 ou 1000 passaient).
+        $pack = filter_var($input['pack'] ?? null, FILTER_VALIDATE_INT);
+        if (!in_array($pack, self::ALLOWED_PACKS, true)) {
+            http_response_code(400);
+            echo json_encode(['code' => 0, 'message' => 'Pack invalide.']);
+            return;
+        }
+
         $price = $this->modelPrice->getPriceByDurationAndLesson($input['duration'], $input['idLesson']);
 
         if (!$price) {
@@ -443,7 +436,7 @@ class ControllerOrder
             return;
         }
 
-        $packAmount = $this->packAmount($price, $input['pack']);
+        $packAmount = $this->packAmount($price, $pack);
         $_SESSION['lesson_price'] = $packAmount;
         $_SESSION['lesson_name'] = $input['idLesson'];
         $_SESSION['event_id'] = 0;

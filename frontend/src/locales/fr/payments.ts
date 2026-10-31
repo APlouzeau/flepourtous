@@ -13,6 +13,7 @@ export default {
         returnToCalendar: "Retour à mon calendrier",
         successFullPayment: "Paiement réussi !",
         creditedToWallet: "Votre rendez-vous a été annulé avant la fin du paiement (délai de paiement dépassé). Le montant payé a été crédité sur votre porte-monnaie : vous pouvez l'utiliser pour réserver un nouveau cours.",
+        creditedWalletShort: "Votre porte-monnaie ne couvre plus le reste du prix du cours (il a été utilisé pendant le paiement). Le montant payé par carte a été crédité sur votre porte-monnaie : le rendez-vous reste à payer depuis votre calendrier.",
         missingCheck: "Erreur lors de la vérification du paiement.",
         processing: "Traitement de votre paiement, veuillez patienter...",
         redirectToCalendar: "Redirection vers le calendrier dans quelques secondes...",

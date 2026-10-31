@@ -82,6 +82,22 @@ class ControllerError
         fclose($stderr);
     }
 
+    /**
+     * Adresse e-mail masquée pour les logs (RGPD, minimisation) : "alice.martin@gmail.com"
+     * → "a***@gmail.com". Le domaine reste, pour diagnostiquer un envoi.
+     */
+    public static function maskEmail(?string $email): string
+    {
+        if ($email === null || $email === '') {
+            return '(aucune adresse)';
+        }
+        $at = strrpos($email, '@');
+        if ($at === false || $at === 0) {
+            return '***';
+        }
+        return mb_substr($email, 0, 1) . '***' . substr($email, $at);
+    }
+
     public function logs(string $title, array $messages, string $file)
     {
         $logFile = APP_PATH . '/logs/' . $file . '.log';

@@ -29,6 +29,11 @@ define("URI_MAIL", getenv('URI_MAIL'));
 define("URI_FRONT", getenv('URI_FRONT'));
 define('URI_STRIPE', getenv('URI_STRIPE'));
 define("COOKIE_DOMAIN", getenv('COOKIE_DOMAIN'));
+// Nom du cookie de session, propre à chaque environnement (FLE-95) : le cookie de prod
+// (domaine .flepourtous.fr) est aussi envoyé à l'API preprod ; avec le même nom PHPSESSID,
+// PHP pouvait prendre la session de prod. Lettres, chiffres et _ uniquement.
+$sessionName = getenv('SESSION_NAME');
+define("SESSION_NAME", (is_string($sessionName) && preg_match('/^[A-Za-z0-9_]{1,64}$/', $sessionName)) ? $sessionName : 'PHPSESSID');
 // Cookie de session en HTTPS uniquement, sauf SESSION_COOKIE_SECURE=false (local en HTTP).
 define("SESSION_COOKIE_SECURE", getenv('SESSION_COOKIE_SECURE') !== 'false');
 

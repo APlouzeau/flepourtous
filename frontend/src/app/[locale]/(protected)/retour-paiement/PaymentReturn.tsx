@@ -7,10 +7,9 @@ import { useTranslations } from "@/locales/client";
 
 interface PaymentReturnProps {
     sessionId?: string;
-    cookie: string | null;
 }
 
-export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps) {
+export default function PaymentReturn({ sessionId }: PaymentReturnProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -42,7 +41,6 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
                     { session_id: sessionId },
                     {
                         headers: {
-                            Cookie: `PHPSESSID=${cookie}`,
                             "Content-Type": "application/json",
                         },
                         withCredentials: true,
@@ -55,6 +53,11 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
                     // Cours annulé avant la fin du paiement : le montant est sur le porte-monnaie.
                     setStatus("credited");
                     setMessage(trad("payment.creditedToWallet"));
+                } else if (result.status === "credited_wallet_short") {
+                    // Porte-monnaie dépensé pendant le paiement carte : le cours reste à payer,
+                    // le montant carte est sur le porte-monnaie.
+                    setStatus("credited");
+                    setMessage(trad("payment.creditedWalletShort"));
                 } else if (result.payment_status === "paid" || result.status === "already_processed") {
                     setStatus("success");
                     setMessage(trad("payment.successFullPayment"));
@@ -71,7 +74,7 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
         };
 
         checkPaymentStatus();
-    }, [isWalletSuccess, hasChecked, sessionId, router, cookie, trad, searchParams]);
+    }, [isWalletSuccess, hasChecked, sessionId, router, trad, searchParams]);
 
     return (
         <div className="p-4 md:p-8 text-center max-w-md mx-auto">

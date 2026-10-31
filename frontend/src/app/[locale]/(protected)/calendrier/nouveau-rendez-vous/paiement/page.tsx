@@ -20,7 +20,7 @@ export default async function PaymentPage() {
     return (
         <div id="checkout">
             {/* On ne passe plus stripePromise, mais la clé publique directement */}
-            <PaymentForm stripePublicKey={pk} cookie={cookie} serverError={pageError} />
+            <PaymentForm stripePublicKey={pk} hasSession={!!cookie} serverError={pageError} />
         </div>
     );
 }

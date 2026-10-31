@@ -354,6 +354,63 @@ class ModelEvent extends  ClassDatabase
         }
     }
 
+    public const PAY_OK = 'paid';
+    public const PAY_NOT_PENDING = 'not_pending';
+    public const PAY_INSUFFICIENT_WALLET = 'insufficient_wallet';
+    public const PAY_ERROR = 'error';
+
+    /**
+     * Passe le rendez-vous en « Payé » et débite $walletAmount du porte-monnaie, en une transaction.
+     *
+     * - Le rendez-vous doit être « En attente » et appartenir à $idUser.
+     * - Le porte-monnaie doit couvrir $walletAmount au moment du débit (jamais de solde forcé à 0) :
+     *   sinon rien ne change. Un solde dépensé entre le début et la fin d'un paiement par carte
+     *   ne peut donc plus servir à payer deux cours.
+     *
+     * @return string PAY_OK, PAY_NOT_PENDING, PAY_INSUFFICIENT_WALLET ou PAY_ERROR (rien n'a changé sauf PAY_OK)
+     */
+    public function payWithWallet(string $idEvent, int $idUser, float $walletAmount): string
+    {
+        $walletAmount = round($walletAmount, 2);
+        try {
+            $this->conn->beginTransaction();
+
+            $event = $this->conn->prepare('UPDATE events SET status = :paid
+                WHERE id_event = :id_event AND user_id = :id_user AND status = :pending');
+            $event->bindValue(':paid', AppointmentStatus::PAID->value, PDO::PARAM_STR);
+            $event->bindValue(':pending', AppointmentStatus::PENDING->value, PDO::PARAM_STR);
+            $event->bindValue(':id_event', $idEvent, PDO::PARAM_STR);
+            $event->bindValue(':id_user', $idUser, PDO::PARAM_INT);
+            $event->execute();
+            if ($event->rowCount() !== 1) {
+                $this->conn->rollBack();
+                return self::PAY_NOT_PENDING;
+            }
+
+            if ($walletAmount > 0) {
+                $wallet = $this->conn->prepare('UPDATE users SET wallet = wallet - :amount
+                    WHERE id_user = :id_user AND wallet >= :amount_check');
+                $wallet->bindValue(':amount', number_format($walletAmount, 2, '.', ''), PDO::PARAM_STR);
+                $wallet->bindValue(':amount_check', number_format($walletAmount, 2, '.', ''), PDO::PARAM_STR);
+                $wallet->bindValue(':id_user', $idUser, PDO::PARAM_INT);
+                $wallet->execute();
+                if ($wallet->rowCount() !== 1) {
+                    $this->conn->rollBack();
+                    return self::PAY_INSUFFICIENT_WALLET;
+                }
+            }
+
+            $this->conn->commit();
+            return self::PAY_OK;
+        } catch (Throwable $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            error_log("Paiement de l'événement $idEvent impossible : " . $e->getMessage());
+            return self::PAY_ERROR;
+        }
+    }
+
     /**
      * Passe le rendez-vous en « Payé » seulement s'il est encore « En attente », en une requête :
      * si le cron l'a annulé entre-temps, rien ne change et la méthode renvoie false.
