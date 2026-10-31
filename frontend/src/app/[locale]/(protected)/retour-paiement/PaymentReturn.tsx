@@ -55,6 +55,11 @@ export default function PaymentReturn({ sessionId, cookie }: PaymentReturnProps)
                     // Cours annulé avant la fin du paiement : le montant est sur le porte-monnaie.
                     setStatus("credited");
                     setMessage(trad("payment.creditedToWallet"));
+                } else if (result.status === "credited_wallet_short") {
+                    // Porte-monnaie dépensé pendant le paiement carte : le cours reste à payer,
+                    // le montant carte est sur le porte-monnaie.
+                    setStatus("credited");
+                    setMessage(trad("payment.creditedWalletShort"));
                 } else if (result.payment_status === "paid" || result.status === "already_processed") {
                     setStatus("success");
                     setMessage(trad("payment.successFullPayment"));
