@@ -32,6 +32,22 @@ class ControllerCalendar
     public const CANCEL_ADMIN = 3;             // annulation par l'admin : recrédité
     private const CANCEL_FREE_DELAY_SECONDS = 24 * 3600;
 
+    // Prise de rendez-vous (FLE-113).
+    public const ALLOWED_DURATIONS = [30, 45, 60];
+    private const SLOT_STEP_MINUTES = 15;
+    private const MIN_DELAY_BEFORE_APPOINTMENT_SECONDS = 8 * 3600;
+    // Plages de la professeure, en heure de Paris, par jour ISO (1 = lundi … 7 = dimanche).
+    // Heure de fin = fin du dernier cours. Remplacé par la table des horaires dans FLE-32.
+    private const DEFAULT_TEACHER_RANGES = [
+        1 => [['08:30', '21:30']],
+        2 => [['08:30', '21:30']],
+        3 => [['08:30', '21:30']],
+        4 => [['08:30', '21:30']],
+        5 => [['08:30', '21:30']],
+        6 => [['08:30', '21:30']],
+        7 => [['08:30', '21:30']],
+    ];
+
     /**
      * Règle d'annulation, unique pour checkDeleteEvent et deleteEvent.
      * Le code demandé par le front n'est écouté que pour l'annulation admin (3),
@@ -522,90 +538,239 @@ class ControllerCalendar
         $requestBody = file_get_contents('php://input');
         $data = json_decode($requestBody, true);
 
-        $utcTimeZone = new DateTimeZone('UTC'); // La timezone de la base de données
-        $frenchTimeZone = new DateTimeZone($this->frenchTimeZone); // La timezone de Paris
-
-        $userTimeZone = new DateTimeZone($data['userTimeZone']); // Timezone de l'utilisateur
-
-        $userDate = $data['date']; // La date demandée par l'utilisateur
-
-        $startTime = new DateTime($userDate . ' 08:30:00', $frenchTimeZone); // Crée un objet DateTime pour 8h00 (heure minimum de rendez-vous)
-        $startTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
-
-        $endTime = new DateTime($userDate . ' 21:30:00', $frenchTimeZone); // Crée un objet DateTime pour 22h00 (heure de maximale de fin de journée)
-        $endTime->setTimezone($utcTimeZone); // Définit la timezone de l'objet DateTime
-
-        $controllerGoogle = new ControllerGoogle();
-        $events = $controllerGoogle->getOccupiedSlotsOnGoogleCalendar($startTime, $endTime);
-
-
-        $interval = new DateInterval('PT15M'); // Intervalle de 15 minutes
-        $occupiedTimeSlots = [];
-
-        if (is_array($events) && !empty($events)) {
-            foreach ($events as $event) {
-                $periodStart = $event->getStart();
-                $periodEnd = $event->getEnd();
-                $period = new DatePeriod(
-                    new DateTime($periodStart, new DateTimeZone('UTC')),
-                    $interval,
-                    new DateTime($periodEnd, new DateTimeZone('UTC'))
-                );
-                foreach ($period as $dt) {
-                    $occupiedTimeSlots[] = $dt->setTimezone($utcTimeZone)->format('Y-m-d H:i:s');
-                }
-            }
-        }
-
-        $availableTimeSlots = [];
-
-        $day = new DatePeriod($startTime, $interval, $endTime);
-        $now = new DateTime('now', $utcTimeZone);
-        $nextPossibleAppointment = (clone $now)->modify('+8 hours');
-
-
-        foreach ($day as $time) {
-            $timeString = (clone $time)->format('Y-m-d H:i:s');
-            if (!in_array($timeString, $occupiedTimeSlots) && $time >= $nextPossibleAppointment) {
-                $availableTimeSlots[] = $time;
-            }
-        }
-        $lookupTimestamps = array_map(function ($element) {
-            return $element->getTimestamp();
-        }, $availableTimeSlots);
-
-        $finalAvailableTimeSlots = [];
-        $occupiedTimeSlotsForAppointment = $data['selectedDuration'] / 15; // nombre de slots de 15 minutes nécessaires pour l'occupation
-
-        foreach ($availableTimeSlots as $potentialStartSlot) {
-            $isSlotSuitable = true;
-            for ($i = 1; $i < $occupiedTimeSlotsForAppointment; $i++) {
-                $nextBlockToCheckTime = (clone $potentialStartSlot)->modify('+' . (15 * $i) . ' minutes');
-                if (!in_array($nextBlockToCheckTime->getTimestamp(), $lookupTimestamps)) {
-                    $isSlotSuitable = false;
-                    break;
-                }
-            }
-
-            if ($isSlotSuitable) {
-                $finalAvailableTimeSlots[] = $potentialStartSlot->setTimezone($userTimeZone)->format('H:i');
-            }
-        }
-        if (empty($finalAvailableTimeSlots)) {
-            $response = [
+        $error = self::validateSlotsRequest(is_array($data) ? $data : []);
+        if ($error !== null) {
+            http_response_code(400);
+            echo json_encode([
                 'code' => 0,
-            ];
-            echo json_encode($response);
+                'message' => $error,
+            ]);
             return;
         }
-        if (!empty($finalAvailableTimeSlots)) {
-            $response = [
-                'code' => 1,
-                'message' => 'Créneaux disponibles récupérés avec succès',
-                'data' => $finalAvailableTimeSlots,
-            ];
-            echo json_encode($response);
+
+        $userTimeZone = new DateTimeZone($data['userTimeZone']);
+        $duration = (int) $data['selectedDuration'];
+        $teacherTimeZone = new DateTimeZone($this->frenchTimeZone);
+        [$dayStart, $dayEnd] = self::userDayBounds($data['date'], $userTimeZone);
+
+        // Périodes occupées sur toute la journée de l'élève (qui peut couvrir deux jours de Paris).
+        $controllerGoogle = new ControllerGoogle();
+        $events = $controllerGoogle->getOccupiedSlotsOnGoogleCalendar(
+            $dayStart->setTimezone(new DateTimeZone('UTC')),
+            $dayEnd->setTimezone(new DateTimeZone('UTC'))
+        );
+        if (!is_array($events)) {
+            // Google injoignable : sans les occupations, tous les créneaux paraîtraient libres. On n'en propose aucun.
+            http_response_code(503);
+            echo json_encode([
+                'code' => 0,
+                'message' => 'Impossible de vérifier les disponibilités pour le moment.',
+            ]);
+            return;
         }
+        $busyPeriods = [];
+        foreach ($events as $event) {
+            $busyPeriods[] = [new DateTimeImmutable($event->getStart()), new DateTimeImmutable($event->getEnd())];
+        }
+
+        $slots = self::computeAvailableSlots(
+            $data['date'],
+            $userTimeZone,
+            $duration,
+            self::DEFAULT_TEACHER_RANGES,
+            $teacherTimeZone,
+            $busyPeriods
+        );
+
+        if (empty($slots)) {
+            echo json_encode(['code' => 0]);
+            return;
+        }
+
+        echo json_encode([
+            'code' => 1,
+            'message' => 'Créneaux disponibles récupérés avec succès',
+            'data' => array_map(fn(DateTimeImmutable $slot) => $slot->format('H:i'), $slots),
+        ]);
+    }
+
+    /**
+     * Contrôle les paramètres de getAvailableTimeSlots. Renvoie le message d'erreur, ou null si tout est valide.
+     * Fuseaux : identifiants IANA, y compris les anciens noms que renvoient encore les navigateurs
+     * (Asia/Calcutta, Europe/Kiev…). Décalages fixes (« +02:00 ») et abréviations (« CEST ») refusés :
+     * ils ignorent les changements d'heure.
+     */
+    public static function validateSlotsRequest(array $data): ?string
+    {
+        $date = $data['date'] ?? null;
+        $parsedDate = is_string($date) ? DateTimeImmutable::createFromFormat('!Y-m-d', $date) : false;
+        if (!$parsedDate || $parsedDate->format('Y-m-d') !== $date) {
+            return 'Date invalide (format attendu : AAAA-MM-JJ).';
+        }
+
+        $timeZone = $data['userTimeZone'] ?? null;
+        if (!is_string($timeZone) || !self::isNamedTimeZone($timeZone)) {
+            return 'Fuseau horaire invalide.';
+        }
+
+        $duration = $data['selectedDuration'] ?? null;
+        if (!is_numeric($duration) || !in_array((int) $duration, self::ALLOWED_DURATIONS, true) || (float) $duration != (int) $duration) {
+            return 'La durée doit être de 30, 45 ou 60 minutes.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Vrai pour un fuseau nommé (type 3 : « Europe/Paris », « Asia/Calcutta »…) connu de PHP.
+     * Faux pour un décalage fixe (« +02:00 », type 1) ou une abréviation (« CEST », type 2).
+     */
+    private static function isNamedTimeZone(string $timeZone): bool
+    {
+        try {
+            $zone = new DateTimeZone($timeZone);
+        } catch (Exception $e) {
+            return false;
+        }
+        return (((array) $zone)['timezone_type'] ?? null) === 3;
+    }
+
+    /**
+     * Début et fin (exclue) de la journée de l'élève, dans son fuseau.
+     * Si minuit n'existe pas ce jour-là chez lui (changement d'heure à minuit), PHP prend la première heure qui existe.
+     *
+     * @return array{0: DateTimeImmutable, 1: DateTimeImmutable}
+     */
+    public static function userDayBounds(string $userDate, DateTimeZone $userTimeZone): array
+    {
+        $dayStart = new DateTimeImmutable($userDate . ' 00:00:00', $userTimeZone);
+        $nextDate = (new DateTimeImmutable($userDate, new DateTimeZone('UTC')))->modify('+1 day')->format('Y-m-d');
+        $dayEnd = new DateTimeImmutable($nextDate . ' 00:00:00', $userTimeZone);
+
+        return [$dayStart, $dayEnd];
+    }
+
+    /**
+     * Créneaux réservables pour un élève, un jour donné CHEZ LUI (00:00 → 24:00 dans son fuseau). Fonction pure (FLE-113).
+     *
+     * - Les plages de la professeure sont des heures murales dans son fuseau, par jour ISO (1 = lundi … 7 = dimanche).
+     *   L'heure de fin d'une plage est la fin du dernier cours : un cours doit tenir entièrement dans une plage.
+     * - La journée de l'élève peut couvrir deux jours de la professeure : on calcule les créneaux de chaque jour
+     *   concerné, puis on ne garde que ceux qui commencent dans la journée de l'élève.
+     * - Grille de 15 min depuis le début de la plage ; un cours ne commence pas moins de 8 h après $now.
+     * - Un créneau est pris s'il chevauche une période occupée ($busyPeriods : [début, fin], fin exclue).
+     * - Créneaux écartés : heure qui n'existe pas chez la professeure, et heure qui existe deux fois chez l'élève
+     *   (nuit où il recule d'une heure) : l'API ne renvoie que H:i, createEvent ne saurait pas laquelle réserver.
+     * Aucun décalage n'est supposé : chaque conversion passe par DateTimeZone, à la date du créneau.
+     *
+     * @param array<int, list<array{0: string, 1: string}>> $teacherRanges jour ISO => [['09:00', '12:00'], …]
+     * @param list<array{0: DateTimeInterface, 1: DateTimeInterface}> $busyPeriods
+     * @return list<DateTimeImmutable> débuts des créneaux, dans le fuseau de l'élève, triés
+     */
+    public static function computeAvailableSlots(
+        string $userDate,
+        DateTimeZone $userTimeZone,
+        int $duration,
+        array $teacherRanges,
+        DateTimeZone $teacherTimeZone,
+        array $busyPeriods,
+        ?DateTimeImmutable $now = null
+    ): array {
+        $step = self::SLOT_STEP_MINUTES * 60;
+        $durationSeconds = $duration * 60;
+        $now = $now ?? new DateTimeImmutable('now', new DateTimeZone('UTC'));
+        $earliest = $now->getTimestamp() + self::MIN_DELAY_BEFORE_APPOINTMENT_SECONDS;
+
+        [$dayStart, $dayEnd] = self::userDayBounds($userDate, $userTimeZone);
+        $dayStartTs = $dayStart->getTimestamp();
+        $dayEndTs = $dayEnd->getTimestamp();
+
+        $busy = array_map(fn($period) => [$period[0]->getTimestamp(), $period[1]->getTimestamp()], $busyPeriods);
+
+        // Jours de la professeure qui chevauchent la journée de l'élève (deux au plus).
+        $teacherDate = $dayStart->setTimezone($teacherTimeZone)->setTime(0, 0);
+        $lastTeacherDate = $dayEnd->modify('-1 second')->setTimezone($teacherTimeZone)->format('Y-m-d');
+
+        $slots = [];
+        while ($teacherDate->format('Y-m-d') <= $lastTeacherDate) {
+            $date = $teacherDate->format('Y-m-d');
+            foreach ($teacherRanges[(int) $teacherDate->format('N')] ?? [] as [$rangeStart, $rangeEnd]) {
+                $rangeStartAt = self::teacherWallTime($date, $rangeStart, $teacherTimeZone);
+                $rangeEndAt = self::teacherWallTime($date, $rangeEnd, $teacherTimeZone);
+                if ($rangeStartAt === null || $rangeEndAt === null) {
+                    continue;
+                }
+                $rangeEndTs = $rangeEndAt->getTimestamp();
+
+                [$hour, $minute] = array_map('intval', explode(':', $rangeStart));
+                for ($minutes = $hour * 60 + $minute; ; $minutes += self::SLOT_STEP_MINUTES) {
+                    if ($minutes >= 24 * 60) {
+                        break;
+                    }
+                    $start = self::teacherWallTime($date, sprintf('%02d:%02d', intdiv($minutes, 60), $minutes % 60), $teacherTimeZone);
+                    if ($start === null) {
+                        continue; // heure sautée chez la professeure
+                    }
+                    $startTs = $start->getTimestamp();
+                    $endTs = $startTs + $durationSeconds;
+                    if ($endTs > $rangeEndTs) {
+                        break;
+                    }
+                    if ($startTs < $dayStartTs || $startTs >= $dayEndTs || $startTs < $earliest) {
+                        continue;
+                    }
+                    foreach ($busy as [$busyStart, $busyEnd]) {
+                        if ($startTs < $busyEnd && $endTs > $busyStart) {
+                            continue 2;
+                        }
+                    }
+                    $userStart = $start->setTimezone($userTimeZone);
+                    if (self::isAmbiguousWallTime($userStart, $userTimeZone)) {
+                        continue;
+                    }
+                    $slots[$startTs] = $userStart;
+                }
+            }
+            $teacherDate = $teacherDate->modify('+1 day');
+        }
+
+        ksort($slots);
+        return array_values($slots);
+    }
+
+    /** Heure murale chez la professeure, ou null si elle n'existe pas ce jour-là (passage à l'heure d'été). */
+    private static function teacherWallTime(string $date, string $time, DateTimeZone $timeZone): ?DateTimeImmutable
+    {
+        if ($time === '24:00') {
+            $next = (new DateTimeImmutable($date, new DateTimeZone('UTC')))->modify('+1 day')->format('Y-m-d');
+            return new DateTimeImmutable($next . ' 00:00:00', $timeZone);
+        }
+        $wallTime = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $date . ' ' . $time, $timeZone);
+        if (!$wallTime || $wallTime->format('Y-m-d H:i') !== $date . ' ' . $time) {
+            return null;
+        }
+        return $wallTime;
+    }
+
+    /**
+     * Vrai si l'heure murale de $time existe deux fois dans $timeZone ce jour-là (nuit du retour à l'heure d'hiver).
+     * On cherche, autour de $time, un autre décalage qui donnerait la même heure murale à un autre instant.
+     */
+    private static function isAmbiguousWallTime(DateTimeImmutable $time, DateTimeZone $timeZone): bool
+    {
+        $timestamp = $time->getTimestamp();
+        $offset = $timeZone->getOffset($time);
+        foreach ([-3 * 3600, 3 * 3600] as $shift) {
+            $otherOffset = $timeZone->getOffset((new DateTimeImmutable('@' . ($timestamp + $shift))));
+            if ($otherOffset === $offset) {
+                continue;
+            }
+            $otherTimestamp = $timestamp + $offset - $otherOffset;
+            if ($timeZone->getOffset(new DateTimeImmutable('@' . $otherTimestamp)) === $otherOffset) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function checkWaitingEvents()
