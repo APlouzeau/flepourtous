@@ -483,6 +483,23 @@ class ControllerMail
             }
         }
     }
+    /**
+     * Date en toutes lettres et en français, dans le fuseau de $dateTime : "3 décembre 2026".
+     * DateTime::format('F') ignore setlocale() et sort toujours le mois en anglais.
+     */
+    public static function frenchDate(DateTimeInterface $dateTime): string
+    {
+        $formatter = new IntlDateFormatter(
+            'fr_FR',
+            IntlDateFormatter::NONE,
+            IntlDateFormatter::NONE,
+            $dateTime->getTimezone(),
+            IntlDateFormatter::GREGORIAN,
+            'd MMMM y'
+        );
+        return $formatter->format($dateTime);
+    }
+
     public function sendMailToAlertEventDelete($userId, $startDateTime, $timezone, $amount, $codeInvoiced)
     {
         $modelUser = new ModelUser();
@@ -491,8 +508,7 @@ class ControllerMail
         $appointmentDateTime = $appointmentDateTimeUTC->setTimezone(new DateTimeZone($timezone));
 
         // 🎨 Formatage user-friendly
-        setlocale(LC_TIME, 'fr_FR.UTF-8', 'fr_FR', 'french'); // Pour les noms français
-        $appointmentDate = $appointmentDateTime->format('j F Y'); // "4 octobre 2025"
+        $appointmentDate = self::frenchDate($appointmentDateTime); // "4 octobre 2025"
         $appointmentHour = $appointmentDateTime->format('G\hi'); // "14h30" au lieu de "14:30"
 
         $this->mailer->addAddress($userInformations['mail']);
@@ -538,8 +554,7 @@ class ControllerMail
         $appointmentDateTime = $appointmentDateTimeUTC->setTimezone(new DateTimeZone($timezone));
 
         // 🎨 Formatage user-friendly
-        setlocale(LC_TIME, 'fr_FR.UTF-8', 'fr_FR', 'french'); // Pour les noms français
-        $appointmentDate = $appointmentDateTime->format('j F Y'); // "4 octobre 2025"
+        $appointmentDate = self::frenchDate($appointmentDateTime); // "4 octobre 2025"
         $appointmentHour = $appointmentDateTime->format('G\hi'); // "14h30" au lieu de "14:30"
 
         $this->mailer->addAddress(TEACHER_MAIL);
@@ -547,10 +562,12 @@ class ControllerMail
         $this->mailer->Subject = "Annulation du rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']);
         $emailBody = "Bonjour,<br><br>";
 
-        match ($codeInvoiced) {
-            '1' => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
-            '2' => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € n'a pas été recrédité sur son porte-monnaie électronique.<br>",
-            '3' => $emailBody .= "Nous confirmons votre annulation du rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . "  et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
+        // (int) : le code arrive en entier ; avec '1', '2', '3' en chaîne, match (strict)
+        // tombait toujours dans default et annonçait « non remboursé ».
+        match ((int) $codeInvoiced) {
+            1 => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
+            2 => $emailBody .= "Nous vous informons que " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " a annulé le rendez-vous prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " et que le montant de " . htmlspecialchars($amount) . " € n'a pas été recrédité sur son porte-monnaie électronique.<br>",
+            3 => $emailBody .= "Nous confirmons votre annulation du rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . "  et que le montant de " . htmlspecialchars($amount) . " € a été recrédité sur son porte-monnaie électronique.<br>",
             default => $emailBody .= "Nous vous informons que le rendez-vous de " . htmlspecialchars($userInformations['firstName'] . " " . $userInformations['lastName']) . " prévu le " . htmlspecialchars($appointmentDate) . " à " . htmlspecialchars($appointmentHour) . " a été annulé et que le montant de " . htmlspecialchars($amount) . " € n'a pas été remboursé.<br>",
         };
 
@@ -583,7 +600,7 @@ class ControllerMail
         $appointmentDateTime = $appointmentDateTimeUTC->setTimezone(new DateTimeZone($timezone));
 
         // 🎨 Formatage user-friendly
-        $appointmentDate = $appointmentDateTime->format('j F Y'); // "4 octobre 2025"
+        $appointmentDate = self::frenchDate($appointmentDateTime); // "4 octobre 2025"
         $appointmentHour = $appointmentDateTime->format('G\hi'); // "14h30" au lieu de "14:30"
 
         $this->mailer->addAddress($userInformations['mail']);
