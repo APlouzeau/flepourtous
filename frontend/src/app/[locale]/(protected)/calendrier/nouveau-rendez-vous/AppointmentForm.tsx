@@ -9,8 +9,20 @@ import { LessonsWithPrices, LessonWithPrice } from "@/app/[locale]/types/lessons
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
+/** Date du jour (AAAA-MM-JJ) dans le fuseau donné, et non en UTC : à Tokyo le matin, l'UTC est encore la veille. */
+function todayIn(timeZone: string): string {
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).formatToParts(new Date());
+    const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+    return `${part("year")}-${part("month")}-${part("day")}`;
+}
+
 export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPrices }) {
-    const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
+    const [date, setDate] = useState<string>(() => todayIn(Intl.DateTimeFormat().resolvedOptions().timeZone));
     const [timeSlots, setTimeSlots] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -150,7 +162,14 @@ export default function NewAppointmentForm({ lessons }: { lessons: LessonsWithPr
                             id={id}
                             name="userTimeZone"
                             value={selectedTimezone}
-                            onChange={(e) => setSelectedTimezone(e.target.value)}
+                            onChange={(e) => {
+                                const newTimezone = e.target.value;
+                                // La date n'a pas été choisie par l'élève : on garde « aujourd'hui », mais dans le nouveau fuseau.
+                                setDate((current) =>
+                                    current === todayIn(selectedTimezone) ? todayIn(newTimezone) : current,
+                                );
+                                setSelectedTimezone(newTimezone);
+                            }}
                             className="w-full bg-white border-gray-300 rounded-lg shadow-sm focus:border-gray-600 focus:ring-gray-600"
                             style={{ "--ring-color": "#1D1E1C", "--border-color": "#1D1E1C" } as React.CSSProperties}
                         >
